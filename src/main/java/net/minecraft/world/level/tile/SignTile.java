@@ -14,10 +14,10 @@ import net.minecraft.world.level.material.Material;
 
 public class SignTile extends EntityTile
 {
-    private Class clas;
+    private Class<? extends TileEntity> clas;
     private boolean onGround;
     
-    protected SignTile(final int id, final Class clas, final boolean onGround) {
+    protected SignTile(final int id, final Class<? extends TileEntity> clas, final boolean onGround) {
         super(id, Material.wood);
         this.onGround = onGround;
         this.tex = 4;

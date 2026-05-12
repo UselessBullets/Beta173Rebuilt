@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ContainerAckPacket extends Packet
 {
@@ -28,14 +29,14 @@ public class ContainerAckPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.containerId = dis.readByte();
         this.uid = dis.readShort();
         this.accepted = (dis.readByte() != 0);
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeByte(this.containerId);
         dos.writeShort(this.uid);
         dos.writeByte(this.accepted ? 1 : 0);

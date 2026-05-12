@@ -7,7 +7,6 @@ package net.minecraft.network.packet;
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityIO;
 import net.minecraft.world.entity.Mob;
 

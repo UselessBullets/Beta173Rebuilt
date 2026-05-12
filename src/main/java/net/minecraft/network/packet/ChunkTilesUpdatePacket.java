@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ChunkTilesUpdatePacket extends Packet
 {
@@ -21,7 +22,7 @@ public class ChunkTilesUpdatePacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.xc = dis.readInt();
         this.zc = dis.readInt();
         this.count = (dis.readShort() & 0xFFFF);
@@ -36,7 +37,7 @@ public class ChunkTilesUpdatePacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.xc);
         dos.writeInt(this.zc);
         dos.writeShort((short)this.count);

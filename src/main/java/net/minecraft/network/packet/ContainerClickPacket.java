@@ -6,6 +6,8 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
+
 import net.minecraft.world.item.ItemInstance;
 
 public class ContainerClickPacket extends Packet
@@ -35,7 +37,7 @@ public class ContainerClickPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.containerId = dis.readByte();
         this.slotNum = dis.readShort();
         this.buttonNum = dis.readByte();
@@ -51,7 +53,7 @@ public class ContainerClickPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeByte(this.containerId);
         dos.writeShort(this.slotNum);
         dos.writeByte(this.buttonNum);

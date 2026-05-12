@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class LevelEventPacket extends Packet
 {
@@ -16,7 +17,7 @@ public class LevelEventPacket extends Packet
     public int z;
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.type = dis.readInt();
         this.x = dis.readInt();
         this.y = dis.readByte();
@@ -25,7 +26,7 @@ public class LevelEventPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.type);
         dos.writeInt(this.x);
         dos.writeByte(this.y);

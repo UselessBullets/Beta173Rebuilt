@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class EntityActionAtPositionPacket extends Packet
 {
@@ -16,7 +17,7 @@ public class EntityActionAtPositionPacket extends Packet
     public int action;
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();
         this.action = dis.readByte();
         this.x = dis.readInt();
@@ -25,7 +26,7 @@ public class EntityActionAtPositionPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.id);
         dos.writeByte(this.action);
         dos.writeInt(this.x);

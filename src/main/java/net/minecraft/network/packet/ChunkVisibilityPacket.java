@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ChunkVisibilityPacket extends Packet
 {
@@ -18,14 +19,14 @@ public class ChunkVisibilityPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.x = dis.readInt();
         this.y = dis.readInt();
         this.visible = (dis.read() != 0);
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.x);
         dos.writeInt(this.y);
         dos.write(this.visible ? 1 : 0);

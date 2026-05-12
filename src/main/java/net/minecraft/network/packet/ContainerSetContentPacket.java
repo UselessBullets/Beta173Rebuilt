@@ -6,6 +6,8 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
+
 import net.minecraft.world.item.ItemInstance;
 
 public class ContainerSetContentPacket extends Packet
@@ -14,7 +16,7 @@ public class ContainerSetContentPacket extends Packet
     public ItemInstance[] items;
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.containerId = dis.readByte();
         final short short1 = dis.readShort();
         this.items = new ItemInstance[short1];
@@ -27,7 +29,7 @@ public class ContainerSetContentPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeByte(this.containerId);
         dos.writeShort(this.items.length);
         for (int i = 0; i < this.items.length; ++i) {

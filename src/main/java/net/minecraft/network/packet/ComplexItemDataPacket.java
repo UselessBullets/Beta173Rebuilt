@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ComplexItemDataPacket extends Packet
 {
@@ -18,14 +19,14 @@ public class ComplexItemDataPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.itemType = dis.readShort();
         this.itemId = dis.readShort();
         dis.readFully(this.data = new byte[dis.readByte() & 0xFF]);
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeShort(this.itemType);
         dos.writeShort(this.itemId);
         dos.writeByte(this.data.length);

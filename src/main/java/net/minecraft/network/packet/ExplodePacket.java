@@ -4,12 +4,10 @@
 
 package net.minecraft.network.packet;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.io.DataOutputStream;
 import net.minecraft.world.level.TilePos;
-import net.minecraft.world.level.tile.Tile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.io.DataInputStream;
 import java.util.Set;

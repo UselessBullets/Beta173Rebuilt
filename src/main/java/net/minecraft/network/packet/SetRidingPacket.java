@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class SetRidingPacket extends Packet
 {
@@ -18,13 +19,13 @@ public class SetRidingPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.riderId = dis.readInt();
         this.riddenId = dis.readInt();
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.riderId);
         dos.writeInt(this.riddenId);
     }

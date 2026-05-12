@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class EntityEventPacket extends Packet
 {
@@ -13,13 +14,13 @@ public class EntityEventPacket extends Packet
     public byte eventId;
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.entityId = dis.readInt();
         this.eventId = dis.readByte();
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.entityId);
         dos.writeByte(this.eventId);
     }

@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class MovePlayerPacket_PosRot extends MovePlayerPacket
 {
@@ -27,7 +28,7 @@ public class MovePlayerPacket_PosRot extends MovePlayerPacket
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.x = dis.readDouble();
         this.y = dis.readDouble();
         this.yView = dis.readDouble();
@@ -38,7 +39,7 @@ public class MovePlayerPacket_PosRot extends MovePlayerPacket
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeDouble(this.x);
         dos.writeDouble(this.y);
         dos.writeDouble(this.yView);

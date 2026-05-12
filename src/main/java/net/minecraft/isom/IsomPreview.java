@@ -34,7 +34,7 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     private Level level;
     private File workDir;
     private boolean running;
-    private List zonesToRender;
+    private List<Zone> zonesToRender;
     private Zone[][] zoneMap;
     private int xCam;
     private int yCam;
@@ -109,7 +109,7 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
         this.zoom = 2;
         this.showHelp = true;
         this.running = true;
-        this.zonesToRender = Collections.synchronizedList(new LinkedList<Object>());
+        this.zonesToRender = Collections.synchronizedList(new LinkedList<>());
         this.zoneMap = new Zone[64][64];
         this.workDir = this.getWorkingDirectory();
         for (int i = 0; i < 64; ++i) {

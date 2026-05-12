@@ -6,16 +6,16 @@ package net.minecraft.world.level.chunk.storage;
 
 import net.minecraft.world.level.LevelData;
 import java.io.DataOutputStream;
-import java.io.DataOutput;
-import com.mojang.nbt.Tag;
+
 import com.mojang.nbt.CompoundTag;
 import java.io.DataInputStream;
-import java.io.DataInput;
+
 import com.mojang.nbt.NbtIo;
 import net.minecraft.world.level.storage.RegionFileCache;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.Level;
 import java.io.File;
+import java.io.IOException;
 
 public class McRegionChunkStorage implements ChunkStorage
 {
@@ -25,7 +25,7 @@ public class McRegionChunkStorage implements ChunkStorage
         this.saveFile = saveFile;
     }
     
-    public LevelChunk load(final Level level, final int x, final int z) {
+    public LevelChunk load(final Level level, final int x, final int z) throws IOException {
         final DataInputStream chunkDataInputStream = RegionFileCache.getChunkDataInputStream(this.saveFile, x, z);
         if (chunkDataInputStream == null) {
             return null;
@@ -50,7 +50,7 @@ public class McRegionChunkStorage implements ChunkStorage
         return levelChunk;
     }
     
-    public void save(final Level level, final LevelChunk levelChunk) {
+    public void save(final Level level, final LevelChunk levelChunk) throws IOException {
         level.checkSession();
         try {
             final DataOutputStream chunkDataOutputStream = RegionFileCache.getChunkDataOutputStream(this.saveFile, levelChunk.x, levelChunk.z);
@@ -68,7 +68,7 @@ public class McRegionChunkStorage implements ChunkStorage
         }
     }
     
-    public void saveEntities(final Level level, final LevelChunk levelChunk) {
+    public void saveEntities(final Level level, final LevelChunk levelChunk) throws IOException {
     }
     
     public void tick() {

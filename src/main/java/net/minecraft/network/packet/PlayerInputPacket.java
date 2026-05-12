@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class PlayerInputPacket extends Packet
 {
@@ -17,7 +18,7 @@ public class PlayerInputPacket extends Packet
     private float yRot;
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.xa = dis.readFloat();
         this.ya = dis.readFloat();
         this.xRot = dis.readFloat();
@@ -27,7 +28,7 @@ public class PlayerInputPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeFloat(this.xa);
         dos.writeFloat(this.ya);
         dos.writeFloat(this.xRot);

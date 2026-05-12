@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class SetEquippedItemPacket extends Packet
 {
@@ -15,7 +16,7 @@ public class SetEquippedItemPacket extends Packet
     public int auxValue;
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.entity = dis.readInt();
         this.slot = dis.readShort();
         this.item = dis.readShort();
@@ -23,7 +24,7 @@ public class SetEquippedItemPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.entity);
         dos.writeShort(this.slot);
         dos.writeShort(this.item);

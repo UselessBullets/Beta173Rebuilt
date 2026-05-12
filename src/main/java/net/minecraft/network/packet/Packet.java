@@ -6,7 +6,6 @@ package net.minecraft.network.packet;
 
 import java.util.HashSet;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.util.HashMap;

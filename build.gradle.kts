@@ -16,7 +16,7 @@ dependencies {
     implementation("com.paulscode:librarylwjglopenal:20100824") // needs to be included in client jar
     implementation("com.paulscode:codecwav:20101023") // needs to be included in client jar
 
-    val lwjglVer = "2.9.3"
+    val lwjglVer = "2.9.4-nightly-20150209"
     implementation("org.lwjgl.lwjgl:lwjgl:$lwjglVer")
     implementation("org.lwjgl.lwjgl:lwjgl_util:$lwjglVer")
     runtimeOnly("org.lwjgl.lwjgl:lwjgl-platform:${lwjglVer}")

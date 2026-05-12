@@ -14,8 +14,8 @@ import java.util.List;
 
 public class MemoryTracker
 {
-    private static List lists;
-    private static List textures;
+    private static List<Integer> lists;
+    private static List<Integer> textures;
     
     public static synchronized int genLists(final int count) {
         final int glGenLists = GL11.glGenLists(count);
@@ -33,20 +33,20 @@ public class MemoryTracker
     
     public static synchronized void releaseLists(final int id) {
         final int index = MemoryTracker.lists.indexOf(id);
-        GL11.glDeleteLists((int)MemoryTracker.lists.get(index), (int)MemoryTracker.lists.get(index + 1));
+        GL11.glDeleteLists(MemoryTracker.lists.get(index), MemoryTracker.lists.get(index + 1));
         MemoryTracker.lists.remove(index);
         MemoryTracker.lists.remove(index);
     }
     
     public static synchronized void release() {
         for (int i = 0; i < MemoryTracker.lists.size(); i += 2) {
-            GL11.glDeleteLists((int)MemoryTracker.lists.get(i), (int)MemoryTracker.lists.get(i + 1));
+            GL11.glDeleteLists(MemoryTracker.lists.get(i), MemoryTracker.lists.get(i + 1));
         }
         final IntBuffer intBuffer = createIntBuffer(MemoryTracker.textures.size());
         intBuffer.flip();
         GL11.glDeleteTextures(intBuffer);
         for (int j = 0; j < MemoryTracker.textures.size(); ++j) {
-            intBuffer.put((int)MemoryTracker.textures.get(j));
+            intBuffer.put(MemoryTracker.textures.get(j));
         }
         intBuffer.flip();
         GL11.glDeleteTextures(intBuffer);
@@ -67,7 +67,7 @@ public class MemoryTracker
     }
     
     static {
-        MemoryTracker.lists = new ArrayList();
-        MemoryTracker.textures = new ArrayList();
+        MemoryTracker.lists = new ArrayList<>();
+        MemoryTracker.textures = new ArrayList<>();
     }
 }

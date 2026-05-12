@@ -17,6 +17,8 @@ public class Tesselator
 {
     private static boolean TRIANGLE_MODE;
     private static boolean USE_VBO;
+    private static final int MAX_MEMORY_USE = 16777216;
+    private static final int MAX_FLOATS = 2097152;
     private ByteBuffer buffer;
     private IntBuffer ib;
     private FloatBuffer fb;
@@ -75,8 +77,8 @@ public class Tesselator
         if (this.vertices > 0) {
             this.ib.clear();
             this.ib.put(this.array, 0, this.p);
-            this.buffer.position();
-            this.buffer.limit();
+            this.buffer.position(0);
+            this.buffer.limit(this.p * 4);
             if (this.vboMode) {
                 this.vboId = (this.vboId + 1) % this.vboCounts;
                 ARBVertexBufferObject.glBindBufferARB(34962, this.vboIds.get(this.vboId));
@@ -87,7 +89,7 @@ public class Tesselator
                     GL11.glTexCoordPointer(2, 5126, 32, 12L);
                 }
                 else {
-                    this.fb.position();
+                    this.fb.position(0);
                     GL11.glTexCoordPointer(2, 32, this.fb);
                 }
                 GL11.glEnableClientState(32888);
@@ -97,7 +99,7 @@ public class Tesselator
                     GL11.glColorPointer(4, 5121, 32, 20L);
                 }
                 else {
-                    this.buffer.position();
+                    this.buffer.position(20);
                     GL11.glColorPointer(4, true, 32, this.buffer);
                 }
                 GL11.glEnableClientState(32886);
@@ -107,7 +109,7 @@ public class Tesselator
                     GL11.glNormalPointer(5120, 32, 24L);
                 }
                 else {
-                    this.buffer.position();
+                    this.buffer.position(24);
                     GL11.glNormalPointer(32, this.buffer);
                 }
                 GL11.glEnableClientState(32885);
@@ -116,7 +118,7 @@ public class Tesselator
                 GL11.glVertexPointer(3, 5126, 32, 0L);
             }
             else {
-                this.fb.position();
+                this.fb.position(0);
                 GL11.glVertexPointer(3, 32, this.fb);
             }
             GL11.glEnableClientState(32884);
@@ -299,6 +301,6 @@ public class Tesselator
     static {
         Tesselator.TRIANGLE_MODE = true;
         Tesselator.USE_VBO = false;
-        instance = new Tesselator(2097152);
+        instance = new Tesselator(MAX_FLOATS);
     }
 }

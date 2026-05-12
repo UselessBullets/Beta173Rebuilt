@@ -43,13 +43,13 @@ public class Textures
     private BufferedImage missingNo;
     
     public Textures(final TexturePackRepository skins, final Options options) {
-        this.idMap = new HashMap();
-        this.pixelsMap = new HashMap();
-        this.loadedImages = new HashMap();
+        this.idMap = new HashMap<>();
+        this.pixelsMap = new HashMap<>();
+        this.loadedImages = new HashMap<>();
         this.ib = MemoryTracker.createIntBuffer(1);
         this.pixels = MemoryTracker.createByteBuffer(1048576);
-        this.dynamicTextures = new ArrayList();
-        this.httpTextures = new HashMap();
+        this.dynamicTextures = new ArrayList<>();
+        this.httpTextures = new HashMap<>();
         this.clamp = false;
         this.blur = false;
         this.missingNo = new BufferedImage(64, 64, 2);

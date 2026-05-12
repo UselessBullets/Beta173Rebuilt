@@ -24,7 +24,7 @@ public class Pig extends Animal
     
     @Override
     protected void definedSynchedData() {
-        this.entityData.define(16, 0);
+        this.entityData.define(16, (byte)0);
     }
     
     @Override

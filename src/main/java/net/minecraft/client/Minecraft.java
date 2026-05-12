@@ -68,6 +68,9 @@ import net.minecraft.client.renderer.ptexture.LavaTexture;
 import net.minecraft.client.renderer.ptexture.WaterTexture;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.world.level.storage.LevelStorageSource;
+
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import net.minecraft.client.skins.TexturePackRepository;
 import net.minecraft.client.sound.SoundEngine;
@@ -1415,7 +1418,19 @@ public abstract class Minecraft implements Runnable
             minecraft.connectTo(split[0], Integer.parseInt(split[1]));
         }
         frame.setVisible(true);
-        frame.addWindowListener(new Minecraft_WindowAdapter(minecraft, thread));
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(final WindowEvent windowEvent) {
+                minecraft.stop();
+                try {
+                    thread.join();
+                }
+                catch (final InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                System.exit(0);
+            }
+        });
         thread.start();
     }
     

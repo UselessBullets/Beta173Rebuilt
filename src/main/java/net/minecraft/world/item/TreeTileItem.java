@@ -1,0 +1,26 @@
+// 
+// Decompiled by Procyon v0.6.0
+// 
+
+package net.minecraft.world.item;
+
+import net.minecraft.world.level.tile.Tile;
+
+public class TreeTileItem extends TileItem
+{
+    public TreeTileItem(final int id) {
+        super(id);
+        this.setMaxDamage(0);
+        this.setStackedByData(true);
+    }
+    
+    @Override
+    public int getIcon(final int auxValue) {
+        return Tile.treeTrunk.getTexture(2, auxValue);
+    }
+    
+    @Override
+    public int getLevelDataForAuxValue(final int auxValue) {
+        return auxValue;
+    }
+}

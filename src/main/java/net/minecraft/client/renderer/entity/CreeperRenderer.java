@@ -1,0 +1,84 @@
+// 
+// Decompiled by Procyon v0.6.0
+// 
+
+package net.minecraft.client.renderer.entity;
+
+import net.minecraft.world.entity.Mob;
+import org.lwjgl.opengl.GL11;
+import util.Mth;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.client.model.CreeperModel;
+import net.minecraft.client.model.Model;
+
+public class CreeperRenderer extends MobRenderer
+{
+    private Model armorModel;
+    
+    public CreeperRenderer() {
+        super(new CreeperModel(), 0.5f);
+        this.armorModel = new CreeperModel(2.0f);
+    }
+    
+    protected void scale(final Creeper mob, final float partialTick) {
+        float swelling = mob.getSwelling(partialTick);
+        final float n = 1.0f + Mth.sin(swelling * 100.0f) * swelling * 0.01f;
+        if (swelling < 0.0f) {
+            swelling = 0.0f;
+        }
+        if (swelling > 1.0f) {
+            swelling = 1.0f;
+        }
+        final float n2 = swelling * swelling;
+        final float n3 = n2 * n2;
+        final float n4 = (1.0f + n3 * 0.4f) * n;
+        GL11.glScalef(n4, (1.0f + n3 * 0.1f) / n, n4);
+    }
+    
+    protected int getOverlayColor(final Creeper mob, final float br, final float partialTick) {
+        final float swelling = mob.getSwelling(partialTick);
+        if ((int)(swelling * 10.0f) % 2 == 0) {
+            return 0;
+        }
+        int n = (int)(swelling * 0.2f * 255.0f);
+        if (n < 0) {
+            n = 0;
+        }
+        if (n > 255) {
+            n = 255;
+        }
+        return n << 24 | 255 << 16 | 255 << 8 | 0xFF;
+    }
+    
+    protected boolean prepareArmor(final Creeper mob, final int layer, final float partialTick) {
+        if (mob.isPowered()) {
+            if (layer == 1) {
+                final float n = mob.tickCount + partialTick;
+                this.bindTexture("/armor/power.png");
+                GL11.glMatrixMode(5890);
+                GL11.glLoadIdentity();
+                GL11.glTranslatef(n * 0.01f, n * 0.01f, 0.0f);
+                this.setArmor(this.armorModel);
+                GL11.glMatrixMode(5888);
+                GL11.glEnable(3042);
+                final float n2 = 0.5f;
+                GL11.glColor4f(n2, n2, n2, 1.0f);
+                GL11.glDisable(2896);
+                GL11.glBlendFunc(1, 1);
+                return true;
+            }
+            if (layer == 2) {
+                GL11.glMatrixMode(5890);
+                GL11.glLoadIdentity();
+                GL11.glMatrixMode(5888);
+                GL11.glEnable(2896);
+                GL11.glDisable(3042);
+            }
+        }
+        return false;
+    }
+    
+    protected boolean prepareArmorOverlay(final Creeper mob, final int layer, final float partialTick) {
+        return false;
+    }
+}

@@ -1,0 +1,112 @@
+// 
+// Decompiled by Procyon v0.6.0
+// 
+
+package net.minecraft.client.renderer.tileentity;
+
+import org.lwjgl.opengl.GL11;
+import net.minecraft.world.level.tile.entity.TileEntity;
+import java.util.Iterator;
+import net.minecraft.world.level.tile.entity.PistonPieceEntity;
+import net.minecraft.world.level.tile.entity.MobSpawnerTileEntity;
+import net.minecraft.world.level.tile.entity.SignTileEntity;
+import java.util.HashMap;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.Level;
+import net.minecraft.client.renderer.Textures;
+import net.minecraft.client.gui.Font;
+import java.util.Map;
+
+public class TileEntityRenderDispatcher
+{
+    private Map renderers;
+    public static TileEntityRenderDispatcher instance;
+    private Font font;
+    public static double xOff;
+    public static double yOff;
+    public static double zOff;
+    public Textures textures;
+    public Level level;
+    public Mob player;
+    public float playerRotY;
+    public float playerRotX;
+    public double xPlayer;
+    public double yPlayer;
+    public double zPlayer;
+    
+    private TileEntityRenderDispatcher() {
+        (this.renderers = new HashMap()).put(SignTileEntity.class, new SignRenderer());
+        this.renderers.put(MobSpawnerTileEntity.class, new MobSpawnerRenderer());
+        this.renderers.put(PistonPieceEntity.class, new PistonPieceRenderer());
+        final Iterator iterator = this.renderers.values().iterator();
+        while (iterator.hasNext()) {
+            ((TileEntityRenderer)iterator.next()).bindTexture(this);
+        }
+    }
+    
+    public TileEntityRenderer getRenderer(final Class e) {
+        TileEntityRenderer renderer = this.renderers.get(e);
+        if (renderer == null && e != TileEntity.class) {
+            renderer = this.getRenderer(e.getSuperclass());
+            this.renderers.put(e, renderer);
+        }
+        return renderer;
+    }
+    
+    public boolean hasRenderer(final TileEntity e) {
+        return this.getRenderer(e) != null;
+    }
+    
+    public TileEntityRenderer getRenderer(final TileEntity e) {
+        if (e == null) {
+            return null;
+        }
+        return this.getRenderer(e.getClass());
+    }
+    
+    public void prepare(final Level level, final Textures textures, final Font font, final Mob player, final float partialTick) {
+        if (this.level != level) {
+            this.setLevel(level);
+        }
+        this.textures = textures;
+        this.player = player;
+        this.font = font;
+        this.playerRotY = player.yRotO + (player.yRot - player.yRotO) * partialTick;
+        this.playerRotX = player.xRotO + (player.xRot - player.xRotO) * partialTick;
+        this.xPlayer = player.xOld + (player.x - player.xOld) * partialTick;
+        this.yPlayer = player.yOld + (player.y - player.yOld) * partialTick;
+        this.zPlayer = player.zOld + (player.z - player.zOld) * partialTick;
+    }
+    
+    public void render(final TileEntity e, final float partialTick) {
+        if (e.distanceToSqr(this.xPlayer, this.yPlayer, this.zPlayer) < 4096.0) {
+            final float brightness = this.level.getBrightness(e.x, e.y, e.z);
+            GL11.glColor3f(brightness, brightness, brightness);
+            this.render(e, e.x - TileEntityRenderDispatcher.xOff, e.y - TileEntityRenderDispatcher.yOff, e.z - TileEntityRenderDispatcher.zOff, partialTick);
+        }
+    }
+    
+    public void render(final TileEntity e, final double x, final double y, final double z, final float partialTick) {
+        final TileEntityRenderer renderer = this.getRenderer(e);
+        if (renderer != null) {
+            renderer.render(e, x, y, z, partialTick);
+        }
+    }
+    
+    public void setLevel(final Level level) {
+        this.level = level;
+        for (final TileEntityRenderer tileEntityRenderer : this.renderers.values()) {
+            if (tileEntityRenderer != null) {
+                tileEntityRenderer.onNewLevel(level);
+            }
+        }
+    }
+    
+    public Font getFont() {
+        return this.font;
+    }
+    
+    static {
+        TileEntityRenderDispatcher.instance = new TileEntityRenderDispatcher();
+    }
+}

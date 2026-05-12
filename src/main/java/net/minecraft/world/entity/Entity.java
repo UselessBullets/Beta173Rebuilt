@@ -129,7 +129,7 @@ public abstract class Entity
         this.inChunk = false;
         this.level = level;
         this.setPos(0.0, 0.0, 0.0);
-        this.entityData.define(0, 0);
+        this.entityData.define(0, (byte)0);
         this.definedSynchedData();
     }
     

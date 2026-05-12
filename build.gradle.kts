@@ -11,14 +11,19 @@ repositories {
 }
 
 dependencies {
+    implementation("com.paulscode:soundsystem:20120107") // needs to be included in client jar
+//    implementation("com.paulscode:libraryjavasound:20101123") // needs to be included in client jar
     implementation("com.paulscode:librarylwjglopenal:20100824") // needs to be included in client jar
     implementation("com.paulscode:codecwav:20101023") // needs to be included in client jar
-//    implementation("com.paulscode:codecjorbis:20101023") // needs to be included in client jar
 
     val lwjglVer = "2.9.3"
     implementation("org.lwjgl.lwjgl:lwjgl:$lwjglVer")
     implementation("org.lwjgl.lwjgl:lwjgl_util:$lwjglVer")
     runtimeOnly("org.lwjgl.lwjgl:lwjgl-platform:${lwjglVer}")
+
+    runtimeOnly("net.java.jinput:jinput-platform:2.0.5")
+    implementation("net.java.jinput:jinput:2.0.5")
+    implementation("net.java.jutils:jutils:1.0.0")
 }
 
 task("copyNatives", Copy::class) {

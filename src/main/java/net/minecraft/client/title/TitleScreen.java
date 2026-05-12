@@ -12,6 +12,8 @@ import net.minecraft.client.gui.JoinMultiplayerScreen;
 import net.minecraft.client.gui.SelectWorldScreen;
 import net.minecraft.client.gui.OptionsScreen;
 import net.minecraft.locale.language.Language;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Calendar;
 import java.io.Reader;
@@ -35,8 +37,9 @@ public class TitleScreen extends Screen
         this.splash = "missingno";
         try {
             final ArrayList list = new ArrayList();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(TitleScreen.class.getResourceAsStream("/title/splashes.txt"), StandardCharsets.UTF_8));
             String line;
-            while ((line = new BufferedReader(new InputStreamReader(TitleScreen.class.getResourceAsStream("/title/splashes.txt"), Charset.forName("UTF-8"))).readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 final String trim = line.trim();
                 if (trim.length() > 0) {
                     list.add(trim);

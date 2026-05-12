@@ -64,10 +64,10 @@ public class SynchedEntityData
     }
     
     public void set(final int id, final Object value) {
-        final DataItem synchedEntityData_DataItem = this.itemsById.get(id);
-        if (!value.equals(synchedEntityData_DataItem.getValue())) {
-            synchedEntityData_DataItem.setValue(value);
-            synchedEntityData_DataItem.setDirty(true);
+        final DataItem dataItem = this.itemsById.get(id);
+        if (!value.equals(dataItem.getValue())) {
+            dataItem.setValue(value);
+            dataItem.setDirty(true);
             this.isDirty = true;
         }
     }

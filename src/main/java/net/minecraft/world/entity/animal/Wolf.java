@@ -41,7 +41,7 @@ public class Wolf extends Animal
     @Override
     protected void definedSynchedData() {
         super.definedSynchedData();
-        this.entityData.define(16, 0);
+        this.entityData.define(16, (byte)0);
         this.entityData.define(17, "");
         this.entityData.define(18, new Integer(this.health));
     }

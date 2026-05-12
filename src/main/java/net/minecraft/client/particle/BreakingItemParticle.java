@@ -24,7 +24,7 @@ public class BreakingItemParticle extends Particle
     
     @Override
     public int getParticleTexture() {
-        return 2;
+        return ParticleEngine.ITEM_TEXTURE;
     }
     
     @Override

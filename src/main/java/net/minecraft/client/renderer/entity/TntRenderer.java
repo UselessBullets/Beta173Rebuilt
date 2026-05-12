@@ -10,7 +10,9 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.client.renderer.TileRenderer;
 
-public class TntRenderer extends EntityRenderer
+import static org.lwjgl.opengl.GL11.*;
+
+public class TntRenderer extends EntityRenderer<PrimedTnt>
 {
     private TileRenderer tileRenderer;
     
@@ -38,16 +40,16 @@ public class TntRenderer extends EntityRenderer
         this.bindTexture("/terrain.png");
         this.tileRenderer.renderTile(Tile.tnt, 0, entity.getBrightness(partialTick));
         if (entity.life / 5 % 2 == 0) {
-            GL11.glDisable(3553);
-            GL11.glDisable(2896);
-            GL11.glEnable(3042);
+            GL11.glDisable(GL_TEXTURE_2D);
+            GL11.glDisable(GL_LIGHTING);
+            GL11.glEnable(GL_BLEND);
             GL11.glBlendFunc(770, 772);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, n4);
             this.tileRenderer.renderTile(Tile.tnt, 0, 1.0f);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             GL11.glDisable(3042);
-            GL11.glEnable(2896);
-            GL11.glEnable(3553);
+            GL11.glDisable(GL_LIGHTING);
+            GL11.glEnable(GL_TEXTURE_2D);
         }
         GL11.glPopMatrix();
     }

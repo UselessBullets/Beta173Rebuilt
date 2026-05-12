@@ -4,8 +4,6 @@
 
 package net.minecraft.client;
 
-import java.util.Iterator;
-import net.minecraft.world.level.saveddata.MapItemSavedData_MapDecoration;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.world.level.material.MaterialColor;
@@ -14,6 +12,8 @@ import net.minecraft.world.entity.player.Player;
 import java.awt.image.BufferedImage;
 import net.minecraft.client.renderer.Textures;
 import net.minecraft.client.gui.Font;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class Minimap
 {
@@ -68,7 +68,7 @@ public class Minimap
         final Tesselator instance = Tesselator.instance;
         final float n9 = 0.0f;
         GL11.glBindTexture(3553, this.mapTexture);
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glDisable(3008);
         instance.begin();
         instance.vertexUV(x + 0 + n9, y + 128 - n9, -0.009999999776482582, 0.0, 1.0);
@@ -79,16 +79,16 @@ public class Minimap
         GL11.glEnable(3008);
         GL11.glDisable(3042);
         textures.bind(textures.loadTexture("/misc/mapicons.png"));
-        for (final MapItemSavedData_MapDecoration mapItemSavedData_MapDecoration : data.decorations) {
+        for (final MapItemSavedData.MapDecoration mapDecoration : data.decorations) {
             GL11.glPushMatrix();
-            GL11.glTranslatef(x + mapItemSavedData_MapDecoration.x / 2.0f + 64.0f, y + mapItemSavedData_MapDecoration.y / 2.0f + 64.0f, -0.02f);
-            GL11.glRotatef(mapItemSavedData_MapDecoration.rot * 360 / 16.0f, 0.0f, 0.0f, 1.0f);
+            GL11.glTranslatef(x + mapDecoration.x / 2.0f + 64.0f, y + mapDecoration.y / 2.0f + 64.0f, -0.02f);
+            GL11.glRotatef(mapDecoration.rot * 360 / 16.0f, 0.0f, 0.0f, 1.0f);
             GL11.glScalef(4.0f, 4.0f, 3.0f);
             GL11.glTranslatef(-0.125f, 0.125f, 0.0f);
-            final float n10 = (mapItemSavedData_MapDecoration.imgIndex % 4 + 0) / 4.0f;
-            final float n11 = (mapItemSavedData_MapDecoration.imgIndex / 4 + 0) / 4.0f;
-            final float n12 = (mapItemSavedData_MapDecoration.imgIndex % 4 + 1) / 4.0f;
-            final float n13 = (mapItemSavedData_MapDecoration.imgIndex / 4 + 1) / 4.0f;
+            final float n10 = (mapDecoration.imgIndex % 4 + 0) / 4.0f;
+            final float n11 = (mapDecoration.imgIndex / 4 + 0) / 4.0f;
+            final float n12 = (mapDecoration.imgIndex % 4 + 1) / 4.0f;
+            final float n13 = (mapDecoration.imgIndex / 4 + 1) / 4.0f;
             instance.begin();
             instance.vertexUV(-1.0, 1.0, 0.0, n10, n11);
             instance.vertexUV(1.0, 1.0, 0.0, n12, n11);

@@ -11,7 +11,9 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.model.Model;
 
-public class CreeperRenderer extends MobRenderer
+import static org.lwjgl.opengl.GL11.*;
+
+public class CreeperRenderer extends MobRenderer<Creeper>
 {
     private Model armorModel;
     
@@ -60,10 +62,10 @@ public class CreeperRenderer extends MobRenderer
                 GL11.glTranslatef(n * 0.01f, n * 0.01f, 0.0f);
                 this.setArmor(this.armorModel);
                 GL11.glMatrixMode(5888);
-                GL11.glEnable(3042);
+                GL11.glEnable(GL_BLEND);
                 final float n2 = 0.5f;
                 GL11.glColor4f(n2, n2, n2, 1.0f);
-                GL11.glDisable(2896);
+                GL11.glDisable(GL_LIGHTING);
                 GL11.glBlendFunc(1, 1);
                 return true;
             }
@@ -71,7 +73,7 @@ public class CreeperRenderer extends MobRenderer
                 GL11.glMatrixMode(5890);
                 GL11.glLoadIdentity();
                 GL11.glMatrixMode(5888);
-                GL11.glEnable(2896);
+                GL11.glDisable(GL_LIGHTING);
                 GL11.glDisable(3042);
             }
         }

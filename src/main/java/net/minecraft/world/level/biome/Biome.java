@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.biome;
 
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import java.awt.Color;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
@@ -19,7 +20,6 @@ import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.level.MobSpawnerData;
 import net.minecraft.world.entity.monster.Spider;
 import java.util.ArrayList;
 import net.minecraft.world.level.tile.Tile;
@@ -45,9 +45,9 @@ public class Biome
     public byte topMaterial;
     public byte material;
     public int leafColor;
-    protected List enemies;
-    protected List friendlies;
-    protected List waterFriendlies;
+    protected List<MobSpawnerData> enemies;
+    protected List<MobSpawnerData> friendlies;
+    protected List<MobSpawnerData> waterFriendlies;
     private boolean snowCovered;
     private boolean hasRain;
     private static Biome[] map;
@@ -55,10 +55,10 @@ public class Biome
     protected Biome() {
         this.topMaterial = (byte)Tile.grass.id;
         this.material = (byte)Tile.dirt.id;
-        this.leafColor = 5169201;
-        this.enemies = new ArrayList();
-        this.friendlies = new ArrayList();
-        this.waterFriendlies = new ArrayList();
+        this.leafColor = 0x4ee031;
+        this.enemies = new ArrayList<>();
+        this.friendlies = new ArrayList<>();
+        this.waterFriendlies = new ArrayList<>();
         this.hasRain = true;
         this.enemies.add(new MobSpawnerData(Spider.class, 10));
         this.enemies.add(new MobSpawnerData(Zombie.class, 10));
@@ -176,7 +176,7 @@ public class Biome
         return Color.getHSBColor(0.62222224f - temp * 0.05f, 0.5f + temp * 0.1f, 1.0f).getRGB();
     }
     
-    public List getMobs(final MobCategory category) {
+    public List<MobSpawnerData> getMobs(final MobCategory category) {
         if (category == MobCategory.monster) {
             return this.enemies;
         }
@@ -198,20 +198,31 @@ public class Biome
     }
     
     static {
-        rainForest = new RainforestBiome().setColor(588342).setName("Rainforest").setLeafColor(2094168);
-        swampland = new SwampBiome().setColor(522674).setName("Swampland").setLeafColor(9154376);
-        seasonalForest = new Biome().setColor(10215459).setName("Seasonal Forest");
-        forest = new ForestBiome().setColor(353825).setName("Forest").setLeafColor(5159473);
-        savanna = new FlatBiome().setColor(14278691).setName("Savanna");
-        shrubland = new Biome().setColor(10595616).setName("Shrubland");
-        taiga = new TaigaBiome().setColor(3060051).setName("Taiga").setSnowCovered().setLeafColor(8107825);
-        desert = new FlatBiome().setColor(16421912).setName("Desert").setNoRain();
-        plains = new FlatBiome().setColor(16767248).setName("Plains");
-        iceDesert = new FlatBiome().setColor(16772499).setName("Ice Desert").setSnowCovered().setNoRain().setLeafColor(12899129);
-        tunfra = new Biome().setColor(5762041).setName("Tundra").setSnowCovered().setLeafColor(12899129);
-        hell = new HellBiome().setColor(16711680).setName("Hell").setNoRain();
-        sky = new SkyBiome().setColor(8421631).setName("Sky").setNoRain();
+        rainForest = new RainforestBiome().setColor(0x8fa36).setName("Rainforest").setLeafColor(0x1ff458);
+        swampland = new SwampBiome().setColor(0x7f9b2).setName("Swampland").setLeafColor(0x8baf48);
+        seasonalForest = new Biome().setColor(0x9be023).setName("Seasonal Forest");
+        forest = new ForestBiome().setColor(0x56621).setName("Forest").setLeafColor(0x4eba31);
+        savanna = new FlatBiome().setColor(0xd9e023).setName("Savanna");
+        shrubland = new Biome().setColor(0xa1ad20).setName("Shrubland");
+        taiga = new TaigaBiome().setColor(0x2eb153).setName("Taiga").setSnowCovered().setLeafColor(0x7bb731);
+        desert = new FlatBiome().setColor(0xfa9418).setName("Desert").setNoRain();
+        plains = new FlatBiome().setColor(0xffd910).setName("Plains");
+        iceDesert = new FlatBiome().setColor(0xffed93).setName("Ice Desert").setSnowCovered().setNoRain().setLeafColor(0xc4d339);
+        tunfra = new Biome().setColor(0x57ebf9).setName("Tundra").setSnowCovered().setLeafColor(0xc4d339);
+        hell = new HellBiome().setColor(0xff0000).setName("Hell").setNoRain();
+        sky = new SkyBiome().setColor(0x8080ff).setName("Sky").setNoRain();
         Biome.map = new Biome[4096];
         recalc();
+    }
+
+    public static class MobSpawnerData
+    {
+        public Class<? extends Mob> mobClass;
+        public int probabilityWeight;
+
+        public MobSpawnerData(final Class<? extends Mob> mobClass, final int probabilityWeight) {
+            this.mobClass = mobClass;
+            this.probabilityWeight = probabilityWeight;
+        }
     }
 }

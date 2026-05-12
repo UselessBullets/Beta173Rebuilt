@@ -5,7 +5,6 @@
 package net.minecraft.world.level;
 
 import java.util.List;
-import java.util.Collection;
 import java.util.ArrayList;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
@@ -26,12 +25,12 @@ public class Explosion
     public double z;
     public Entity source;
     public float r;
-    public Set toBlow;
+    public Set<TilePos> toBlow;
     
     public Explosion(final Level level, final Entity source, final double x, final double y, final double z, final float r) {
         this.fire = false;
         this.random = new Random();
-        this.toBlow = new HashSet();
+        this.toBlow = new HashSet<>();
         this.level = level;
         this.source = source;
         this.r = r;
@@ -77,7 +76,7 @@ public class Explosion
             }
         }
         this.r *= 2.0f;
-        final List entities = this.level.getEntities(this.source, AABB.newTemp(Mth.floor(this.x - this.r - 1.0), Mth.floor(this.y - this.r - 1.0), Mth.floor(this.z - this.r - 1.0), Mth.floor(this.x + this.r + 1.0), Mth.floor(this.y + this.r + 1.0), Mth.floor(this.z + this.r + 1.0)));
+        final List<Entity> entities = this.level.getEntities(this.source, AABB.newTemp(Mth.floor(this.x - this.r - 1.0), Mth.floor(this.y - this.r - 1.0), Mth.floor(this.z - this.r - 1.0), Mth.floor(this.x + this.r + 1.0), Mth.floor(this.y + this.r + 1.0), Mth.floor(this.z + this.r + 1.0)));
         final Vec3 temp = Vec3.newTemp(this.x, this.y, this.z);
         for (int l = 0; l < entities.size(); ++l) {
             final Entity entity = entities.get(l);
@@ -102,7 +101,7 @@ public class Explosion
             }
         }
         this.r = r;
-        final ArrayList list = new ArrayList();
+        final ArrayList<TilePos> list = new ArrayList<>();
         list.addAll(this.toBlow);
         if (this.fire) {
             for (int n20 = list.size() - 1; n20 >= 0; --n20) {
@@ -121,7 +120,7 @@ public class Explosion
     
     public void addParticles(final boolean generateParticles) {
         this.level.playLocalSound(this.x, this.y, this.z, "random.explode", 4.0f, (1.0f + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2f) * 0.7f);
-        final ArrayList list = new ArrayList();
+        final ArrayList<TilePos> list = new ArrayList();
         list.addAll(this.toBlow);
         for (int i = list.size() - 1; i >= 0; --i) {
             final TilePos tilePos = (TilePos)list.get(i);

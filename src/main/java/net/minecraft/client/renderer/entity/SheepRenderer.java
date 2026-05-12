@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.client.model.Model;
 
-public class SheepRenderer extends MobRenderer
+public class SheepRenderer extends MobRenderer<Sheep>
 {
     public SheepRenderer(final Model model, final Model armor, final float shadow) {
         super(model, shadow);

@@ -6,7 +6,6 @@ package net.minecraft.world.entity.item;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Mob;
-import com.mojang.nbt.Tag;
 import com.mojang.nbt.ListTag;
 import com.mojang.nbt.CompoundTag;
 import java.util.List;
@@ -454,7 +453,7 @@ public class Minecart extends Entity implements Container
             this.flipped = !this.flipped;
         }
         this.setRot(this.yRot, this.xRot);
-        final List entities = this.level.getEntities(this, this.bb.grow(0.20000000298023224, 0.0, 0.20000000298023224));
+        final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.20000000298023224, 0.0, 0.20000000298023224));
         if (entities != null && entities.size() > 0) {
             for (int i = 0; i < entities.size(); ++i) {
                 final Entity entity = entities.get(i);

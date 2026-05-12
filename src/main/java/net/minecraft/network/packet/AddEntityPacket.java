@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class AddEntityPacket extends Packet
 {
@@ -20,7 +21,7 @@ public class AddEntityPacket extends Packet
     public int data;
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();
         this.type = dis.readByte();
         this.x = dis.readInt();
@@ -35,7 +36,7 @@ public class AddEntityPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.id);
         dos.writeByte(this.type);
         dos.writeInt(this.x);

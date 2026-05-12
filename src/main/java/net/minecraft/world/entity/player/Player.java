@@ -14,7 +14,6 @@ import net.minecraft.world.level.tile.BedTile;
 import net.minecraft.world.level.tile.entity.SignTileEntity;
 import net.minecraft.world.level.tile.entity.DispenserTileEntity;
 import net.minecraft.world.level.tile.entity.FurnaceTileEntity;
-import java.util.Iterator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.Ghast;
@@ -22,7 +21,6 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.Container;
-import com.mojang.nbt.Tag;
 import com.mojang.nbt.ListTag;
 import com.mojang.nbt.CompoundTag;
 import net.minecraft.world.level.material.Material;
@@ -249,7 +247,7 @@ public abstract class Player extends Mob
         this.bob += (sqrt - this.bob) * 0.4f;
         this.tilt += (n - this.tilt) * 0.8f;
         if (this.health > 0) {
-            final List entities = this.level.getEntities(this, this.bb.grow(1.0, 0.0, 1.0));
+            final List<Entity> entities = this.level.getEntities(this, this.bb.grow(1.0, 0.0, 1.0));
             if (entities != null) {
                 for (int i = 0; i < entities.size(); ++i) {
                     final Entity entity = entities.get(i);

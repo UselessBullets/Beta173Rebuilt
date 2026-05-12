@@ -76,7 +76,7 @@ public class LevelData
         return tag;
     }
     
-    public CompoundTag createTag(final List players) {
+    public CompoundTag createTag(final List<Player> players) {
         final CompoundTag tag = new CompoundTag();
         Entity entity = null;
         CompoundTag compoundTag = null;

@@ -17,8 +17,8 @@ import java.util.Map;
 
 public class StatsCounter
 {
-    private Map stats;
-    private Map unsentStats;
+    private Map<Stat, Integer> stats;
+    private Map<Stat, Integer> unsentStats;
     private boolean requiresSave;
     private StatsSyncher statsSyncher;
     
@@ -48,7 +48,7 @@ public class StatsCounter
         this.requiresSave = true;
     }
     
-    private void add(final Map statMap, final Stat stat, final int count) {
+    private void add(final Map<Stat, Integer> statMap, final Stat stat, final int count) {
         final Integer n = statMap.get(stat);
         statMap.put(stat, ((n == null) ? 0 : n) + count);
     }
@@ -57,7 +57,7 @@ public class StatsCounter
         return new HashMap(this.unsentStats);
     }
     
-    public void loadStats(final Map statMap) {
+    public void loadStats(final Map<Stat, Integer> statMap) {
         if (statMap == null) {
             return;
         }
@@ -68,7 +68,7 @@ public class StatsCounter
         }
     }
     
-    public void mergeStats(final Map statMap) {
+    public void mergeStats(final Map<Stat, Integer> statMap) {
         if (statMap == null) {
             return;
         }
@@ -78,7 +78,7 @@ public class StatsCounter
         }
     }
     
-    public void queueStats(final Map statMap) {
+    public void queueStats(final Map<Stat, Integer> statMap) {
         if (statMap == null) {
             return;
         }
@@ -88,15 +88,15 @@ public class StatsCounter
         }
     }
     
-    public static Map loadStatsFromString(final String statsString) {
-        final HashMap hashMap = new HashMap();
+    public static Map<Stat, Integer> loadStatsFromString(final String statsString) {
+        final HashMap<Stat, Integer> hashMap = new HashMap<>();
         try {
             final String salt = "local";
             final StringBuilder sb = new StringBuilder();
             final JsonRootNode parse = new JdomParser().parse(statsString);
             final Iterator iterator = parse.getArrayNode("stats-change").iterator();
             while (iterator.hasNext()) {
-                final Map.Entry<JsonStringNode, V> entry = ((JsonNode)iterator.next()).getFields().entrySet().iterator().next();
+                final Map.Entry<JsonStringNode, JsonNode> entry = ((JsonNode)iterator.next()).getFields().entrySet().iterator().next();
                 final int int1 = Integer.parseInt(entry.getKey().getText());
                 final int int2 = Integer.parseInt(((JsonNode)entry.getValue()).getText());
                 final Stat stat = Stats.getStat(int1);
@@ -120,7 +120,7 @@ public class StatsCounter
         return hashMap;
     }
     
-    public static String saveStatsToString(final String name, final String sessionId, final Map stats) {
+    public static String saveStatsToString(final String name, final String sessionId, final Map<Stat, Integer> stats) {
         final StringBuilder sb = new StringBuilder();
         final StringBuilder sb2 = new StringBuilder();
         int n = 1;

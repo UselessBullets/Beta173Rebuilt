@@ -15,13 +15,13 @@ import java.util.Map;
 
 public abstract class Packet
 {
-    private static Map idToClassMap;
-    private static Map classToIdMap;
-    private static Set clientReceivedPackets;
-    private static Set serverReceivedPackets;
+    private static Map<Integer, Class<? extends Packet>> idToClassMap;
+    private static Map<Class<? extends Packet>, Integer> classToIdMap;
+    private static Set<Integer> clientReceivedPackets;
+    private static Set<Integer> serverReceivedPackets;
     public final long createTime;
     public boolean shouldDelay;
-    private static HashMap packetStatistics;
+    private static HashMap<Integer, PacketStatistics> packetStatistics;
     private static int readCounter;
     
     public Packet() {
@@ -82,13 +82,13 @@ public abstract class Packet
             }
             packet.read(dis);
         }
-        catch (final EOFException ex) {
+        catch (final IOException ex) {
             System.out.println("Reached end of stream");
             return null;
         }
-        Packet_PacketStatistics value = Packet.packetStatistics.get(read);
+        PacketStatistics value = Packet.packetStatistics.get(read);
         if (value == null) {
-            value = new Packet_PacketStatistics(null);
+            value = new PacketStatistics();
             Packet.packetStatistics.put(read, value);
         }
         value.addPacket(packet.getEstimatedSize());
@@ -97,12 +97,12 @@ public abstract class Packet
         return packet;
     }
     
-    public static void writePacket(final Packet packet, final DataOutputStream dos) {
+    public static void writePacket(final Packet packet, final DataOutputStream dos) throws IOException {
         dos.write(packet.getId());
         packet.write(dos);
     }
     
-    public static void writeUTF(final String value, final DataOutputStream dos) {
+    public static void writeUTF(final String value, final DataOutputStream dos) throws IOException {
         if (value.length() > 32767) {
             throw new IOException("String too big");
         }
@@ -110,7 +110,7 @@ public abstract class Packet
         dos.writeChars(value);
     }
     
-    public static String readUTF(final DataInputStream dis, final int maxLength) {
+    public static String readUTF(final DataInputStream dis, final int maxLength) throws IOException {
         final short short1 = dis.readShort();
         if (short1 > maxLength) {
             throw new IOException("Received string length longer than maximum allowed (" + short1 + " > " + maxLength + ")");
@@ -125,9 +125,9 @@ public abstract class Packet
         return sb.toString();
     }
     
-    public abstract void read(final DataInputStream dis);
+    public abstract void read(final DataInputStream dis) throws IOException;
     
-    public abstract void write(final DataOutputStream dos);
+    public abstract void write(final DataOutputStream dos) throws IOException;
     
     public abstract void handle(final PacketListener listener);
     
@@ -197,5 +197,19 @@ public abstract class Packet
         map(255, true, true, DisconnectPacket.class);
         Packet.packetStatistics = new HashMap();
         Packet.readCounter = 0;
+    }
+
+    static class PacketStatistics
+    {
+        private int count;
+        private long totalSize;
+
+        private PacketStatistics() {
+        }
+
+        public void addPacket(final int bytes) {
+            ++this.count;
+            this.totalSize += bytes;
+        }
     }
 }

@@ -10,7 +10,9 @@ import net.minecraft.client.renderer.Tesselator;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.projectile.Arrow;
 
-public class ArrowRenderer extends EntityRenderer
+import static org.lwjgl.opengl.GL12.*;
+
+public class ArrowRenderer extends EntityRenderer<Arrow>
 {
     public void render(final Arrow entity, final double x, final double y, final double z, final float rot, final float partialTick) {
         if (entity.yRotO == 0.0f && entity.xRotO == 0.0f) {
@@ -32,7 +34,7 @@ public class ArrowRenderer extends EntityRenderer
         final float n8 = (5 + n * 10) / 32.0f;
         final float n9 = (10 + n * 10) / 32.0f;
         final float n10 = 0.05625f;
-        GL11.glEnable(32826);
+        GL11.glEnable(GL_RESCALE_NORMAL);
         final float n11 = entity.shakeTime - partialTick;
         if (n11 > 0.0f) {
             GL11.glRotatef(-Mth.sin(n11 * 3.0f) * n11, 0.0f, 0.0f, 1.0f);

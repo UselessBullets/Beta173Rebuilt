@@ -7,6 +7,8 @@ package net.minecraft.client.gui;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.Tesselator;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class GuiComponent
 {
     protected float blitOffset;
@@ -49,8 +51,8 @@ public class GuiComponent
         final float n5 = (col >> 8 & 0xFF) / 255.0f;
         final float n6 = (col & 0xFF) / 255.0f;
         final Tesselator instance = Tesselator.instance;
-        GL11.glEnable(3042);
-        GL11.glDisable(3553);
+        GL11.glEnable(GL_BLEND);
+        GL11.glDisable(GL_TEXTURE_2D);
         GL11.glBlendFunc(770, 771);
         GL11.glColor4f(n4, n5, n6, n3);
         instance.begin();
@@ -59,7 +61,7 @@ public class GuiComponent
         instance.vertex(x1, y0, 0.0);
         instance.vertex(x0, y0, 0.0);
         instance.end();
-        GL11.glEnable(3553);
+        GL11.glEnable(GL_TEXTURE_2D);
         GL11.glDisable(3042);
     }
     
@@ -72,8 +74,8 @@ public class GuiComponent
         final float r2 = (col2 >> 16 & 0xFF) / 255.0f;
         final float g2 = (col2 >> 8 & 0xFF) / 255.0f;
         final float b2 = (col2 & 0xFF) / 255.0f;
-        GL11.glDisable(3553);
-        GL11.glEnable(3042);
+        GL11.glDisable(GL_TEXTURE_2D);
+        GL11.glEnable(GL_BLEND);
         GL11.glDisable(3008);
         GL11.glBlendFunc(770, 771);
         GL11.glShadeModel(7425);
@@ -89,7 +91,7 @@ public class GuiComponent
         GL11.glShadeModel(7424);
         GL11.glDisable(3042);
         GL11.glEnable(3008);
-        GL11.glEnable(3553);
+        GL11.glEnable(GL_TEXTURE_2D);
     }
     
     public void drawCenteredString(final Font font, final String str, final int x, final int y, final int color) {

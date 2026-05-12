@@ -4,11 +4,10 @@
 
 package net.minecraft.world.level.storage;
 
-import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.zip.DeflaterOutputStream;
 import java.io.DataOutputStream;
 import java.util.zip.InflaterInputStream;
-import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -24,7 +23,7 @@ public class RegionFile
     private RandomAccessFile saveFile;
     private final int[] offsets;
     private final int[] chunkTimestamps;
-    private ArrayList sectorFree;
+    private ArrayList<Boolean> sectorFree;
     private int sizeDelta;
     private long lastModified;
     
@@ -151,7 +150,7 @@ public class RegionFile
         if (this.outOfBounds(x, z)) {
             return null;
         }
-        return new DataOutputStream(new DeflaterOutputStream(new RegionFile_ChunkBuffer(this, x, z)));
+        return new DataOutputStream(new DeflaterOutputStream(new ChunkBuffer(this, x, z)));
     }
     
     protected synchronized void write(final int x, final int y, final byte[] data, final int length) {
@@ -221,7 +220,7 @@ public class RegionFile
         }
     }
     
-    private void write(final int sectorNumber, final byte[] data, final int length) {
+    private void write(final int sectorNumber, final byte[] data, final int length) throws IOException {
         this.debugln(" " + sectorNumber);
         this.saveFile.seek(sectorNumber * 4096);
         this.saveFile.writeInt(length + 1);
@@ -241,23 +240,42 @@ public class RegionFile
         return this.getOffset(x, z) != 0;
     }
     
-    private void setOffset(final int x, final int z, final int offset) {
+    private void setOffset(final int x, final int z, final int offset) throws IOException {
         this.offsets[x + z * 32] = offset;
         this.saveFile.seek((x + z * 32) * 4);
         this.saveFile.writeInt(offset);
     }
     
-    private void setTimestamp(final int x, final int z, final int value) {
+    private void setTimestamp(final int x, final int z, final int value) throws IOException {
         this.chunkTimestamps[x + z * 32] = value;
         this.saveFile.seek(4096 + (x + z * 32) * 4);
         this.saveFile.writeInt(value);
     }
     
-    public void close() {
+    public void close() throws IOException {
         this.saveFile.close();
     }
     
     static {
         emptySection = new byte[4096];
+    }
+
+    static class ChunkBuffer extends ByteArrayOutputStream
+    {
+        private RegionFile rf;
+        private int x;
+        private int z;
+
+        public ChunkBuffer(final RegionFile regionFile, final int x, final int z) {
+            super(8096);
+            this.rf = regionFile;
+            this.x = x;
+            this.z = z;
+        }
+
+        @Override
+        public void close() {
+            this.rf.write(this.x, this.z, this.buf, this.count);
+        }
     }
 }

@@ -6,6 +6,8 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
+
 import net.minecraft.world.item.ItemInstance;
 import util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -37,7 +39,7 @@ public class AddPlayerPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();
         this.name = Packet.readUTF(dis, 16);
         this.x = dis.readInt();
@@ -49,7 +51,7 @@ public class AddPlayerPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.id);
         Packet.writeUTF(this.name, dos);
         dos.writeInt(this.x);

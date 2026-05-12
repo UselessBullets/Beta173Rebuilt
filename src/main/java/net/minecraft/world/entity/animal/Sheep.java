@@ -54,13 +54,10 @@ public class Sheep extends Animal
             if (!this.level.isClientSide) {
                 this.setSheared(true);
                 for (int n = 2 + this.random.nextInt(3), i = 0; i < n; ++i) {
-                    final ItemEntity spawnAtLocation;
-                    final ItemEntity itemEntity = spawnAtLocation = this.spawnAtLocation(new ItemInstance(Tile.cloth.id, 1, this.getColor()), 1.0f);
-                    spawnAtLocation.yd += this.random.nextFloat() * 0.05f;
-                    final ItemEntity itemEntity2 = itemEntity;
-                    itemEntity2.xd += (this.random.nextFloat() - this.random.nextFloat()) * 0.1f;
-                    final ItemEntity itemEntity3 = itemEntity;
-                    itemEntity3.zd += (this.random.nextFloat() - this.random.nextFloat()) * 0.1f;
+                    final ItemEntity ie = this.spawnAtLocation(new ItemInstance(Tile.cloth.id, 1, this.getColor()), 1.0f);
+                    ie.yd += this.random.nextFloat() * 0.05f;
+                    ie.xd += (this.random.nextFloat() - this.random.nextFloat()) * 0.1f;
+                    ie.zd += (this.random.nextFloat() - this.random.nextFloat()) * 0.1f;
                 }
             }
             selected.hurt(1, player);

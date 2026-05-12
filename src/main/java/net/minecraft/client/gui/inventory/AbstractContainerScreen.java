@@ -16,6 +16,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.gui.Screen;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
+
 public abstract class AbstractContainerScreen extends Screen
 {
     private static ItemRenderer itemRenderer;
@@ -48,20 +51,20 @@ public abstract class AbstractContainerScreen extends Screen
         GL11.glPushMatrix();
         GL11.glTranslatef((float)n, (float)n2, 0.0f);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glEnable(32826);
+        GL11.glEnable(GL_RESCALE_NORMAL);
         Slot slot = null;
         for (int i = 0; i < this.menu.slots.size(); ++i) {
             final Slot slot2 = this.menu.slots.get(i);
             this.renderSlot(slot2);
             if (this.isHovering(slot2, xm, ym)) {
                 slot = slot2;
-                GL11.glDisable(2896);
-                GL11.glDisable(2929);
+                GL11.glDisable(GL_LIGHTING);
+                GL11.glDisable(GL_DEPTH_TEST);
                 final int x = slot2.x;
                 final int y = slot2.y;
                 this.fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
-                GL11.glEnable(2896);
-                GL11.glEnable(2929);
+                GL11.glDisable(GL_LIGHTING);
+                GL11.glEnable(GL_DEPTH_TEST);
             }
         }
         final Inventory inventory = this.minecraft.player.inventory;
@@ -72,8 +75,8 @@ public abstract class AbstractContainerScreen extends Screen
         }
         GL11.glDisable(32826);
         Lighting.turnOff();
-        GL11.glDisable(2896);
-        GL11.glDisable(2929);
+        GL11.glDisable(GL_LIGHTING);
+        GL11.glDisable(GL_DEPTH_TEST);
         this.renderLabels();
         if (inventory.getCarried() == null && slot != null && slot.hasItem()) {
             final String trim = ("" + Language.getInstance().getElementName(slot.getItem().getDescriptionId())).trim();
@@ -86,8 +89,8 @@ public abstract class AbstractContainerScreen extends Screen
         }
         GL11.glPopMatrix();
         super.render(xm, ym, partialTick);
-        GL11.glEnable(2896);
-        GL11.glEnable(2929);
+        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_DEPTH_TEST);
     }
     
     protected void renderLabels() {
@@ -102,10 +105,10 @@ public abstract class AbstractContainerScreen extends Screen
         if (item == null) {
             final int noItemIcon = slot.getNoItemIcon();
             if (noItemIcon >= 0) {
-                GL11.glDisable(2896);
+                GL11.glDisable(GL_LIGHTING);
                 this.minecraft.textures.bind(this.minecraft.textures.loadTexture("/gui/items.png"));
                 this.blit(x, y, noItemIcon % 16 * 16, noItemIcon / 16 * 16, 16, 16);
-                GL11.glEnable(2896);
+                GL11.glDisable(GL_LIGHTING);
                 return;
             }
         }

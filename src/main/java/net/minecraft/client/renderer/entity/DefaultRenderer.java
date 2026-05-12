@@ -7,7 +7,7 @@ package net.minecraft.client.renderer.entity;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Entity;
 
-public class DefaultRenderer extends EntityRenderer
+public class DefaultRenderer extends EntityRenderer<Entity>
 {
     @Override
     public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float partialTick) {

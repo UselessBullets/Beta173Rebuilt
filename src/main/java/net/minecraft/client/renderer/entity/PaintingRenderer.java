@@ -12,7 +12,9 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Painting;
 import java.util.Random;
 
-public class PaintingRenderer extends EntityRenderer
+import static org.lwjgl.opengl.GL12.*;
+
+public class PaintingRenderer extends EntityRenderer<Painting>
 {
     private Random random;
     
@@ -25,7 +27,7 @@ public class PaintingRenderer extends EntityRenderer
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
         GL11.glRotatef(rot, 0.0f, 1.0f, 0.0f);
-        GL11.glEnable(32826);
+        GL11.glEnable(GL_RESCALE_NORMAL);
         this.bindTexture("/art/kz.png");
         final Painting_Motive motive = entity.motive;
         final float n = 0.0625f;

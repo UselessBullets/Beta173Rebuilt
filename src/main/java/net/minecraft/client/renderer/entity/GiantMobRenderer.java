@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.client.model.Model;
 
-public class GiantMobRenderer extends MobRenderer
+public class GiantMobRenderer extends MobRenderer<Giant>
 {
     private float scale;
     

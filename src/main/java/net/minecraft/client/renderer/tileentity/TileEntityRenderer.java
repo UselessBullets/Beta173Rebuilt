@@ -9,11 +9,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.client.renderer.Textures;
 import net.minecraft.world.level.tile.entity.TileEntity;
 
-public abstract class TileEntityRenderer
+public abstract class TileEntityRenderer<T extends TileEntity>
 {
     protected TileEntityRenderDispatcher tileEntityRenderDispatcher;
     
-    public abstract void render(final TileEntity entity, final double x, final double y, final double z, final float partialTick);
+    public abstract void render(final T entity, final double x, final double y, final double z, final float partialTick);
     
     protected void bindTexture(final String resourceName) {
         final Textures textures = this.tileEntityRenderDispatcher.textures;

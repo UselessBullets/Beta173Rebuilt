@@ -11,7 +11,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.world.level.tile.entity.SignTileEntity;
 import net.minecraft.client.model.SignModel;
 
-public class SignRenderer extends TileEntityRenderer
+public class SignRenderer extends TileEntityRenderer<SignTileEntity>
 {
     private SignModel signModel;
     

@@ -21,10 +21,13 @@ import java.util.Random;
 import java.util.List;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
+
 public class Gui extends GuiComponent
 {
     private static ItemRenderer itemRenderer;
-    private List guiMessages;
+    private List<GuiMessage> guiMessages;
     private Random random;
     private Minecraft minecraft;
     public String selectedName;
@@ -53,7 +56,7 @@ public class Gui extends GuiComponent
         final int height = screenSizeCalculator.getHeight();
         final Font font = this.minecraft.font;
         this.minecraft.gameRenderer.setupGuiScreen();
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         if (Minecraft.useFancyGraphics()) {
             this.renderVignette(this.minecraft.player.getBrightness(partialTick), width, height);
         }
@@ -72,7 +75,7 @@ public class Gui extends GuiComponent
         this.blit(width / 2 - 91, height - 22, 0, 0, 182, 22);
         this.blit(width / 2 - 91 - 1 + inventory.selected * 20, height - 22 - 1, 0, 22, 24, 22);
         GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/gui/icons.png"));
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(775, 769);
         this.blit(width / 2 - 7, height / 2 - 7, 0, 0, 16, 16);
         GL11.glDisable(3042);
@@ -135,7 +138,7 @@ public class Gui extends GuiComponent
             }
         }
         GL11.glDisable(3042);
-        GL11.glEnable(32826);
+        GL11.glEnable(GL_RESCALE_NORMAL);
         GL11.glPushMatrix();
         GL11.glRotatef(120.0f, 1.0f, 0.0f, 0.0f);
         Lighting.turnOn();
@@ -146,7 +149,7 @@ public class Gui extends GuiComponent
         Lighting.turnOff();
         GL11.glDisable(32826);
         if (this.minecraft.player.getSleepTimer() > 0) {
-            GL11.glDisable(2929);
+            GL11.glDisable(GL_DEPTH_TEST);
             GL11.glDisable(3008);
             final int sleepTimer = this.minecraft.player.getSleepTimer();
             float n5 = sleepTimer / 100.0f;
@@ -155,7 +158,7 @@ public class Gui extends GuiComponent
             }
             this.fill(0, 0, width, height, (int)(220.0f * n5) << 24 | 0x101020);
             GL11.glEnable(3008);
-            GL11.glEnable(2929);
+            GL11.glEnable(GL_DEPTH_TEST);
         }
         if (this.minecraft.options.renderDebug) {
             GL11.glPushMatrix();
@@ -189,7 +192,7 @@ public class Gui extends GuiComponent
             if (n8 > 0) {
                 GL11.glPushMatrix();
                 GL11.glTranslatef((float)(width / 2), (float)(height - 48), 0.0f);
-                GL11.glEnable(3042);
+                GL11.glEnable(GL_BLEND);
                 GL11.glBlendFunc(770, 771);
                 int n9 = 16777215;
                 if (this.nowPlayingColor) {
@@ -206,7 +209,7 @@ public class Gui extends GuiComponent
             n10 = 20;
             b2 = true;
         }
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         GL11.glDisable(3008);
         GL11.glPushMatrix();
@@ -229,7 +232,7 @@ public class Gui extends GuiComponent
                     final int y = -n11 * 9;
                     final String string3 = this.guiMessages.get(n11).string;
                     this.fill(n14, y - 1, n14 + 320, y + 8, n13 / 2 << 24);
-                    GL11.glEnable(3042);
+                    GL11.glEnable(GL_BLEND);
                     font.drawShadow(string3, n14, y, 16777215 + (n13 << 24));
                 }
             }
@@ -240,7 +243,7 @@ public class Gui extends GuiComponent
     }
     
     private void renderPumpkin(final int w, final int h) {
-        GL11.glDisable(2929);
+        GL11.glDisable(GL_DEPTH_TEST);
         GL11.glDepthMask(false);
         GL11.glBlendFunc(770, 771);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -254,7 +257,7 @@ public class Gui extends GuiComponent
         instance.vertexUV(0.0, 0.0, -90.0, 0.0, 0.0);
         instance.end();
         GL11.glDepthMask(true);
-        GL11.glEnable(2929);
+        GL11.glEnable(GL_DEPTH_TEST);
         GL11.glEnable(3008);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
@@ -268,7 +271,7 @@ public class Gui extends GuiComponent
             br = 1.0f;
         }
         this.tbr += (float)((br - this.tbr) * 0.01);
-        GL11.glDisable(2929);
+        GL11.glDisable(GL_DEPTH_TEST);
         GL11.glDepthMask(false);
         GL11.glBlendFunc(0, 769);
         GL11.glColor4f(this.tbr, this.tbr, this.tbr, 1.0f);
@@ -281,7 +284,7 @@ public class Gui extends GuiComponent
         instance.vertexUV(0.0, 0.0, -90.0, 0.0, 0.0);
         instance.end();
         GL11.glDepthMask(true);
-        GL11.glEnable(2929);
+        GL11.glEnable(GL_DEPTH_TEST);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glBlendFunc(770, 771);
     }
@@ -293,7 +296,7 @@ public class Gui extends GuiComponent
             br = br * 0.8f + 0.2f;
         }
         GL11.glDisable(3008);
-        GL11.glDisable(2929);
+        GL11.glDisable(GL_DEPTH_TEST);
         GL11.glDepthMask(false);
         GL11.glBlendFunc(770, 771);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, br);
@@ -310,7 +313,7 @@ public class Gui extends GuiComponent
         instance.vertexUV(0.0, 0.0, -90.0, n, n2);
         instance.end();
         GL11.glDepthMask(true);
-        GL11.glEnable(2929);
+        GL11.glEnable(GL_DEPTH_TEST);
         GL11.glEnable(3008);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }

@@ -4,7 +4,7 @@
 
 package net.minecraft;
 
-public class Pos implements Comparable
+public class Pos implements Comparable<Pos>
 {
     public int x;
     public int y;

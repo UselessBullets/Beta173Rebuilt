@@ -7,7 +7,6 @@ package net.minecraft.world.level.storage;
 import java.util.HashMap;
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
-import java.util.Iterator;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.lang.ref.Reference;
@@ -16,7 +15,7 @@ import java.util.Map;
 
 public class RegionFileCache
 {
-    private static final Map defaultCache;
+    private static final Map<File, Reference<RegionFile>> defaultCache;
     
     private RegionFileCache() {
     }
@@ -24,9 +23,9 @@ public class RegionFileCache
     public static synchronized RegionFile getRegionFile(final File saveFile, final int chunkX, final int chunkZ) {
         final File parent = new File(saveFile, "region");
         final File path = new File(parent, "r." + (chunkX >> 5) + "." + (chunkZ >> 5) + ".mcr");
-        final Reference reference = RegionFileCache.defaultCache.get(path);
+        final Reference<RegionFile> reference = RegionFileCache.defaultCache.get(path);
         if (reference != null) {
-            final RegionFile regionFile = (RegionFile)reference.get();
+            final RegionFile regionFile = reference.get();
             if (regionFile != null) {
                 return regionFile;
             }
@@ -38,14 +37,14 @@ public class RegionFileCache
             clear();
         }
         final RegionFile referent = new RegionFile(path);
-        RegionFileCache.defaultCache.put(path, new SoftReference(referent));
+        RegionFileCache.defaultCache.put(path, new SoftReference<>(referent));
         return referent;
     }
     
     public static synchronized void clear() {
-        for (final Reference reference : RegionFileCache.defaultCache.values()) {
+        for (final Reference<RegionFile> reference : RegionFileCache.defaultCache.values()) {
             try {
-                final RegionFile regionFile = (RegionFile)reference.get();
+                final RegionFile regionFile = reference.get();
                 if (regionFile == null) {
                     continue;
                 }
@@ -71,6 +70,6 @@ public class RegionFileCache
     }
     
     static {
-        defaultCache = new HashMap();
+        defaultCache = new HashMap<>();
     }
 }

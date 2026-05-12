@@ -70,7 +70,7 @@ public class PigZombie extends Zombie
     @Override
     public boolean hurt(final Entity source, final int dmg) {
         if (source instanceof Player) {
-            final List entities = this.level.getEntities(this, this.bb.grow(32.0, 32.0, 32.0));
+            final List<Entity> entities = this.level.getEntities(this, this.bb.grow(32.0, 32.0, 32.0));
             for (int i = 0; i < entities.size(); ++i) {
                 final Entity entity = entities.get(i);
                 if (entity instanceof PigZombie) {

@@ -9,7 +9,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.client.model.Model;
 
-public class WolfRenderer extends MobRenderer
+public class WolfRenderer extends MobRenderer<Wolf>
 {
     public WolfRenderer(final Model model, final float shadow) {
         super(model, shadow);

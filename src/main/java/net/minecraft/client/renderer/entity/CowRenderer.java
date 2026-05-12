@@ -9,7 +9,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.client.model.Model;
 
-public class CowRenderer extends MobRenderer
+public class CowRenderer extends MobRenderer<Cow>
 {
     public CowRenderer(final Model model, final float shadow) {
         super(model, shadow);

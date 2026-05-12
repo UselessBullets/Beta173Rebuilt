@@ -9,7 +9,7 @@ import java.util.List;
 
 public class AABB
 {
-    private static List pool;
+    private static List<AABB> pool;
     private static int poolPointer;
     public double x0;
     public double y0;

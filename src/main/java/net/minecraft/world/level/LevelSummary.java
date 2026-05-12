@@ -4,7 +4,7 @@
 
 package net.minecraft.world.level;
 
-public class LevelSummary implements Comparable
+public class LevelSummary implements Comparable<LevelSummary>
 {
     private final String levelId;
     private final String levelName;

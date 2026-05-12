@@ -15,12 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class Screen extends GuiComponent
 {
     protected Minecraft minecraft;
     public int width;
     public int height;
-    protected List buttons;
+    protected List<Button> buttons;
     public boolean passEvents;
     protected Font font;
     public GuiParticles particles;
@@ -140,7 +142,7 @@ public class Screen extends GuiComponent
     }
     
     public void renderDirtBackground(final int vo) {
-        GL11.glDisable(2896);
+        GL11.glDisable(GL_LIGHTING);
         GL11.glDisable(2912);
         final Tesselator instance = Tesselator.instance;
         GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/gui/background.png"));

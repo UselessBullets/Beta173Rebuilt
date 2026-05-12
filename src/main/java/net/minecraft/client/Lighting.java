@@ -8,22 +8,24 @@ import net.minecraft.world.phys.Vec3;
 import org.lwjgl.opengl.GL11;
 import java.nio.FloatBuffer;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class Lighting
 {
     private static FloatBuffer lb;
     
     public static void turnOff() {
-        GL11.glDisable(2896);
+        GL11.glDisable(GL_LIGHTING);
         GL11.glDisable(16384);
         GL11.glDisable(16385);
         GL11.glDisable(2903);
     }
     
     public static void turnOn() {
-        GL11.glEnable(2896);
+        GL11.glDisable(GL_LIGHTING);
         GL11.glEnable(16384);
         GL11.glEnable(16385);
-        GL11.glEnable(2903);
+        GL11.glEnable(GL_COLOR_MATERIAL);
         GL11.glColorMaterial(1032, 5634);
         final float n = 0.4f;
         final float n2 = 0.6f;

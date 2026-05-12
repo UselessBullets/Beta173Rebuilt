@@ -18,7 +18,6 @@ import net.minecraft.client.particle.ExplodeParticle;
 import net.minecraft.client.particle.PortalParticle;
 import net.minecraft.client.particle.NoteParticle;
 import net.minecraft.client.particle.SmokeParticle;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.BubbleParticle;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult_Type;
@@ -32,12 +31,11 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderDispatcher;
 import net.minecraft.client.renderer.culling.Culler;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.Mob;
-import java.util.Comparator;
+
 import java.util.Arrays;
 import net.minecraft.world.entity.Entity;
 import util.Mth;
 import net.minecraft.world.level.tile.Tile;
-import net.minecraft.world.level.LevelSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import java.util.Random;
 import org.lwjgl.opengl.GL11;
@@ -50,12 +48,17 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 import net.minecraft.world.level.LevelListener;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class LevelRenderer implements LevelListener
 {
-    public List renderableTileEntities;
+    public static final int CHUNK_SIZE = 16;
+    public static final int MAX_VISIBLE_REBUILDS_PER_FRAME = 3;
+    public static final int MAX_INVISIBLE_REBUILDS_PER_FRAME = 1;
+    public List<TileEntity> renderableTileEntities;
     private Level level;
     private Textures textures;
-    private List dirtyChunks;
+    private List<Chunk> dirtyChunks;
     private Chunk[] sortedChunks;
     private Chunk[] chunks;
     private int xChunks;
@@ -89,7 +92,7 @@ public class LevelRenderer implements LevelListener
     private int renderedChunks;
     private int emptyChunks;
     private int chunkFixOffs;
-    private List renderChunks;
+    private List<Chunk> renderChunks;
     private OffsettedRenderList[] renderLists;
     int frame;
     int repeatList;
@@ -299,7 +302,7 @@ public class LevelRenderer implements LevelListener
         TileEntityRenderDispatcher.xOff = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * partialTick;
         TileEntityRenderDispatcher.yOff = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * partialTick;
         TileEntityRenderDispatcher.zOff = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * partialTick;
-        final List allEntities = this.level.getAllEntities();
+        final List<Entity> allEntities = this.level.getAllEntities();
         this.totalEntities = allEntities.size();
         for (int i = 0; i < this.level.globalEntities.size(); ++i) {
             final Entity entity = this.level.globalEntities.get(i);
@@ -444,8 +447,8 @@ public class LevelRenderer implements LevelListener
                 if (j > this.sortedChunks.length) {
                     j = this.sortedChunks.length;
                 }
-                GL11.glDisable(3553);
-                GL11.glDisable(2896);
+                GL11.glDisable(GL_TEXTURE_2D);
+                GL11.glDisable(GL_LIGHTING);
                 GL11.glDisable(3008);
                 GL11.glDisable(2912);
                 GL11.glColorMask(false, false, false, false);
@@ -500,7 +503,7 @@ public class LevelRenderer implements LevelListener
                     GL11.glColorMask(true, true, true, true);
                 }
                 GL11.glDepthMask(true);
-                GL11.glEnable(3553);
+                GL11.glEnable(GL_TEXTURE_2D);
                 GL11.glEnable(3008);
                 GL11.glEnable(2912);
                 n9 += this.renderChunks(n10, j, layer, alpha);
@@ -591,7 +594,7 @@ public class LevelRenderer implements LevelListener
         if (this.mc.level.dimension.foggy) {
             return;
         }
-        GL11.glDisable(3553);
+        GL11.glDisable(GL_TEXTURE_2D);
         final Vec3 skyColor = this.level.getSkyColor(this.mc.cameraTargetPlayer, alpha);
         float n = (float)skyColor.x;
         float n2 = (float)skyColor.y;
@@ -612,12 +615,12 @@ public class LevelRenderer implements LevelListener
         GL11.glCallList(this.skyList);
         GL11.glDisable(2912);
         GL11.glDisable(3008);
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         Lighting.turnOff();
         final float[] sunriseColor = this.level.dimension.getSunriseColor(this.level.getTimeOfDay(alpha), alpha);
         if (sunriseColor != null) {
-            GL11.glDisable(3553);
+            GL11.glDisable(GL_TEXTURE_2D);
             GL11.glShadeModel(7425);
             GL11.glPushMatrix();
             GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
@@ -648,7 +651,7 @@ public class LevelRenderer implements LevelListener
             GL11.glPopMatrix();
             GL11.glShadeModel(7424);
         }
-        GL11.glEnable(3553);
+        GL11.glEnable(GL_TEXTURE_2D);
         GL11.glBlendFunc(770, 1);
         GL11.glPushMatrix();
         final float n12 = 1.0f - this.level.getRainLevel(alpha);
@@ -675,7 +678,7 @@ public class LevelRenderer implements LevelListener
         instance.vertexUV(n17, -100.0, -n17, 0.0, 0.0);
         instance.vertexUV(-n17, -100.0, -n17, 1.0, 0.0);
         instance.end();
-        GL11.glDisable(3553);
+        GL11.glDisable(GL_TEXTURE_2D);
         final float n18 = this.level.getStarBrightness(alpha) * n12;
         if (n18 > 0.0f) {
             GL11.glColor4f(n18, n18, n18, n18);
@@ -692,9 +695,9 @@ public class LevelRenderer implements LevelListener
         else {
             GL11.glColor3f(n, n2, n3);
         }
-        GL11.glDisable(3553);
+        GL11.glDisable(GL_TEXTURE_2D);
         GL11.glCallList(this.darkList);
-        GL11.glEnable(3553);
+        GL11.glEnable(GL_TEXTURE_2D);
         GL11.glDepthMask(true);
     }
     
@@ -712,7 +715,7 @@ public class LevelRenderer implements LevelListener
         final int n3 = 256 / n2;
         final Tesselator instance = Tesselator.instance;
         GL11.glBindTexture(3553, this.textures.loadTexture("/environment/clouds.png"));
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         final Vec3 cloudColor = this.level.getCloudColor(alpha);
         float r = (float)cloudColor.x;
@@ -749,7 +752,7 @@ public class LevelRenderer implements LevelListener
         instance.end();
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glDisable(3042);
-        GL11.glEnable(2884);
+        GL11.glEnable(GL_CULL_FACE);
     }
     
     public boolean isInCloud(final double double1, final double double2, final double double3, final float float4) {
@@ -770,7 +773,7 @@ public class LevelRenderer implements LevelListener
         final double n7 = n4 - floor * 2048;
         final double n8 = n5 - floor2 * 2048;
         GL11.glBindTexture(3553, this.textures.loadTexture("/environment/clouds.png"));
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         final Vec3 cloudColor = this.level.getCloudColor(alpha);
         float r = (float)cloudColor.x;
@@ -877,12 +880,13 @@ public class LevelRenderer implements LevelListener
         }
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glDisable(3042);
-        GL11.glEnable(2884);
+        GL11.glEnable(GL_CULL_FACE);
     }
     
     public boolean updateDirtyChunks(final Mob player, final boolean force) {
-        if (false) {
-            Collections.sort((List<Object>)this.dirtyChunks, new DirtyChunkSorter(player));
+        final boolean slow = false;
+        if (slow) {
+            Collections.sort(this.dirtyChunks, new DirtyChunkSorter(player));
             final int n = this.dirtyChunks.size() - 1;
             for (int size = this.dirtyChunks.size(), i = 0; i < size; ++i) {
                 final Chunk chunk = this.dirtyChunks.get(n - i);
@@ -910,7 +914,7 @@ public class LevelRenderer implements LevelListener
         final int n2 = 2;
         final DirtyChunkSorter c = new DirtyChunkSorter(player);
         final Chunk[] array = new Chunk[n2];
-        List<Object> list = null;
+        List<Chunk> list = null;
         final int size2 = this.dirtyChunks.size();
         int n3 = 0;
         for (int j = 0; j < size2; ++j) {
@@ -933,7 +937,7 @@ public class LevelRenderer implements LevelListener
                 continue;
             }
             if (list == null) {
-                list = new ArrayList<Object>();
+                list = new ArrayList<>();
             }
             ++n3;
             ((ArrayList<Chunk>)list).add(chunk2);
@@ -990,7 +994,7 @@ public class LevelRenderer implements LevelListener
     
     public void renderHit(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float partialTick) {
         final Tesselator instance = Tesselator.instance;
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glEnable(3008);
         GL11.glBlendFunc(770, 1);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, (Mth.sin(System.currentTimeMillis() / 100.0f) * 0.2f + 0.4f) * 0.5f);
@@ -1059,11 +1063,11 @@ public class LevelRenderer implements LevelListener
     
     public void renderHitOutline(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float partialTick) {
         if (mode == 0 && h.type == HitResult_Type.TILE) {
-            GL11.glEnable(3042);
+            GL11.glEnable(GL_BLEND);
             GL11.glBlendFunc(770, 771);
             GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
             GL11.glLineWidth(2.0f);
-            GL11.glDisable(3553);
+            GL11.glDisable(GL_TEXTURE_2D);
             GL11.glDepthMask(false);
             final float n = 0.002f;
             final int tile = this.level.getTile(h.x, h.y, h.z);
@@ -1072,7 +1076,7 @@ public class LevelRenderer implements LevelListener
                 this.render(Tile.tiles[tile].getTileAABB(this.level, h.x, h.y, h.z).grow(n, n, n).cloneMove(-(player.xOld + (player.x - player.xOld) * partialTick), -(player.yOld + (player.y - player.yOld) * partialTick), -(player.zOld + (player.z - player.zOld) * partialTick)));
             }
             GL11.glDepthMask(true);
-            GL11.glEnable(3553);
+            GL11.glEnable(GL_TEXTURE_2D);
             GL11.glDisable(3042);
         }
     }

@@ -17,7 +17,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import java.util.Random;
 import net.minecraft.client.renderer.TileRenderer;
 
-public class ItemRenderer extends EntityRenderer
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
+
+public class ItemRenderer extends EntityRenderer<ItemEntity>
 {
     private TileRenderer tileRenderer;
     private Random random;
@@ -48,7 +51,7 @@ public class ItemRenderer extends EntityRenderer
             n3 = 4;
         }
         GL11.glTranslatef((float)x, (float)y + n, (float)z);
-        GL11.glEnable(32826);
+        GL11.glEnable(GL_RESCALE_NORMAL);
         if (item.id < 256 && TileRenderer.canRender(Tile.tiles[item.id].getRenderShape())) {
             GL11.glRotatef(n2, 0.0f, 1.0f, 0.0f);
             this.bindTexture("/terrain.png");
@@ -136,7 +139,7 @@ public class ItemRenderer extends EntityRenderer
             GL11.glPopMatrix();
         }
         else if (icon >= 0) {
-            GL11.glDisable(2896);
+            GL11.glDisable(GL_LIGHTING);
             if (id < 256) {
                 textures.bind(textures.loadTexture("/terrain.png"));
             }
@@ -151,9 +154,9 @@ public class ItemRenderer extends EntityRenderer
                 GL11.glColor4f(n4, n5, n6, 1.0f);
             }
             this.blit(x, y, icon % 16 * 16, icon / 16 * 16, 16, 16);
-            GL11.glEnable(2896);
+            GL11.glDisable(GL_LIGHTING);
         }
-        GL11.glEnable(2884);
+        GL11.glEnable(GL_CULL_FACE);
     }
     
     public void renderGuiItem(final Font font, final Textures textures, final ItemInstance item, final int x, final int y) {
@@ -169,27 +172,27 @@ public class ItemRenderer extends EntityRenderer
         }
         if (item.count > 1) {
             final String string = "" + item.count;
-            GL11.glDisable(2896);
-            GL11.glDisable(2929);
+            GL11.glDisable(GL_LIGHTING);
+            GL11.glDisable(GL_DEPTH_TEST);
             font.drawShadow(string, x + 19 - 2 - font.width(string), y + 6 + 3, 16777215);
-            GL11.glEnable(2896);
-            GL11.glEnable(2929);
+            GL11.glDisable(GL_LIGHTING);
+            GL11.glEnable(GL_DEPTH_TEST);
         }
         if (item.isDamaged()) {
             final int w = (int)Math.round(13.0 - item.getDamageValue() * 13.0 / item.getMaxDamage());
             final int n = (int)Math.round(255.0 - item.getDamageValue() * 255.0 / item.getMaxDamage());
-            GL11.glDisable(2896);
-            GL11.glDisable(2929);
-            GL11.glDisable(3553);
+            GL11.glDisable(GL_LIGHTING);
+            GL11.glDisable(GL_DEPTH_TEST);
+            GL11.glDisable(GL_TEXTURE_2D);
             final Tesselator instance = Tesselator.instance;
             final int c = 255 - n << 16 | n << 8;
             final int c2 = (255 - n) / 4 << 16 | 0x3F00;
             this.fillRect(instance, x + 2, y + 13, 13, 2, 0);
             this.fillRect(instance, x + 2, y + 13, 12, 1, c2);
             this.fillRect(instance, x + 2, y + 13, w, 1, c);
-            GL11.glEnable(3553);
-            GL11.glEnable(2896);
-            GL11.glEnable(2929);
+            GL11.glEnable(GL_TEXTURE_2D);
+            GL11.glDisable(GL_LIGHTING);
+            GL11.glEnable(GL_DEPTH_TEST);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
     }

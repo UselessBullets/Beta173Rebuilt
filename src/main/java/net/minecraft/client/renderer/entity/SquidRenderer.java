@@ -10,7 +10,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.client.model.Model;
 
-public class SquidRenderer extends MobRenderer
+public class SquidRenderer extends MobRenderer<Squid>
 {
     public SquidRenderer(final Model model, final float shadow) {
         super(model, shadow);

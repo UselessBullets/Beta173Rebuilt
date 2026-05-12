@@ -10,6 +10,8 @@ import java.util.List;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.client.Minecraft;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public abstract class ScrolledSelectionList
 {
     private final Minecraft minecraft;
@@ -186,7 +188,7 @@ public abstract class ScrolledSelectionList
             this.yDrag = -1.0f;
         }
         this.capYPosition();
-        GL11.glDisable(2896);
+        GL11.glDisable(GL_LIGHTING);
         GL11.glDisable(2912);
         final Tesselator instance = Tesselator.instance;
         GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/gui/background.png"));
@@ -213,7 +215,7 @@ public abstract class ScrolledSelectionList
                         final int n11 = this.width / 2 - 110;
                         final int n12 = this.width / 2 + 110;
                         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                        GL11.glDisable(3553);
+                        GL11.glDisable(GL_TEXTURE_2D);
                         instance.begin();
                         instance.color(8421504);
                         instance.vertexUV(n11, y2 + h + 2, 0.0, 0.0, 1.0);
@@ -226,21 +228,21 @@ public abstract class ScrolledSelectionList
                         instance.vertexUV(n12 - 1, y2 - 1, 0.0, 1.0, 0.0);
                         instance.vertexUV(n11 + 1, y2 - 1, 0.0, 0.0, 0.0);
                         instance.end();
-                        GL11.glEnable(3553);
+                        GL11.glEnable(GL_TEXTURE_2D);
                     }
                     this.renderItem(i, n10, y2, h, instance);
                 }
             }
         }
-        GL11.glDisable(2929);
+        GL11.glDisable(GL_DEPTH_TEST);
         final int n13 = 4;
         this.renderHoleBackground(0, this.y0, 255, 255);
         this.renderHoleBackground(this.y1, this.height, 255, 255);
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         GL11.glDisable(3008);
         GL11.glShadeModel(7425);
-        GL11.glDisable(3553);
+        GL11.glDisable(GL_TEXTURE_2D);
         instance.begin();
         instance.color(0, 0);
         instance.vertexUV(this.x0, this.y0 + n13, 0.0, 0.0, 1.0);
@@ -293,7 +295,7 @@ public abstract class ScrolledSelectionList
             instance.end();
         }
         this.renderDecorations(xm, ym);
-        GL11.glEnable(3553);
+        GL11.glEnable(GL_TEXTURE_2D);
         GL11.glShadeModel(7424);
         GL11.glEnable(3008);
         GL11.glDisable(3042);

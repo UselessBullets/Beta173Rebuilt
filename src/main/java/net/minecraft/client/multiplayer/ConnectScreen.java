@@ -7,9 +7,12 @@ package net.minecraft.client.multiplayer;
 import net.minecraft.client.title.TitleScreen;
 import net.minecraft.client.gui.Button;
 import net.minecraft.locale.language.Language;
-import net.minecraft.world.level.Level;
+import net.minecraft.network.packet.PreLoginPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Screen;
+
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 
 public class ConnectScreen extends Screen
 {
@@ -20,7 +23,34 @@ public class ConnectScreen extends Screen
         this.aborted = false;
         System.out.println("Connecting to " + ip + ", " + port);
         minecraft.setLevel(null);
-        new ConnectScreen_Thread(this, minecraft, ip, port).start();
+        new Thread(() -> {
+            try {
+                this.connection = new ClientConnection(minecraft, ip, port);
+                if (this.aborted) {
+                    return;
+                }
+                this.connection.send(new PreLoginPacket(minecraft.user.name));
+            }
+            catch (final UnknownHostException ex) {
+                if (this.aborted) {
+                    return;
+                }
+                minecraft.setScreen(new DisconnectedScreen("connect.failed", "disconnect.genericReason", "Unknown host '" + ip + "'"));
+            }
+            catch (final ConnectException ex2) {
+                if (this.aborted) {
+                    return;
+                }
+                minecraft.setScreen(new DisconnectedScreen("connect.failed", "disconnect.genericReason", ex2.getMessage()));
+            }
+            catch (final Exception ex3) {
+                if (this.aborted) {
+                    return;
+                }
+                ex3.printStackTrace();
+                minecraft.setScreen(new DisconnectedScreen("connect.failed", "disconnect.genericReason", ex3.toString()));
+            }
+        }).start();
     }
     
     @Override

@@ -60,6 +60,6 @@ public class TakeAnimationParticle extends Particle
     
     @Override
     public int getParticleTexture() {
-        return 3;
+        return ParticleEngine.ENTITY_PARTICLE_TEXTURE;
     }
 }

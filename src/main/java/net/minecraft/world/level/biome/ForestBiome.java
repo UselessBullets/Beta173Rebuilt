@@ -9,7 +9,7 @@ import net.minecraft.world.level.levelgen.feature.BasicTree;
 import net.minecraft.world.level.levelgen.feature.BirchFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import java.util.Random;
-import net.minecraft.world.level.MobSpawnerData;
+
 import net.minecraft.world.entity.animal.Wolf;
 
 public class ForestBiome extends Biome

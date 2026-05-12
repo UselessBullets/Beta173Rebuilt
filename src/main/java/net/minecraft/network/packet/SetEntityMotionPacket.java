@@ -6,6 +6,8 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
+
 import net.minecraft.world.entity.Entity;
 
 public class SetEntityMotionPacket extends Packet
@@ -49,7 +51,7 @@ public class SetEntityMotionPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();
         this.xa = dis.readShort();
         this.ya = dis.readShort();
@@ -57,7 +59,7 @@ public class SetEntityMotionPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.id);
         dos.writeShort(this.xa);
         dos.writeShort(this.ya);

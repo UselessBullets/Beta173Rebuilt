@@ -12,15 +12,15 @@ import java.util.Map;
 
 public class TileEntity
 {
-    private static Map idClassMap;
-    private static Map classIdMap;
+    private static Map<String, Class<? extends TileEntity>> idClassMap;
+    private static Map<Class<? extends TileEntity>, String> classIdMap;
     public Level level;
     public int x;
     public int y;
     public int z;
     protected boolean remove;
     
-    private static void setId(final Class clazz, final String id) {
+    private static void setId(final Class<? extends TileEntity> clazz, final String id) {
         if (TileEntity.classIdMap.containsKey(id)) {
             throw new IllegalArgumentException("Duplicate id: " + id);
         }
@@ -51,9 +51,9 @@ public class TileEntity
     public static TileEntity loadStatic(final CompoundTag compoundTag) {
         TileEntity tileEntity = null;
         try {
-            final Class clazz = TileEntity.idClassMap.get(compoundTag.getString("id"));
+            final Class<? extends TileEntity> clazz = TileEntity.idClassMap.get(compoundTag.getString("id"));
             if (clazz != null) {
-                tileEntity = (TileEntity)clazz.newInstance();
+                tileEntity = clazz.newInstance();
             }
         }
         catch (final Exception ex) {
@@ -102,8 +102,8 @@ public class TileEntity
     }
     
     static {
-        TileEntity.idClassMap = new HashMap();
-        TileEntity.classIdMap = new HashMap();
+        TileEntity.idClassMap = new HashMap<>();
+        TileEntity.classIdMap = new HashMap<>();
         setId(FurnaceTileEntity.class, "Furnace");
         setId(ChestTileEntity.class, "Chest");
         setId(RecordPlayerTileEntity.class, "RecordPlayer");

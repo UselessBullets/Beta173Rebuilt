@@ -111,7 +111,7 @@ public class Particle extends Entity
     }
     
     public int getParticleTexture() {
-        return 0;
+        return ParticleEngine.MISC_TEXTURE;
     }
     
     public void addAdditionalSaveData(final CompoundTag compoundTag) {

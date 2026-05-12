@@ -11,12 +11,15 @@ import net.minecraft.client.renderer.Tesselator;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.projectile.FishingHook;
 
-public class FishingHookRenderer extends EntityRenderer
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
+
+public class FishingHookRenderer extends EntityRenderer<FishingHook>
 {
     public void render(final FishingHook entity, final double x, final double y, final double z, final float rot, final float partialTick) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
-        GL11.glEnable(32826);
+        GL11.glEnable(GL_RESCALE_NORMAL);
         GL11.glScalef(0.5f, 0.5f, 0.5f);
         final int n = 1;
         final int n2 = 2;
@@ -67,8 +70,8 @@ public class FishingHookRenderer extends EntityRenderer
             final double n22 = (float)(n13 - n19);
             final double n23 = (float)(n14 - n20);
             final double n24 = (float)(n15 - n21);
-            GL11.glDisable(3553);
-            GL11.glDisable(2896);
+            GL11.glDisable(GL_TEXTURE_2D);
+            GL11.glDisable(GL_LIGHTING);
             instance.begin(3);
             instance.color(0);
             for (int n25 = 16, i = 0; i <= n25; ++i) {
@@ -76,8 +79,8 @@ public class FishingHookRenderer extends EntityRenderer
                 instance.vertex(x + n22 * n26, y + n23 * (n26 * n26 + n26) * 0.5 + 0.25, z + n24 * n26);
             }
             instance.end();
-            GL11.glEnable(2896);
-            GL11.glEnable(3553);
+            GL11.glDisable(GL_LIGHTING);
+            GL11.glEnable(GL_TEXTURE_2D);
         }
     }
 }

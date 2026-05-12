@@ -29,7 +29,7 @@ public class Achievement extends Stat
     }
     
     public Achievement(final int id, final String name, final int x, final int y, final ItemInstance icon, final Achievement requires) {
-        super(5242880 + id, I18n.get("achievement." + name));
+        super(Achievements.ACHIEVEMENT_OFFSET + id, I18n.get("achievement." + name));
         this.icon = icon;
         this.desc = I18n.get("achievement." + name + ".desc");
         this.x = x;

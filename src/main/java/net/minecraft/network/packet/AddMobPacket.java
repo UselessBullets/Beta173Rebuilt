@@ -10,6 +10,8 @@ import util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityIO;
 import net.minecraft.world.entity.Mob;
+
+import java.io.IOException;
 import java.util.List;
 import net.minecraft.world.entity.SynchedEntityData;
 
@@ -40,7 +42,7 @@ public class AddMobPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();
         this.type = dis.readByte();
         this.x = dis.readInt();
@@ -52,7 +54,7 @@ public class AddMobPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.id);
         dos.writeByte(this.type);
         dos.writeInt(this.x);

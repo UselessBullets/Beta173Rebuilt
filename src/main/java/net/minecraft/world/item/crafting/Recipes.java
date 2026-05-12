@@ -17,14 +17,14 @@ import java.util.List;
 public class Recipes
 {
     private static final Recipes instance;
-    private List recipes;
+    private List<Recipe> recipes;
     
     public static final Recipes getInstance() {
         return Recipes.instance;
     }
     
     private Recipes() {
-        this.recipes = new ArrayList();
+        this.recipes = new ArrayList<>();
         new ToolRecipes().addRecipes(this);
         new WeaponRecipes().addRecipes(this);
         new OreRecipes().addRecipes(this);
@@ -89,7 +89,7 @@ public class Recipes
         this.addShapedRecipe(new ItemInstance(Tile.pistonBase, 1), "TTT", "#X#", "#R#", '#', Tile.stoneBrick, 'X', Item.ironIngot, 'R', Item.redStone, 'T', Tile.wood);
         this.addShapedRecipe(new ItemInstance(Tile.pistonStickyBase, 1), "S", "P", 'S', Item.slimeBall, 'P', Tile.pistonBase);
         this.addShapedRecipe(new ItemInstance(Item.bed, 1), "###", "XXX", '#', Tile.cloth, 'X', Tile.wood);
-        Collections.sort((List<Object>)this.recipes, new Recipes_RecipeSorter(this));
+        Collections.sort(this.recipes, new RecipeSorter(this));
         System.out.println(this.recipes.size() + " recipes");
     }
     
@@ -115,7 +115,7 @@ public class Recipes
                 s += str2;
             }
         }
-        final HashMap hashMap = new HashMap();
+        final HashMap<Character, Object> hashMap = new HashMap<>();
         while (i < args.length) {
             final Character c = (Character)args[i];
             Object o = null;
@@ -145,7 +145,7 @@ public class Recipes
     }
     
     void addShapelessRecipe(final ItemInstance result, final Object... args) {
-        final ArrayList ingredients = new ArrayList();
+        final ArrayList<ItemInstance> ingredients = new ArrayList<>();
         for (final Object o : args) {
             if (o instanceof ItemInstance) {
                 ingredients.add(((ItemInstance)o).copy());
@@ -173,11 +173,36 @@ public class Recipes
         return null;
     }
     
-    public List getRecipes() {
+    public List<Recipe> getRecipes() {
         return this.recipes;
     }
     
     static {
         instance = new Recipes();
+    }
+
+    static class RecipeSorter implements Comparator<Recipe>
+    {
+        final /* synthetic */ Recipes recipes;
+
+        RecipeSorter(final Recipes recipes) {
+            this.recipes = recipes;
+        }
+
+        public int compare(final Recipe r0, final Recipe r1) {
+            if (r0 instanceof ShapelessRecipe && r1 instanceof ShapedRecipe) {
+                return 1;
+            }
+            if (r1 instanceof ShapelessRecipe && r0 instanceof ShapedRecipe) {
+                return -1;
+            }
+            if (r1.size() < r0.size()) {
+                return -1;
+            }
+            if (r1.size() > r0.size()) {
+                return 1;
+            }
+            return 0;
+        }
     }
 }

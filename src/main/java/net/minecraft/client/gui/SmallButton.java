@@ -4,11 +4,12 @@
 
 package net.minecraft.client.gui;
 
-import net.minecraft.client.Options_Option;
+import net.minecraft.client.Options;
+import net.minecraft.client.Options.Option;
 
 public class SmallButton extends Button
 {
-    private final Options_Option option;
+    private final Option option;
     
     public SmallButton(final int id, final int x, final int y, final String msg) {
         this(id, x, y, null, msg);
@@ -19,12 +20,12 @@ public class SmallButton extends Button
         this.option = null;
     }
     
-    public SmallButton(final int id, final int x, final int y, final Options_Option item, final String msg) {
+    public SmallButton(final int id, final int x, final int y, final Option item, final String msg) {
         super(id, x, y, 150, 20, msg);
         this.option = item;
     }
     
-    public Options_Option getOption() {
+    public Option getOption() {
         return this.option;
     }
 }

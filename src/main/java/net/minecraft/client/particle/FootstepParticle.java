@@ -10,6 +10,8 @@ import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.world.level.Level;
 import net.minecraft.client.renderer.Textures;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class FootstepParticle extends Particle
 {
     private int life;
@@ -36,14 +38,14 @@ public class FootstepParticle extends Particle
             n2 = 1.0f;
         }
         final float a = n2 * 0.2f;
-        GL11.glDisable(2896);
+        GL11.glDisable(GL_LIGHTING);
         final float n3 = 0.125f;
         final float n4 = (float)(this.x - FootstepParticle.xOff);
         final float n5 = (float)(this.y - FootstepParticle.yOff);
         final float n6 = (float)(this.z - FootstepParticle.zOff);
         final float brightness = this.level.getBrightness(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z));
         this.textures.bind(this.textures.loadTexture("/misc/footprint.png"));
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         t.begin();
         t.color(brightness, brightness, brightness, a);
@@ -53,7 +55,7 @@ public class FootstepParticle extends Particle
         t.vertexUV(n4 - n3, n5, n6 - n3, 0.0, 0.0);
         t.end();
         GL11.glDisable(3042);
-        GL11.glEnable(2896);
+        GL11.glDisable(GL_LIGHTING);
     }
     
     @Override
@@ -66,6 +68,6 @@ public class FootstepParticle extends Particle
     
     @Override
     public int getParticleTexture() {
-        return 3;
+        return ParticleEngine.ENTITY_PARTICLE_TEXTURE;
     }
 }

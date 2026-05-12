@@ -4,9 +4,12 @@
 
 package net.minecraft.network.packet;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.io.DataOutputStream;
 import net.minecraft.world.level.TilePos;
+import net.minecraft.world.level.tile.Tile;
+
 import java.util.HashSet;
 import java.io.DataInputStream;
 import java.util.Set;
@@ -17,16 +20,16 @@ public class ExplodePacket extends Packet
     public double y;
     public double z;
     public float r;
-    public Set toBlow;
+    public Set<TilePos> toBlow;
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.x = dis.readDouble();
         this.y = dis.readDouble();
         this.z = dis.readDouble();
         this.r = dis.readFloat();
         final int int1 = dis.readInt();
-        this.toBlow = new HashSet();
+        this.toBlow = new HashSet<>();
         final int n = (int)this.x;
         final int n2 = (int)this.y;
         final int n3 = (int)this.z;
@@ -36,7 +39,7 @@ public class ExplodePacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeDouble(this.x);
         dos.writeDouble(this.y);
         dos.writeDouble(this.z);

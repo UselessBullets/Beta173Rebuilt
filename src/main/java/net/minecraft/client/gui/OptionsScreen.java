@@ -5,7 +5,7 @@
 package net.minecraft.client.gui;
 
 import net.minecraft.locale.language.Language;
-import net.minecraft.client.Options_Option;
+import net.minecraft.client.Options.Option;
 import net.minecraft.client.Options;
 
 public class OptionsScreen extends Screen
@@ -13,7 +13,7 @@ public class OptionsScreen extends Screen
     private Screen lastScreen;
     protected String title;
     private Options options;
-    private static Options_Option[] OPTIONS;
+    private static Option[] OPTIONS;
     
     public OptionsScreen(final Screen lastScreeen, final Options options) {
         this.title = "Options";
@@ -26,7 +26,7 @@ public class OptionsScreen extends Screen
         final Language instance = Language.getInstance();
         this.title = instance.getElement("options.title");
         int n = 0;
-        for (final Options_Option option : OptionsScreen.OPTIONS) {
+        for (final Option option : OptionsScreen.OPTIONS) {
             if (!option.isProgress()) {
                 this.buttons.add(new SmallButton(option.getId(), this.width / 2 - 155 + n % 2 * 160, this.height / 6 + 24 * (n >> 1), option, this.options.getMessage(option)));
             }
@@ -47,7 +47,7 @@ public class OptionsScreen extends Screen
         }
         if (button.id < 100 && button instanceof SmallButton) {
             this.options.toggle(((SmallButton)button).getOption(), 1);
-            button.msg = this.options.getMessage(Options_Option.getItem(button.id));
+            button.msg = this.options.getMessage(Option.getItem(button.id));
         }
         if (button.id == 101) {
             this.minecraft.options.save();
@@ -71,6 +71,6 @@ public class OptionsScreen extends Screen
     }
     
     static {
-        OptionsScreen.OPTIONS = new Options_Option[] { Options_Option.MUSIC, Options_Option.SOUND, Options_Option.INVERT_MOUSE, Options_Option.SENSITIVITY, Options_Option.DIFFICULTY };
+        OptionsScreen.OPTIONS = new Option[] { Option.MUSIC, Option.SOUND, Option.INVERT_MOUSE, Option.SENSITIVITY, Option.DIFFICULTY };
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Vec3
 {
-    private static List pool;
+    private static List<Vec3> pool;
     private static int poolPointer;
     public double x;
     public double y;

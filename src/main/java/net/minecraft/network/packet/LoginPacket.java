@@ -6,6 +6,7 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
 
 public class LoginPacket extends Packet
 {
@@ -23,7 +24,7 @@ public class LoginPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.clientVersion = dis.readInt();
         this.userName = Packet.readUTF(dis, 16);
         this.seed = dis.readLong();
@@ -31,7 +32,7 @@ public class LoginPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.clientVersion);
         Packet.writeUTF(this.userName, dos);
         dos.writeLong(this.seed);

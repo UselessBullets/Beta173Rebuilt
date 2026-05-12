@@ -15,15 +15,15 @@ import java.util.Random;
 public class SoundRepository
 {
     private Random random;
-    private Map urls;
-    private List all;
+    private Map<String, List<Sound>> urls;
+    private List<Sound> all;
     public int count;
     public boolean trimDigits;
     
     public SoundRepository() {
         this.random = new Random();
-        this.urls = new HashMap();
-        this.all = new ArrayList();
+        this.urls = new HashMap<>();
+        this.all = new ArrayList<>();
         this.count = 0;
         this.trimDigits = true;
     }
@@ -39,7 +39,7 @@ public class SoundRepository
             }
             name = name.replaceAll("/", ".");
             if (!this.urls.containsKey(name)) {
-                this.urls.put(name, new ArrayList());
+                this.urls.put(name, new ArrayList<>());
             }
             final Sound sound = new Sound(name2, file.toURI().toURL());
             this.urls.get(name).add(sound);
@@ -54,11 +54,11 @@ public class SoundRepository
     }
     
     public Sound get(final String name) {
-        final List list = this.urls.get(name);
+        final List<Sound> list = this.urls.get(name);
         if (list == null) {
             return null;
         }
-        return (Sound)list.get(this.random.nextInt(list.size()));
+        return list.get(this.random.nextInt(list.size()));
     }
     
     public Sound any() {

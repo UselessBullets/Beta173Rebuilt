@@ -14,12 +14,12 @@ import net.minecraft.world.level.tile.entity.MobSpawnerTileEntity;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MobSpawnerRenderer extends TileEntityRenderer
+public class MobSpawnerRenderer extends TileEntityRenderer<MobSpawnerTileEntity>
 {
-    private Map models;
+    private Map<String, Entity> models;
     
     public MobSpawnerRenderer() {
-        this.models = new HashMap();
+        this.models = new HashMap<>();
     }
     
     public void render(final MobSpawnerTileEntity entity, final double x, final double y, final double z, final float partialTick) {

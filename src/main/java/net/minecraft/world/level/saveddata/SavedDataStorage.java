@@ -27,19 +27,19 @@ import net.minecraft.world.level.storage.LevelStorage;
 public class SavedDataStorage
 {
     private LevelStorage levelStorage;
-    private Map cache;
-    private List savedDatas;
-    private Map usedAuxIds;
+    private Map<String, SavedData> cache;
+    private List<SavedData> savedDatas;
+    private Map<String, Short> usedAuxIds;
     
     public SavedDataStorage(final LevelStorage levelStorage) {
-        this.cache = new HashMap();
-        this.savedDatas = new ArrayList();
-        this.usedAuxIds = new HashMap();
+        this.cache = new HashMap<>();
+        this.savedDatas = new ArrayList<>();
+        this.usedAuxIds = new HashMap<>();
         this.levelStorage = levelStorage;
         this.loadAuxValues();
     }
     
-    public SavedData get(final Class clazz, final String id) {
+    public SavedData get(final Class<? extends SavedData> clazz, final String id) {
         SavedData savedData = this.cache.get(id);
         if (savedData != null) {
             return savedData;

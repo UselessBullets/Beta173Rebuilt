@@ -10,7 +10,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.client.model.Model;
 
-public class ChickenRenderer extends MobRenderer
+public class ChickenRenderer extends MobRenderer<Chicken>
 {
     public ChickenRenderer(final Model model, final float shadow) {
         super(model, shadow);

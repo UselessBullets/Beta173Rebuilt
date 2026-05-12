@@ -14,9 +14,9 @@ import net.minecraft.world.item.ItemInstance;
 public class ShapelessRecipe implements Recipe
 {
     private final ItemInstance result;
-    private final List ingredients;
+    private final List<ItemInstance> ingredients;
     
-    public ShapelessRecipe(final ItemInstance result, final List ingredients) {
+    public ShapelessRecipe(final ItemInstance result, final List<ItemInstance> ingredients) {
         this.result = result;
         this.ingredients = ingredients;
     }
@@ -26,7 +26,7 @@ public class ShapelessRecipe implements Recipe
     }
     
     public boolean matches(final CraftingContainer craftSlots) {
-        final ArrayList list = new ArrayList(this.ingredients);
+        final ArrayList<ItemInstance> list = new ArrayList<>(this.ingredients);
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
                 final ItemInstance item = craftSlots.getItem(j, i);

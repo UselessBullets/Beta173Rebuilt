@@ -8,12 +8,10 @@ import org.lwjgl.opengl.GLContext;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.Level;
 import net.minecraft.client.particle.WaterDropParticle;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SmokeParticle;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.Lighting;
-import net.minecraft.client.renderer.culling.Culler;
 import net.minecraft.client.renderer.culling.FrustumCuller;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.level.chunk.ChunkCache;
@@ -38,6 +36,8 @@ import java.util.Random;
 import net.minecraft.world.SmoothFloat;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.client.Minecraft;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class GameRenderer
 {
@@ -161,7 +161,7 @@ public class GameRenderer
         final Vec3 add = pos.add(viewVector.x * n, viewVector.y * n, viewVector.z * n);
         this.hovered = null;
         final float n2 = 1.0f;
-        final List entities = this.mc.level.getEntities(this.mc.cameraTargetPlayer, this.mc.cameraTargetPlayer.bb.expand(viewVector.x * n, viewVector.y * n, viewVector.z * n).grow(n2, n2, n2));
+        final List<Entity> entities = this.mc.level.getEntities(this.mc.cameraTargetPlayer, this.mc.cameraTargetPlayer.bb.expand(viewVector.x * n, viewVector.y * n, viewVector.z * n).grow(n2, n2, n2));
         double n3 = 0.0;
         for (int i = 0; i < entities.size(); ++i) {
             final Entity entity = entities.get(i);
@@ -454,8 +454,8 @@ public class GameRenderer
     }
     
     public void renderLevel(final float partialTick, final long until) {
-        GL11.glEnable(2884);
-        GL11.glEnable(2929);
+        GL11.glEnable(GL_CULL_FACE);
+        GL11.glEnable(GL_DEPTH_TEST);
         if (this.mc.cameraTargetPlayer == null) {
             this.mc.cameraTargetPlayer = this.mc.player;
         }
@@ -483,7 +483,7 @@ public class GameRenderer
             GL11.glViewport(0, 0, this.mc.width, this.mc.height);
             this.setupClearColor(partialTick);
             GL11.glClear(16640);
-            GL11.glEnable(2884);
+            GL11.glEnable(GL_CULL_FACE);
             this.setupCamera(partialTick, i);
             Frustum.getFrustum();
             if (this.mc.options.viewDistance < 2) {
@@ -533,7 +533,7 @@ public class GameRenderer
             }
             GL11.glBlendFunc(770, 771);
             this.setupFog(0, partialTick);
-            GL11.glEnable(3042);
+            GL11.glEnable(GL_BLEND);
             GL11.glDisable(2884);
             GL11.glBindTexture(3553, this.mc.textures.loadTexture("/terrain.png"));
             if (this.mc.options.fancyGraphics) {
@@ -562,7 +562,7 @@ public class GameRenderer
                 levelRenderer.render(cameraTargetPlayer, 1, partialTick);
             }
             GL11.glDepthMask(true);
-            GL11.glEnable(2884);
+            GL11.glEnable(GL_CULL_FACE);
             GL11.glDisable(3042);
             if (this.zoom == 1.0 && cameraTargetPlayer instanceof Player && this.mc.hitResult != null && !cameraTargetPlayer.isUnderLiquid(Material.water)) {
                 final Player player2 = (Player)cameraTargetPlayer;
@@ -656,7 +656,7 @@ public class GameRenderer
         final Tesselator instance = Tesselator.instance;
         GL11.glDisable(2884);
         GL11.glNormal3f(0.0f, 1.0f, 0.0f);
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         GL11.glAlphaFunc(516, 0.01f);
         GL11.glBindTexture(3553, this.mc.textures.loadTexture("/environment/snow.png"));
@@ -759,7 +759,7 @@ public class GameRenderer
                 }
             }
         }
-        GL11.glEnable(2884);
+        GL11.glEnable(GL_CULL_FACE);
         GL11.glDisable(3042);
         GL11.glAlphaFunc(516, 0.1f);
     }
@@ -871,7 +871,7 @@ public class GameRenderer
                 GL11.glFogf(2915, 0.0f);
             }
         }
-        GL11.glEnable(2903);
+        GL11.glEnable(GL_COLOR_MATERIAL);
         GL11.glColorMaterial(1028, 4608);
     }
     

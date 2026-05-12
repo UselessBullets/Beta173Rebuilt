@@ -32,8 +32,8 @@ public class DirectoryLevelStorageSource implements LevelStorageSource
         return "Old Format";
     }
     
-    public List getLevelList() {
-        final ArrayList list = new ArrayList();
+    public List<LevelSummary> getLevelList() {
+        final ArrayList<LevelSummary> list = new ArrayList<>();
         for (int i = 0; i < 5; ++i) {
             final String string = "World" + (i + 1);
             final LevelData dataTag = this.getDataTagFor(string);

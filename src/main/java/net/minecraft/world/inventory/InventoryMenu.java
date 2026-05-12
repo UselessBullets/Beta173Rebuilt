@@ -4,12 +4,14 @@
 
 package net.minecraft.world.inventory;
 
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.Recipes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.Container;
 import net.minecraft.world.CraftingContainer;
+import net.minecraft.world.level.tile.Tile;
 
 public class InventoryMenu extends AbstractContainerMenu
 {
@@ -32,8 +34,22 @@ public class InventoryMenu extends AbstractContainerMenu
                 this.addSlot(new Slot(this.craftSlots, j + i * 2, 88 + j * 18, 26 + i * 18));
             }
         }
-        for (int k = 0; k < 4; ++k) {
-            this.addSlot(new ArmorSlot(this, inventory, inventory.getContainerSize() - 1 - k, 8, 8 + k * 18, k));
+        for (int i = 0; i < 4; ++i) {
+            final int slotNum = i;
+            this.addSlot(new Slot(inventory, inventory.getContainerSize() - 1 - slotNum, 8, 8 + slotNum * 18) {
+                @Override
+                public int getMaxStackSize() {
+                    return 1;
+                }
+
+                @Override
+                public boolean mayPlace(final ItemInstance item) {
+                    if (item.getItem() instanceof ArmorItem) {
+                        return ((ArmorItem)item.getItem()).slot == slotNum;
+                    }
+                    return item.getItem().id == Tile.pumpkin.id && slotNum == 0;
+                }
+            });
         }
         for (int l = 0; l < 3; ++l) {
             for (int n = 0; n < 9; ++n) {

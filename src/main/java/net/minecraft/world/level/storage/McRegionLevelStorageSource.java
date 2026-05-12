@@ -5,15 +5,16 @@
 package net.minecraft.world.level.storage;
 
 import java.io.DataOutputStream;
-import java.util.Iterator;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.DataInputStream;
-import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.io.FileInputStream;
 import java.util.Collections;
-import java.io.FilenameFilter;
-import java.io.FileFilter;
+
 import util.ProgressListener;
 import net.minecraft.world.level.LevelData;
 import net.minecraft.world.level.LevelSummary;
@@ -34,8 +35,8 @@ public class McRegionLevelStorageSource extends DirectoryLevelStorageSource
     }
     
     @Override
-    public List getLevelList() {
-        final ArrayList list = new ArrayList();
+    public List<LevelSummary> getLevelList() {
+        final ArrayList<LevelSummary> list = new ArrayList<>();
         for (final File file : this.baseDir.listFiles()) {
             if (file.isDirectory()) {
                 final String name = file.getName();
@@ -72,10 +73,10 @@ public class McRegionLevelStorageSource extends DirectoryLevelStorageSource
     @Override
     public boolean convertLevel(final String levelId, final ProgressListener progress) {
         progress.progressStagePercentage(0);
-        final ArrayList list = new ArrayList();
-        final ArrayList list2 = new ArrayList();
-        final ArrayList list3 = new ArrayList();
-        final ArrayList list4 = new ArrayList();
+        final ArrayList<ChunkFile> list = new ArrayList<>();
+        final ArrayList<File> list2 = new ArrayList<>();
+        final ArrayList<ChunkFile> list3 = new ArrayList<>();
+        final ArrayList<File> list4 = new ArrayList<>();
         final File baseFolder = new File(this.baseDir, levelId);
         final File file = new File(baseFolder, "DIM-1");
         System.out.println("Scanning folders...");
@@ -97,31 +98,31 @@ public class McRegionLevelStorageSource extends DirectoryLevelStorageSource
         return true;
     }
     
-    private void addRegions(final File baseFolder, final ArrayList dest, final ArrayList firstLevelFolders) {
-        final McRegionLevelStorageSource_FolderFilter mcRegionLevelStorageSource_FolderFilter = new McRegionLevelStorageSource_FolderFilter(null);
-        final McRegionLevelStorageSource_ChunkFilter filter = new McRegionLevelStorageSource_ChunkFilter(null);
-        for (final File e : baseFolder.listFiles(mcRegionLevelStorageSource_FolderFilter)) {
+    private void addRegions(final File baseFolder, final ArrayList<ChunkFile> dest, final ArrayList<File> firstLevelFolders) {
+        final FolderFilter folderFilter = new FolderFilter();
+        final ChunkFilter filter = new ChunkFilter();
+        for (final File e : baseFolder.listFiles(folderFilter)) {
             firstLevelFolders.add(e);
-            final File[] listFiles2 = e.listFiles(mcRegionLevelStorageSource_FolderFilter);
+            final File[] listFiles2 = e.listFiles(folderFilter);
             for (int length2 = listFiles2.length, j = 0; j < length2; ++j) {
                 final File[] listFiles3 = listFiles2[j].listFiles(filter);
                 for (int length3 = listFiles3.length, k = 0; k < length3; ++k) {
-                    dest.add(new McRegionLevelStorageSource_ChunkFile(listFiles3[k]));
+                    dest.add(new ChunkFile(listFiles3[k]));
                 }
             }
         }
     }
     
-    private void convertRegions(final File baseFolder, final ArrayList chunkFiles, int currentCount, final int totalCount, final ProgressListener progress) {
-        Collections.sort((List<Comparable>)chunkFiles);
+    private void convertRegions(final File baseFolder, final ArrayList<ChunkFile> chunkFiles, int currentCount, final int totalCount, final ProgressListener progress) {
+        Collections.sort(chunkFiles);
         final byte[] array = new byte[4096];
-        for (final McRegionLevelStorageSource_ChunkFile mcRegionLevelStorageSource_ChunkFile : chunkFiles) {
-            final int x = mcRegionLevelStorageSource_ChunkFile.getX();
-            final int z = mcRegionLevelStorageSource_ChunkFile.getZ();
+        for (final ChunkFile chunkFile : chunkFiles) {
+            final int x = chunkFile.getX();
+            final int z = chunkFile.getZ();
             final RegionFile regionFile = RegionFileCache.getRegionFile(baseFolder, x, z);
             if (!regionFile.hasChunk(x & 0x1F, z & 0x1F)) {
                 try {
-                    final DataInputStream dataInputStream = new DataInputStream(new GZIPInputStream(new FileInputStream(mcRegionLevelStorageSource_ChunkFile.getFile())));
+                    final DataInputStream dataInputStream = new DataInputStream(new GZIPInputStream(new FileInputStream(chunkFile.getFile())));
                     final DataOutputStream chunkDataOutputStream = regionFile.getChunkDataOutputStream(x & 0x1F, z & 0x1F);
                     int read;
                     while ((read = dataInputStream.read(array)) != -1) {
@@ -140,12 +141,85 @@ public class McRegionLevelStorageSource extends DirectoryLevelStorageSource
         RegionFileCache.clear();
     }
     
-    private void eraseFolders(final ArrayList folders, int currentCount, final int totalCount, final ProgressListener progress) {
+    private void eraseFolders(final ArrayList<File> folders, int currentCount, final int totalCount, final ProgressListener progress) {
         for (final File file : folders) {
             DirectoryLevelStorageSource.deleteRecursive(file.listFiles());
             file.delete();
             ++currentCount;
             progress.progressStagePercentage((int)Math.round(100.0 * currentCount / totalCount));
+        }
+    }
+
+    static class ChunkFile implements Comparable<ChunkFile>
+    {
+        private final File file;
+        private final int x;
+        private final int z;
+
+        public ChunkFile(final File file) {
+            this.file = file;
+            final Matcher matcher = ChunkFilter.chunkFilePattern.matcher(file.getName());
+            if (matcher.matches()) {
+                this.x = Integer.parseInt(matcher.group(1), 36);
+                this.z = Integer.parseInt(matcher.group(2), 36);
+            }
+            else {
+                this.x = 0;
+                this.z = 0;
+            }
+        }
+
+        public int compareTo(final ChunkFile rhs) {
+            final int n = this.x >> 5;
+            final int n2 = rhs.x >> 5;
+            if (n == n2) {
+                return (this.z >> 5) - (rhs.z >> 5);
+            }
+            return n - n2;
+        }
+
+        public File getFile() {
+            return this.file;
+        }
+
+        public int getX() {
+            return this.x;
+        }
+
+        public int getZ() {
+            return this.z;
+        }
+    }
+
+    static class ChunkFilter implements FilenameFilter
+    {
+        public static final Pattern chunkFilePattern;
+
+        private ChunkFilter() {
+        }
+
+        public boolean accept(final File file, final String string) {
+            return ChunkFilter.chunkFilePattern.matcher(string).matches();
+        }
+
+        static {
+            chunkFilePattern = Pattern.compile("c\\.(-?[0-9a-z]+)\\.(-?[0-9a-z]+)\\.dat");
+        }
+    }
+
+    static class FolderFilter implements FileFilter
+    {
+        public static final Pattern chunkFolderPattern;
+
+        private FolderFilter() {
+        }
+
+        public boolean accept(final File file) {
+            return file.isDirectory() && FolderFilter.chunkFolderPattern.matcher(file.getName()).matches();
+        }
+
+        static {
+            chunkFolderPattern = Pattern.compile("[0-9a-z]|([0-9a-z][0-9a-z])");
         }
     }
 }

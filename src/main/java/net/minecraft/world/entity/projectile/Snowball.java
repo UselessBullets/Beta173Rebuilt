@@ -164,7 +164,7 @@ public class Snowball extends Entity
         }
         if (!this.level.isClientSide) {
             Entity entity = null;
-            final List entities = this.level.getEntities(this, this.bb.expand(this.xd, this.yd, this.zd).grow(1.0, 1.0, 1.0));
+            final List<Entity> entities = this.level.getEntities(this, this.bb.expand(this.xd, this.yd, this.zd).grow(1.0, 1.0, 1.0));
             double n = 0.0;
             for (int i = 0; i < entities.size(); ++i) {
                 final Entity entity2 = entities.get(i);

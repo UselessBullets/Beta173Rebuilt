@@ -14,7 +14,7 @@ import net.minecraft.world.entity.item.Minecart;
 import net.minecraft.client.model.MinecartModel;
 import net.minecraft.client.model.Model;
 
-public class MinecartRenderer extends EntityRenderer
+public class MinecartRenderer extends EntityRenderer<Minecart>
 {
     protected Model model;
     

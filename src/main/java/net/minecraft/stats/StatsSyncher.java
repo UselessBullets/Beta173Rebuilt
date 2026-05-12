@@ -4,10 +4,9 @@
 
 package net.minecraft.stats;
 
-import java.io.Writer;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.FileWriter;
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import net.minecraft.client.User;
@@ -17,8 +16,8 @@ import java.util.Map;
 public class StatsSyncher
 {
     private volatile boolean busy;
-    private volatile Map serverStats;
-    private volatile Map failedSentStats;
+    private volatile Map<Stat, Integer> serverStats;
+    private volatile Map<Stat, Integer> failedSentStats;
     private StatsCounter statsCounter;
     private File unsentFile;
     private File lastServerFile;
@@ -113,7 +112,7 @@ public class StatsSyncher
         return null;
     }
     
-    private void doSave(final Map stats, final File file, final File tmp, final File old) {
+    private void doSave(final Map<Stat, Integer> stats, final File file, final File tmp, final File old) throws IOException {
         final PrintWriter printWriter = new PrintWriter(new FileWriter(tmp, false));
         try {
             printWriter.print(StatsCounter.saveStatsToString(this.user.name, "local", stats));
@@ -136,16 +135,41 @@ public class StatsSyncher
         }
         this.noSaveIn = 100;
         this.busy = true;
-        new StatsSyncher_GetStatsFromServerThread(this).start();
+        new Thread(() -> {
+            try {
+                if (serverStats != null) {
+                    doSave(serverStats, lastServerFile, lastServerFileTmp, lastServerFileOld);
+                }
+                else if (lastServerFile.exists()) {
+                    serverStats = loadStatsFromDisk(lastServerFile, lastServerFileTmp, lastServerFileOld);
+                }
+            }
+            catch (final Exception ex) {
+                ex.printStackTrace();
+            }
+            finally {
+                busy = false;
+            }
+        }).start();
     }
     
-    public void saveUnsent(final Map stats) {
+    public void saveUnsent(final Map<Stat, Integer> stats) {
         if (this.busy) {
             throw new IllegalStateException("Can't save stats while StatsSyncher is busy!");
         }
         this.noSaveIn = 100;
         this.busy = true;
-        new StatsSyncher_SaveUnsentThread(this, stats).start();
+        new Thread(() -> {
+            try {
+                doSave(stats, unsentFile, unsentFileTmp, unsentFileOld);
+            }
+            catch (final Exception ex) {
+                ex.printStackTrace();
+            }
+            finally {
+                busy = false;
+            }
+        }).start();
     }
     
     public void forceSaveUnsent(final Map stats) {

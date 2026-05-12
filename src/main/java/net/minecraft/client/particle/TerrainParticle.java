@@ -41,7 +41,7 @@ public class TerrainParticle extends Particle
     
     @Override
     public int getParticleTexture() {
-        return 1;
+        return ParticleEngine.TERRAIN_TEXTURE;
     }
     
     @Override

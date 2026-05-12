@@ -11,11 +11,11 @@ import java.util.List;
 
 public class GuiParticles extends GuiComponent
 {
-    private List particles;
+    private List<GuiParticle> particles;
     private Minecraft mc;
     
     public GuiParticles(final Minecraft mc) {
-        this.particles = new ArrayList();
+        this.particles = new ArrayList<>();
         this.mc = mc;
     }
     

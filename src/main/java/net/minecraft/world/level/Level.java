@@ -92,15 +92,15 @@ public class Level implements LevelSource
     
     public Level(final LevelStorage levelStorage, final String name, final Dimension fixedDimension, final long seed) {
         this.instaTick = false;
-        this.lightUpdates = new ArrayList();
-        this.entities = new ArrayList();
-        this.entitiesToRemove = new ArrayList();
-        this.tickNextTickList = new TreeSet();
-        this.tickNextTickSet = new HashSet();
-        this.tileEntityList = new ArrayList();
-        this.pendingTileEntities = new ArrayList();
-        this.players = new ArrayList();
-        this.globalEntities = new ArrayList();
+        this.lightUpdates = new ArrayList<>();
+        this.entities = new ArrayList<>();
+        this.entitiesToRemove = new ArrayList<>();
+        this.tickNextTickList = new TreeSet<>();
+        this.tickNextTickSet = new HashSet<>();
+        this.tileEntityList = new ArrayList<>();
+        this.pendingTileEntities = new ArrayList<>();
+        this.players = new ArrayList<>();
+        this.globalEntities = new ArrayList<>();
         this.cloudColor = 16777215L;
         this.skyDarken = 0;
         this.randValue = new Random().nextInt();
@@ -111,14 +111,14 @@ public class Level implements LevelSource
         this.saveInterval = 40;
         this.random = new Random();
         this.isNew = false;
-        this.listeners = new ArrayList();
-        this.boxes = new ArrayList();
+        this.listeners = new ArrayList<>();
+        this.boxes = new ArrayList<>();
         this.maxRecurse = 0;
         this.spawnEnemies = true;
         this.spawnFriendlies = true;
-        this.chunksToPoll = new HashSet();
+        this.chunksToPoll = new HashSet<>();
         this.delayUntilNextMoodSound = this.random.nextInt(12000);
-        this.es = new ArrayList();
+        this.es = new ArrayList<>();
         this.isClientSide = false;
         this.levelStorage = levelStorage;
         this.levelData = new LevelData(seed, name);
@@ -867,7 +867,7 @@ public class Level implements LevelSource
         }
         if (b || this.hasChunk(floor, floor2)) {
             if (e instanceof Player) {
-                this.players.add(e);
+                this.players.add((Player) e);
                 this.updateSleepingPlayerList();
             }
             this.getChunk(floor, floor2).addEntity(e);
@@ -912,7 +912,7 @@ public class Level implements LevelSource
         this.listeners.remove(listener);
     }
     
-    public List getCubes(final Entity source, final AABB box) {
+    public List<AABB> getCubes(final Entity source, final AABB box) {
         this.boxes.clear();
         final int floor = Mth.floor(box.x0);
         final int floor2 = Mth.floor(box.x1 + 1.0);
@@ -1838,12 +1838,12 @@ public class Level implements LevelSource
         return this.es;
     }
     
-    public List getEntitiesOfClass(final Class baseClass, final AABB bb) {
+    public <T extends Entity> List<T> getEntitiesOfClass(final Class<T> baseClass, final AABB bb) {
         final int floor = Mth.floor((bb.x0 - 2.0) / 16.0);
         final int floor2 = Mth.floor((bb.x1 + 2.0) / 16.0);
         final int floor3 = Mth.floor((bb.z0 - 2.0) / 16.0);
         final int floor4 = Mth.floor((bb.z1 + 2.0) / 16.0);
-        final ArrayList es = new ArrayList();
+        final ArrayList es = new ArrayList<>();
         for (int i = floor; i <= floor2; ++i) {
             for (int j = floor3; j <= floor4; ++j) {
                 if (this.hasChunk(i, j)) {
@@ -1854,7 +1854,7 @@ public class Level implements LevelSource
         return es;
     }
     
-    public List getAllEntities() {
+    public List<Entity> getAllEntities() {
         return this.entities;
     }
     

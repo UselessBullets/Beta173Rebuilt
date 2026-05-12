@@ -8,7 +8,7 @@ import net.minecraft.world.level.levelgen.feature.SpruceFeature;
 import net.minecraft.world.level.levelgen.feature.PineFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import java.util.Random;
-import net.minecraft.world.level.MobSpawnerData;
+
 import net.minecraft.world.entity.animal.Wolf;
 
 public class TaigaBiome extends Biome

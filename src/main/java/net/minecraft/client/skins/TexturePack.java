@@ -4,6 +4,7 @@
 
 package net.minecraft.client.skins;
 
+import java.io.IOException;
 import java.io.InputStream;
 import net.minecraft.client.Minecraft;
 
@@ -20,7 +21,7 @@ public abstract class TexturePack
     public void deselect() {
     }
     
-    public void load(final Minecraft minecraft) {
+    public void load(final Minecraft minecraft) throws IOException {
     }
     
     public void unload(final Minecraft minecraft) {

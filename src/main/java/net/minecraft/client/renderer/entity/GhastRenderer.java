@@ -10,7 +10,7 @@ import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.GhastModel;
 
-public class GhastRenderer extends MobRenderer
+public class GhastRenderer extends MobRenderer<Ghast>
 {
     public GhastRenderer() {
         super(new GhastModel(), 0.5f);

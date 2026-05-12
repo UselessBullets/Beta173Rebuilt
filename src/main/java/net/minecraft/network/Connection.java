@@ -5,7 +5,8 @@
 package net.minecraft.network;
 
 import net.minecraft.network.packet.Packet;
-import java.io.OutputStream;
+
+import java.io.IOException;
 import java.io.BufferedOutputStream;
 import java.net.SocketException;
 import java.util.Collections;
@@ -23,14 +24,19 @@ public class Connection
     public static int readThreads;
     public static int writeThreads;
     private Object writeLock;
+    private static final int MAX_TICKS_WITHOUT_INPUT = 20 * 60;
+    public static final int IPTOS_LOWCOST = 0x2;
+    public static final int IPTOS_RELIABILITY = 0x4;
+    public static final int IPTOS_THROUGHPUT = 0x8;
+    public static final int IPTOS_LOWDELAY = 0x10;
     private Socket socket;
     private final SocketAddress address;
     private DataInputStream dis;
     private DataOutputStream dos;
     private boolean running;
-    private List incoming;
-    private List outgoing;
-    private List outgoing_slow;
+    private List<Packet> incoming;
+    private List<Packet> outgoing;
+    private List<Packet> outgoing_slow;
     private PacketListener packetListener;
     private boolean quitting;
     private Thread writeThread;
@@ -45,12 +51,12 @@ public class Connection
     public int fakeLag;
     private int slowWriteDelay;
     
-    public Connection(final Socket socket, final String id, final PacketListener packetListener) {
+    public Connection(final Socket socket, final String id, final PacketListener packetListener) throws IOException {
         this.writeLock = new Object();
         this.running = true;
-        this.incoming = Collections.synchronizedList(new ArrayList<Object>());
-        this.outgoing = Collections.synchronizedList(new ArrayList<Object>());
-        this.outgoing_slow = Collections.synchronizedList(new ArrayList<Object>());
+        this.incoming = Collections.synchronizedList(new ArrayList<>());
+        this.outgoing = Collections.synchronizedList(new ArrayList<>());
+        this.outgoing_slow = Collections.synchronizedList(new ArrayList<>());
         this.quitting = false;
         this.disconnected = false;
         this.disconnectReason = "";
@@ -63,15 +69,71 @@ public class Connection
         this.packetListener = packetListener;
         try {
             socket.setSoTimeout(30000);
-            socket.setTrafficClass(24);
+            socket.setTrafficClass(IPTOS_THROUGHPUT | IPTOS_LOWDELAY);
         }
         catch (final SocketException ex) {
             System.err.println(ex.getMessage());
         }
         this.dis = new DataInputStream(socket.getInputStream());
         this.dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream(), 5120));
-        this.readThread = new Connection_ReadThread(this, id + " read thread");
-        this.writeThread = new Connection_WriteThread(this, id + " write thread");
+        this.readThread = new Thread(id + " read thread") {
+
+            @Override
+            public void run() {
+                synchronized (threadCounterLock) {
+                    ++readThreads;
+                }
+                try {
+                    while (running && !quitting) {
+                        while (readTick()) {}
+                        try {
+                            Thread.sleep(100L);
+                        }
+                        catch (final InterruptedException ex) {}
+                    }
+                }
+                finally {
+                    synchronized (threadCounterLock) {
+                        --readThreads;
+                    }
+                }
+            }
+        };
+        this.writeThread = new Thread(id + " write thread") {
+
+            @Override
+            public void run() {
+                synchronized (threadCounterLock) {
+                    ++writeThreads;
+                }
+                try {
+                    while (running) {
+                        while (writeTick()) {}
+                        try {
+                            Thread.sleep(100L);
+                        }
+                        catch (final InterruptedException ex) {}
+                        try {
+                            if (dos == null) {
+                                continue;
+                            }
+                            dos.flush();
+                        }
+                        catch (final IOException ex2) {
+                            if (!disconnected) {
+                                handleException(ex2);
+                            }
+                            ex2.printStackTrace();
+                        }
+                    }
+                }
+                finally {
+                    synchronized (threadCounterLock) {
+                        --writeThreads;
+                    }
+                }
+            }
+        };
         this.readThread.start();
         this.writeThread.start();
     }
@@ -146,7 +208,7 @@ public class Connection
                 b = true;
             }
             else {
-                this.close("disconnect.endOfStream", new Object[0]);
+                this.close("disconnect.endOfStream");
             }
         }
         catch (final Exception ex) {
@@ -160,7 +222,7 @@ public class Connection
     
     private void handleException(final Exception ex) {
         ex.printStackTrace();
-        this.close("disconnect.genericReason", "Internal exception: " + ex.toString());
+        this.close("disconnect.genericReason", "Internal exception: " + ex);
     }
     
     public void close(final String reason, final Object... disconnectReasonObjects) {
@@ -170,7 +232,26 @@ public class Connection
         this.disconnected = true;
         this.disconnectReason = reason;
         this.disconnectReasonObjects = disconnectReasonObjects;
-        new Connection_CloseThread(this).start();
+        new Thread(() -> {
+            try {
+                Thread.sleep(5000L);
+                if (readThread.isAlive()) {
+                    try {
+                        readThread.stop();
+                    }
+                    catch (final Throwable t) {}
+                }
+                if (writeThread.isAlive()) {
+                    try {
+                        writeThread.stop();
+                    }
+                    catch (final Throwable t2) {}
+                }
+            }
+            catch (final InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }).start();
         this.running = false;
         try {
             this.dis.close();
@@ -190,12 +271,12 @@ public class Connection
     }
     
     public void tick() {
-        if (this.estimatedRemaining > 1048576) {
-            this.close("disconnect.overflow", new Object[0]);
+        if (this.estimatedRemaining > 1 * 1024 * 1024) {
+            this.close("disconnect.overflow");
         }
         if (this.incoming.isEmpty()) {
-            if (this.noInputTicks++ == 1200) {
-                this.close("disconnect.timeout", new Object[0]);
+            if (this.noInputTicks++ == MAX_TICKS_WITHOUT_INPUT) {
+                this.close("disconnect.timeout");
             }
         }
         else {
@@ -215,7 +296,18 @@ public class Connection
         this.flush();
         this.quitting = true;
         this.readThread.interrupt();
-        new Connection_SendAndQuitThread(this).start();
+        new Thread(() -> {
+            try {
+                Thread.sleep(2000L);
+                if (running) {
+                    writeThread.interrupt();
+                    close("disconnect.closed");
+                }
+            }
+            catch (final Exception ex) {
+                ex.printStackTrace();
+            }
+        }).start();
     }
     
     static {

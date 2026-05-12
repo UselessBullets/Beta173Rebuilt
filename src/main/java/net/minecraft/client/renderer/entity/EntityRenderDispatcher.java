@@ -44,7 +44,6 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.client.model.SheepFurModel;
 import net.minecraft.client.model.SheepModel;
 import net.minecraft.world.entity.animal.Sheep;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.PigModel;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.monster.Spider;
@@ -59,7 +58,7 @@ import java.util.Map;
 
 public class EntityRenderDispatcher
 {
-    private Map renderers;
+    private Map<Class<? extends Entity>, EntityRenderer<? extends Entity>> renderers;
     public static EntityRenderDispatcher instance;
     private Font font;
     public static double xOff;
@@ -77,21 +76,21 @@ public class EntityRenderDispatcher
     public double zPlayer;
     
     private EntityRenderDispatcher() {
-        (this.renderers = new HashMap()).put(Spider.class, new SpiderRenderer());
+        (this.renderers = new HashMap<>()).put(Spider.class, new SpiderRenderer());
         this.renderers.put(Pig.class, new PigRenderer(new PigModel(), new PigModel(0.5f), 0.7f));
         this.renderers.put(Sheep.class, new SheepRenderer(new SheepModel(), new SheepFurModel(), 0.7f));
         this.renderers.put(Cow.class, new CowRenderer(new CowModel(), 0.7f));
         this.renderers.put(Wolf.class, new WolfRenderer(new WolfModel(), 0.5f));
         this.renderers.put(Chicken.class, new ChickenRenderer(new ChickenModel(), 0.3f));
         this.renderers.put(Creeper.class, new CreeperRenderer());
-        this.renderers.put(Skeleton.class, new HumanoidMobRenderer(new SkeletonModel(), 0.5f));
-        this.renderers.put(Zombie.class, new HumanoidMobRenderer(new ZombieModel(), 0.5f));
+        this.renderers.put(Skeleton.class, new HumanoidMobRenderer<>(new SkeletonModel(), 0.5f));
+        this.renderers.put(Zombie.class, new HumanoidMobRenderer<>(new ZombieModel(), 0.5f));
         this.renderers.put(Slime.class, new SlimeRenderer(new SlimeModel(16), new SlimeModel(0), 0.25f));
         this.renderers.put(Player.class, new PlayerRenderer());
         this.renderers.put(Giant.class, new GiantMobRenderer(new ZombieModel(), 0.5f, 6.0f));
         this.renderers.put(Ghast.class, new GhastRenderer());
         this.renderers.put(Squid.class, new SquidRenderer(new SquidModel(), 0.7f));
-        this.renderers.put(Mob.class, new MobRenderer(new HumanoidModel(), 0.5f));
+        this.renderers.put(Mob.class, new MobRenderer<>(new HumanoidModel(), 0.5f));
         this.renderers.put(Entity.class, new DefaultRenderer());
         this.renderers.put(Painting.class, new PaintingRenderer());
         this.renderers.put(Arrow.class, new ArrowRenderer());
@@ -105,22 +104,22 @@ public class EntityRenderDispatcher
         this.renderers.put(Boat.class, new BoatRenderer());
         this.renderers.put(FishingHook.class, new FishingHookRenderer());
         this.renderers.put(LightningBolt.class, new LightningBoltRenderer());
-        final Iterator iterator = this.renderers.values().iterator();
+        final Iterator<EntityRenderer<? extends Entity>> iterator = this.renderers.values().iterator();
         while (iterator.hasNext()) {
-            ((EntityRenderer)iterator.next()).init(this);
+            iterator.next().init(this);
         }
     }
     
-    public EntityRenderer getRenderer(final Class clazz) {
-        EntityRenderer renderer = this.renderers.get(clazz);
+    public <T extends Entity> EntityRenderer<T> getRenderer(final Class<? extends Entity> clazz) {
+        EntityRenderer<? extends Entity> renderer = this.renderers.get(clazz);
         if (renderer == null && clazz != Entity.class) {
-            renderer = this.getRenderer(clazz.getSuperclass());
+            renderer = this.getRenderer((Class<? extends T>) clazz.getSuperclass());
             this.renderers.put(clazz, renderer);
         }
-        return renderer;
+        return (EntityRenderer<T>) renderer;
     }
     
-    public EntityRenderer getRenderer(final Entity entity) {
+    public <T extends Entity> EntityRenderer<T> getRenderer(final Entity entity) {
         return this.getRenderer(entity.getClass());
     }
     
@@ -156,7 +155,7 @@ public class EntityRenderDispatcher
     }
     
     public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float partialTick) {
-        final EntityRenderer renderer = this.getRenderer(entity);
+        final EntityRenderer<Entity> renderer = this.getRenderer(entity);
         if (renderer != null) {
             renderer.render(entity, x, y, z, rot, partialTick);
             renderer.postRender(entity, x, y, z, rot, partialTick);

@@ -29,13 +29,13 @@ import java.util.HashMap;
 public class Textures
 {
     public static boolean MIPMAP;
-    private HashMap idMap;
-    private HashMap pixelsMap;
-    private HashMap loadedImages;
+    private HashMap<String, Integer> idMap;
+    private HashMap<String, int[]> pixelsMap;
+    private HashMap<Integer, BufferedImage> loadedImages;
     private IntBuffer ib;
     private ByteBuffer pixels;
-    private List dynamicTextures;
-    private Map httpTextures;
+    private List<DynamicTexture> dynamicTextures;
+    private Map<String, HttpTexture> httpTextures;
     private Options options;
     private boolean clamp;
     private boolean blur;
@@ -230,7 +230,7 @@ public class Textures
         }
         this.pixels.clear();
         this.pixels.put(src);
-        this.pixels.position().limit(src.length);
+        this.pixels.position(0).limit(src.length);
         GL11.glTexImage2D(3553, 0, 6408, width, height, 0, 6408, 5121, this.pixels);
         if (Textures.MIPMAP) {
             for (int j = 1; j <= 4; ++j) {
@@ -290,7 +290,7 @@ public class Textures
         }
         this.pixels.clear();
         this.pixels.put(src);
-        this.pixels.position().limit(src.length);
+        this.pixels.position(0).limit(src.length);
         GL11.glTexSubImage2D(3553, 0, 0, 0, w, h, 6408, 5121, this.pixels);
     }
     
@@ -360,7 +360,7 @@ public class Textures
             dynamicTexture.tick();
             this.pixels.clear();
             this.pixels.put(dynamicTexture.pixels);
-            this.pixels.position().limit(dynamicTexture.pixels.length);
+            this.pixels.position(0).limit(dynamicTexture.pixels.length);
             dynamicTexture.bindTexture(this);
             for (int j = 0; j < dynamicTexture.replicate; ++j) {
                 for (int k = 0; k < dynamicTexture.replicate; ++k) {
@@ -385,7 +385,7 @@ public class Textures
             if (dynamicTexture2.copyTo > 0) {
                 this.pixels.clear();
                 this.pixels.put(dynamicTexture2.pixels);
-                this.pixels.position().limit(dynamicTexture2.pixels.length);
+                this.pixels.position(0).limit(dynamicTexture2.pixels.length);
                 GL11.glBindTexture(3553, dynamicTexture2.copyTo);
                 GL11.glTexSubImage2D(3553, 0, 0, 0, 16, 16, 6408, 5121, this.pixels);
                 if (Textures.MIPMAP) {
@@ -481,7 +481,7 @@ public class Textures
         }
     }
     
-    private BufferedImage readImage(final InputStream in) {
+    private BufferedImage readImage(final InputStream in) throws IOException {
         final BufferedImage read = ImageIO.read(in);
         in.close();
         return read;

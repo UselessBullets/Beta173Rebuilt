@@ -36,6 +36,9 @@ import net.minecraft.network.packet.SetRidingPacket;
 import net.minecraft.Pos;
 import net.minecraft.network.packet.SetSpawnPositionPacket;
 import net.minecraft.network.packet.SetTimePacket;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.List;
 import net.minecraft.world.entity.EntityIO;
 import net.minecraft.network.packet.AddMobPacket;
@@ -111,7 +114,7 @@ public class ClientConnection extends PacketListener
     public SavedDataStorage savedDataStorage;
     Random random;
     
-    public ClientConnection(final Minecraft minecraft, final String ip, final int port) {
+    public ClientConnection(final Minecraft minecraft, final String ip, final int port) throws IOException {
         this.done = false;
         this.started = false;
         this.savedDataStorage = new SavedDataStorage(null);

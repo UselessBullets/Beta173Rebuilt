@@ -21,18 +21,18 @@ import net.minecraft.world.level.chunk.ChunkSource;
 
 public class ClientChunkCache implements ChunkSource
 {
-    private Set toDrop;
+    private Set<Integer> toDrop;
     private LevelChunk emptyChunk;
     private ChunkSource source;
     private ChunkStorage storage;
-    private Map cache;
-    private List loadedChunkList;
+    private Map<Integer, LevelChunk> cache;
+    private List<LevelChunk> loadedChunkList;
     private Level level;
     
     public ClientChunkCache(final Level level, final ChunkStorage storage, final ChunkSource source) {
-        this.toDrop = new HashSet();
-        this.cache = new HashMap();
-        this.loadedChunkList = new ArrayList();
+        this.toDrop = new HashSet<>();
+        this.cache = new HashMap<>();
+        this.loadedChunkList = new ArrayList<>();
         this.emptyChunk = new EmptyLevelChunk(level, new byte[32768], 0, 0);
         this.level = level;
         this.storage = storage;

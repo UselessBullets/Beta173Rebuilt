@@ -17,7 +17,9 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.TileRenderer;
 import net.minecraft.client.model.Model;
 
-public abstract class EntityRenderer
+import static org.lwjgl.opengl.GL11.*;
+
+public abstract class EntityRenderer<T extends Entity>
 {
     protected EntityRenderDispatcher entityRenderDispatcher;
     private Model m;
@@ -32,7 +34,7 @@ public abstract class EntityRenderer
         this.shadowStrength = 1.0f;
     }
     
-    public abstract void render(final Entity entity, final double x, final double y, final double z, final float rot, final float partialTick);
+    public abstract void render(final T entity, final double x, final double y, final double z, final float rot, final float partialTick);
     
     protected void bindTexture(final String resourceName) {
         final Textures textures = this.entityRenderDispatcher.textures;
@@ -50,7 +52,7 @@ public abstract class EntityRenderer
     }
     
     private void renderFlame(final Entity e, final double x, final double y, final double z, final float partialTick) {
-        GL11.glDisable(2896);
+        GL11.glDisable(GL_LIGHTING);
         final int tex = Tile.fire.tex;
         final int n = (tex & 0xF) << 4;
         final int n2 = tex & 0xF0;
@@ -108,11 +110,11 @@ public abstract class EntityRenderer
         }
         instance.end();
         GL11.glPopMatrix();
-        GL11.glEnable(2896);
+        GL11.glDisable(GL_LIGHTING);
     }
     
     private void renderShadow(final Entity e, final double x, final double y, final double z, final float pow, final float partialTick) {
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         final Textures textures = this.entityRenderDispatcher.textures;
         textures.bind(textures.loadTexture("%clamp%/misc/shadow.png"));
@@ -182,7 +184,7 @@ public abstract class EntityRenderer
     }
     
     public static void render(final AABB bb, final double xo, final double yo, final double zo) {
-        GL11.glDisable(3553);
+        GL11.glDisable(GL_TEXTURE_2D);
         final Tesselator instance = Tesselator.instance;
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         instance.begin();
@@ -219,7 +221,7 @@ public abstract class EntityRenderer
         instance.vertex(bb.x1, bb.y0, bb.z1);
         instance.offset(0.0, 0.0, 0.0);
         instance.end();
-        GL11.glEnable(3553);
+        GL11.glEnable(GL_TEXTURE_2D);
     }
     
     public static void renderFlat(final AABB bb) {

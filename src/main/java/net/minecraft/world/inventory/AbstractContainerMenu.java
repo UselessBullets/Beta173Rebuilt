@@ -15,20 +15,20 @@ import java.util.List;
 
 public abstract class AbstractContainerMenu
 {
-    public List lastSlots;
-    public List slots;
+    public List<ItemInstance> lastSlots;
+    public List<Slot> slots;
     public int containerId;
     private short changeUid;
-    protected List containerListeners;
-    private Set unSynchedPlayers;
+    protected List<ContainerListener> containerListeners;
+    private Set<Player> unSynchedPlayers;
     
     public AbstractContainerMenu() {
-        this.lastSlots = new ArrayList();
-        this.slots = new ArrayList();
+        this.lastSlots = new ArrayList<>();
+        this.slots = new ArrayList<>();
         this.containerId = 0;
         this.changeUid = 0;
-        this.containerListeners = new ArrayList();
-        this.unSynchedPlayers = new HashSet();
+        this.containerListeners = new ArrayList<>();
+        this.unSynchedPlayers = new HashSet<>();
     }
     
     protected void addSlot(final Slot slot) {

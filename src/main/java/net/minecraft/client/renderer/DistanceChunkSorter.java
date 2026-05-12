@@ -7,7 +7,7 @@ package net.minecraft.client.renderer;
 import net.minecraft.world.entity.Entity;
 import java.util.Comparator;
 
-public class DistanceChunkSorter implements Comparator
+public class DistanceChunkSorter implements Comparator<Chunk>
 {
     private double ix;
     private double iy;

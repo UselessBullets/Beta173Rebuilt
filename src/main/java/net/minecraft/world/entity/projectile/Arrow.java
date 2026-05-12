@@ -11,7 +11,6 @@ import java.util.List;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.level.LevelSource;
 import net.minecraft.world.level.tile.Tile;
 import util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -169,7 +168,7 @@ public class Arrow extends Entity
                 b = Vec3.newTemp(clip.pos.x, clip.pos.y, clip.pos.z);
             }
             Entity entity = null;
-            final List entities = this.level.getEntities(this, this.bb.expand(this.xd, this.yd, this.zd).grow(1.0, 1.0, 1.0));
+            final List<Entity> entities = this.level.getEntities(this, this.bb.expand(this.xd, this.yd, this.zd).grow(1.0, 1.0, 1.0));
             double n3 = 0.0;
             for (int i = 0; i < entities.size(); ++i) {
                 final Entity entity2 = entities.get(i);

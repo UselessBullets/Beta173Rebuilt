@@ -4,6 +4,7 @@
 
 package net.minecraft.client.skins;
 
+import java.io.IOException;
 import java.util.zip.ZipEntry;
 import org.lwjgl.opengl.GL11;
 import java.io.InputStream;
@@ -37,7 +38,7 @@ public class FileTexturePack extends TexturePack
     }
     
     @Override
-    public void load(final Minecraft minecraft) {
+    public void load(final Minecraft minecraft) throws IOException {
         ZipFile zipFile = null;
         InputStream inputStream = null;
         try {

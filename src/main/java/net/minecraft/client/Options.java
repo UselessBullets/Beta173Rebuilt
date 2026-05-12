@@ -4,10 +4,8 @@
 
 package net.minecraft.client;
 
-import java.io.Writer;
 import java.io.PrintWriter;
 import java.io.FileWriter;
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import net.minecraft.locale.language.I18n;
@@ -148,86 +146,86 @@ public class Options
         this.save();
     }
     
-    public void set(final Options_Option option, final float sensitivity) {
-        if (option == Options_Option.MUSIC) {
+    public void set(final Option option, final float sensitivity) {
+        if (option == Option.MUSIC) {
             this.music = sensitivity;
             this.minecraft.soundEngine.updateOptions();
         }
-        if (option == Options_Option.SOUND) {
+        if (option == Option.SOUND) {
             this.sound = sensitivity;
             this.minecraft.soundEngine.updateOptions();
         }
-        if (option == Options_Option.SENSITIVITY) {
+        if (option == Option.SENSITIVITY) {
             this.sensitivity = sensitivity;
         }
     }
     
-    public void toggle(final Options_Option option, final int n) {
-        if (option == Options_Option.INVERT_MOUSE) {
+    public void toggle(final Option option, final int n) {
+        if (option == Option.INVERT_MOUSE) {
             this.invertYMouse = !this.invertYMouse;
         }
-        if (option == Options_Option.RENDER_DISTANCE) {
+        if (option == Option.RENDER_DISTANCE) {
             this.viewDistance = (this.viewDistance + n & 0x3);
         }
-        if (option == Options_Option.GUI_SCALE) {
+        if (option == Option.GUI_SCALE) {
             this.guiScale = (this.guiScale + n & 0x3);
         }
-        if (option == Options_Option.VIEW_BOBBING) {
+        if (option == Option.VIEW_BOBBING) {
             this.bobView = !this.bobView;
         }
-        if (option == Options_Option.ADVANCED_OPENGL) {
+        if (option == Option.ADVANCED_OPENGL) {
             this.advancedOpengl = !this.advancedOpengl;
             this.minecraft.levelRenderer.allChanged();
         }
-        if (option == Options_Option.ANAGLYPH) {
+        if (option == Option.ANAGLYPH) {
             this.anaglyph3d = !this.anaglyph3d;
             this.minecraft.textures.reloadAll();
         }
-        if (option == Options_Option.FRAMERATE_LIMIT) {
+        if (option == Option.FRAMERATE_LIMIT) {
             this.limitFramerate = (this.limitFramerate + n + 3) % 3;
         }
-        if (option == Options_Option.DIFFICULTY) {
+        if (option == Option.DIFFICULTY) {
             this.difficulty = (this.difficulty + n & 0x3);
         }
-        if (option == Options_Option.GRAPHICS) {
+        if (option == Option.GRAPHICS) {
             this.fancyGraphics = !this.fancyGraphics;
             this.minecraft.levelRenderer.allChanged();
         }
-        if (option == Options_Option.AMBIENT_OCCLUSION) {
+        if (option == Option.AMBIENT_OCCLUSION) {
             this.ambientOcclusion = !this.ambientOcclusion;
             this.minecraft.levelRenderer.allChanged();
         }
         this.save();
     }
     
-    public float getProgressValue(final Options_Option option) {
-        if (option == Options_Option.MUSIC) {
+    public float getProgressValue(final Option option) {
+        if (option == Option.MUSIC) {
             return this.music;
         }
-        if (option == Options_Option.SOUND) {
+        if (option == Option.SOUND) {
             return this.sound;
         }
-        if (option == Options_Option.SENSITIVITY) {
+        if (option == Option.SENSITIVITY) {
             return this.sensitivity;
         }
         return 0.0f;
     }
     
-    public boolean getBooleanValue(final Options_Option option) {
-        switch (Options_GetBooleanValueSwitchObfuscation.arr[option.ordinal()]) {
-            case 1: {
+    public boolean getBooleanValue(final Option option) {
+        switch (option) {
+            case INVERT_MOUSE: {
                 return this.invertYMouse;
             }
-            case 2: {
+            case VIEW_BOBBING: {
                 return this.bobView;
             }
-            case 3: {
+            case ANAGLYPH: {
                 return this.anaglyph3d;
             }
-            case 4: {
+            case ADVANCED_OPENGL: {
                 return this.advancedOpengl;
             }
-            case 5: {
+            case AMBIENT_OCCLUSION: {
                 return this.ambientOcclusion;
             }
             default: {
@@ -236,12 +234,12 @@ public class Options
         }
     }
     
-    public String getMessage(final Options_Option option) {
+    public String getMessage(final Option option) {
         final Language instance = Language.getInstance();
         final String string = instance.getElement(option.getCaptionId()) + ": ";
         if (option.isProgress()) {
             final float progressValue = this.getProgressValue(option);
-            if (option == Options_Option.SENSITIVITY) {
+            if (option == Option.SENSITIVITY) {
                 if (progressValue == 0.0f) {
                     return string + instance.getElement("options.sensitivity.min");
                 }
@@ -264,19 +262,19 @@ public class Options
             return string + instance.getElement("options.off");
         }
         else {
-            if (option == Options_Option.RENDER_DISTANCE) {
+            if (option == Option.RENDER_DISTANCE) {
                 return string + instance.getElement(Options.RENDER_DISTANCE_NAMES[this.viewDistance]);
             }
-            if (option == Options_Option.DIFFICULTY) {
+            if (option == Option.DIFFICULTY) {
                 return string + instance.getElement(Options.DIFFICULTY_NAMES[this.difficulty]);
             }
-            if (option == Options_Option.GUI_SCALE) {
+            if (option == Option.GUI_SCALE) {
                 return string + instance.getElement(Options.GUI_SCALE[this.guiScale]);
             }
-            if (option == Options_Option.FRAMERATE_LIMIT) {
+            if (option == Option.FRAMERATE_LIMIT) {
                 return string + I18n.get(Options.FRAMERATE_LIMITS[this.limitFramerate]);
             }
-            if (option != Options_Option.GRAPHICS) {
+            if (option != Option.GRAPHICS) {
                 return string;
             }
             if (this.fancyGraphics) {
@@ -403,5 +401,56 @@ public class Options
         DIFFICULTY_NAMES = new String[] { "options.difficulty.peaceful", "options.difficulty.easy", "options.difficulty.normal", "options.difficulty.hard" };
         GUI_SCALE = new String[] { "options.guiScale.auto", "options.guiScale.small", "options.guiScale.normal", "options.guiScale.large" };
         FRAMERATE_LIMITS = new String[] { "performance.max", "performance.balanced", "performance.powersaver" };
+    }
+    public enum Option
+    {
+        MUSIC("options.music", true, false),
+        SOUND("options.sound", true, false),
+        INVERT_MOUSE("options.invertMouse", false, true),
+        SENSITIVITY("options.sensitivity", true, false),
+        RENDER_DISTANCE("options.renderDistance", false, false),
+        VIEW_BOBBING("options.viewBobbing", false, true),
+        ANAGLYPH("options.anaglyph", false, true),
+        ADVANCED_OPENGL("options.advancedOpengl", false, true),
+        FRAMERATE_LIMIT("options.framerateLimit", false, false),
+        DIFFICULTY("options.difficulty", false, false),
+        GRAPHICS("options.graphics", false, false),
+        AMBIENT_OCCLUSION("options.ao", false, true),
+        GUI_SCALE("options.guiScale", false, false);
+
+        private final boolean isProgress;
+        private final boolean isBoolean;
+        private final String captionId;
+
+        public static Option getItem(final int n) {
+            for (final Option option : values()) {
+                if (option.getId() == n) {
+                    return option;
+                }
+            }
+            return null;
+        }
+
+        private Option(final String captionId, final boolean isProgress, final boolean isBoolean) {
+            this.captionId = captionId;
+            this.isProgress = isProgress;
+            this.isBoolean = isBoolean;
+        }
+
+        public boolean isProgress() {
+            return this.isProgress;
+        }
+
+        public boolean isBoolean() {
+            return this.isBoolean;
+        }
+
+        public int getId() {
+            return this.ordinal();
+        }
+
+        public String getCaptionId() {
+            return this.captionId;
+        }
     }
 }

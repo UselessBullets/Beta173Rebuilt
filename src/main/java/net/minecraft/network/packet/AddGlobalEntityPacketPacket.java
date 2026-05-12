@@ -6,6 +6,8 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
+import java.io.IOException;
+
 import net.minecraft.world.entity.global.LightningBolt;
 import util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -32,7 +34,7 @@ public class AddGlobalEntityPacketPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();
         this.type = dis.readByte();
         this.x = dis.readInt();
@@ -41,7 +43,7 @@ public class AddGlobalEntityPacketPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.id);
         dos.writeByte(this.type);
         dos.writeInt(this.x);

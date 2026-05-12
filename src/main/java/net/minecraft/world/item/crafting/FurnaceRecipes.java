@@ -13,14 +13,14 @@ import java.util.Map;
 public class FurnaceRecipes
 {
     private static final FurnaceRecipes instance;
-    private Map recipes;
+    private Map<Integer, ItemInstance> recipes;
     
     public static final FurnaceRecipes getInstance() {
         return FurnaceRecipes.instance;
     }
     
     private FurnaceRecipes() {
-        this.recipes = new HashMap();
+        this.recipes = new HashMap<>();
         this.addFurnaceRecipe(Tile.ironOre.id, new ItemInstance(Item.ironIngot));
         this.addFurnaceRecipe(Tile.goldOre.id, new ItemInstance(Item.goldIngot));
         this.addFurnaceRecipe(Tile.emeraldOre.id, new ItemInstance(Item.emerald));
@@ -41,7 +41,7 @@ public class FurnaceRecipes
         return this.recipes.get(itemId);
     }
     
-    public Map getRecipies() {
+    public Map<Integer, ItemInstance> getRecipies() {
         return this.recipes;
     }
     

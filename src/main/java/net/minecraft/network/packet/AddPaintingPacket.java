@@ -7,6 +7,8 @@ package net.minecraft.network.packet;
 import java.io.DataOutputStream;
 import net.minecraft.world.entity.Painting_Motive;
 import java.io.DataInputStream;
+import java.io.IOException;
+
 import net.minecraft.world.entity.Painting;
 
 public class AddPaintingPacket extends Packet
@@ -31,7 +33,7 @@ public class AddPaintingPacket extends Packet
     }
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();
         this.motive = Packet.readUTF(dis, Painting_Motive.MAX_MOTIVE_NAME_LENGTH);
         this.x = dis.readInt();
@@ -41,7 +43,7 @@ public class AddPaintingPacket extends Packet
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.id);
         Packet.writeUTF(this.motive, dos);
         dos.writeInt(this.x);

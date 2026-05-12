@@ -4,14 +4,13 @@
 
 package net.minecraft.client.multiplayer;
 
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.DisconnectPacket;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelListener;
 import net.minecraft.Pos;
 import java.util.HashSet;
-import net.minecraft.world.level.storage.LevelStorage;
+
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.storage.MockedLevelStorage;
 import java.util.Set;
@@ -21,19 +20,20 @@ import net.minecraft.world.level.Level;
 
 public class MultiPlayerLevel extends Level
 {
-    private LinkedList updatesToReset;
+    private static final int TICKS_BEFORE_RESET = 80;
+    private LinkedList<ResetInfo> updatesToReset;
     private ClientConnection connection;
     private MultiPlayerChunkCache chunkCache;
     private IntHashMap entitiesById;
-    private Set forced;
-    private Set reEntries;
+    private Set<Entity> forced;
+    private Set<Entity> reEntries;
     
     public MultiPlayerLevel(final ClientConnection connection, final long seed, final int dimension) {
         super(new MockedLevelStorage(), "MpServer", Dimension.getNew(dimension), seed);
-        this.updatesToReset = new LinkedList();
+        this.updatesToReset = new LinkedList<>();
         this.entitiesById = new IntHashMap();
-        this.forced = new HashSet();
-        this.reEntries = new HashSet();
+        this.forced = new HashSet<>();
+        this.reEntries = new HashSet<>();
         this.connection = connection;
         this.setSpawnPos(new Pos(8, 64, 8));
         this.savedDataStorage = connection.savedDataStorage;
@@ -57,8 +57,8 @@ public class MultiPlayerLevel extends Level
         }
         this.connection.tick();
         for (int j = 0; j < this.updatesToReset.size(); ++j) {
-            final MultiPlayerLevel_ResetInfo multiPlayerLevel_ResetInfo2;
-            final MultiPlayerLevel_ResetInfo multiPlayerLevel_ResetInfo = multiPlayerLevel_ResetInfo2 = this.updatesToReset.get(j);
+            final ResetInfo multiPlayerLevel_ResetInfo2;
+            final ResetInfo multiPlayerLevel_ResetInfo = multiPlayerLevel_ResetInfo2 = this.updatesToReset.get(j);
             if (--multiPlayerLevel_ResetInfo2.ticks == 0) {
                 super.setTileAndDataNoUpdate(multiPlayerLevel_ResetInfo.x, multiPlayerLevel_ResetInfo.y, multiPlayerLevel_ResetInfo.z, multiPlayerLevel_ResetInfo.tile, multiPlayerLevel_ResetInfo.data);
                 super.sendTileUpdated(multiPlayerLevel_ResetInfo.x, multiPlayerLevel_ResetInfo.y, multiPlayerLevel_ResetInfo.z);
@@ -69,7 +69,7 @@ public class MultiPlayerLevel extends Level
     
     public void clearResetRegion(final int x0, final int y0, final int z0, final int x1, final int y1, final int z1) {
         for (int i = 0; i < this.updatesToReset.size(); ++i) {
-            final MultiPlayerLevel_ResetInfo multiPlayerLevel_ResetInfo = this.updatesToReset.get(i);
+            final ResetInfo multiPlayerLevel_ResetInfo = this.updatesToReset.get(i);
             if (multiPlayerLevel_ResetInfo.x >= x0 && multiPlayerLevel_ResetInfo.y >= y0 && multiPlayerLevel_ResetInfo.z >= z0 && multiPlayerLevel_ResetInfo.x <= x1 && multiPlayerLevel_ResetInfo.y <= y1 && multiPlayerLevel_ResetInfo.z <= z1) {
                 this.updatesToReset.remove(i--);
             }
@@ -174,7 +174,7 @@ public class MultiPlayerLevel extends Level
         final int tile = this.getTile(x, y, z);
         final int data2 = this.getData(x, y, z);
         if (super.setDataNoUpdate(x, y, z, data)) {
-            this.updatesToReset.add(new MultiPlayerLevel_ResetInfo(this, x, y, z, tile, data2));
+            this.updatesToReset.add(new ResetInfo(this, x, y, z, tile, data2));
             return true;
         }
         return false;
@@ -185,7 +185,7 @@ public class MultiPlayerLevel extends Level
         final int tile2 = this.getTile(x, y, z);
         final int data2 = this.getData(x, y, z);
         if (super.setTileAndDataNoUpdate(x, y, z, tile, data)) {
-            this.updatesToReset.add(new MultiPlayerLevel_ResetInfo(this, x, y, z, tile2, data2));
+            this.updatesToReset.add(new ResetInfo(this, x, y, z, tile2, data2));
             return true;
         }
         return false;
@@ -196,7 +196,7 @@ public class MultiPlayerLevel extends Level
         final int tile2 = this.getTile(x, y, z);
         final int data = this.getData(x, y, z);
         if (super.setTileNoUpdate(x, y, z, tile)) {
-            this.updatesToReset.add(new MultiPlayerLevel_ResetInfo(this, x, y, z, tile2, data));
+            this.updatesToReset.add(new ResetInfo(this, x, y, z, tile2, data));
             return true;
         }
         return false;
@@ -249,6 +249,27 @@ public class MultiPlayerLevel extends Level
         }
         if (this.thunderLevel > 1.0f) {
             this.thunderLevel = 1.0f;
+        }
+    }
+
+    static class ResetInfo
+    {
+        int x;
+        int y;
+        int z;
+        int ticks;
+        int tile;
+        int data;
+        final /* synthetic */ MultiPlayerLevel mpLevel;
+
+        public ResetInfo(final MultiPlayerLevel mpLevel, final int x, final int y, final int z, final int tile, final int data) {
+            this.mpLevel = mpLevel;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.ticks = TICKS_BEFORE_RESET;
+            this.tile = tile;
+            this.data = data;
         }
     }
 }

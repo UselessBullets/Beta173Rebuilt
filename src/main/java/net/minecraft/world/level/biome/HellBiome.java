@@ -5,7 +5,6 @@
 package net.minecraft.world.level.biome;
 
 import net.minecraft.world.entity.monster.PigZombie;
-import net.minecraft.world.level.MobSpawnerData;
 import net.minecraft.world.entity.monster.Ghast;
 
 public class HellBiome extends Biome

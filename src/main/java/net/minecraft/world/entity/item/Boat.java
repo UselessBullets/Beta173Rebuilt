@@ -269,7 +269,7 @@ public class Boat extends Entity
             n9 = -20.0;
         }
         this.setRot(this.yRot += (float)n9, this.xRot);
-        final List entities = this.level.getEntities(this, this.bb.grow(0.20000000298023224, 0.0, 0.20000000298023224));
+        final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.20000000298023224, 0.0, 0.20000000298023224));
         if (entities != null && entities.size() > 0) {
             for (int l = 0; l < entities.size(); ++l) {
                 final Entity entity = entities.get(l);

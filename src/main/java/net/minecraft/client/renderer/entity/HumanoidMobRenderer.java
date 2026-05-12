@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.HumanoidModel;
 
-public class HumanoidMobRenderer extends MobRenderer
+public class HumanoidMobRenderer<T extends Mob> extends MobRenderer<T>
 {
     protected HumanoidModel humanoidModel;
     

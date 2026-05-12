@@ -9,13 +9,10 @@ import java.awt.event.MouseEvent;
 import java.awt.Rectangle;
 import net.minecraft.Pos;
 import java.awt.geom.AffineTransform;
-import java.awt.image.ImageObserver;
-import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferStrategy;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
-import net.minecraft.world.level.storage.LevelStorage;
 import java.util.Random;
 import net.minecraft.world.level.storage.DirectoryLevelStorage;
 import java.awt.Color;
@@ -54,13 +51,13 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     public File getWorkingDirectory(final String applicationName) {
         final String property = System.getProperty("user.home", ".");
         File obj = null;
-        switch (IsomPreview_GetOsValueSwitchObfuscation.arr[getPlatform().ordinal()]) {
-            case 1:
-            case 2: {
+        switch (getPlatform()) {
+            case linux:
+            case solaris: {
                 obj = new File(property, '.' + applicationName + '/');
                 break;
             }
-            case 3: {
+            case windows: {
                 final String getenv = System.getenv("APPDATA");
                 if (getenv != null) {
                     obj = new File(getenv, "." + applicationName + '/');
@@ -69,7 +66,7 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
                 obj = new File(property, '.' + applicationName + '/');
                 break;
             }
-            case 4: {
+            case macos: {
                 obj = new File(property, "Library/Application Support/" + applicationName);
                 break;
             }
@@ -84,27 +81,27 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
         return obj;
     }
     
-    private static IsomPreview_OS getPlatform() {
+    private static OS getPlatform() {
         final String lowerCase = System.getProperty("os.name").toLowerCase();
         if (lowerCase.contains("win")) {
-            return IsomPreview_OS.windows;
+            return OS.windows;
         }
         if (lowerCase.contains("mac")) {
-            return IsomPreview_OS.macos;
+            return OS.macos;
         }
         if (lowerCase.contains("solaris")) {
-            return IsomPreview_OS.solaris;
+            return OS.solaris;
         }
         if (lowerCase.contains("sunos")) {
-            return IsomPreview_OS.solaris;
+            return OS.solaris;
         }
         if (lowerCase.contains("linux")) {
-            return IsomPreview_OS.linux;
+            return OS.linux;
         }
         if (lowerCase.contains("unix")) {
-            return IsomPreview_OS.linux;
+            return OS.linux;
         }
-        return IsomPreview_OS.unknown;
+        return OS.unknown;
     }
     
     public IsomPreview() {
@@ -157,7 +154,21 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     }
     
     public void start() {
-        new IsomPreview_RenderThread(this).start();
+        IsomPreview bd = this;
+        new Thread() {
+            final /* synthetic */ IsomPreview a = bd;
+
+            @Override
+            public void run() {
+                while (this.a.running) {
+                    this.a.render();
+                    try {
+                        Thread.sleep(1L);
+                    }
+                    catch (final Exception ex) {}
+                }
+            }
+        }.start();
         for (int i = 0; i < 8; ++i) {
             new Thread(this).start();
         }
@@ -371,5 +382,14 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     }
     
     public void keyTyped(final KeyEvent ke) {
+    }
+
+    enum OS
+    {
+        linux,
+        solaris,
+        windows,
+        macos,
+        unknown;
     }
 }

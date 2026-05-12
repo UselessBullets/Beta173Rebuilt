@@ -13,7 +13,7 @@ import java.util.List;
 public class NotGateTile extends TorchTile
 {
     private boolean on;
-    private static List recentToggles;
+    private static List<Toggle> recentToggles;
     
     @Override
     public int getTexture(final int face, final int data) {
@@ -25,11 +25,11 @@ public class NotGateTile extends TorchTile
     
     private boolean isToggledTooFrequently(final Level level, final int x, final int y, final int z, final boolean add) {
         if (add) {
-            NotGateTile.recentToggles.add(new NotGateTile_Toggle(x, y, z, level.getTime()));
+            NotGateTile.recentToggles.add(new Toggle(x, y, z, level.getTime()));
         }
         int n = 0;
         for (int i = 0; i < NotGateTile.recentToggles.size(); ++i) {
-            final NotGateTile_Toggle notGateTile_Toggle = NotGateTile.recentToggles.get(i);
+            final Toggle notGateTile_Toggle = NotGateTile.recentToggles.get(i);
             if (notGateTile_Toggle.x == x && notGateTile_Toggle.y == y && notGateTile_Toggle.z == z && ++n >= 8) {
                 return true;
             }
@@ -162,6 +162,21 @@ public class NotGateTile extends TorchTile
     }
     
     static {
-        NotGateTile.recentToggles = new ArrayList();
+        NotGateTile.recentToggles = new ArrayList<>();
+    }
+
+    static class Toggle
+    {
+        int x;
+        int y;
+        int z;
+        long when;
+
+        public Toggle(final int x, final int y, final int z, final long when) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.when = when;
+        }
     }
 }

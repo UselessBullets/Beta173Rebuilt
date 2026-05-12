@@ -20,16 +20,16 @@ public class MapItemSavedData extends SavedData
     public byte scale;
     public byte[] colors;
     public int step;
-    public List carriedBy;
-    private Map carriedByPlayers;
-    public List decorations;
+    public List<HoldingPlayer> carriedBy;
+    private Map<Player, HoldingPlayer> carriedByPlayers;
+    public List<MapDecoration> decorations;
     
     public MapItemSavedData(final String id) {
         super(id);
         this.colors = new byte[16384];
-        this.carriedBy = new ArrayList();
-        this.carriedByPlayers = new HashMap();
-        this.decorations = new ArrayList();
+        this.carriedBy = new ArrayList<>();
+        this.carriedByPlayers = new HashMap<>();
+        this.decorations = new ArrayList<>();
     }
     
     @Override
@@ -81,13 +81,13 @@ public class MapItemSavedData extends SavedData
     
     public void tickCarriedBy(final Player player, final ItemInstance item) {
         if (!this.carriedByPlayers.containsKey(player)) {
-            final MapItemSavedData_HoldingPlayer mapItemSavedData_HoldingPlayer = new MapItemSavedData_HoldingPlayer(this, player);
+            final HoldingPlayer mapItemSavedData_HoldingPlayer = new HoldingPlayer(this, player);
             this.carriedByPlayers.put(player, mapItemSavedData_HoldingPlayer);
             this.carriedBy.add(mapItemSavedData_HoldingPlayer);
         }
         this.decorations.clear();
         for (int i = 0; i < this.carriedBy.size(); ++i) {
-            final MapItemSavedData_HoldingPlayer mapItemSavedData_HoldingPlayer2 = this.carriedBy.get(i);
+            final HoldingPlayer mapItemSavedData_HoldingPlayer2 = this.carriedBy.get(i);
             if (mapItemSavedData_HoldingPlayer2.player.removed || !mapItemSavedData_HoldingPlayer2.player.inventory.contains(item)) {
                 this.carriedByPlayers.remove(mapItemSavedData_HoldingPlayer2.player);
                 this.carriedBy.remove(mapItemSavedData_HoldingPlayer2);
@@ -107,7 +107,7 @@ public class MapItemSavedData extends SavedData
                         rot = (byte)(n5 * n5 * 34187121 + n5 * 121 >> 15 & 0xF);
                     }
                     if (mapItemSavedData_HoldingPlayer2.player.dimension == this.dimension) {
-                        this.decorations.add(new MapItemSavedData_MapDecoration(this, img, x, y, rot));
+                        this.decorations.add(new MapDecoration(this, img, x, y, rot));
                     }
                 }
             }
@@ -117,7 +117,7 @@ public class MapItemSavedData extends SavedData
     public void setDirty(final int x, final int y0, final int y1) {
         super.setDirty();
         for (int i = 0; i < this.carriedBy.size(); ++i) {
-            final MapItemSavedData_HoldingPlayer mapItemSavedData_HoldingPlayer = this.carriedBy.get(i);
+            final HoldingPlayer mapItemSavedData_HoldingPlayer = this.carriedBy.get(i);
             if (mapItemSavedData_HoldingPlayer.rowsDirtyMin[x] < 0 || mapItemSavedData_HoldingPlayer.rowsDirtyMin[x] > y0) {
                 mapItemSavedData_HoldingPlayer.rowsDirtyMin[x] = y0;
             }
@@ -139,7 +139,47 @@ public class MapItemSavedData extends SavedData
         else if (data[0] == 1) {
             this.decorations.clear();
             for (int j = 0; j < (data.length - 1) / 3; ++j) {
-                this.decorations.add(new MapItemSavedData_MapDecoration(this, (byte)(data[j * 3 + 1] % 16), data[j * 3 + 2], data[j * 3 + 3], (byte)(data[j * 3 + 1] / 16)));
+                this.decorations.add(new MapDecoration(this, (byte)(data[j * 3 + 1] % 16), data[j * 3 + 2], data[j * 3 + 3], (byte)(data[j * 3 + 1] / 16)));
+            }
+        }
+    }
+
+    public static class MapDecoration
+    {
+        public byte imgIndex;
+        public byte x;
+        public byte y;
+        public byte rot;
+        final /* synthetic */ MapItemSavedData data;
+
+        public MapDecoration(final MapItemSavedData data, final byte img, final byte x, final byte y, final byte rot) {
+            this.data = data;
+            this.imgIndex = img;
+            this.x = x;
+            this.y = y;
+            this.rot = rot;
+        }
+    }
+
+    public static class HoldingPlayer
+    {
+        public final Player player;
+        public int[] rowsDirtyMin;
+        public int[] rowsDirtyMax;
+        private int tick;
+        private int sendPosTick;
+        final /* synthetic */ MapItemSavedData data;
+
+        public HoldingPlayer(final MapItemSavedData data, final Player player) {
+            this.data = data;
+            this.rowsDirtyMin = new int[128];
+            this.rowsDirtyMax = new int[128];
+            this.tick = 0;
+            this.sendPosTick = 0;
+            this.player = player;
+            for (int i = 0; i < this.rowsDirtyMin.length; ++i) {
+                this.rowsDirtyMin[i] = 0;
+                this.rowsDirtyMax[i] = 127;
             }
         }
     }

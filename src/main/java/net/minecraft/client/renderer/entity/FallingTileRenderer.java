@@ -12,7 +12,9 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.item.FallingTile;
 import net.minecraft.client.renderer.TileRenderer;
 
-public class FallingTileRenderer extends EntityRenderer
+import static org.lwjgl.opengl.GL11.*;
+
+public class FallingTileRenderer extends EntityRenderer<FallingTile>
 {
     private TileRenderer tileRenderer;
     
@@ -27,9 +29,9 @@ public class FallingTileRenderer extends EntityRenderer
         this.bindTexture("/terrain.png");
         final Tile tt = Tile.tiles[entity.tile];
         final Level level = entity.getLevel();
-        GL11.glDisable(2896);
+        GL11.glDisable(GL_LIGHTING);
         this.tileRenderer.renderBlock(tt, level, Mth.floor(entity.x), Mth.floor(entity.y), Mth.floor(entity.z));
-        GL11.glEnable(2896);
+        GL11.glDisable(GL_LIGHTING);
         GL11.glPopMatrix();
     }
 }

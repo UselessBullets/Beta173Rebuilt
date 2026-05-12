@@ -4,17 +4,17 @@
 
 package net.minecraft.client.gui;
 
+import net.minecraft.client.Options.Option;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options_Option;
 
 public class SlideButton extends Button
 {
     public float value;
     public boolean sliding;
-    private Options_Option option;
+    private Option option;
     
-    public SlideButton(final int id, final int x, final int y, final Options_Option option, final String msg, final float value) {
+    public SlideButton(final int id, final int x, final int y, final Option option, final String msg, final float value) {
         super(id, x, y, 150, 20, msg);
         this.value = 1.0f;
         this.sliding = false;

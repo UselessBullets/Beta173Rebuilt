@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class TileEntityRenderDispatcher
 {
-    private Map renderers;
+    private Map<Class<? extends TileEntity>, TileEntityRenderer<? extends TileEntity>> renderers;
     public static TileEntityRenderDispatcher instance;
     private Font font;
     public static double xOff;
@@ -35,29 +35,29 @@ public class TileEntityRenderDispatcher
     public double zPlayer;
     
     private TileEntityRenderDispatcher() {
-        (this.renderers = new HashMap()).put(SignTileEntity.class, new SignRenderer());
+        (this.renderers = new HashMap<>()).put(SignTileEntity.class, new SignRenderer());
         this.renderers.put(MobSpawnerTileEntity.class, new MobSpawnerRenderer());
         this.renderers.put(PistonPieceEntity.class, new PistonPieceRenderer());
-        final Iterator iterator = this.renderers.values().iterator();
+        final Iterator<TileEntityRenderer<? extends TileEntity>> iterator = this.renderers.values().iterator();
         while (iterator.hasNext()) {
-            ((TileEntityRenderer)iterator.next()).bindTexture(this);
+            iterator.next().bindTexture(this);
         }
     }
     
-    public TileEntityRenderer getRenderer(final Class e) {
-        TileEntityRenderer renderer = this.renderers.get(e);
+    public <T extends TileEntity> TileEntityRenderer<T> getRenderer(final Class<? extends TileEntity> e) {
+        TileEntityRenderer<? extends TileEntity> renderer = this.renderers.get(e);
         if (renderer == null && e != TileEntity.class) {
-            renderer = this.getRenderer(e.getSuperclass());
+            renderer = this.getRenderer((Class<? extends TileEntity>) e.getSuperclass());
             this.renderers.put(e, renderer);
         }
-        return renderer;
+        return (TileEntityRenderer<T>) renderer;
     }
     
     public boolean hasRenderer(final TileEntity e) {
         return this.getRenderer(e) != null;
     }
     
-    public TileEntityRenderer getRenderer(final TileEntity e) {
+    public <T extends TileEntity> TileEntityRenderer<T> getRenderer(final TileEntity e) {
         if (e == null) {
             return null;
         }
@@ -87,7 +87,7 @@ public class TileEntityRenderDispatcher
     }
     
     public void render(final TileEntity e, final double x, final double y, final double z, final float partialTick) {
-        final TileEntityRenderer renderer = this.getRenderer(e);
+        final TileEntityRenderer<TileEntity> renderer = this.getRenderer(e);
         if (renderer != null) {
             renderer.render(e, x, y, z, partialTick);
         }
@@ -95,7 +95,7 @@ public class TileEntityRenderDispatcher
     
     public void setLevel(final Level level) {
         this.level = level;
-        for (final TileEntityRenderer tileEntityRenderer : this.renderers.values()) {
+        for (final TileEntityRenderer<? extends TileEntity> tileEntityRenderer : this.renderers.values()) {
             if (tileEntityRenderer != null) {
                 tileEntityRenderer.onNewLevel(level);
             }

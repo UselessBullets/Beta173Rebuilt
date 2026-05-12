@@ -8,7 +8,9 @@ import net.minecraft.client.renderer.Tesselator;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Entity;
 
-public class ItemSpriteRenderer extends EntityRenderer
+import static org.lwjgl.opengl.GL12.*;
+
+public class ItemSpriteRenderer extends EntityRenderer<Entity>
 {
     private int icon;
     
@@ -20,7 +22,7 @@ public class ItemSpriteRenderer extends EntityRenderer
     public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float partialTick) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
-        GL11.glEnable(32826);
+        GL11.glEnable(GL_RESCALE_NORMAL);
         GL11.glScalef(0.5f, 0.5f, 0.5f);
         this.bindTexture("/gui/items.png");
         final Tesselator instance = Tesselator.instance;

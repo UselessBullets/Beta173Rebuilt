@@ -10,7 +10,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import com.mojang.nbt.ListTag;
 import com.mojang.nbt.FloatTag;
 import com.mojang.nbt.DoubleTag;
-import com.mojang.nbt.Tag;
 import com.mojang.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.player.Player;
@@ -947,7 +946,7 @@ public abstract class Entity
     public void lerpTo(final double x, double y, final double z, final float yRot, final float xRot, final int steps) {
         this.setPos(x, y, z);
         this.setRot(yRot, xRot);
-        final List cubes = this.level.getCubes(this, this.bb.shrink(0.03125, 0.0, 0.03125));
+        final List<AABB> cubes = this.level.getCubes(this, this.bb.shrink(0.03125, 0.0, 0.03125));
         if (cubes.size() > 0) {
             double y2 = 0.0;
             for (int i = 0; i < cubes.size(); ++i) {

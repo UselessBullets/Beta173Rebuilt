@@ -13,10 +13,10 @@ import java.util.Map;
 public class AchievementMap
 {
     public static AchievementMap instance;
-    private Map statGuidMap;
+    private Map<Integer, String> statGuidMap;
     
     private AchievementMap() {
-        this.statGuidMap = new HashMap();
+        this.statGuidMap = new HashMap<>();
         try {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(AchievementMap.class.getResourceAsStream("/achievement/map.txt")));
             String line;

@@ -4,19 +4,17 @@
 
 package net.minecraft.client;
 
+import net.minecraft.client.Options.Option;
 import net.minecraft.client.multiplayer.MultiplayerLocalPlayer;
 import net.minecraft.client.multiplayer.ClientConnection;
-import java.awt.event.WindowListener;
-import java.awt.LayoutManager;
+
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import net.minecraft.Pos;
 import net.minecraft.client.player.KeyboardInput;
-import util.ProgressListener;
 import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.client.gui.ChatScreen;
 import net.minecraft.client.gui.inventory.InventoryScreen;
 import net.minecraft.client.gui.InBedChatScreen;
@@ -49,7 +47,6 @@ import net.minecraft.client.renderer.ptexture.WaterSideTexture;
 import net.minecraft.client.renderer.ptexture.ClockTexture;
 import net.minecraft.client.renderer.ptexture.CompassTexture;
 import net.minecraft.client.renderer.ptexture.PortalTexture;
-import net.minecraft.client.renderer.ptexture.DynamicTexture;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Controllers;
 import org.lwjgl.input.Mouse;
@@ -89,6 +86,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.level.Level;
 import net.minecraft.client.gamemode.GameMode;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public abstract class Minecraft implements Runnable
 {
@@ -184,7 +183,23 @@ public abstract class Minecraft implements Runnable
         this.orgHeight = height;
         this.fullscreen = fullscreen;
         this.minecraftApplet = minecraftApplet;
-        new Minecraft_TimerHackThread(this, "Timer hack thread");
+        new Thread("Timer hack thread") {
+
+            {
+                this.setDaemon(true);
+                this.start();
+            }
+
+            @Override
+            public void run() {
+                while (Minecraft.this.running) {
+                    try {
+                        Thread.sleep(2147483647L);
+                    }
+                    catch (final InterruptedException ex) {}
+                }
+            }
+        };
         this.parent = parent;
         this.width = width;
         this.height = height;
@@ -267,11 +282,11 @@ public abstract class Minecraft implements Runnable
             ex3.printStackTrace();
         }
         this.checkGlError("Pre startup");
-        GL11.glEnable(3553);
+        GL11.glEnable(GL_TEXTURE_2D);
         GL11.glShadeModel(7425);
         GL11.glClearDepth(1.0);
-        GL11.glEnable(2929);
-        GL11.glDepthFunc(515);
+        GL11.glEnable(GL_DEPTH_TEST);
+        GL11.glDepthFunc(GL_LEQUAL);
         GL11.glEnable(3008);
         GL11.glAlphaFunc(516, 0.1f);
         GL11.glCullFace(1029);
@@ -319,8 +334,8 @@ public abstract class Minecraft implements Runnable
         GL11.glViewport(0, 0, this.width, this.height);
         GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         final Tesselator instance = Tesselator.instance;
-        GL11.glDisable(2896);
-        GL11.glEnable(3553);
+        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_TEXTURE_2D);
         GL11.glDisable(2912);
         GL11.glBindTexture(3553, this.textures.loadTexture("/title/mojang.png"));
         instance.begin();
@@ -335,7 +350,7 @@ public abstract class Minecraft implements Runnable
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         instance.color(16777215);
         this.blit((screenSizeCalculator.getWidth() - w) / 2, (screenSizeCalculator.getHeight() - h) / 2, 0, 0, w, h);
-        GL11.glDisable(2896);
+        GL11.glDisable(GL_LIGHTING);
         GL11.glDisable(2912);
         GL11.glEnable(3008);
         GL11.glAlphaFunc(516, 0.1f);
@@ -394,27 +409,27 @@ public abstract class Minecraft implements Runnable
         return obj;
     }
     
-    private static Minecraft_OS getPlatform() {
+    private static OS getPlatform() {
         final String lowerCase = System.getProperty("os.name").toLowerCase();
         if (lowerCase.contains("win")) {
-            return Minecraft_OS.windows;
+            return OS.windows;
         }
         if (lowerCase.contains("mac")) {
-            return Minecraft_OS.macos;
+            return OS.macos;
         }
         if (lowerCase.contains("solaris")) {
-            return Minecraft_OS.solaris;
+            return OS.solaris;
         }
         if (lowerCase.contains("sunos")) {
-            return Minecraft_OS.solaris;
+            return OS.solaris;
         }
         if (lowerCase.contains("linux")) {
-            return Minecraft_OS.linux;
+            return OS.linux;
         }
         if (lowerCase.contains("unix")) {
-            return Minecraft_OS.linux;
+            return OS.linux;
         }
-        return Minecraft_OS.unknown;
+        return OS.unknown;
     }
     
     public LevelStorageSource getLevelSource() {
@@ -543,7 +558,7 @@ public abstract class Minecraft implements Runnable
                     this.checkGlError("Pre render");
                     TileRenderer.fancy = this.options.fancyGraphics;
                     this.soundEngine.update(this.player, this.timer.partialTick);
-                    GL11.glEnable(3553);
+                    GL11.glEnable(GL_TEXTURE_2D);
                     if (this.level != null) {
                         this.level.updateLights();
                     }
@@ -669,7 +684,7 @@ public abstract class Minecraft implements Runnable
         GL11.glLoadIdentity();
         GL11.glTranslatef(0.0f, 0.0f, -2000.0f);
         GL11.glLineWidth(1.0f);
-        GL11.glDisable(3553);
+        GL11.glDisable(GL_TEXTURE_2D);
         final Tesselator instance = Tesselator.instance;
         instance.begin(7);
         final int n2 = (int)(n / 200000L);
@@ -716,7 +731,7 @@ public abstract class Minecraft implements Runnable
             instance.vertex(j + 0.5f, this.height - (n8 - n9) + 0.5f, 0.0);
         }
         instance.end();
-        GL11.glEnable(3553);
+        GL11.glEnable(GL_TEXTURE_2D);
     }
     
     public void stop() {
@@ -1045,7 +1060,7 @@ public abstract class Minecraft implements Runnable
                         if (Keyboard.getEventKey() != this.options.keyFog.key) {
                             continue;
                         }
-                        this.options.toggle(Options_Option.RENDER_DISTANCE, (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54)) ? -1 : 1);
+                        this.options.toggle(Option.RENDER_DISTANCE, (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54)) ? -1 : 1);
                     }
                 }
             }
@@ -1378,22 +1393,29 @@ public abstract class Minecraft implements Runnable
         canvas.setPreferredSize(new java.awt.Dimension(854, 480));
         frame.pack();
         frame.setLocationRelativeTo(null);
-        final Minecraft_Minecraft minecraft_Minecraft = new Minecraft_Minecraft(frame, canvas, null, 854, 480, fullscreen, frame);
-        final Thread thread = new Thread(minecraft_Minecraft, "Minecraft main thread");
+        final Minecraft minecraft = new Minecraft(frame, canvas, null, 854, 480, fullscreen) {
+            @Override
+            public void onCrash(final CrashReport crashReport) {
+                frame.removeAll();
+                frame.add(new CrashInfoPanel(crashReport), "Center");
+                frame.validate();
+            }
+        };
+        final Thread thread = new Thread(minecraft, "Minecraft main thread");
         thread.setPriority(10);
-        minecraft_Minecraft.serverDomain = "www.minecraft.net";
+        minecraft.serverDomain = "www.minecraft.net";
         if (name != null && sessionId != null) {
-            minecraft_Minecraft.user = new User(name, sessionId);
+            minecraft.user = new User(name, sessionId);
         }
         else {
-            minecraft_Minecraft.user = new User("Player" + System.currentTimeMillis() % 1000L, "");
+            minecraft.user = new User("Player" + System.currentTimeMillis() % 1000L, "");
         }
         if (url != null) {
             final String[] split = url.split(":");
-            minecraft_Minecraft.connectTo(split[0], Integer.parseInt(split[1]));
+            minecraft.connectTo(split[0], Integer.parseInt(split[1]));
         }
         frame.setVisible(true);
-        frame.addWindowListener(new Minecraft_WindowAdapter(minecraft_Minecraft, thread));
+        frame.addWindowListener(new Minecraft_WindowAdapter(minecraft, thread));
         thread.start();
     }
     
@@ -1444,5 +1466,14 @@ public abstract class Minecraft implements Runnable
         Minecraft.frameTimePos = 0;
         Minecraft.warezTime = 0L;
         Minecraft.workDir = null;
+    }
+
+    public enum OS
+    {
+        linux,
+        solaris,
+        windows,
+        macos,
+        unknown;
     }
 }

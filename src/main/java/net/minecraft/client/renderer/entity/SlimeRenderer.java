@@ -9,7 +9,9 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.client.model.Model;
 
-public class SlimeRenderer extends MobRenderer
+import static org.lwjgl.opengl.GL11.*;
+
+public class SlimeRenderer extends MobRenderer<Slime>
 {
     private Model slimeArmor;
     
@@ -22,7 +24,7 @@ public class SlimeRenderer extends MobRenderer
         if (layer == 0) {
             this.setArmor(this.slimeArmor);
             GL11.glEnable(2977);
-            GL11.glEnable(3042);
+            GL11.glEnable(GL_BLEND);
             GL11.glBlendFunc(770, 771);
             return true;
         }

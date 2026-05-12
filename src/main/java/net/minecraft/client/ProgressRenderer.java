@@ -10,6 +10,8 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.gui.ScreenSizeCalculator;
 import util.ProgressListener;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class ProgressRenderer implements ProgressListener
 {
     private String status;
@@ -108,7 +110,7 @@ public class ProgressRenderer implements ProgressListener
                 final int n3 = 2;
                 final int n4 = width / 2 - n2 / 2;
                 final int n5 = height / 2 + 16;
-                GL11.glDisable(3553);
+                GL11.glDisable(GL_TEXTURE_2D);
                 instance.begin();
                 instance.color(8421504);
                 instance.vertex(n4, n5, 0.0);
@@ -121,7 +123,7 @@ public class ProgressRenderer implements ProgressListener
                 instance.vertex(n4 + i, n5 + n3, 0.0);
                 instance.vertex(n4 + i, n5, 0.0);
                 instance.end();
-                GL11.glEnable(3553);
+                GL11.glEnable(GL_TEXTURE_2D);
             }
             this.minecraft.font.drawShadow(this.title, (width - this.minecraft.font.width(this.title)) / 2, height / 2 - 4 - 16, 16777215);
             this.minecraft.font.drawShadow(this.status, (width - this.minecraft.font.width(this.status)) / 2, height / 2 - 4 + 8, 16777215);

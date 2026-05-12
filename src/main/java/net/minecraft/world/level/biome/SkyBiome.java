@@ -4,7 +4,6 @@
 
 package net.minecraft.world.level.biome;
 
-import net.minecraft.world.level.MobSpawnerData;
 import net.minecraft.world.entity.animal.Chicken;
 
 public class SkyBiome extends Biome

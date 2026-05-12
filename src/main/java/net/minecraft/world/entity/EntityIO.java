@@ -33,12 +33,12 @@ import java.util.Map;
 
 public class EntityIO
 {
-    private static Map idClassMap;
-    private static Map classIdMap;
-    private static Map numClassMap;
-    private static Map classNumMap;
+    private static Map<String, Class<? extends Entity>> idClassMap;
+    private static Map<Class<? extends Entity>, String> classIdMap;
+    private static Map<Integer, Class<? extends Entity>> numClassMap;
+    private static Map<Class<? extends Entity>, Integer> classNumMap;
     
-    private static void setId(final Class clazz, final String id, final int idNum) {
+    private static void setId(final Class<? extends Entity> clazz, final String id, final int idNum) {
         EntityIO.idClassMap.put(id, clazz);
         EntityIO.classIdMap.put(clazz, id);
         EntityIO.numClassMap.put(idNum, clazz);
@@ -48,9 +48,9 @@ public class EntityIO
     public static Entity newEntity(final String id, final Level level) {
         Entity entity = null;
         try {
-            final Class clazz = EntityIO.idClassMap.get(id);
+            final Class<? extends Entity> clazz = EntityIO.idClassMap.get(id);
             if (clazz != null) {
-                entity = (Entity)clazz.getConstructor(Level.class).newInstance(level);
+                entity = clazz.getConstructor(Level.class).newInstance(level);
             }
         }
         catch (final Exception ex) {
@@ -62,9 +62,9 @@ public class EntityIO
     public static Entity loadStatic(final CompoundTag tag, final Level level) {
         Entity entity = null;
         try {
-            final Class clazz = EntityIO.idClassMap.get(tag.getString("id"));
+            final Class<? extends Entity> clazz = EntityIO.idClassMap.get(tag.getString("id"));
             if (clazz != null) {
-                entity = (Entity)clazz.getConstructor(Level.class).newInstance(level);
+                entity = clazz.getConstructor(Level.class).newInstance(level);
             }
         }
         catch (final Exception ex) {
@@ -82,9 +82,9 @@ public class EntityIO
     public static Entity newById(final int id, final Level level) {
         Entity entity = null;
         try {
-            final Class clazz = EntityIO.numClassMap.get(id);
+            final Class<? extends Entity> clazz = EntityIO.numClassMap.get(id);
             if (clazz != null) {
-                entity = (Entity)clazz.getConstructor(Level.class).newInstance(level);
+                entity = clazz.getConstructor(Level.class).newInstance(level);
             }
         }
         catch (final Exception ex) {
@@ -105,10 +105,10 @@ public class EntityIO
     }
     
     static {
-        EntityIO.idClassMap = new HashMap();
-        EntityIO.classIdMap = new HashMap();
-        EntityIO.numClassMap = new HashMap();
-        EntityIO.classNumMap = new HashMap();
+        EntityIO.idClassMap = new HashMap<>();
+        EntityIO.classIdMap = new HashMap<>();
+        EntityIO.numClassMap = new HashMap<>();
+        EntityIO.classNumMap = new HashMap<>();
         setId(Arrow.class, "Arrow", 10);
         setId(Snowball.class, "Snowball", 11);
         setId(ItemEntity.class, "Item", 1);

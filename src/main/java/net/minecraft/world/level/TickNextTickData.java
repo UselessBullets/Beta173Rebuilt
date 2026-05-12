@@ -4,7 +4,7 @@
 
 package net.minecraft.world.level;
 
-public class TickNextTickData implements Comparable
+public class TickNextTickData implements Comparable<TickNextTickData>
 {
     private static long C;
     public int x;

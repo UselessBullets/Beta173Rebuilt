@@ -4,6 +4,7 @@
 
 package net.minecraft.client.renderer;
 
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -19,6 +20,9 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.client.Minimap;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.client.Minecraft;
+
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
 
 public class ItemInHandRenderer
 {
@@ -62,7 +66,7 @@ public class ItemInHandRenderer
             final float n5 = 1.0f;
             final float n6 = 0.0f;
             final float n7 = 0.3f;
-            GL11.glEnable(32826);
+            GL11.glEnable(GL_RESCALE_NORMAL);
             GL11.glTranslatef(-n6, -n7, 0.0f);
             final float n8 = 1.5f;
             GL11.glScalef(n8, n8, n8);
@@ -171,7 +175,7 @@ public class ItemInHandRenderer
             GL11.glTranslatef(0.0f, 0.0f * n3 - (1.0f - n) * 1.2f - n5 * 0.5f + 0.04f, -0.9f * n3);
             GL11.glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(n5 * -85.0f, 0.0f, 0.0f, 1.0f);
-            GL11.glEnable(32826);
+            GL11.glEnable(GL_RESCALE_NORMAL);
             GL11.glBindTexture(3553, this.mc.textures.loadHttpTexture(this.mc.player.customTextureUrl, this.mc.player.getTexture()));
             for (int i = 0; i < 2; ++i) {
                 final int n6 = i * 2 - 1;
@@ -181,7 +185,8 @@ public class ItemInHandRenderer
                 GL11.glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
                 GL11.glRotatef(59.0f, 0.0f, 0.0f, 1.0f);
                 GL11.glRotatef((float)(-65 * n6), 0.0f, 1.0f, 0.0f);
-                final PlayerRenderer playerRenderer = (PlayerRenderer)EntityRenderDispatcher.instance.getRenderer(this.mc.player);
+                final EntityRenderer<Player> er = EntityRenderDispatcher.instance.getRenderer(this.mc.player);
+                final PlayerRenderer playerRenderer = (PlayerRenderer) er;
                 final float n7 = 1.0f;
                 GL11.glScalef(n7, n7, n7);
                 playerRenderer.renderHand();
@@ -220,7 +225,7 @@ public class ItemInHandRenderer
             GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim3) * 3.1415927f) * 0.4f, Mth.sin(Mth.sqrt(attackAnim3) * 3.1415927f * 2.0f) * 0.2f, -Mth.sin(attackAnim3 * 3.1415927f) * 0.2f);
             GL11.glTranslatef(0.7f * n11, -0.65f * n11 - (1.0f - n) * 0.6f, -0.9f * n11);
             GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
-            GL11.glEnable(32826);
+            GL11.glEnable(GL_RESCALE_NORMAL);
             final float attackAnim4 = player.getAttackAnim(partialTick);
             final float sin3 = Mth.sin(attackAnim4 * attackAnim4 * 3.1415927f);
             final float sin4 = Mth.sin(Mth.sqrt(attackAnim4) * 3.1415927f);
@@ -242,7 +247,7 @@ public class ItemInHandRenderer
             GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim5) * 3.1415927f) * 0.3f, Mth.sin(Mth.sqrt(attackAnim5) * 3.1415927f * 2.0f) * 0.4f, -Mth.sin(attackAnim5 * 3.1415927f) * 0.4f);
             GL11.glTranslatef(0.8f * n13, -0.75f * n13 - (1.0f - n) * 0.6f, -0.9f * n13);
             GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
-            GL11.glEnable(32826);
+            GL11.glEnable(GL_RESCALE_NORMAL);
             final float attackAnim6 = player.getAttackAnim(partialTick);
             final float sin5 = Mth.sin(attackAnim6 * attackAnim6 * 3.1415927f);
             GL11.glRotatef(Mth.sin(Mth.sqrt(attackAnim6) * 3.1415927f) * 70.0f, 0.0f, 1.0f, 0.0f);
@@ -254,7 +259,8 @@ public class ItemInHandRenderer
             GL11.glRotatef(-135.0f, 0.0f, 1.0f, 0.0f);
             GL11.glScalef(1.0f, 1.0f, 1.0f);
             GL11.glTranslatef(5.6f, 0.0f, 0.0f);
-            final PlayerRenderer playerRenderer2 = (PlayerRenderer)EntityRenderDispatcher.instance.getRenderer(this.mc.player);
+            final EntityRenderer<Player> er = EntityRenderDispatcher.instance.getRenderer(this.mc.player);
+            final PlayerRenderer playerRenderer2 = (PlayerRenderer)er;
             final float n14 = 1.0f;
             GL11.glScalef(n14, n14, n14);
             playerRenderer2.renderHand();
@@ -333,7 +339,7 @@ public class ItemInHandRenderer
         final Tesselator instance = Tesselator.instance;
         final float brightness = this.mc.player.getBrightness(partialTick);
         GL11.glColor4f(brightness, brightness, brightness, 0.5f);
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         GL11.glPushMatrix();
         final float n = 4.0f;
@@ -358,7 +364,7 @@ public class ItemInHandRenderer
     private void renderFire(final float partialTick) {
         final Tesselator instance = Tesselator.instance;
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
-        GL11.glEnable(3042);
+        GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(770, 771);
         final float n = 1.0f;
         for (int i = 0; i < 2; ++i) {

@@ -584,7 +584,7 @@ public abstract class Mob extends Entity
             --this.lSteps;
             this.setPos(n, y, n2);
             this.setRot(this.yRot, this.xRot);
-            final List cubes = this.level.getCubes(this, this.bb.shrink(0.03125, 0.0, 0.03125));
+            final List<AABB> cubes = this.level.getCubes(this, this.bb.shrink(0.03125, 0.0, 0.03125));
             if (cubes.size() > 0) {
                 double y2 = 0.0;
                 for (int i = 0; i < cubes.size(); ++i) {
@@ -622,7 +622,7 @@ public abstract class Mob extends Entity
         this.yya *= 0.98f;
         this.yRotA *= 0.9f;
         this.travel(this.xxa, this.yya);
-        final List entities = this.level.getEntities(this, this.bb.grow(0.20000000298023224, 0.0, 0.20000000298023224));
+        final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.20000000298023224, 0.0, 0.20000000298023224));
         if (entities != null && entities.size() > 0) {
             for (int j = 0; j < entities.size(); ++j) {
                 final Entity entity = entities.get(j);

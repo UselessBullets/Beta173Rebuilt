@@ -10,12 +10,14 @@ import net.minecraft.world.item.Item;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.projectile.Fireball;
 
-public class FireballRenderer extends EntityRenderer
+import static org.lwjgl.opengl.GL12.*;
+
+public class FireballRenderer extends EntityRenderer<Fireball>
 {
     public void render(final Fireball entity, final double x, final double y, final double z, final float rot, final float partialTick) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
-        GL11.glEnable(32826);
+        GL11.glEnable(GL_RESCALE_NORMAL);
         final float n = 2.0f;
         GL11.glScalef(n / 1.0f, n / 1.0f, n / 1.0f);
         final int icon = Item.snowBall.getIcon(0);

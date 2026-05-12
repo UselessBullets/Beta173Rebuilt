@@ -16,6 +16,9 @@ import net.minecraft.stats.Stat;
 import net.minecraft.stats.Achievements;
 import net.minecraft.world.entity.player.Player;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
+
 public class InventoryScreen extends AbstractContainerScreen
 {
     private float xMouse;
@@ -52,8 +55,8 @@ public class InventoryScreen extends AbstractContainerScreen
         final int x = (this.width - this.imageWidth) / 2;
         final int y = (this.height - this.imageHeight) / 2;
         this.blit(x, y, 0, 0, this.imageWidth, this.imageHeight);
-        GL11.glEnable(32826);
-        GL11.glEnable(2903);
+        GL11.glEnable(GL_RESCALE_NORMAL);
+        GL11.glEnable(GL_COLOR_MATERIAL);
         GL11.glPushMatrix();
         GL11.glTranslatef((float)(x + 51), (float)(y + 75), 50.0f);
         final float n = 30.0f;

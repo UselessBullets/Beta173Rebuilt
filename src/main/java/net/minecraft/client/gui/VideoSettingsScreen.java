@@ -5,7 +5,7 @@
 package net.minecraft.client.gui;
 
 import net.minecraft.locale.language.Language;
-import net.minecraft.client.Options_Option;
+import net.minecraft.client.Options.Option;
 import net.minecraft.client.Options;
 
 public class VideoSettingsScreen extends Screen
@@ -13,7 +13,7 @@ public class VideoSettingsScreen extends Screen
     private Screen lastScreen;
     protected String title;
     private Options options;
-    private static Options_Option[] OPTIONS;
+    private static Option[] OPTIONS;
     
     public VideoSettingsScreen(final Screen lastScreen, final Options options) {
         this.title = "Video Settings";
@@ -26,7 +26,7 @@ public class VideoSettingsScreen extends Screen
         final Language instance = Language.getInstance();
         this.title = instance.getElement("options.videoTitle");
         int n = 0;
-        for (final Options_Option option : VideoSettingsScreen.OPTIONS) {
+        for (final Option option : VideoSettingsScreen.OPTIONS) {
             if (!option.isProgress()) {
                 this.buttons.add(new SmallButton(option.getId(), this.width / 2 - 155 + n % 2 * 160, this.height / 6 + 24 * (n >> 1), option, this.options.getMessage(option)));
             }
@@ -45,7 +45,7 @@ public class VideoSettingsScreen extends Screen
         }
         if (button.id < 100 && button instanceof SmallButton) {
             this.options.toggle(((SmallButton)button).getOption(), 1);
-            button.msg = this.options.getMessage(Options_Option.getItem(button.id));
+            button.msg = this.options.getMessage(Option.getItem(button.id));
         }
         if (button.id == 200) {
             this.minecraft.options.save();
@@ -63,6 +63,6 @@ public class VideoSettingsScreen extends Screen
     }
     
     static {
-        VideoSettingsScreen.OPTIONS = new Options_Option[] { Options_Option.GRAPHICS, Options_Option.RENDER_DISTANCE, Options_Option.AMBIENT_OCCLUSION, Options_Option.FRAMERATE_LIMIT, Options_Option.ANAGLYPH, Options_Option.VIEW_BOBBING, Options_Option.GUI_SCALE, Options_Option.ADVANCED_OPENGL };
+        VideoSettingsScreen.OPTIONS = new Option[] { Option.GRAPHICS, Option.RENDER_DISTANCE, Option.AMBIENT_OCCLUSION, Option.FRAMERATE_LIMIT, Option.ANAGLYPH, Option.VIEW_BOBBING, Option.GUI_SCALE, Option.ADVANCED_OPENGL };
     }
 }

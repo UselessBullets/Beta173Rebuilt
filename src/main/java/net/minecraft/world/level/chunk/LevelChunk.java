@@ -7,7 +7,7 @@ package net.minecraft.world.level.chunk;
 import java.util.Random;
 import net.minecraft.world.phys.AABB;
 import java.util.Iterator;
-import java.util.Collection;
+
 import net.minecraft.world.level.tile.EntityTile;
 import net.minecraft.world.level.TilePos;
 import net.minecraft.world.level.tile.entity.TileEntity;
@@ -34,8 +34,8 @@ public class LevelChunk
     public int minHeight;
     public final int x;
     public final int z;
-    public Map tileEntities;
-    public List[] entityBlocks;
+    public Map<TilePos, TileEntity> tileEntities;
+    public List<Entity>[] entityBlocks;
     public boolean terrainPopulated;
     public boolean unsaved;
     public boolean dontSave;
@@ -43,7 +43,7 @@ public class LevelChunk
     public long lastSaveTime;
     
     public LevelChunk(final Level level, final int x, final int z) {
-        this.tileEntities = new HashMap();
+        this.tileEntities = new HashMap<>();
         this.entityBlocks = new List[8];
         this.terrainPopulated = false;
         this.unsaved = false;
@@ -54,7 +54,7 @@ public class LevelChunk
         this.z = z;
         this.heightmap = new byte[256];
         for (int i = 0; i < this.entityBlocks.length; ++i) {
-            this.entityBlocks[i] = new ArrayList();
+            this.entityBlocks[i] = new ArrayList<>();
         }
     }
     
@@ -438,7 +438,7 @@ public class LevelChunk
         this.unsaved = true;
     }
     
-    public void getEntities(final Entity except, final AABB bb, final List es) {
+    public void getEntities(final Entity except, final AABB bb, final List<Entity> es) {
         int floor = Mth.floor((bb.y0 - 2.0) / 16.0);
         int floor2 = Mth.floor((bb.y1 + 2.0) / 16.0);
         if (floor < 0) {
@@ -448,7 +448,7 @@ public class LevelChunk
             floor2 = this.entityBlocks.length - 1;
         }
         for (int i = floor; i <= floor2; ++i) {
-            final List list = this.entityBlocks[i];
+            final List<Entity> list = this.entityBlocks[i];
             for (int j = 0; j < list.size(); ++j) {
                 final Entity entity = list.get(j);
                 if (entity != except && entity.bb.intersects(bb)) {
@@ -458,7 +458,7 @@ public class LevelChunk
         }
     }
     
-    public void getEntitiesOfClass(final Class ec, final AABB bb, final List es) {
+    public <T extends Entity>  void getEntitiesOfClass(final Class<T> ec, final AABB bb, final List<Entity> es) {
         int floor = Mth.floor((bb.y0 - 2.0) / 16.0);
         int floor2 = Mth.floor((bb.y1 + 2.0) / 16.0);
         if (floor < 0) {
@@ -468,7 +468,7 @@ public class LevelChunk
             floor2 = this.entityBlocks.length - 1;
         }
         for (int i = floor; i <= floor2; ++i) {
-            final List list = this.entityBlocks[i];
+            final List<Entity> list = this.entityBlocks[i];
             for (int j = 0; j < list.size(); ++j) {
                 final Entity entity = list.get(j);
                 if (ec.isAssignableFrom(entity.getClass()) && entity.bb.intersects(bb)) {

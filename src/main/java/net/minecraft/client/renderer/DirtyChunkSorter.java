@@ -8,7 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import java.util.Comparator;
 
-public class DirtyChunkSorter implements Comparator
+public class DirtyChunkSorter implements Comparator<Chunk>
 {
     private Mob player;
     

@@ -8,7 +8,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.client.model.Model;
 
-public class PigRenderer extends MobRenderer
+public class PigRenderer extends MobRenderer<Pig>
 {
     public PigRenderer(final Model model, final Model armor, final float shadow) {
         super(model, shadow);

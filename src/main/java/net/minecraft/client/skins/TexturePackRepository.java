@@ -16,10 +16,10 @@ import java.util.List;
 
 public class TexturePackRepository
 {
-    private List texturePacks;
+    private List<TexturePack> texturePacks;
     private TexturePack defaultTexturePack;
     public TexturePack selected;
-    private Map skinCache;
+    private Map<String, TexturePack> skinCache;
     private Minecraft minecraft;
     private File workDir;
     private String chosenSkinName;
@@ -89,7 +89,7 @@ public class TexturePackRepository
         this.texturePacks = texturePacks;
     }
     
-    public List getAll() {
-        return new ArrayList(this.texturePacks);
+    public List<TexturePack> getAll() {
+        return new ArrayList<>(this.texturePacks);
     }
 }

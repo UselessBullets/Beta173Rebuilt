@@ -20,11 +20,14 @@ import java.util.Map;
 
 public class Stats
 {
-    protected static Map statsById;
-    public static List all;
-    public static List generalStats;
-    public static List blocksMinedStats;
-    public static List itemsCraftedStats;
+    private static final int BLOCKS_MINED_OFFSET = 0x1000000;
+    private static final int ITEMS_COLLECTED_OFFSET = 0x1010000;
+    private static final int ITEMS_CRAFTED_OFFSET = 0x1020000;
+    protected static Map<Integer, Stat> statsById;
+    public static List<Stat> all;
+    public static List<Stat> generalStats;
+    public static List<ItemStat> blocksMinedStats;
+    public static List<ItemStat> itemsCraftedStats;
     public static Stat startGame;
     public static Stat createWorld;
     public static Stat loadWorld;
@@ -59,14 +62,14 @@ public class Stats
     }
     
     public static void buildBlockStats() {
-        Stats.itemUsed = getUsedStats(Stats.itemUsed, "stat.useItem", 16908288, 0, Tile.tiles.length);
+        Stats.itemUsed = getUsedStats(Stats.itemUsed, "stat.useItem", ITEMS_CRAFTED_OFFSET, 0, Tile.tiles.length);
         Stats.itemBroke = getBreakStats(Stats.itemBroke, "stat.breakItem", 16973824, 0, Tile.tiles.length);
         Stats.blockStatsLoaded = true;
         buildCraftableStats();
     }
     
     public static void buildItemStats() {
-        Stats.itemUsed = getUsedStats(Stats.itemUsed, "stat.useItem", 16908288, Tile.tiles.length, 32000);
+        Stats.itemUsed = getUsedStats(Stats.itemUsed, "stat.useItem", ITEMS_CRAFTED_OFFSET, Tile.tiles.length, 32000);
         Stats.itemBroke = getBreakStats(Stats.itemBroke, "stat.breakItem", 16973824, Tile.tiles.length, 32000);
         Stats.itemStatsLoaded = true;
         buildCraftableStats();
@@ -76,7 +79,7 @@ public class Stats
         if (!Stats.blockStatsLoaded || !Stats.itemStatsLoaded) {
             return;
         }
-        final HashSet set = new HashSet();
+        final HashSet<Integer> set = new HashSet();
         final Iterator iterator = Recipes.getInstance().getRecipes().iterator();
         while (iterator.hasNext()) {
             set.add(((Recipe)iterator.next()).getResultItem().id);
@@ -88,7 +91,7 @@ public class Stats
         Stats.itemCrafted = new Stat[32000];
         for (final Integer n : set) {
             if (Item.items[n] != null) {
-                Stats.itemCrafted[n] = new ItemStat(16842752 + n, I18n.get("stat.craftItem", Item.items[n].getName()), n).postConstruct();
+                Stats.itemCrafted[n] = new ItemStat(ITEMS_COLLECTED_OFFSET + n, I18n.get("stat.craftItem", Item.items[n].getName()), n).postConstruct();
             }
         }
         remapIds(Stats.itemCrafted);
@@ -99,7 +102,7 @@ public class Stats
         for (int i = 0; i < 256; ++i) {
             if (Tile.tiles[i] != null && Tile.tiles[i].isCollectStatistics()) {
                 stats[i] = new ItemStat(idOff + i, I18n.get(nameKey, Tile.tiles[i].getName()), i).postConstruct();
-                Stats.itemsCraftedStats.add(stats[i]);
+                Stats.itemsCraftedStats.add((ItemStat) stats[i]);
             }
         }
         remapIds(stats);
@@ -114,7 +117,7 @@ public class Stats
             if (Item.items[i] != null) {
                 result[i] = new ItemStat(idOff + i, I18n.get(nameKey, Item.items[i].getName()), i).postConstruct();
                 if (i >= Tile.tiles.length) {
-                    Stats.blocksMinedStats.add(result[i]);
+                    Stats.blocksMinedStats.add((ItemStat) result[i]);
                 }
             }
         }
@@ -165,11 +168,11 @@ public class Stats
     }
     
     static {
-        Stats.statsById = new HashMap();
-        Stats.all = new ArrayList();
-        Stats.generalStats = new ArrayList();
-        Stats.blocksMinedStats = new ArrayList();
-        Stats.itemsCraftedStats = new ArrayList();
+        Stats.statsById = new HashMap<>();
+        Stats.all = new ArrayList<>();
+        Stats.generalStats = new ArrayList<>();
+        Stats.blocksMinedStats = new ArrayList<>();
+        Stats.itemsCraftedStats = new ArrayList<>();
         Stats.startGame = new GeneralStat(1000, I18n.get("stat.startGame")).setAwardLocallyOnly().postConstruct();
         Stats.createWorld = new GeneralStat(1001, I18n.get("stat.createWorld")).setAwardLocallyOnly().postConstruct();
         Stats.loadWorld = new GeneralStat(1002, I18n.get("stat.loadWorld")).setAwardLocallyOnly().postConstruct();
@@ -193,7 +196,7 @@ public class Stats
         Stats.mobKills = new GeneralStat(2023, I18n.get("stat.mobKills")).postConstruct();
         Stats.playerKills = new GeneralStat(2024, I18n.get("stat.playerKills")).postConstruct();
         Stats.fishCaught = new GeneralStat(2025, I18n.get("stat.fishCaught")).postConstruct();
-        Stats.blockMined = getMinedStats("stat.mineBlock", 16777216);
+        Stats.blockMined = getMinedStats("stat.mineBlock", BLOCKS_MINED_OFFSET);
         Achievements.init();
         Stats.blockStatsLoaded = false;
         Stats.itemStatsLoaded = false;

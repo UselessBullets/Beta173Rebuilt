@@ -16,7 +16,9 @@ import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.level.tile.entity.PistonPieceEntity;
 import net.minecraft.client.renderer.TileRenderer;
 
-public class PistonPieceRenderer extends TileEntityRenderer
+import static org.lwjgl.opengl.GL11.*;
+
+public class PistonPieceRenderer extends TileEntityRenderer<PistonPieceEntity>
 {
     private TileRenderer tileRenderer;
     
@@ -27,7 +29,7 @@ public class PistonPieceRenderer extends TileEntityRenderer
             this.bindTexture("/terrain.png");
             Lighting.turnOff();
             GL11.glBlendFunc(770, 771);
-            GL11.glEnable(3042);
+            GL11.glEnable(GL_BLEND);
             GL11.glDisable(2884);
             if (Minecraft.useAmbientOcclusion()) {
                 GL11.glShadeModel(7425);

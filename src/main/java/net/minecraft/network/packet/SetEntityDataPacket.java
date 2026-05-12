@@ -6,22 +6,25 @@ package net.minecraft.network.packet;
 
 import java.io.DataOutputStream;
 import net.minecraft.world.entity.SynchedEntityData;
+import net.minecraft.world.entity.SynchedEntityData.DataItem;
+
 import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.List;
 
 public class SetEntityDataPacket extends Packet
 {
     public int id;
-    private List packedItems;
+    private List<DataItem> packedItems;
     
     @Override
-    public void read(final DataInputStream dis) {
+    public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();
         this.packedItems = SynchedEntityData.unpack(dis);
     }
     
     @Override
-    public void write(final DataOutputStream dos) {
+    public void write(final DataOutputStream dos) throws IOException {
         dos.writeInt(this.id);
         SynchedEntityData.pack(this.packedItems, dos);
     }

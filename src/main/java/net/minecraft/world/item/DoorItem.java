@@ -37,29 +37,24 @@ public class DoorItem extends Item
             return false;
         }
         int data = Mth.floor((player.yRot + 180.0f) * 4.0f / 360.0f - 0.5) & 0x3;
-        int n = 0;
-        int n2 = 0;
-        if (data == 0) {
-            n2 = 1;
-        }
-        if (data == 1) {
-            n = -1;
-        }
-        if (data == 2) {
-            n2 = -1;
-        }
-        if (data == 3) {
-            n = 1;
-        }
-        final int n3 = (level.isSolidBlockingTile(x - n, y, z - n2) + level.isSolidBlockingTile(x - n, y + 1, z - n2)) ? 1 : 0;
-        final int n4 = (level.isSolidBlockingTile(x + n, y, z + n2) + level.isSolidBlockingTile(x + n, y + 1, z + n2)) ? 1 : 0;
-        final boolean b = level.getTile(x - n, y, z - n2) == tile.id || level.getTile(x - n, y + 1, z - n2) == tile.id;
-        final boolean b2 = level.getTile(x + n, y, z + n2) == tile.id || level.getTile(x + n, y + 1, z + n2) == tile.id;
+
+        int xra = 0;
+        int zra = 0;
+        if (data == 0) zra = 1;
+        if (data == 1) xra = -1;
+        if (data == 2) zra = -1;
+        if (data == 3) xra = 1;
+
+        final int solidLeft = (level.isSolidBlockingTile(x - xra, y, z - zra) ? 1 : 0) + (level.isSolidBlockingTile(x - xra, y + 1, z - zra) ? 1 : 0);
+        final int solidRight = (level.isSolidBlockingTile(x + xra, y, z + zra) ? 1 : 0) + (level.isSolidBlockingTile(x + xra, y + 1, z + zra) ? 1 : 0);
+
+        final boolean b = level.getTile(x - xra, y, z - zra) == tile.id || level.getTile(x - xra, y + 1, z - zra) == tile.id;
+        final boolean b2 = level.getTile(x + xra, y, z + zra) == tile.id || level.getTile(x + xra, y + 1, z + zra) == tile.id;
         boolean b3 = false;
         if (b && !b2) {
             b3 = true;
         }
-        else if (n4 > n3) {
+        else if (solidRight > solidLeft) {
             b3 = true;
         }
         if (b3) {

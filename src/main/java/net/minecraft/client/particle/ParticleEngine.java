@@ -17,20 +17,25 @@ import net.minecraft.world.level.Level;
 
 public class ParticleEngine
 {
+    public static final int MISC_TEXTURE = 0;
+    public static final int TERRAIN_TEXTURE = 1;
+    public static final int ITEM_TEXTURE = 2;
+    public static final int ENTITY_PARTICLE_TEXTURE = 3;
+    public static final int TEXTURE_COUNT = 4;
     protected Level level;
-    private List[] particles;
+    private List<Particle>[] particles;
     private Textures textures;
     private Random random;
     
     public ParticleEngine(final Level level, final Textures textures) {
-        this.particles = new List[4];
+        this.particles = new List[TEXTURE_COUNT];
         this.random = new Random();
         if (level != null) {
             this.level = level;
         }
         this.textures = textures;
         for (int i = 0; i < 4; ++i) {
-            this.particles[i] = new ArrayList();
+            this.particles[i] = new ArrayList<>();
         }
     }
     
@@ -63,16 +68,16 @@ public class ParticleEngine
         Particle.xOff = player.xOld + (player.x - player.xOld) * partialTick;
         Particle.yOff = player.yOld + (player.y - player.yOld) * partialTick;
         Particle.zOff = player.zOld + (player.z - player.zOld) * partialTick;
-        for (int i = 0; i < 3; ++i) {
+        for (int i = MISC_TEXTURE; i < ENTITY_PARTICLE_TEXTURE; ++i) {
             if (this.particles[i].size() != 0) {
                 int n = 0;
-                if (i == 0) {
+                if (i == MISC_TEXTURE) {
                     n = this.textures.loadTexture("/particles.png");
                 }
-                if (i == 1) {
+                if (i == TERRAIN_TEXTURE) {
                     n = this.textures.loadTexture("/terrain.png");
                 }
-                if (i == 2) {
+                if (i == ITEM_TEXTURE) {
                     n = this.textures.loadTexture("/gui/items.png");
                 }
                 GL11.glBindTexture(3553, n);

@@ -11,7 +11,7 @@ import net.minecraft.world.entity.item.Boat;
 import net.minecraft.client.model.BoatModel;
 import net.minecraft.client.model.Model;
 
-public class BoatRenderer extends EntityRenderer
+public class BoatRenderer extends EntityRenderer<Boat>
 {
     protected Model model;
     

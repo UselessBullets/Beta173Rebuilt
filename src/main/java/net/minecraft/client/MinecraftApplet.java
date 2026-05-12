@@ -4,7 +4,6 @@
 
 package net.minecraft.client;
 
-import java.awt.LayoutManager;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Canvas;
@@ -23,11 +22,19 @@ public class MinecraftApplet extends Applet
     @Override
     public void init() {
         this.canvas = new MinecraftApplet_Canvas(this);
-        boolean equalsIgnoreCase = false;
+        boolean fullscreen = false;
         if (this.getParameter("fullscreen") != null) {
-            equalsIgnoreCase = this.getParameter("fullscreen").equalsIgnoreCase("true");
+            fullscreen = this.getParameter("fullscreen").equalsIgnoreCase("true");
         }
-        this.minecraft = new MinecraftApplet_Minecraft(this, this, this.canvas, this, this.getWidth(), this.getHeight(), equalsIgnoreCase);
+        this.minecraft = new Minecraft(this, this.canvas, this, this.getWidth(), this.getHeight(), fullscreen) {
+            @Override
+            public void onCrash(final CrashReport crashReport) {
+                removeAll();
+                setLayout(new BorderLayout());
+                add(new CrashInfoPanel(crashReport), "Center");
+                validate();
+            }
+        };
         this.minecraft.serverDomain = this.getDocumentBase().getHost();
         if (this.getDocumentBase().getPort() > 0) {
             final StringBuilder sb = new StringBuilder();

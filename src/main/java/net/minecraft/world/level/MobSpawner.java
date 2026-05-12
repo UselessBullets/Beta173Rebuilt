@@ -6,6 +6,8 @@ package net.minecraft.world.level;
 
 import net.minecraft.world.entity.monster.Zombie;
 import java.util.HashSet;
+
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.tile.BedTile;
@@ -17,7 +19,6 @@ import net.minecraft.world.level.material.Material;
 import java.util.List;
 import java.util.Iterator;
 import net.minecraft.Pos;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import util.Mth;
@@ -26,8 +27,8 @@ import java.util.Set;
 
 public final class MobSpawner
 {
-    private static Set chunksToPoll;
-    protected static final Class[] bedEnemies;
+    private static Set<ChunkPos> chunksToPoll;
+    protected static final Class<? extends Mob>[] bedEnemies;
     
     protected static TilePos getRandomPosWithin(final Level level, final int cx, final int cz) {
         return new TilePos(cx + level.random.nextInt(16), level.random.nextInt(128), cz + level.random.nextInt(16));
@@ -58,7 +59,7 @@ public final class MobSpawner
                     Label_0253:
                         while (true) {
                             for (final ChunkPos chunkPos : MobSpawner.chunksToPoll) {
-                                final List mobs = level.getBiomeSource().getBiome(chunkPos).getMobs(mobCategory);
+                                final List<Biome.MobSpawnerData> mobs = level.getBiomeSource().getBiome(chunkPos).getMobs(mobCategory);
                                 if (mobs != null) {
                                     if (mobs.isEmpty()) {
                                         continue Label_0253_Outer;
@@ -66,11 +67,11 @@ public final class MobSpawner
                                     int bound = 0;
                                     final Iterator iterator2 = mobs.iterator();
                                     while (iterator2.hasNext()) {
-                                        bound += ((MobSpawnerData)iterator2.next()).probabilityWeight;
+                                        bound += ((Biome.MobSpawnerData)iterator2.next()).probabilityWeight;
                                     }
                                     int nextInt = level.random.nextInt(bound);
-                                    MobSpawnerData mobSpawnerData = mobs.get(0);
-                                    for (final MobSpawnerData mobSpawnerData2 : mobs) {
+                                    Biome.MobSpawnerData mobSpawnerData = mobs.get(0);
+                                    for (final Biome.MobSpawnerData mobSpawnerData2 : mobs) {
                                         nextInt -= mobSpawnerData2.probabilityWeight;
                                         if (nextInt < 0) {
                                             mobSpawnerData = mobSpawnerData2;
@@ -159,11 +160,11 @@ public final class MobSpawner
         }
     }
     
-    public static boolean attackSleepingPlayers(final Level level, final List players) {
+    public static boolean attackSleepingPlayers(final Level level, final List<Player> players) {
         boolean b = false;
         final PathFinder pathFinder = new PathFinder(level);
         for (final Player to : players) {
-            final Class[] bedEnemies = MobSpawner.bedEnemies;
+            final Class<? extends Mob>[] bedEnemies = MobSpawner.bedEnemies;
             if (bedEnemies != null) {
                 if (bedEnemies.length == 0) {
                     continue;
@@ -224,7 +225,7 @@ public final class MobSpawner
     }
     
     static {
-        MobSpawner.chunksToPoll = new HashSet();
+        MobSpawner.chunksToPoll = new HashSet<>();
         bedEnemies = new Class[] { Spider.class, Zombie.class, Skeleton.class };
     }
 }

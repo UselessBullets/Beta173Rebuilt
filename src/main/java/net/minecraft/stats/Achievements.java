@@ -11,11 +11,14 @@ import java.util.List;
 
 public class Achievements
 {
+    protected static final int ACHIEVEMENT_OFFSET = 0x500000;
+    public static final int ACHIEVEMENT_WIDTH_POSITION = 12;
+    public static final int ACHIEVEMENT_HEIGHT_POSITION = 12;
     public static int xMin;
     public static int yMin;
     public static int xMax;
     public static int yMax;
-    public static List achievements;
+    public static List<Achievement> achievements;
     public static Achievement openInventory;
     public static Achievement mineWood;
     public static Achievement buildWorkbench;
@@ -37,7 +40,7 @@ public class Achievements
     }
     
     static {
-        Achievements.achievements = new ArrayList();
+        Achievements.achievements = new ArrayList<>();
         Achievements.openInventory = new Achievement(0, "openInventory", 0, 0, Item.book, null).setAwardLocallyOnly().postConstruct();
         Achievements.mineWood = new Achievement(1, "mineWood", 2, 1, Tile.treeTrunk, Achievements.openInventory).postConstruct();
         Achievements.buildWorkbench = new Achievement(2, "buildWorkBench", 4, -1, Tile.workBench, Achievements.mineWood).postConstruct();

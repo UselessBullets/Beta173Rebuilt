@@ -15,14 +15,15 @@ import argo.jdom.JsonRootNode;
 import argo.jdom.JsonStringNode;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.TreeSet;
 
 /**
- * JsonFormat that formats JSON as compactly as possible.  Instances of this class can safely be shared between threads.
+ * JsonFormat that formats JSON in a human-readable form.  Instances of this class can safely be shared between threads.
  */
-public final class CompactJsonFormatter implements JsonFormatter {
+public final class PrettyJsonFormatter implements JsonFormatter {
 
     public String format(final JsonRootNode jsonNode) {
         final StringWriter stringWriter = new StringWriter();
@@ -35,39 +36,52 @@ public final class CompactJsonFormatter implements JsonFormatter {
     }
 
     public void format(final JsonRootNode jsonNode, final Writer writer) throws IOException {
-        formatJsonNode(jsonNode, writer);
+        formatJsonNode(jsonNode, new PrintWriter(writer), 0);
     }
 
-    private void formatJsonNode(final JsonNode jsonNode, final Writer writer) throws IOException {
+    private void formatJsonNode(final JsonNode jsonNode, final PrintWriter writer, final int indent) throws IOException {
         boolean first = true;
         switch (jsonNode.getType()) {
             case ARRAY:
                 writer.append('[');
                 for (final JsonNode node : jsonNode.getElements()) {
+                    writer.println();
+                    addTabs(writer, indent + 1);
                     if (!first) {
-                        writer.append(',');
+                        writer.append(", ");
                     }
                     first = false;
-                    formatJsonNode(node, writer);
+                    formatJsonNode(node, writer, indent + 1);
+                }
+                if (!jsonNode.getElements().isEmpty()) {
+                    writer.println();
+                    addTabs(writer, indent);
                 }
                 writer.append(']');
                 break;
             case OBJECT:
                 writer.append('{');
                 for (final JsonStringNode field : new TreeSet<JsonStringNode>(jsonNode.getFields().keySet())) {
+                    writer.println();
+                    addTabs(writer, indent + 1);
                     if (!first) {
-                        writer.append(',');
+                        writer.append(", ");
                     }
                     first = false;
-                    formatJsonNode(field, writer);
-                    writer.append(':');
-                    formatJsonNode(jsonNode.getFields().get(field), writer);
+                    formatJsonNode(field, writer, indent + 1);
+                    writer.append(": ");
+                    formatJsonNode(jsonNode.getFields().get(field), writer, indent + 1);
+                }
+                if (!jsonNode.getFields().isEmpty()) {
+                    writer.println();
+                    addTabs(writer, indent);
                 }
                 writer.append('}');
                 break;
             case STRING:
                 writer.append('"')
-                        .append(new JsonEscapedString(jsonNode.getText()).toString()).append('"');
+                        .append(new JsonEscapedString(jsonNode.getText()).toString())
+                        .append('"');
                 break;
             case NUMBER:
                 writer.append(jsonNode.getText());
@@ -85,4 +99,11 @@ public final class CompactJsonFormatter implements JsonFormatter {
                 throw new RuntimeException("Coding failure in Argo:  Attempt to format a JsonNode of unknown type [" + jsonNode.getType() + "];");
         }
     }
+
+    private void addTabs(final PrintWriter writer, final int tabs) {
+        for (int i = 0; i < tabs; i++) {
+            writer.write('\t');
+        }
+    }
+
 }

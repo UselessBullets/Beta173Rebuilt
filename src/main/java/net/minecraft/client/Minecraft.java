@@ -207,7 +207,7 @@ public abstract class Minecraft implements Runnable
         this.connectToPort = port;
     }
     
-    public void init() {
+    public void init() throws LWJGLException {
         if (this.parent != null) {
             final Graphics graphics = this.parent.getGraphics();
             if (graphics != null) {
@@ -307,7 +307,7 @@ public abstract class Minecraft implements Runnable
         }
     }
     
-    private void renderLoadingScreen() {
+    private void renderLoadingScreen() throws LWJGLException {
         final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.options, this.width, this.height);
         GL11.glClear(16640);
         GL11.glMatrixMode(5889);
@@ -364,13 +364,13 @@ public abstract class Minecraft implements Runnable
     public static File getWorkingDirectory(final String applicationName) {
         final String property = System.getProperty("user.home", ".");
         File obj = null;
-        switch (Minecraft_OS_Obfuscation.arr[getPlatform().ordinal()]) {
-            case 1:
-            case 2: {
+        switch (getPlatform()) {
+            case linux:
+            case solaris: {
                 obj = new File(property, '.' + applicationName + '/');
                 break;
             }
-            case 3: {
+            case windows: {
                 final String getenv = System.getenv("APPDATA");
                 if (getenv != null) {
                     obj = new File(getenv, "." + applicationName + '/');
@@ -379,7 +379,7 @@ public abstract class Minecraft implements Runnable
                 obj = new File(property, '.' + applicationName + '/');
                 break;
             }
-            case 4: {
+            case macos: {
                 obj = new File(property, "Library/Application Support/" + applicationName);
                 break;
             }

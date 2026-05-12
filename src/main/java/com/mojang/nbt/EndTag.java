@@ -19,7 +19,7 @@ public class EndTag extends Tag
     
     @Override
     public byte getId() {
-        return 0;
+        return TAG_End;
     }
     
     @Override

@@ -6,6 +6,7 @@ package com.mojang.nbt;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.IOException;
 
 public class ByteArrayTag extends Tag
 {
@@ -19,19 +20,19 @@ public class ByteArrayTag extends Tag
     }
     
     @Override
-    void write(final DataOutput dos) {
+    void write(final DataOutput dos) throws IOException {
         dos.writeInt(this.data.length);
         dos.write(this.data);
     }
     
     @Override
-    void load(final DataInput dis) {
+    void load(final DataInput dis) throws IOException {
         dis.readFully(this.data = new byte[dis.readInt()]);
     }
     
     @Override
     public byte getId() {
-        return 7;
+        return TAG_Byte_Array;
     }
     
     @Override

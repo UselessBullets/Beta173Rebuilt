@@ -6,12 +6,13 @@ package com.mojang.nbt;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ListTag extends Tag
 {
-    private List list;
+    private List<Tag> list;
     private byte type;
     
     public ListTag() {
@@ -19,7 +20,7 @@ public class ListTag extends Tag
     }
     
     @Override
-    void write(final DataOutput dos) {
+    void write(final DataOutput dos) throws IOException {
         if (this.list.size() > 0) {
             this.type = this.list.get(0).getId();
         }
@@ -34,7 +35,7 @@ public class ListTag extends Tag
     }
     
     @Override
-    void load(final DataInput dis) {
+    void load(final DataInput dis) throws IOException {
         this.type = dis.readByte();
         final int int1 = dis.readInt();
         this.list = new ArrayList();
@@ -47,7 +48,7 @@ public class ListTag extends Tag
     
     @Override
     public byte getId() {
-        return 9;
+        return TAG_List;
     }
     
     @Override

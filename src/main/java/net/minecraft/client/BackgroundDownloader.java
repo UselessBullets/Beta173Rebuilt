@@ -4,6 +4,7 @@
 
 package net.minecraft.client;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -107,7 +108,7 @@ public class BackgroundDownloader extends Thread
         }
     }
     
-    private void download(final URL url, final File file, final long length) {
+    private void download(final URL url, final File file, final long length) throws IOException {
         final byte[] array = new byte[4096];
         final DataInputStream dataInputStream = new DataInputStream(url.openStream());
         final DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));

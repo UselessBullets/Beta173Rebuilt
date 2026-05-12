@@ -1,47 +1,50 @@
-// 
-// Decompiled by Procyon v0.6.0
-// 
+/*
+ * Copyright 2010 Mark Slater
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
 
 package argo.jdom;
 
 import argo.format.CompactJsonFormatter;
 import argo.format.JsonFormatter;
 
-public final class JsonNodeDoesNotMatchPathElementsException extends JsonNodeDoesNotMatchJsonNodeSelectorException
-{
-    private static final JsonFormatter JSON_FORMATTER;
-    
-    static JsonNodeDoesNotMatchPathElementsException jsonNodeDoesNotMatchPathElementsException(final JsonNodeDoesNotMatchChainedJsonNodeSelectorException mz, final Object[] arr, final JsonRootNode qe) {
-        return new JsonNodeDoesNotMatchPathElementsException(mz, arr, qe);
+import static argo.jdom.JsonNodeDoesNotMatchChainedJsonNodeSelectorException.getShortFormFailPath;
+
+public final class JsonNodeDoesNotMatchPathElementsException extends JsonNodeDoesNotMatchJsonNodeSelectorException {
+
+    private static final JsonFormatter JSON_FORMATTER = new CompactJsonFormatter();
+
+    static JsonNodeDoesNotMatchPathElementsException jsonNodeDoesNotMatchPathElementsException(final JsonNodeDoesNotMatchChainedJsonNodeSelectorException delegate, final Object[] pathElements, final JsonRootNode rootNode) {
+        return new JsonNodeDoesNotMatchPathElementsException(delegate, pathElements, rootNode);
     }
-    
-    private JsonNodeDoesNotMatchPathElementsException(final JsonNodeDoesNotMatchChainedJsonNodeSelectorException mz, final Object[] arr, final JsonRootNode qe) {
-        super(b(mz, arr, qe));
+
+    private JsonNodeDoesNotMatchPathElementsException(final JsonNodeDoesNotMatchChainedJsonNodeSelectorException delegate, final Object[] pathElements, final JsonRootNode rootNode) {
+        super(formatMessage(delegate, pathElements, rootNode));
     }
-    
-    private static String b(final JsonNodeDoesNotMatchChainedJsonNodeSelectorException mz, final Object[] arr, final JsonRootNode qe) {
-        return "Failed to find " + mz.failedNode.toString() + " at [" + JsonNodeDoesNotMatchChainedJsonNodeSelectorException.getShortFormFailPath(mz.failPath) + "] while resolving [" + a(arr) + "] in " + JsonNodeDoesNotMatchPathElementsException.JSON_FORMATTER.format(qe) + ".";
+
+    private static String formatMessage(final JsonNodeDoesNotMatchChainedJsonNodeSelectorException delegate, final Object[] pathElements, final JsonRootNode rootNode) {
+        return "Failed to find " + delegate.failedNode.toString() + " at [" + getShortFormFailPath(delegate.failPath) + "] while resolving [" + commaSeparate(pathElements) + "] in " + JSON_FORMATTER.format(rootNode) +  ".";
     }
-    
-    private static String a(final Object[] arr) {
-        final StringBuilder sb = new StringBuilder();
-        int n = 1;
-        for (final Object o : arr) {
-            if (n == 0) {
-                sb.append(".");
+
+    private static String commaSeparate(final Object[] pathElements) {
+        final StringBuilder result = new StringBuilder();
+        boolean firstElement = true;
+        for (Object pathElement : pathElements) {
+            if (!firstElement) {
+                result.append(".");
             }
-            n = 0;
-            if (o instanceof String) {
-                sb.append("\"").append(o).append("\"");
-            }
-            else {
-                sb.append(o);
+            firstElement = false;
+            if (pathElement instanceof String) {
+                result.append("\"").append(pathElement).append("\"");
+            } else {
+                result.append(pathElement);
             }
         }
-        return sb.toString();
-    }
-    
-    static {
-        JSON_FORMATTER = new CompactJsonFormatter();
+        return result.toString();
     }
 }

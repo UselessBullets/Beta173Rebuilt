@@ -6,18 +6,30 @@ package com.mojang.nbt;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.IOException;
 
 public abstract class Tag
 {
+    public static final byte TAG_End = 0;
+    public static final byte TAG_Byte = 1;
+    public static final byte TAG_Short = 2;
+    public static final byte TAG_Int = 3;
+    public static final byte TAG_Long = 4;
+    public static final byte TAG_Float = 5;
+    public static final byte TAG_Double = 6;
+    public static final byte TAG_Byte_Array = 7;
+    public static final byte TAG_String = 8;
+    public static final byte TAG_List = 9;
+    public static final byte TAG_Compound = 10;
     private String name;
     
     public Tag() {
         this.name = null;
     }
     
-    abstract void write(final DataOutput dos);
+    abstract void write(final DataOutput dos) throws IOException;
     
-    abstract void load(final DataInput dis);
+    abstract void load(final DataInput dis) throws IOException;
     
     public abstract byte getId();
     
@@ -33,9 +45,9 @@ public abstract class Tag
         return this;
     }
     
-    public static Tag readNamedTag(final DataInput dis) {
+    public static Tag readNamedTag(final DataInput dis) throws IOException {
         final byte byte1 = dis.readByte();
-        if (byte1 == 0) {
+        if (byte1 == TAG_End) {
             return new EndTag();
         }
         final Tag tag = newTag(byte1);
@@ -44,7 +56,7 @@ public abstract class Tag
         return tag;
     }
     
-    public static void writeNamedTag(final Tag tag, final DataOutput dos) {
+    public static void writeNamedTag(final Tag tag, final DataOutput dos) throws IOException {
         dos.writeByte(tag.getId());
         if (tag.getId() == 0) {
             return;
@@ -55,37 +67,37 @@ public abstract class Tag
     
     public static Tag newTag(final byte type) {
         switch (type) {
-            case 0: {
+            case TAG_End: {
                 return new EndTag();
             }
-            case 1: {
+            case TAG_Byte: {
                 return new ByteTag();
             }
-            case 2: {
+            case TAG_Short: {
                 return new ShortTag();
             }
-            case 3: {
+            case TAG_Int: {
                 return new IntTag();
             }
-            case 4: {
+            case TAG_Long: {
                 return new LongTag();
             }
-            case 5: {
+            case TAG_Float: {
                 return new FloatTag();
             }
-            case 6: {
+            case TAG_Double: {
                 return new DoubleTag();
             }
-            case 7: {
+            case TAG_Byte_Array: {
                 return new ByteArrayTag();
             }
-            case 8: {
+            case TAG_String: {
                 return new StringTag();
             }
-            case 9: {
+            case TAG_List: {
                 return new ListTag();
             }
-            case 10: {
+            case TAG_Compound: {
                 return new CompoundTag();
             }
             default: {
@@ -96,37 +108,37 @@ public abstract class Tag
     
     public static String getTagName(final byte type) {
         switch (type) {
-            case 0: {
+            case TAG_End: {
                 return "TAG_End";
             }
-            case 1: {
+            case TAG_Byte: {
                 return "TAG_Byte";
             }
-            case 2: {
+            case TAG_Short: {
                 return "TAG_Short";
             }
-            case 3: {
+            case TAG_Int: {
                 return "TAG_Int";
             }
-            case 4: {
+            case TAG_Long: {
                 return "TAG_Long";
             }
-            case 5: {
+            case TAG_Float: {
                 return "TAG_Float";
             }
-            case 6: {
+            case TAG_Double: {
                 return "TAG_Double";
             }
-            case 7: {
+            case TAG_Byte_Array: {
                 return "TAG_Byte_Array";
             }
-            case 8: {
+            case TAG_String: {
                 return "TAG_String";
             }
-            case 9: {
+            case TAG_List: {
                 return "TAG_List";
             }
-            case 10: {
+            case TAG_Compound: {
                 return "TAG_Compound";
             }
             default: {

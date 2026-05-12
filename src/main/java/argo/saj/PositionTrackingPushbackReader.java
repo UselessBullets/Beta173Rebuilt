@@ -1,78 +1,93 @@
-// 
-// Decompiled by Procyon v0.6.0
-// 
+/*
+ * Copyright 2011 Mark Slater
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
 
 package argo.saj;
 
-import java.io.Reader;
+import java.io.IOException;
 import java.io.PushbackReader;
+import java.io.Reader;
 
-final class PositionTrackingPushbackReader implements ThingWithPosition
-{
+final class PositionTrackingPushbackReader implements ThingWithPosition {
+    private static final int NEWLINE = '\n';
+    private static final int CARRIAGE_RETURN = '\r';
+
     private final PushbackReader pushbackReader;
-    private int characterCount;
-    private int lineCount;
-    private boolean lastCharacterWasCarriageReturn;
-    
+    private int characterCount = 0;
+    private int lineCount = 1;
+    private boolean lastCharacterWasCarriageReturn = false;
+
     public PositionTrackingPushbackReader(final Reader in) {
-        this.characterCount = 0;
-        this.lineCount = 1;
-        this.lastCharacterWasCarriageReturn = false;
         this.pushbackReader = new PushbackReader(in);
     }
-    
-    public void unread(final char c) {
-        --this.characterCount;
-        if (this.characterCount < 0) {
-            this.characterCount = 0;
+
+    public void unread(final char c) throws IOException {
+        characterCount--;
+        if (characterCount < 0) characterCount = 0;
+        pushbackReader.unread(c);
+    }
+
+    public void uncount(final char[] resultCharArray) throws IOException {
+        characterCount = characterCount - resultCharArray.length;
+        if (characterCount < 0) characterCount = 0;
+    }
+
+    public int read() throws IOException {
+        final int result = pushbackReader.read();
+        updateCharacterAndLineCounts(result);
+        return result;
+    }
+
+    public int read(final char[] buffer) throws IOException {
+        final int result = pushbackReader.read(buffer);
+        for (char character : buffer) {
+            updateCharacterAndLineCounts(character);
         }
-        this.pushbackReader.unread(c);
+        return result;
     }
-    
-    public void uncount(final char[] resultCharArray) {
-        this.characterCount -= resultCharArray.length;
-        if (this.characterCount < 0) {
-            this.characterCount = 0;
-        }
-    }
-    
-    public int read() {
-        final int read = this.pushbackReader.read();
-        this.updateCharacterAndLineCounts(read);
-        return read;
-    }
-    
-    public int read(final char[] buffer) {
-        final int read = this.pushbackReader.read(buffer);
-        for (int length = buffer.length, i = 0; i < length; ++i) {
-            this.updateCharacterAndLineCounts(buffer[i]);
-        }
-        return read;
-    }
-    
+
     private void updateCharacterAndLineCounts(final int result) {
-        if (13 == result) {
-            this.characterCount = 0;
-            ++this.lineCount;
-            this.lastCharacterWasCarriageReturn = true;
-        }
-        else {
-            if (10 == result && !this.lastCharacterWasCarriageReturn) {
-                this.characterCount = 0;
-                ++this.lineCount;
+        if (CARRIAGE_RETURN == result) {
+            characterCount = 0;
+            lineCount++;
+            lastCharacterWasCarriageReturn = true;
+        } else {
+            if (NEWLINE == result && !lastCharacterWasCarriageReturn) {
+                characterCount = 0;
+                lineCount++;
+            } else {
+                characterCount++;
             }
-            else {
-                ++this.characterCount;
-            }
-            this.lastCharacterWasCarriageReturn = false;
+            lastCharacterWasCarriageReturn = false;
         }
     }
-    
+
     public int getColumn() {
-        return this.characterCount;
+        return characterCount;
     }
-    
+
     public int getRow() {
-        return this.lineCount;
+        return lineCount;
+    }
+
+    public ThingWithPosition snapshotOfPosition() {
+        return new ThingWithPosition() {
+            private final int localCharacterCount = characterCount;
+            private final int localLineCount = lineCount;
+
+            public int getColumn() {
+                return localCharacterCount;
+            }
+
+            public int getRow() {
+                return localLineCount;
+            }
+        };
     }
 }

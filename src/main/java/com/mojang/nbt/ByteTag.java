@@ -6,6 +6,7 @@ package com.mojang.nbt;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.IOException;
 
 public class ByteTag extends Tag
 {
@@ -19,18 +20,18 @@ public class ByteTag extends Tag
     }
     
     @Override
-    void write(final DataOutput dos) {
+    void write(final DataOutput dos) throws IOException {
         dos.writeByte(this.data);
     }
     
     @Override
-    void load(final DataInput dis) {
+    void load(final DataInput dis) throws IOException {
         this.data = dis.readByte();
     }
     
     @Override
     public byte getId() {
-        return 1;
+        return TAG_Byte;
     }
     
     @Override

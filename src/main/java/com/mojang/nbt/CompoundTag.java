@@ -4,6 +4,7 @@
 
 package com.mojang.nbt;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.io.DataInput;
 import java.util.Iterator;
@@ -13,14 +14,14 @@ import java.util.Map;
 
 public class CompoundTag extends Tag
 {
-    private Map tags;
+    private Map<String, Tag> tags;
     
     public CompoundTag() {
         this.tags = new HashMap();
     }
     
     @Override
-    void write(final DataOutput dos) {
+    void write(final DataOutput dos) throws IOException {
         final Iterator iterator = this.tags.values().iterator();
         while (iterator.hasNext()) {
             Tag.writeNamedTag((Tag)iterator.next(), dos);
@@ -29,7 +30,7 @@ public class CompoundTag extends Tag
     }
     
     @Override
-    void load(final DataInput dis) {
+    void load(final DataInput dis) throws IOException {
         this.tags.clear();
         Tag namedTag;
         while ((namedTag = Tag.readNamedTag(dis)).getId() != 0) {
@@ -37,13 +38,13 @@ public class CompoundTag extends Tag
         }
     }
     
-    public Collection getAllTags() {
+    public Collection<Tag> getAllTags() {
         return this.tags.values();
     }
     
     @Override
     public byte getId() {
-        return 10;
+        return TAG_Compound;
     }
     
     public void put(final String name, final Tag tag) {
@@ -98,70 +99,70 @@ public class CompoundTag extends Tag
         if (!this.tags.containsKey(name)) {
             return 0;
         }
-        return this.tags.get(name).data;
+        return ((ByteTag) this.tags.get(name)).data;
     }
     
     public short getShort(final String name) {
         if (!this.tags.containsKey(name)) {
             return 0;
         }
-        return this.tags.get(name).data;
+        return ((ShortTag) this.tags.get(name)).data;
     }
     
     public int getInt(final String name) {
         if (!this.tags.containsKey(name)) {
             return 0;
         }
-        return this.tags.get(name).data;
+        return ((IntTag) this.tags.get(name)).data;
     }
     
     public long getLong(final String name) {
         if (!this.tags.containsKey(name)) {
             return 0L;
         }
-        return this.tags.get(name).data;
+        return ((LongTag) this.tags.get(name)).data;
     }
     
     public float getFloat(final String name) {
         if (!this.tags.containsKey(name)) {
             return 0.0f;
         }
-        return this.tags.get(name).data;
+        return ((FloatTag) this.tags.get(name)).data;
     }
     
     public double getDouble(final String name) {
         if (!this.tags.containsKey(name)) {
             return 0.0;
         }
-        return this.tags.get(name).data;
+        return ((DoubleTag) this.tags.get(name)).data;
     }
     
     public String getString(final String name) {
         if (!this.tags.containsKey(name)) {
             return "";
         }
-        return this.tags.get(name).data;
+        return ((StringTag) this.tags.get(name)).data;
     }
     
     public byte[] getByteArray(final String name) {
         if (!this.tags.containsKey(name)) {
             return new byte[0];
         }
-        return this.tags.get(name).data;
+        return ((ByteArrayTag) this.tags.get(name)).data;
     }
     
     public CompoundTag getCompound(final String name) {
         if (!this.tags.containsKey(name)) {
             return new CompoundTag();
         }
-        return this.tags.get(name);
+        return (CompoundTag) this.tags.get(name);
     }
     
     public ListTag getList(final String name) {
         if (!this.tags.containsKey(name)) {
             return new ListTag();
         }
-        return this.tags.get(name);
+        return (ListTag) this.tags.get(name);
     }
     
     public boolean getBoolean(final String name) {

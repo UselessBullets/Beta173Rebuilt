@@ -11,17 +11,28 @@
 package argo.jdom;
 
 /**
- * Builder for <code>JsonStringNode</code>s.
+ * A field in a JSON object.  Immutable.
  */
-public final class JsonStringNodeBuilder implements JsonNodeBuilder<JsonStringNode> {
+public final class JsonField {
+    private final JsonStringNode name;
+    private final JsonNode value;
 
-    private final String value;
-
-    JsonStringNodeBuilder(final String value) {
+    /**
+     * Constructs an instance of <code>JsonField<code> with the given name and value.
+     *
+     * @param name a JSON string representing the key.
+     * @param value any <code>JsonNode</code> representing the value of the field.
+     */
+    public JsonField(final JsonStringNode name, final JsonNode value) {
+        this.name = name;
         this.value = value;
     }
 
-    public JsonStringNode build() {
-        return JsonNodeFactories.aJsonString(value);
+    JsonStringNode getName() {
+        return name;
+    }
+
+    JsonNode getValue() {
+        return value;
     }
 }

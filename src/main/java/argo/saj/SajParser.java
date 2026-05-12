@@ -1,436 +1,450 @@
-// 
-// Decompiled by Procyon v0.6.0
-// 
+/*
+ * Copyright 2011 Mark Slater
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
 
 package argo.saj;
 
-import java.util.Arrays;
-import argo.jdom.JsonListener;
+import java.io.IOException;
 import java.io.Reader;
+import java.util.Arrays;
 
-public final class SajParser
-{
-    public void parse(final Reader in, final JsonListener jsonListener) {
-        final PositionTrackingPushbackReader thingWithPosition = new PositionTrackingPushbackReader(in);
-        final char c = (char)thingWithPosition.read();
-        switch (c) {
-            case 123: {
-                thingWithPosition.unread(c);
+/**
+ * Converts a character stream into calls to a <code>JsonListener</code>.
+ * <p/>
+ * Instances of <code>SajParser</code> are threadsafe in that concurrent calls to <code>parse</code> are safe, provided
+ * each call is made with a different <code>Reader</code> and a different <code>JsonListener</code>.
+ *
+ * @see JsonListener
+ */
+public final class SajParser {
+
+    private static final char DOUBLE_QUOTE = '"';
+    private static final char BACK_SLASH = '\\';
+    private static final char BACKSPACE = '\b';
+    private static final char TAB = '\t';
+    private static final char NEWLINE = '\n';
+    private static final char CARRIAGE_RETURN = '\r';
+    private static final char FORM_FEED = '\f';
+
+    public SajParser() {
+    }
+
+    /**
+     * Parses the given character stream into calls to the given JsonListener.
+     *
+     * @param in           the character stream to parse
+     * @param jsonListener the JsonListener to notify of parsing events
+     * @throws IOException            bubbled up from exceptions thrown reading from <code>in</code>
+     * @throws InvalidSyntaxException thrown to indicate the characters read from <code>in</code> did not constitute valid JSON.
+     */
+    public void parse(final Reader in, final JsonListener jsonListener) throws IOException, InvalidSyntaxException {
+        final PositionTrackingPushbackReader pushbackReader = new PositionTrackingPushbackReader(in);
+        final char nextChar = (char) pushbackReader.read();
+        switch (nextChar) {
+            case '{':
+                pushbackReader.unread(nextChar);
                 jsonListener.startDocument();
-                this.b(thingWithPosition, jsonListener);
+                objectString(pushbackReader, jsonListener);
                 break;
-            }
-            case 91: {
-                thingWithPosition.unread(c);
+            case '[':
+                pushbackReader.unread(nextChar);
                 jsonListener.startDocument();
-                this.a(thingWithPosition, jsonListener);
+                arrayString(pushbackReader, jsonListener);
                 break;
-            }
-            default: {
-                throw new InvalidSyntaxException("Expected either [ or { but got [" + c + "].", thingWithPosition);
-            }
+            default:
+                throw new InvalidSyntaxException("Expected either [ or { but got [" + nextChar + "].", pushbackReader);
         }
-        final int l = this.l(thingWithPosition);
-        if (l != -1) {
-            throw new InvalidSyntaxException("Got unexpected trailing character [" + (char)l + "].", thingWithPosition);
+        final int trailingCharacter = readNextNonWhitespaceChar(pushbackReader);
+        if (trailingCharacter != -1) {
+            throw new InvalidSyntaxException("Got unexpected trailing character [" + (char) trailingCharacter + "].", pushbackReader);
         }
         jsonListener.endDocument();
     }
-    
-    private void a(final PositionTrackingPushbackReader lj, final JsonListener wg) {
-        final char c = (char)this.l(lj);
-        if (c != '[') {
-            throw new InvalidSyntaxException("Expected object to start with [ but got [" + c + "].", lj);
+
+    private void arrayString(final PositionTrackingPushbackReader pushbackReader, final JsonListener jsonListener) throws IOException, InvalidSyntaxException {
+        final char firstChar = (char) readNextNonWhitespaceChar(pushbackReader);
+        if (firstChar != '[') {
+            throw new InvalidSyntaxException("Expected object to start with [ but got [" + firstChar + "].", pushbackReader);
         }
-        wg.startArray();
-        final char c2 = (char)this.l(lj);
-        lj.unread(c2);
-        if (c2 != ']') {
-            this.d(lj, wg);
+        jsonListener.startArray();
+        final char secondChar = (char) readNextNonWhitespaceChar(pushbackReader);
+        pushbackReader.unread(secondChar);
+        if (secondChar != ']') {
+            aJsonValue(pushbackReader, jsonListener);
         }
-        int i = 0;
-        while (i == 0) {
-            final char c3 = (char)this.l(lj);
-            switch (c3) {
-                case 44: {
-                    this.d(lj, wg);
-                    continue;
-                }
-                case 93: {
-                    i = 1;
-                    continue;
-                }
-                default: {
-                    throw new InvalidSyntaxException("Expected either , or ] but got [" + c3 + "].", lj);
-                }
+        boolean gotEndOfArray = false;
+        while (!gotEndOfArray) {
+            final char nextChar = (char) readNextNonWhitespaceChar(pushbackReader);
+            switch (nextChar) {
+                case ',':
+                    aJsonValue(pushbackReader, jsonListener);
+                    break;
+                case ']':
+                    gotEndOfArray = true;
+                    break;
+                default:
+                    throw new InvalidSyntaxException("Expected either , or ] but got [" + nextChar + "].", pushbackReader);
             }
         }
-        wg.endArray();
+        jsonListener.endArray();
     }
-    
-    private void b(final PositionTrackingPushbackReader lj, final JsonListener wg) {
-        final char c = (char)this.l(lj);
-        if (c != '{') {
-            throw new InvalidSyntaxException("Expected object to start with { but got [" + c + "].", lj);
+
+    private void objectString(final PositionTrackingPushbackReader pushbackReader, final JsonListener jsonListener) throws IOException, InvalidSyntaxException {
+        final char firstChar = (char) readNextNonWhitespaceChar(pushbackReader);
+        if (firstChar != '{') {
+            throw new InvalidSyntaxException("Expected object to start with { but got [" + firstChar + "].", pushbackReader);
         }
-        wg.startObject();
-        final char c2 = (char)this.l(lj);
-        lj.unread(c2);
-        if (c2 != '}') {
-            this.c(lj, wg);
+        jsonListener.startObject();
+        final char secondChar = (char) readNextNonWhitespaceChar(pushbackReader);
+        pushbackReader.unread(secondChar);
+        if (secondChar != '}') {
+            aFieldToken(pushbackReader, jsonListener);
         }
-        int i = 0;
-        while (i == 0) {
-            final char c3 = (char)this.l(lj);
-            switch (c3) {
-                case 44: {
-                    this.c(lj, wg);
-                    continue;
-                }
-                case 125: {
-                    i = 1;
-                    continue;
-                }
-                default: {
-                    throw new InvalidSyntaxException("Expected either , or } but got [" + c3 + "].", lj);
-                }
+        boolean gotEndOfObject = false;
+        while (!gotEndOfObject) {
+            final char nextChar = (char) readNextNonWhitespaceChar(pushbackReader);
+            switch (nextChar) {
+                case ',':
+                    aFieldToken(pushbackReader, jsonListener);
+                    break;
+                case '}':
+                    gotEndOfObject = true;
+                    break;
+                default:
+                    throw new InvalidSyntaxException("Expected either , or } but got [" + nextChar + "].", pushbackReader);
             }
         }
-        wg.endObject();
+        jsonListener.endObject();
     }
-    
-    private void c(final PositionTrackingPushbackReader lj, final JsonListener wg) {
-        final char c = (char)this.l(lj);
-        if ('\"' != c) {
-            throw new InvalidSyntaxException("Expected object identifier to begin with [\"] but got [" + c + "].", lj);
+
+    private void aFieldToken(final PositionTrackingPushbackReader pushbackReader, final JsonListener jsonListener) throws IOException, InvalidSyntaxException {
+        final char nextChar = (char) readNextNonWhitespaceChar(pushbackReader);
+        if (DOUBLE_QUOTE != nextChar) {
+            throw new InvalidSyntaxException("Expected object identifier to begin with [\"] but got [" + nextChar + "].", pushbackReader);
         }
-        lj.unread(c);
-        wg.startField(this.i(lj));
-        final char c2 = (char)this.l(lj);
-        if (c2 != ':') {
-            throw new InvalidSyntaxException("Expected object identifier to be followed by : but got [" + c2 + "].", lj);
+        pushbackReader.unread(nextChar);
+        jsonListener.startField(stringToken(pushbackReader));
+        final char separatorChar = (char) readNextNonWhitespaceChar(pushbackReader);
+        if (separatorChar != ':') {
+            throw new InvalidSyntaxException("Expected object identifier to be followed by : but got [" + separatorChar + "].", pushbackReader);
         }
-        this.d(lj, wg);
-        wg.endField();
+        aJsonValue(pushbackReader, jsonListener);
+        jsonListener.endField();
     }
-    
-    private void d(final PositionTrackingPushbackReader lj, final JsonListener wg) {
-        final char c = (char)this.l(lj);
-        switch (c) {
-            case 34: {
-                lj.unread(c);
-                wg.stringValue(this.i(lj));
+
+    private void aJsonValue(final PositionTrackingPushbackReader pushbackReader, final JsonListener jsonListener) throws IOException, InvalidSyntaxException {
+        final char nextChar = (char) readNextNonWhitespaceChar(pushbackReader);
+        switch (nextChar) {
+            case '"':
+                pushbackReader.unread(nextChar);
+                jsonListener.stringValue(stringToken(pushbackReader));
                 break;
-            }
-            case 116: {
-                final char[] a = new char[3];
-                if (lj.read(a) != 3 || a[0] != 'r' || a[1] != 'u' || a[2] != 'e') {
-                    lj.uncount(a);
-                    throw new InvalidSyntaxException("Expected 't' to be followed by [[r, u, e]], but got [" + Arrays.toString(a) + "].", lj);
+            case 't':
+                final char[] remainingTrueTokenCharacters = new char[3];
+                final int trueTokenCharactersRead = pushbackReader.read(remainingTrueTokenCharacters);
+                if (trueTokenCharactersRead != 3 || remainingTrueTokenCharacters[0] != 'r' || remainingTrueTokenCharacters[1] != 'u' || remainingTrueTokenCharacters[2] != 'e') {
+                    pushbackReader.uncount(remainingTrueTokenCharacters);
+                    throw new InvalidSyntaxException("Expected 't' to be followed by [[r, u, e]], but got [" + Arrays.toString(remainingTrueTokenCharacters) + "].", pushbackReader);
+                } else {
+                    jsonListener.trueValue();
                 }
-                wg.trueValue();
                 break;
-            }
-            case 102: {
-                final char[] a2 = new char[4];
-                if (lj.read(a2) != 4 || a2[0] != 'a' || a2[1] != 'l' || a2[2] != 's' || a2[3] != 'e') {
-                    lj.uncount(a2);
-                    throw new InvalidSyntaxException("Expected 'f' to be followed by [[a, l, s, e]], but got [" + Arrays.toString(a2) + "].", lj);
+            case 'f':
+                final char[] remainingFalseTokenCharacters = new char[4];
+                final int falseTokenCharactersRead = pushbackReader.read(remainingFalseTokenCharacters);
+                if (falseTokenCharactersRead != 4 || remainingFalseTokenCharacters[0] != 'a' || remainingFalseTokenCharacters[1] != 'l' || remainingFalseTokenCharacters[2] != 's' || remainingFalseTokenCharacters[3] != 'e') {
+                    pushbackReader.uncount(remainingFalseTokenCharacters);
+                    throw new InvalidSyntaxException("Expected 'f' to be followed by [[a, l, s, e]], but got [" + Arrays.toString(remainingFalseTokenCharacters) + "].", pushbackReader);
+                } else {
+                    jsonListener.falseValue();
                 }
-                wg.falseValue();
                 break;
-            }
-            case 110: {
-                final char[] a3 = new char[3];
-                if (lj.read(a3) != 3 || a3[0] != 'u' || a3[1] != 'l' || a3[2] != 'l') {
-                    lj.uncount(a3);
-                    throw new InvalidSyntaxException("Expected 'n' to be followed by [[u, l, l]], but got [" + Arrays.toString(a3) + "].", lj);
+            case 'n':
+                final char[] remainingNullTokenCharacters = new char[3];
+                final int nullTokenCharactersRead = pushbackReader.read(remainingNullTokenCharacters);
+                if (nullTokenCharactersRead != 3 || remainingNullTokenCharacters[0] != 'u' || remainingNullTokenCharacters[1] != 'l' || remainingNullTokenCharacters[2] != 'l') {
+                    pushbackReader.uncount(remainingNullTokenCharacters);
+                    throw new InvalidSyntaxException("Expected 'n' to be followed by [[u, l, l]], but got [" + Arrays.toString(remainingNullTokenCharacters) + "].", pushbackReader);
+                } else {
+                    jsonListener.nullValue();
                 }
-                wg.nullValue();
                 break;
-            }
-            case 45:
-            case 48:
-            case 49:
-            case 50:
-            case 51:
-            case 52:
-            case 53:
-            case 54:
-            case 55:
-            case 56:
-            case 57: {
-                lj.unread(c);
-                wg.numberValue(this.a(lj));
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                pushbackReader.unread(nextChar);
+                jsonListener.numberValue(numberToken(pushbackReader));
                 break;
-            }
-            case 123: {
-                lj.unread(c);
-                this.b(lj, wg);
+            case '{':
+                pushbackReader.unread(nextChar);
+                objectString(pushbackReader, jsonListener);
                 break;
-            }
-            case 91: {
-                lj.unread(c);
-                this.a(lj, wg);
+            case '[':
+                pushbackReader.unread(nextChar);
+                arrayString(pushbackReader, jsonListener);
                 break;
-            }
-            default: {
-                throw new InvalidSyntaxException("Invalid character at start of value [" + c + "].", lj);
-            }
+            default:
+                throw new InvalidSyntaxException("Invalid character at start of value [" + nextChar + "].", pushbackReader);
         }
     }
-    
-    private String a(final PositionTrackingPushbackReader lj) {
-        final StringBuilder sb = new StringBuilder();
-        final char c = (char)lj.read();
-        if ('-' == c) {
-            sb.append('-');
+
+    private String numberToken(final PositionTrackingPushbackReader in) throws IOException, InvalidSyntaxException {
+        final StringBuilder result = new StringBuilder();
+        final char firstChar = (char) in.read();
+        if ('-' == firstChar) {
+            result.append('-');
+        } else {
+            in.unread(firstChar);
         }
-        else {
-            lj.unread(c);
-        }
-        sb.append(this.b(lj));
-        return sb.toString();
+        result.append(nonNegativeNumberToken(in));
+        return result.toString();
     }
-    
-    private String b(final PositionTrackingPushbackReader lj) {
-        final StringBuilder sb = new StringBuilder();
-        final char c = (char)lj.read();
-        if ('0' == c) {
-            sb.append('0');
-            sb.append(this.f(lj));
-            sb.append(this.g(lj));
+
+    private String nonNegativeNumberToken(final PositionTrackingPushbackReader in) throws IOException, InvalidSyntaxException {
+        final StringBuilder result = new StringBuilder();
+        final char firstChar = (char) in.read();
+        if ('0' == firstChar) {
+            result.append('0');
+            result.append(possibleFractionalComponent(in));
+            result.append(possibleExponent(in));
+        } else {
+            in.unread(firstChar);
+            result.append(nonZeroDigitToken(in));
+            result.append(digitString(in));
+            result.append(possibleFractionalComponent(in));
+            result.append(possibleExponent(in));
         }
-        else {
-            lj.unread(c);
-            sb.append(this.c(lj));
-            sb.append(this.e(lj));
-            sb.append(this.f(lj));
-            sb.append(this.g(lj));
-        }
-        return sb.toString();
+        return result.toString();
     }
-    
-    private char c(final PositionTrackingPushbackReader lj) {
-        final char c = (char)lj.read();
-        switch (c) {
-            case 49:
-            case 50:
-            case 51:
-            case 52:
-            case 53:
-            case 54:
-            case 55:
-            case 56:
-            case 57: {
-                return c;
-            }
-            default: {
-                throw new InvalidSyntaxException("Expected a digit 1 - 9 but got [" + c + "].", lj);
-            }
-        }
-    }
-    
-    private char d(final PositionTrackingPushbackReader lj) {
-        final char c = (char)lj.read();
-        switch (c) {
-            case 48:
-            case 49:
-            case 50:
-            case 51:
-            case 52:
-            case 53:
-            case 54:
-            case 55:
-            case 56:
-            case 57: {
-                return c;
-            }
-            default: {
-                throw new InvalidSyntaxException("Expected a digit 1 - 9 but got [" + c + "].", lj);
-            }
-        }
-    }
-    
-    private String e(final PositionTrackingPushbackReader lj) {
-        final StringBuilder sb = new StringBuilder();
-        int i = 0;
-        while (i == 0) {
-            final char c = (char)lj.read();
-            switch (c) {
-                case 48:
-                case 49:
-                case 50:
-                case 51:
-                case 52:
-                case 53:
-                case 54:
-                case 55:
-                case 56:
-                case 57: {
-                    sb.append(c);
-                    continue;
-                }
-                default: {
-                    i = 1;
-                    lj.unread(c);
-                    continue;
-                }
-            }
-        }
-        return sb.toString();
-    }
-    
-    private String f(final PositionTrackingPushbackReader lj) {
-        final StringBuilder sb = new StringBuilder();
-        final char c = (char)lj.read();
-        if (c == '.') {
-            sb.append('.');
-            sb.append(this.d(lj));
-            sb.append(this.e(lj));
-        }
-        else {
-            lj.unread(c);
-        }
-        return sb.toString();
-    }
-    
-    private String g(final PositionTrackingPushbackReader lj) {
-        final StringBuilder sb = new StringBuilder();
-        final char c = (char)lj.read();
-        if (c == '.' || c == 'E') {
-            sb.append('E');
-            sb.append(this.h(lj));
-            sb.append(this.d(lj));
-            sb.append(this.e(lj));
-        }
-        else {
-            lj.unread(c);
-        }
-        return sb.toString();
-    }
-    
-    private String h(final PositionTrackingPushbackReader lj) {
-        final StringBuilder sb = new StringBuilder();
-        final char c = (char)lj.read();
-        if (c == '+' || c == '-') {
-            sb.append(c);
-        }
-        else {
-            lj.unread(c);
-        }
-        return sb.toString();
-    }
-    
-    private String i(final PositionTrackingPushbackReader lj) {
-        final StringBuilder sb = new StringBuilder();
-        final char c = (char)lj.read();
-        if ('\"' != c) {
-            throw new InvalidSyntaxException("Expected [\"] but got [" + c + "].", lj);
-        }
-        int i = 0;
-        while (i == 0) {
-            final char c2 = (char)lj.read();
-            switch (c2) {
-                case 34: {
-                    i = 1;
-                    continue;
-                }
-                case 92: {
-                    sb.append(this.j(lj));
-                    continue;
-                }
-                default: {
-                    sb.append(c2);
-                    continue;
-                }
-            }
-        }
-        return sb.toString();
-    }
-    
-    private char j(final PositionTrackingPushbackReader lj) {
-        final char c = (char)lj.read();
-        char c2 = '\0';
-        switch (c) {
-            case 34: {
-                c2 = '\"';
+
+    private char nonZeroDigitToken(final PositionTrackingPushbackReader in) throws IOException, InvalidSyntaxException {
+        final char result;
+        final char nextChar = (char) in.read();
+        switch (nextChar) {
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                result = nextChar;
                 break;
-            }
-            case 92: {
-                c2 = '\\';
-                break;
-            }
-            case 47: {
-                c2 = '/';
-                break;
-            }
-            case 98: {
-                c2 = '\b';
-                break;
-            }
-            case 102: {
-                c2 = '\f';
-                break;
-            }
-            case 110: {
-                c2 = '\n';
-                break;
-            }
-            case 114: {
-                c2 = '\r';
-                break;
-            }
-            case 116: {
-                c2 = '\t';
-                break;
-            }
-            case 117: {
-                c2 = (char)this.k(lj);
-                break;
-            }
-            default: {
-                throw new InvalidSyntaxException("Unrecognised escape character [" + c + "].", lj);
-            }
+            default:
+                throw new InvalidSyntaxException("Expected a digit 1 - 9 but got [" + nextChar + "].", in);
         }
-        return c2;
+        return result;
     }
-    
-    private int k(final PositionTrackingPushbackReader lj) {
-        final char[] data = new char[4];
-        final int read = lj.read(data);
-        if (read != 4) {
-            throw new InvalidSyntaxException("Expected a 4 digit hexidecimal number but got only [" + read + "], namely [" + String.valueOf(data, 0, read) + "].", lj);
+
+    private char digitToken(final PositionTrackingPushbackReader in) throws IOException, InvalidSyntaxException {
+        final char result;
+        final char nextChar = (char) in.read();
+        switch (nextChar) {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                result = nextChar;
+                break;
+            default:
+                throw new InvalidSyntaxException("Expected a digit 1 - 9 but got [" + nextChar + "].", in);
         }
-        int int1;
+        return result;
+    }
+
+    private String digitString(final PositionTrackingPushbackReader in) throws IOException {
+        final StringBuilder result = new StringBuilder();
+        boolean gotANonDigit = false;
+        while (!gotANonDigit) {
+            final char nextChar = (char) in.read();
+            switch (nextChar) {
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    result.append(nextChar);
+                    break;
+                default:
+                    gotANonDigit = true;
+                    in.unread(nextChar);
+            }
+        }
+        return result.toString();
+    }
+
+    private String possibleFractionalComponent(final PositionTrackingPushbackReader pushbackReader) throws IOException, InvalidSyntaxException {
+        final StringBuilder result = new StringBuilder();
+        final char firstChar = (char) pushbackReader.read();
+        if (firstChar == '.') {
+            result.append('.');
+            result.append(digitToken(pushbackReader));
+            result.append(digitString(pushbackReader));
+        } else {
+            pushbackReader.unread(firstChar);
+        }
+        return result.toString();
+    }
+
+    private String possibleExponent(final PositionTrackingPushbackReader pushbackReader) throws IOException, InvalidSyntaxException {
+        final StringBuilder result = new StringBuilder();
+        final char firstChar = (char) pushbackReader.read();
+        switch (firstChar) {
+            case '.':
+            case 'E':
+                result.append('E');
+                result.append(possibleSign(pushbackReader));
+                result.append(digitToken(pushbackReader));
+                result.append(digitString(pushbackReader));
+                break;
+            case 'e':
+                result.append('e');
+                result.append(possibleSign(pushbackReader));
+                result.append(digitToken(pushbackReader));
+                result.append(digitString(pushbackReader));
+                break;
+            default:
+                pushbackReader.unread(firstChar);
+                break;
+        }
+        return result.toString();
+    }
+
+    private String possibleSign(final PositionTrackingPushbackReader pushbackReader) throws IOException {
+        final StringBuilder result = new StringBuilder();
+        final char firstChar = (char) pushbackReader.read();
+        if (firstChar == '+' || firstChar == '-') {
+            result.append(firstChar);
+        } else {
+            pushbackReader.unread(firstChar);
+        }
+        return result.toString();
+    }
+
+
+    private String stringToken(final PositionTrackingPushbackReader in) throws IOException, InvalidSyntaxException {
+        final StringBuilder result = new StringBuilder();
+        final char firstChar = (char) in.read();
+        if (DOUBLE_QUOTE != firstChar) {
+            throw new InvalidSyntaxException("Expected [" + DOUBLE_QUOTE + "] but got [" + firstChar + "].", in);
+        }
+        final ThingWithPosition openDoubleQuotesPosition = in.snapshotOfPosition();
+        boolean stringClosed = false;
+        while (!stringClosed) {
+            final char nextChar = (char) in.read();
+            switch (nextChar) {
+                case (char) -1:
+                    throw new InvalidSyntaxException("Got opening [" + DOUBLE_QUOTE + "] without matching closing [" + DOUBLE_QUOTE + "]", openDoubleQuotesPosition);
+                case DOUBLE_QUOTE:
+                    stringClosed = true;
+                    break;
+                case BACK_SLASH:
+                    final char escapedChar = escapedStringChar(in);
+                    result.append(escapedChar);
+                    break;
+                default:
+                    result.append(nextChar);
+            }
+        }
+        return result.toString();
+    }
+
+    private char escapedStringChar(final PositionTrackingPushbackReader in) throws IOException, InvalidSyntaxException {
+        final char result;
+        final char firstChar = (char) in.read();
+        switch (firstChar) {
+            case DOUBLE_QUOTE:
+                result = DOUBLE_QUOTE;
+                break;
+            case BACK_SLASH:
+                result = BACK_SLASH;
+                break;
+            case '/':
+                result = '/';
+                break;
+            case 'b':
+                result = BACKSPACE;
+                break;
+            case 'f':
+                result = FORM_FEED;
+                break;
+            case 'n':
+                result = NEWLINE;
+                break;
+            case 'r':
+                result = CARRIAGE_RETURN;
+                break;
+            case 't':
+                result = TAB;
+                break;
+            case 'u':
+                result = (char) hexadecimalNumber(in);
+                break;
+            default:
+                throw new InvalidSyntaxException("Unrecognised escape character [" + firstChar + "].", in);
+        }
+        return result;
+    }
+
+    private int hexadecimalNumber(final PositionTrackingPushbackReader in) throws IOException, InvalidSyntaxException {
+        final char[] resultCharArray = new char[4];
+        final int readSize = in.read(resultCharArray);
+        if (readSize != 4) {
+            throw new InvalidSyntaxException("Expected a 4 digit hexadecimal number but got only [" + readSize + "], namely [" + String.valueOf(resultCharArray, 0, readSize) + "].", in);
+        }
+        int result;
         try {
-            int1 = Integer.parseInt(String.valueOf(data), 16);
+            result = Integer.parseInt(String.valueOf(resultCharArray), 16);
+        } catch (final NumberFormatException e) {
+            in.uncount(resultCharArray);
+            throw new InvalidSyntaxException("Unable to parse [" + String.valueOf(resultCharArray) + "] as a hexadecimal number.", e, in);
         }
-        catch (final NumberFormatException throwable) {
-            lj.uncount(data);
-            throw new InvalidSyntaxException("Unable to parse [" + String.valueOf(data) + "] as a hexidecimal number.", throwable, lj);
-        }
-        return int1;
+        return result;
     }
-    
-    private int l(final PositionTrackingPushbackReader lj) {
-        boolean b = false;
-        int read;
+
+    private int readNextNonWhitespaceChar(final PositionTrackingPushbackReader in) throws IOException {
+        int nextChar;
+        boolean gotNonWhitespace = false;
         do {
-            read = lj.read();
-            switch (read) {
-                case 9:
-                case 10:
-                case 13:
-                case 32: {
-                    continue;
-                }
-                default: {
-                    b = true;
-                    continue;
-                }
+            nextChar = in.read();
+            switch (nextChar) {
+                case ' ':
+                case TAB:
+                case NEWLINE:
+                case CARRIAGE_RETURN:
+                    break;
+                default:
+                    gotNonWhitespace = true;
             }
-        } while (!b);
-        return read;
+        } while (!gotNonWhitespace);
+        return nextChar;
     }
+
 }

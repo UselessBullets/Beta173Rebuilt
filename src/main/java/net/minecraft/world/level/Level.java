@@ -42,15 +42,15 @@ import java.util.List;
 public class Level implements LevelSource
 {
     public boolean instaTick;
-    private List lightUpdates;
-    public List entities;
-    private List entitiesToRemove;
-    private TreeSet tickNextTickList;
-    private Set tickNextTickSet;
-    public List tileEntityList;
-    private List pendingTileEntities;
-    public List players;
-    public List globalEntities;
+    private List<LightUpdate> lightUpdates;
+    public List<Entity> entities;
+    private List<Entity> entitiesToRemove;
+    private TreeSet<TickNextTickData> tickNextTickList;
+    private Set<TickNextTickData> tickNextTickSet;
+    public List<TileEntity> tileEntityList;
+    private List<TileEntity> pendingTileEntities;
+    public List<Player> players;
+    public List<Entity> globalEntities;
     private long cloudColor;
     public int skyDarken;
     protected int randValue;
@@ -68,22 +68,22 @@ public class Level implements LevelSource
     public Random random;
     public boolean isNew;
     public final Dimension dimension;
-    protected List listeners;
+    protected List<LevelListener> listeners;
     protected ChunkSource chunkSource;
     protected final LevelStorage levelStorage;
     protected LevelData levelData;
     public boolean isFindingSpawn;
     private boolean allPlayersSleeping;
     public SavedDataStorage savedDataStorage;
-    private ArrayList boxes;
+    private ArrayList<AABB> boxes;
     private boolean updatingTileEntities;
     private int maxRecurse;
     private boolean spawnEnemies;
     private boolean spawnFriendlies;
     static int maxLoop;
-    private Set chunksToPoll;
+    private Set<ChunkPos> chunksToPoll;
     private int delayUntilNextMoodSound;
-    private List es;
+    private List<Entity> es;
     public boolean isClientSide;
     
     public BiomeSource getBiomeSource() {
@@ -933,7 +933,7 @@ public class Level implements LevelSource
             }
         }
         final double n = 0.25;
-        final List entities = this.getEntities(source, box.grow(n, n, n));
+        final List<Entity> entities = this.getEntities(source, box.grow(n, n, n));
         for (int l = 0; l < entities.size(); ++l) {
             final AABB collideBox = entities.get(l).getCollideBox();
             if (collideBox != null && collideBox.intersects(box)) {
@@ -1247,7 +1247,7 @@ public class Level implements LevelSource
     }
     
     public boolean isUnobstructed(final AABB aabb) {
-        final List entities = this.getEntities(null, aabb);
+        final List<Entity> entities = this.getEntities(null, aabb);
         for (int i = 0; i < entities.size(); ++i) {
             final Entity entity = entities.get(i);
             if (!entity.removed && entity.blocksBuilding) {
@@ -1822,7 +1822,7 @@ public class Level implements LevelSource
         }
     }
     
-    public List getEntities(final Entity except, final AABB bb) {
+    public List<Entity> getEntities(final Entity except, final AABB bb) {
         this.es.clear();
         final int floor = Mth.floor((bb.x0 - 2.0) / 16.0);
         final int floor2 = Mth.floor((bb.x1 + 2.0) / 16.0);

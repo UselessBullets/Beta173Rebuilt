@@ -12,23 +12,28 @@ package argo.jdom;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
-/**
- * <code>JsonNode</code> that explicitly represents a JSON String.
- */
-public final class JsonStringNode extends JsonNode implements Comparable<JsonStringNode> {
+import static argo.jdom.JsonNodeType.NUMBER;
+
+final class JsonNumberNode extends JsonNode {
+
+    private static final Pattern PATTERN = Pattern.compile("(-?)(0|([1-9]([0-9]*)))(\\.[0-9]+)?((e|E)(\\+|-)?[0-9]+)?");
 
     private final String value;
 
-    JsonStringNode(final String value) {
+    JsonNumberNode(final String value) {
         if (value == null) {
-            throw new NullPointerException("Attempt to construct a JsonString with a null value.");
+            throw new NullPointerException("Attempt to construct a JsonNumber with a null value.");
+        }
+        if (!PATTERN.matcher(value).matches()) {
+            throw new IllegalArgumentException("Attempt to construct a JsonNumber with a String [" + value + "] that does not match the JSON number specification.");
         }
         this.value = value;
     }
 
     public JsonNodeType getType() {
-        return JsonNodeType.STRING;
+        return NUMBER;
     }
 
     public boolean hasText() {
@@ -60,8 +65,8 @@ public final class JsonStringNode extends JsonNode implements Comparable<JsonStr
         if (this == that) return true;
         if (that == null || getClass() != that.getClass()) return false;
 
-        final JsonStringNode thatJsonTextNode = (JsonStringNode) that;
-        return this.value.equals(thatJsonTextNode.value);
+        final JsonNumberNode thatJsonNumberNode = (JsonNumberNode) that;
+        return this.value.equals(thatJsonNumberNode.value);
     }
 
     @Override
@@ -72,13 +77,9 @@ public final class JsonStringNode extends JsonNode implements Comparable<JsonStr
     @Override
     public String toString() {
         return new StringBuilder()
-                .append("JsonStringNode value:[")
+                .append("JsonNumberNode value:[")
                 .append(value)
                 .append("]")
                 .toString();
-    }
-
-    public int compareTo(final JsonStringNode that) {
-        return this.value.compareTo(that.value);
     }
 }

@@ -6,6 +6,7 @@ package com.mojang.nbt;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.IOException;
 
 public class StringTag extends Tag
 {
@@ -22,18 +23,18 @@ public class StringTag extends Tag
     }
     
     @Override
-    void write(final DataOutput dos) {
+    void write(final DataOutput dos) throws IOException {
         dos.writeUTF(this.data);
     }
     
     @Override
-    void load(final DataInput dis) {
+    void load(final DataInput dis) throws IOException {
         this.data = dis.readUTF();
     }
     
     @Override
     public byte getId() {
-        return 8;
+        return TAG_String;
     }
     
     @Override

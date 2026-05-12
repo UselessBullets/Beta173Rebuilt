@@ -6,6 +6,7 @@ package com.mojang.nbt;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.IOException;
 
 public class FloatTag extends Tag
 {
@@ -19,18 +20,18 @@ public class FloatTag extends Tag
     }
     
     @Override
-    void write(final DataOutput dos) {
+    void write(final DataOutput dos) throws IOException {
         dos.writeFloat(this.data);
     }
     
     @Override
-    void load(final DataInput dis) {
+    void load(final DataInput dis) throws IOException {
         this.data = dis.readFloat();
     }
     
     @Override
     public byte getId() {
-        return 5;
+        return TAG_Float;
     }
     
     @Override

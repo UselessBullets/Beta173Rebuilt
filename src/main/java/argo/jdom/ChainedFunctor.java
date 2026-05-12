@@ -1,47 +1,53 @@
-// 
-// Decompiled by Procyon v0.6.0
-// 
+/*
+ * Copyright 2010 Mark Slater
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
 
 package argo.jdom;
 
-final class ChainedFunctor implements Functor
-{
-    private final JsonNodeSelector parentJsonNodeSelector;
-    private final JsonNodeSelector childJsonNodeSelector;
-    
-    ChainedFunctor(final JsonNodeSelector parentJsonNodeSelector, final JsonNodeSelector childJsonNodeSelector) {
+import static argo.jdom.JsonNodeDoesNotMatchChainedJsonNodeSelectorException.createChainedJsonNodeDoesNotMatchJsonNodeSelectorException;
+import static argo.jdom.JsonNodeDoesNotMatchChainedJsonNodeSelectorException.createUnchainedJsonNodeDoesNotMatchJsonNodeSelectorException;
+
+final class ChainedFunctor<T, U, V> implements Functor<T, V> {
+    private final JsonNodeSelector<T, U> parentJsonNodeSelector;
+    private final JsonNodeSelector<U, V> childJsonNodeSelector;
+
+    ChainedFunctor(final JsonNodeSelector<T, U> parentJsonNodeSelector, final JsonNodeSelector<U, V> childJsonNodeSelector) {
         this.parentJsonNodeSelector = parentJsonNodeSelector;
         this.childJsonNodeSelector = childJsonNodeSelector;
     }
-    
-    public boolean matchesNode(final Object jsonNode) {
-        return this.parentJsonNodeSelector.matches(jsonNode) && this.childJsonNodeSelector.matches(this.parentJsonNodeSelector.getValue(jsonNode));
+
+    public boolean matchesNode(final T jsonNode) {
+        return parentJsonNodeSelector.matches(jsonNode) && childJsonNodeSelector.matches(parentJsonNodeSelector.getValue(jsonNode));
     }
-    
-    public Object applyTo(final Object jsonNode) {
-        Object value;
+
+    public V applyTo(final T jsonNode) {
+        final U parent;
         try {
-            value = this.parentJsonNodeSelector.getValue(jsonNode);
+            parent = parentJsonNodeSelector.getValue(jsonNode);
+        } catch (JsonNodeDoesNotMatchChainedJsonNodeSelectorException e) {
+            throw createUnchainedJsonNodeDoesNotMatchJsonNodeSelectorException(e, parentJsonNodeSelector);
         }
-        catch (final JsonNodeDoesNotMatchChainedJsonNodeSelectorException e) {
-            throw JsonNodeDoesNotMatchChainedJsonNodeSelectorException.createUnchainedJsonNodeDoesNotMatchJsonNodeSelectorException(e, this.parentJsonNodeSelector);
-        }
-        Object value2;
+        final V value;
         try {
-            value2 = this.childJsonNodeSelector.getValue(value);
+            value = childJsonNodeSelector.getValue(parent);
+        } catch (JsonNodeDoesNotMatchChainedJsonNodeSelectorException e) {
+            throw createChainedJsonNodeDoesNotMatchJsonNodeSelectorException(e, parentJsonNodeSelector);
         }
-        catch (final JsonNodeDoesNotMatchChainedJsonNodeSelectorException e2) {
-            throw JsonNodeDoesNotMatchChainedJsonNodeSelectorException.createChainedJsonNodeDoesNotMatchJsonNodeSelectorException(e2, this.parentJsonNodeSelector);
-        }
-        return value2;
+        return value;
     }
-    
+
     public String shortForm() {
-        return this.childJsonNodeSelector.shortForm();
+        return childJsonNodeSelector.shortForm();
     }
-    
+
     @Override
     public String toString() {
-        return this.parentJsonNodeSelector.toString() + ", with " + this.childJsonNodeSelector.toString();
+        return parentJsonNodeSelector.toString() + ", with " + childJsonNodeSelector.toString();
     }
 }

@@ -16,7 +16,7 @@ import java.io.InputStream;
 
 public class NbtIo
 {
-    public static CompoundTag readCompressed(final InputStream in) {
+    public static CompoundTag readCompressed(final InputStream in) throws IOException {
         final DataInputStream dis = new DataInputStream(new GZIPInputStream(in));
         try {
             return read(dis);
@@ -26,7 +26,7 @@ public class NbtIo
         }
     }
     
-    public static void writeCompressed(final CompoundTag tag, final OutputStream out) {
+    public static void writeCompressed(final CompoundTag tag, final OutputStream out) throws IOException {
         final DataOutputStream dos = new DataOutputStream(new GZIPOutputStream(out));
         try {
             write(tag, dos);
@@ -36,7 +36,7 @@ public class NbtIo
         }
     }
     
-    public static CompoundTag read(final DataInput dis) {
+    public static CompoundTag read(final DataInput dis) throws IOException {
         final Tag namedTag = Tag.readNamedTag(dis);
         if (namedTag instanceof CompoundTag) {
             return (CompoundTag)namedTag;
@@ -44,7 +44,7 @@ public class NbtIo
         throw new IOException("Root tag must be a named compound tag");
     }
     
-    public static void write(final CompoundTag tag, final DataOutput dos) {
+    public static void write(final CompoundTag tag, final DataOutput dos) throws IOException {
         Tag.writeNamedTag(tag, dos);
     }
 }

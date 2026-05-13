@@ -28,7 +28,7 @@ public abstract class Packet
         this.shouldDelay = false;
     }
     
-    static void map(final int id, final boolean receiveOnClient, final boolean receiveOnServer, final Class clazz) {
+    static void map(final int id, final boolean receiveOnClient, final boolean receiveOnServer, final Class<? extends Packet> clazz) {
         if (Packet.idToClassMap.containsKey(id)) {
             throw new IllegalArgumentException("Duplicate packet id:" + id);
         }
@@ -47,11 +47,11 @@ public abstract class Packet
     
     public static Packet getPacket(final int id) {
         try {
-            final Class clazz = Packet.idToClassMap.get(id);
+            final Class<? extends Packet> clazz = Packet.idToClassMap.get(id);
             if (clazz == null) {
                 return null;
             }
-            return (Packet)clazz.newInstance();
+            return clazz.newInstance();
         }
         catch (final Exception ex) {
             ex.printStackTrace();
@@ -133,10 +133,10 @@ public abstract class Packet
     public abstract int getEstimatedSize();
     
     static {
-        Packet.idToClassMap = new HashMap();
-        Packet.classToIdMap = new HashMap();
-        Packet.clientReceivedPackets = new HashSet();
-        Packet.serverReceivedPackets = new HashSet();
+        Packet.idToClassMap = new HashMap<>();
+        Packet.classToIdMap = new HashMap<>();
+        Packet.clientReceivedPackets = new HashSet<>();
+        Packet.serverReceivedPackets = new HashSet<>();
         map(0, true, true, KeepAlivePacket.class);
         map(1, true, true, LoginPacket.class);
         map(2, true, true, PreLoginPacket.class);
@@ -194,7 +194,7 @@ public abstract class Packet
         map(131, true, false, ComplexItemDataPacket.class);
         map(200, true, false, AwardStatPacket.class);
         map(255, true, true, DisconnectPacket.class);
-        Packet.packetStatistics = new HashMap();
+        Packet.packetStatistics = new HashMap<>();
         Packet.readCounter = 0;
     }
 

@@ -143,8 +143,9 @@ public class PlayerRenderer extends MobRenderer<Player>
             }
         }
     }
-    
-    protected void scale(final Player mob, final float partialTick) {
+
+    @Override
+    protected void additionalRendering(final Player mob, final float partialTick) {
         final ItemInstance armor = mob.inventory.getArmor(3);
         if (armor != null && armor.getItem().id < 256) {
             GL11.glPushMatrix();
@@ -246,8 +247,9 @@ public class PlayerRenderer extends MobRenderer<Player>
             GL11.glPopMatrix();
         }
     }
-    
-    protected void additionalRendering(final Player mob, final float partialTick) {
+
+    @Override
+    protected void scale(final Player mob, final float partialTick) {
         final float n = 0.9375f;
         GL11.glScalef(n, n, n);
     }

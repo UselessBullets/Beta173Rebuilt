@@ -31,15 +31,15 @@ import net.minecraft.world.level.material.Material;
 
 public class Tile
 {
-    public static final Tile_SoundType SOUND_NORMAL;
-    public static final Tile_SoundType SOUND_WOOD;
-    public static final Tile_SoundType SOUND_GRAVEL;
-    public static final Tile_SoundType SOUND_GRASS;
-    public static final Tile_SoundType SOUND_STONE;
-    public static final Tile_SoundType SOUND_METAL;
-    public static final Tile_SoundType SOUND_GLASS;
-    public static final Tile_SoundType SOUND_CLOTH;
-    public static final Tile_SoundType SOUND_SAND;
+    public static final SoundType SOUND_NORMAL;
+    public static final SoundType SOUND_WOOD;
+    public static final SoundType SOUND_GRAVEL;
+    public static final SoundType SOUND_GRASS;
+    public static final SoundType SOUND_STONE;
+    public static final SoundType SOUND_METAL;
+    public static final SoundType SOUND_GLASS;
+    public static final SoundType SOUND_CLOTH;
+    public static final SoundType SOUND_SAND;
     public static final Tile[] tiles;
     public static final boolean[] shouldTick;
     public static final boolean[] solid;
@@ -156,7 +156,7 @@ public class Tile
     public double xx1;
     public double yy1;
     public double zz1;
-    public Tile_SoundType soundType;
+    public SoundType soundType;
     public float gravity;
     public final Material material;
     public float friction;
@@ -194,7 +194,7 @@ public class Tile
         this.tex = tex;
     }
     
-    protected Tile setSoundType(final Tile_SoundType soundType) {
+    protected Tile setSoundType(final SoundType soundType) {
         this.soundType = soundType;
         return this;
     }
@@ -567,15 +567,25 @@ public class Tile
     }
     
     static {
-        SOUND_NORMAL = new Tile_SoundType("stone", 1.0f, 1.0f);
-        SOUND_WOOD = new Tile_SoundType("wood", 1.0f, 1.0f);
-        SOUND_GRAVEL = new Tile_SoundType("gravel", 1.0f, 1.0f);
-        SOUND_GRASS = new Tile_SoundType("grass", 1.0f, 1.0f);
-        SOUND_STONE = new Tile_SoundType("stone", 1.0f, 1.0f);
-        SOUND_METAL = new Tile_SoundType("stone", 1.0f, 1.5f);
-        SOUND_GLASS = new Tile_SoundType_Glass("stone", 1.0f, 1.0f);
-        SOUND_CLOTH = new Tile_SoundType("cloth", 1.0f, 1.0f);
-        SOUND_SAND = new Tile_SoundType_Sand("sand", 1.0f, 1.0f);
+        SOUND_NORMAL = new SoundType("stone", 1.0f, 1.0f);
+        SOUND_WOOD = new SoundType("wood", 1.0f, 1.0f);
+        SOUND_GRAVEL = new SoundType("gravel", 1.0f, 1.0f);
+        SOUND_GRASS = new SoundType("grass", 1.0f, 1.0f);
+        SOUND_STONE = new SoundType("stone", 1.0f, 1.0f);
+        SOUND_METAL = new SoundType("stone", 1.0f, 1.5f);
+        SOUND_GLASS = new SoundType("stone", 1.0f, 1.0f) {
+            @Override
+            public String getBreakSound() {
+                return "random.glass";
+            }
+        };
+        SOUND_CLOTH = new SoundType("cloth", 1.0f, 1.0f);
+        SOUND_SAND = new SoundType("sand", 1.0f, 1.0f) {
+            @Override
+            public String getBreakSound() {
+                return "step.gravel";
+            }
+        };
         tiles = new Tile[256];
         shouldTick = new boolean[256];
         solid = new boolean[256];
@@ -653,9 +663,9 @@ public class Tile
         stairs_stone = new StairTile(67, Tile.stoneBrick).setDescriptionId("stairsStone").sendTileData();
         wallSign = new SignTile(68, SignTileEntity.class, false).setDestroyTime(1.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("sign").setNotCollectStatistics().sendTileData();
         lever = new LeverTile(69, 96).setDestroyTime(0.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("lever").sendTileData();
-        pressurePlate_stone = new PressurePlateTile(70, Tile.rock.tex, PressurePlateTile_Sensitivity.mobs, Material.stone).setDestroyTime(0.5f).setSoundType(Tile.SOUND_STONE).setDescriptionId("pressurePlate").sendTileData();
+        pressurePlate_stone = new PressurePlateTile(70, Tile.rock.tex, PressurePlateTile.Sensitivity.mobs, Material.stone).setDestroyTime(0.5f).setSoundType(Tile.SOUND_STONE).setDescriptionId("pressurePlate").sendTileData();
         door_iron = new DoorTile(71, Material.metal).setDestroyTime(5.0f).setSoundType(Tile.SOUND_METAL).setDescriptionId("doorIron").setNotCollectStatistics().sendTileData();
-        pressurePlate_wood = new PressurePlateTile(72, Tile.wood.tex, PressurePlateTile_Sensitivity.everything, Material.wood).setDestroyTime(0.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("pressurePlate").sendTileData();
+        pressurePlate_wood = new PressurePlateTile(72, Tile.wood.tex, PressurePlateTile.Sensitivity.everything, Material.wood).setDestroyTime(0.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("pressurePlate").sendTileData();
         redStoneOre = new RedStoneOreTile(73, 51, false).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreRedstone").sendTileData();
         redStoneOre_lit = new RedStoneOreTile(74, 51, true).setLightEmission(0.625f).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreRedstone").sendTileData();
         notGate_off = new NotGateTile(75, 115, false).setDestroyTime(0.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("notGate").sendTileData();
@@ -695,5 +705,34 @@ public class Tile
         }
         Tile.transculent[0] = true;
         Stats.buildBlockStats();
+    }
+
+    public static class SoundType
+    {
+        public final String name;
+        public final float volume;
+        public final float pitch;
+
+        public SoundType(final String name, final float volume, final float pitch) {
+            this.name = name;
+            this.volume = volume;
+            this.pitch = pitch;
+        }
+
+        public float getVolume() {
+            return this.volume;
+        }
+
+        public float getPitch() {
+            return this.pitch;
+        }
+
+        public String getBreakSound() {
+            return "step." + this.name;
+        }
+
+        public String getStepSound() {
+            return "step." + this.name;
+        }
     }
 }

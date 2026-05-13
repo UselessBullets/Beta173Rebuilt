@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.tile.LiquidTile;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.tile.Tile_SoundType;
+
 import java.util.List;
 import net.minecraft.world.level.tile.Tile;
 import util.Mth;
@@ -446,9 +446,9 @@ public abstract class Entity
             }
             if (this.walkDist > this.nextStep && n14 > 0) {
                 ++this.nextStep;
-                final Tile_SoundType soundType = Tile.tiles[n14].soundType;
+                final Tile.SoundType soundType = Tile.tiles[n14].soundType;
                 if (this.level.getTile(floor, floor2 + 1, floor3) == Tile.topSnow.id) {
-                    final Tile_SoundType soundType2 = Tile.topSnow.soundType;
+                    final Tile.SoundType soundType2 = Tile.topSnow.soundType;
                     this.level.playSound(this, soundType2.getStepSound(), soundType2.getVolume() * 0.15f, soundType2.getPitch());
                 }
                 else if (!Tile.tiles[n14].material.isLiquid()) {

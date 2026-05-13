@@ -10,7 +10,6 @@ import net.minecraft.world.entity.player.Player;
 import java.util.List;
 import net.minecraft.world.phys.AABB;
 import com.mojang.nbt.CompoundTag;
-import net.minecraft.world.level.tile.Tile_SoundType;
 import net.minecraft.world.level.tile.Tile;
 import util.Mth;
 import net.minecraft.world.level.material.Material;
@@ -447,7 +446,7 @@ public abstract class Mob extends Entity
             this.hurt(null, dmg);
             final int tile = this.level.getTile(Mth.floor(this.x), Mth.floor(this.y - 0.20000000298023224 - this.heightOffset), Mth.floor(this.z));
             if (tile > 0) {
-                final Tile_SoundType soundType = Tile.tiles[tile].soundType;
+                final Tile.SoundType soundType = Tile.tiles[tile].soundType;
                 this.level.playSound(this, soundType.getStepSound(), soundType.getVolume() * 0.5f, soundType.getPitch() * 0.75f);
             }
         }

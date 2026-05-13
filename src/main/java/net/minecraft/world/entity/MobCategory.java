@@ -11,23 +11,23 @@ import net.minecraft.world.level.material.Material;
 
 public enum MobCategory
 {
-    monster((Class)Enemy.class, 70, Material.air, false), 
-    creature((Class)Animal.class, 15, Material.air, true), 
-    waterCreature((Class)WaterAnimal.class, 5, Material.water, true);
+    monster(Enemy.class, 70, Material.air, false),
+    creature(Animal.class, 15, Material.air, true),
+    waterCreature(WaterAnimal.class, 5, Material.water, true);
     
-    private final Class base;
+    private final Class<?> base;
     private final int max;
     private final Material spawnPositionMaterial;
     private final boolean isFriendly;
     
-    private MobCategory(final Class base, final int max, final Material spawnPositionMaterial, final boolean isFriendly) {
+    private MobCategory(final Class<?> base, final int max, final Material spawnPositionMaterial, final boolean isFriendly) {
         this.base = base;
         this.max = max;
         this.spawnPositionMaterial = spawnPositionMaterial;
         this.isFriendly = isFriendly;
     }
     
-    public Class getBaseClass() {
+    public Class<?> getBaseClass() {
         return this.base;
     }
     

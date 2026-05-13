@@ -16,9 +16,9 @@ import net.minecraft.world.level.material.Material;
 
 public class PressurePlateTile extends Tile
 {
-    private PressurePlateTile_Sensitivity sensitivity;
+    private Sensitivity sensitivity;
     
-    protected PressurePlateTile(final int id, final int tex, final PressurePlateTile_Sensitivity sensitivity, final Material material) {
+    protected PressurePlateTile(final int id, final int tex, final Sensitivity sensitivity, final Material material) {
         super(id, tex, material);
         this.sensitivity = sensitivity;
         this.setTicking(true);
@@ -94,13 +94,13 @@ public class PressurePlateTile extends Tile
         boolean b2 = false;
         final float n = 0.125f;
         List list = null;
-        if (this.sensitivity == PressurePlateTile_Sensitivity.everything) {
+        if (this.sensitivity == Sensitivity.everything) {
             list = level.getEntities(null, AABB.newTemp(x + n, y, z + n, x + 1 - n, y + 0.25, z + 1 - n));
         }
-        if (this.sensitivity == PressurePlateTile_Sensitivity.mobs) {
+        if (this.sensitivity == Sensitivity.mobs) {
             list = level.getEntitiesOfClass(Mob.class, AABB.newTemp(x + n, y, z + n, x + 1 - n, y + 0.25, z + 1 - n));
         }
-        if (this.sensitivity == PressurePlateTile_Sensitivity.players) {
+        if (this.sensitivity == Sensitivity.players) {
             list = level.getEntitiesOfClass(Player.class, AABB.newTemp(x + n, y, z + n, x + 1 - n, y + 0.25, z + 1 - n));
         }
         if (list.size() > 0) {
@@ -172,5 +172,12 @@ public class PressurePlateTile extends Tile
     @Override
     public int getPistonPushReaction() {
         return 1;
+    }
+
+    public enum Sensitivity
+    {
+        everything,
+        mobs,
+        players;
     }
 }

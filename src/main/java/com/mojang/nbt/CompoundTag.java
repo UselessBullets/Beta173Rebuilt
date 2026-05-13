@@ -17,12 +17,12 @@ public class CompoundTag extends Tag
     private Map<String, Tag> tags;
     
     public CompoundTag() {
-        this.tags = new HashMap();
+        this.tags = new HashMap<>();
     }
     
     @Override
     void write(final DataOutput dos) throws IOException {
-        final Iterator iterator = this.tags.values().iterator();
+        final Iterator<Tag> iterator = this.tags.values().iterator();
         while (iterator.hasNext()) {
             Tag.writeNamedTag((Tag)iterator.next(), dos);
         }
@@ -158,11 +158,11 @@ public class CompoundTag extends Tag
         return (CompoundTag) this.tags.get(name);
     }
     
-    public ListTag getList(final String name) {
+    public ListTag<? extends Tag> getList(final String name) {
         if (!this.tags.containsKey(name)) {
-            return new ListTag();
+            return new ListTag<>();
         }
-        return (ListTag) this.tags.get(name);
+        return (ListTag<?>) this.tags.get(name);
     }
     
     public boolean getBoolean(final String name) {

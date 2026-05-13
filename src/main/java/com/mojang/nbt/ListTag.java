@@ -10,13 +10,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListTag extends Tag
+public class ListTag<T extends Tag> extends Tag
 {
-    private List<Tag> list;
+    private List<T> list;
     private byte type;
     
     public ListTag() {
-        this.list = new ArrayList();
+        this.list = new ArrayList<>();
     }
     
     @Override
@@ -30,7 +30,7 @@ public class ListTag extends Tag
         dos.writeByte(this.type);
         dos.writeInt(this.list.size());
         for (int i = 0; i < this.list.size(); ++i) {
-            ((Tag)this.list.get(i)).write(dos);
+            this.list.get(i).write(dos);
         }
     }
     
@@ -38,11 +38,11 @@ public class ListTag extends Tag
     void load(final DataInput dis) throws IOException {
         this.type = dis.readByte();
         final int int1 = dis.readInt();
-        this.list = new ArrayList();
+        this.list = new ArrayList<>();
         for (int i = 0; i < int1; ++i) {
             final Tag tag = Tag.newTag(this.type);
             tag.load(dis);
-            this.list.add(tag);
+            this.list.add((T) tag);
         }
     }
     
@@ -56,12 +56,12 @@ public class ListTag extends Tag
         return "" + this.list.size() + " entries of type " + Tag.getTagName(this.type);
     }
     
-    public void add(final Tag tag) {
+    public void add(final T tag) {
         this.type = tag.getId();
         this.list.add(tag);
     }
     
-    public Tag get(final int index) {
+    public T get(final int index) {
         return this.list.get(index);
     }
     

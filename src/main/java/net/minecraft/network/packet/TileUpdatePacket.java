@@ -4,6 +4,8 @@
 
 package net.minecraft.network.packet;
 
+import net.minecraft.world.level.Level;
+
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -15,9 +17,18 @@ public class TileUpdatePacket extends Packet
     public int z;
     public int block;
     public int data;
-    
+
     public TileUpdatePacket() {
         this.shouldDelay = true;
+    }
+
+    public TileUpdatePacket(final int x, final int y, final int z, final Level level) {
+        this.shouldDelay = true;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.block = level.getTile(x, y, z);
+        this.data = level.getData(x, y, z);
     }
     
     @Override

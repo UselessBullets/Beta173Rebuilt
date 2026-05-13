@@ -36,6 +36,23 @@ public abstract class AbstractContainerMenu
         this.slots.add(slot);
         this.lastSlots.add(null);
     }
+
+    public void addSlotListener(final ContainerListener listener) {
+        if (this.containerListeners.contains(listener)) {
+            throw new IllegalArgumentException("Listener already listening");
+        }
+        this.containerListeners.add(listener);
+        listener.refreshContainer(this, this.getItems());
+        this.broadcastChanges();
+    }
+
+    public List<ItemInstance> getItems() {
+        final ArrayList<ItemInstance> list = new ArrayList<>();
+        for (int i = 0; i < this.slots.size(); ++i) {
+            list.add(this.slots.get(i).getItem());
+        }
+        return list;
+    }
     
     public void broadcastChanges() {
         for (int i = 0; i < this.slots.size(); ++i) {
@@ -44,12 +61,22 @@ public abstract class AbstractContainerMenu
                 final ItemInstance item2 = (item == null) ? null : item.copy();
                 this.lastSlots.set(i, item2);
                 for (int j = 0; j < this.containerListeners.size(); ++j) {
-                    ((ContainerListener)this.containerListeners.get(j)).slotChanged(this, i, item2);
+                    this.containerListeners.get(j).slotChanged(this, i, item2);
                 }
             }
         }
     }
-    
+
+    public Slot getSlotFor(final Container container, final int index) {
+        for (int i = 0; i < this.slots.size(); ++i) {
+            final Slot slot = this.slots.get(i);
+            if (slot.isAt(container, index)) {
+                return slot;
+            }
+        }
+        return null;
+    }
+
     public Slot getSlot(final int index) {
         return this.slots.get(index);
     }
@@ -171,6 +198,19 @@ public abstract class AbstractContainerMenu
     
     public void slotsChanged(final Container container) {
         this.broadcastChanges();
+    }
+
+    public boolean isSynched(final Player player) {
+        return !this.unSynchedPlayers.contains(player);
+    }
+
+    public void setSynched(final Player player, final boolean synched) {
+        if (synched) {
+            this.unSynchedPlayers.remove(player);
+        }
+        else {
+            this.unSynchedPlayers.add(player);
+        }
     }
     
     public void setItem(final int slot, final ItemInstance item) {

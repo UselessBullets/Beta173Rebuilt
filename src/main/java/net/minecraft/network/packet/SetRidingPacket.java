@@ -4,6 +4,8 @@
 
 package net.minecraft.network.packet;
 
+import net.minecraft.world.entity.Entity;
+
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -12,7 +14,15 @@ public class SetRidingPacket extends Packet
 {
     public int riderId;
     public int riddenId;
-    
+
+    public SetRidingPacket() {
+    }
+
+    public SetRidingPacket(final Entity rider, final Entity ridden) {
+        this.riderId = rider.entityId;
+        this.riddenId = ((ridden != null) ? ridden.entityId : -1);
+    }
+
     @Override
     public int getEstimatedSize() {
         return 8;

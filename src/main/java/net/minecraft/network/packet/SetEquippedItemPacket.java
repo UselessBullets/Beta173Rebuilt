@@ -4,6 +4,8 @@
 
 package net.minecraft.network.packet;
 
+import net.minecraft.world.item.ItemInstance;
+
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -14,7 +16,23 @@ public class SetEquippedItemPacket extends Packet
     public int slot;
     public int item;
     public int auxValue;
-    
+
+    public SetEquippedItemPacket() {
+    }
+
+    public SetEquippedItemPacket(final int entity, final int slot, final ItemInstance item) {
+        this.entity = entity;
+        this.slot = slot;
+        if (item == null) {
+            this.item = -1;
+            this.auxValue = 0;
+        }
+        else {
+            this.item = item.id;
+            this.auxValue = item.getAuxValue();
+        }
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.entity = dis.readInt();

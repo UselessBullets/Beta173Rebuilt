@@ -12,7 +12,15 @@ public class TakeItemEntityPacket extends Packet
 {
     public int itemId;
     public int playerId;
-    
+
+    public TakeItemEntityPacket() {
+    }
+
+    public TakeItemEntityPacket(final int itemId, final int playerId) {
+        this.itemId = itemId;
+        this.playerId = playerId;
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.itemId = dis.readInt();

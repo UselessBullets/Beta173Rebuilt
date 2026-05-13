@@ -5,6 +5,8 @@
 package net.minecraft.world.level.tile.entity;
 
 import com.mojang.nbt.CompoundTag;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.SignUpdatePacket;
 
 public class SignTileEntity extends TileEntity
 {
@@ -37,5 +39,22 @@ public class SignTileEntity extends TileEntity
                 this.messages[i] = this.messages[i].substring(0, 15);
             }
         }
+    }
+
+    @Override
+    public Packet getUpdatePacket() {
+        final String[] lines = new String[4];
+        for (int i = 0; i < 4; ++i) {
+            lines[i] = this.messages[i];
+        }
+        return new SignUpdatePacket(this.x, this.y, this.z, lines);
+    }
+
+    public boolean isEditable() {
+        return this.isEditable;
+    }
+
+    public void setEditable(final boolean isEditable) {
+        this.isEditable = isEditable;
     }
 }

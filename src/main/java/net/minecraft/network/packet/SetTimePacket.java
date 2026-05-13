@@ -11,6 +11,13 @@ import java.io.IOException;
 public class SetTimePacket extends Packet
 {
     public long time;
+
+    public SetTimePacket() {
+    }
+
+    public SetTimePacket(final long time) {
+        this.time = time;
+    }
     
     @Override
     public void read(final DataInputStream dis) throws IOException {

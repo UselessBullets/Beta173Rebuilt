@@ -13,9 +13,16 @@ public class ComplexItemDataPacket extends Packet
     public short itemType;
     public short itemId;
     public byte[] data;
-    
+
     public ComplexItemDataPacket() {
         this.shouldDelay = true;
+    }
+
+    public ComplexItemDataPacket(final short itemType, final short itemId, final byte[] data) {
+        this.shouldDelay = true;
+        this.itemType = itemType;
+        this.itemId = itemId;
+        this.data = data;
     }
     
     @Override

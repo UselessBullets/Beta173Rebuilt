@@ -8,6 +8,7 @@ import com.mojang.nbt.Tag;
 import com.mojang.nbt.CompoundTag;
 import java.util.List;
 import com.mojang.nbt.NbtIo;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelData;
 import net.minecraft.world.level.chunk.storage.OldChunkStorage;
 import net.minecraft.world.level.dimension.HellDimension;
@@ -23,7 +24,7 @@ import java.io.FileOutputStream;
 import java.io.File;
 import java.util.logging.Logger;
 
-public class DirectoryLevelStorage implements LevelStorage
+public class DirectoryLevelStorage implements PlayerIO, LevelStorage
 {
     private static final Logger logger;
     private final File dir;
@@ -161,7 +162,57 @@ public class DirectoryLevelStorage implements LevelStorage
             ex.printStackTrace();
         }
     }
-    
+
+    @Override
+    public void save(final Player player) {
+        try {
+            final CompoundTag compoundTag = new CompoundTag();
+            player.saveWithoutId(compoundTag);
+            final File file = new File(this.playerDir, "_tmp_.dat");
+            final File dest = new File(this.playerDir, player.name + ".dat");
+            NbtIo.writeCompressed(compoundTag, new FileOutputStream(file));
+            if (dest.exists()) {
+                dest.delete();
+            }
+            file.renameTo(dest);
+        }
+        catch (final Exception ex) {
+            DirectoryLevelStorage.logger.warning("Failed to save player data for " + player.name);
+        }
+    }
+
+    @Override
+    public void load(final Player player) {
+        final CompoundTag loadPlayerDataTag = this.loadPlayerDataTag(player.name);
+        if (loadPlayerDataTag != null) {
+            player.load(loadPlayerDataTag);
+        }
+    }
+
+    public CompoundTag loadPlayerDataTag(final String userName) {
+        try {
+            final File file = new File(this.playerDir, userName + ".dat");
+            if (file.exists()) {
+                return NbtIo.readCompressed(new FileInputStream(file));
+            }
+        }
+        catch (final Exception ex) {
+            DirectoryLevelStorage.logger.warning("Failed to load player data for " + userName);
+        }
+        return null;
+    }
+
+    @Override
+    public PlayerIO getPlayerIO() {
+        return this;
+    }
+
+    @Override
+    public void closeAll() {
+
+    }
+
+    @Override
     public File getDataFile(final String id) {
         return new File(this.dataDir, id + ".dat");
     }

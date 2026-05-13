@@ -11,6 +11,13 @@ import java.io.IOException;
 public class RemoveEntityPacket extends Packet
 {
     public int id;
+
+    public RemoveEntityPacket() {
+    }
+
+    public RemoveEntityPacket(final int id) {
+        this.id = id;
+    }
     
     @Override
     public void read(final DataInputStream dis) throws IOException {

@@ -19,7 +19,18 @@ public class ExplodePacket extends Packet
     public double z;
     public float r;
     public Set<TilePos> toBlow;
-    
+
+    public ExplodePacket() {
+    }
+
+    public ExplodePacket(final double x, final double y, final double z, final float r, final Set<TilePos> toBlow) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.r = r;
+        this.toBlow = new HashSet<>(toBlow);
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.x = dis.readDouble();

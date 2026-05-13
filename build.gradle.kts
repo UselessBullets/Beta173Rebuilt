@@ -15,7 +15,7 @@ dependencies {
     implementation("com.paulscode:librarylwjglopenal:20100824") // needs to be included in client jar
     implementation("com.paulscode:codecwav:20101023") // needs to be included in client jar
 //    implementation("com.paulscode:codecjorbis:20101023") // Is copied into project since b173 uses a very slightly modified version to faciliate CodecMus
-    implementation("net.sourceforge.argo:argo:3.4") // newer than what would've been in b173, but the older version on maven don't work properly, think b173 used 2.10 or 2.11 but thats not on maven
+    implementation("net.sourceforge.argo:argo:3.4") // needs to be included in client jar, newer than what would've been in b173, but the older version on maven don't work properly, think b173 used 2.10 or 2.11 but thats not on maven
 
     val lwjglVer = "2.9.4-nightly-20150209"
     implementation("org.lwjgl.lwjgl:lwjgl:$lwjglVer")

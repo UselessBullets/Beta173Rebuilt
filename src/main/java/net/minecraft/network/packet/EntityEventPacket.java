@@ -12,7 +12,15 @@ public class EntityEventPacket extends Packet
 {
     public int entityId;
     public byte eventId;
-    
+
+    public EntityEventPacket() {
+    }
+
+    public EntityEventPacket(final int entityId, final byte eventId) {
+        this.entityId = entityId;
+        this.eventId = eventId;
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.entityId = dis.readInt();

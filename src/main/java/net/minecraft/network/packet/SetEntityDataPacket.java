@@ -16,7 +16,15 @@ public class SetEntityDataPacket extends Packet
 {
     public int id;
     private List<DataItem> packedItems;
-    
+
+    public SetEntityDataPacket() {
+    }
+
+    public SetEntityDataPacket(final int id, final SynchedEntityData entityData) {
+        this.id = id;
+        this.packedItems = entityData.packDirty();
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();

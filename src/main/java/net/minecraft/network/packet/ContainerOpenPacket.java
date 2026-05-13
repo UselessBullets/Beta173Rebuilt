@@ -14,7 +14,17 @@ public class ContainerOpenPacket extends Packet
     public int type;
     public String title;
     public int size;
-    
+
+    public ContainerOpenPacket() {
+    }
+
+    public ContainerOpenPacket(final int containerId, final int type, final String title, final int size) {
+        this.containerId = containerId;
+        this.type = type;
+        this.title = title;
+        this.size = size;
+    }
+
     @Override
     public void handle(final PacketListener listener) {
         listener.handleContainerOpen(this);

@@ -4,6 +4,8 @@
 
 package net.minecraft.world.item;
 
+import net.minecraft.network.packet.ComplexItemDataPacket;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.MaterialColor;
@@ -226,5 +228,14 @@ public class MapItem extends ComplexItem
         data.scale = 3;
         data.dimension = (byte)level.dimension.id;
         data.setDirty();
+    }
+
+    @Override
+    public Packet getUpdatePacket(final ItemInstance itemInstance, final Level level, final Player player) {
+        final byte[] updatePacket = this.getSavedData(itemInstance, level).getUpdatePacket(itemInstance, level, player);
+        if (updatePacket == null) {
+            return null;
+        }
+        return new ComplexItemDataPacket((short)Item.map.id, (short)itemInstance.getAuxValue(), updatePacket);
     }
 }

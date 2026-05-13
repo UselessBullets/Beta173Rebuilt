@@ -15,7 +15,18 @@ public class LevelEventPacket extends Packet
     public int x;
     public int y;
     public int z;
-    
+
+    public LevelEventPacket() {
+    }
+
+    public LevelEventPacket(final int type, final int x, final int y, final int z, final int data) {
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.data = data;
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.type = dis.readInt();

@@ -15,7 +15,16 @@ public class ContainerSetSlotPacket extends Packet
     public int containerId;
     public int slot;
     public ItemInstance item;
-    
+
+    public ContainerSetSlotPacket() {
+    }
+
+    public ContainerSetSlotPacket(final int containerId, final int slot, final ItemInstance item) {
+        this.containerId = containerId;
+        this.slot = slot;
+        this.item = ((item == null) ? item : item.copy());
+    }
+
     @Override
     public void handle(final PacketListener listener) {
         listener.handleContainerSetSlot(this);

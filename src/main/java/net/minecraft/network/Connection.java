@@ -137,6 +137,10 @@ public class Connection
         this.readThread.start();
         this.writeThread.start();
     }
+
+    public void setListener(final PacketListener packetListener) {
+        this.packetListener = packetListener;
+    }
     
     public void send(final Packet packet) {
         if (this.quitting) {
@@ -291,6 +295,10 @@ public class Connection
             this.packetListener.onDisconnect(this.disconnectReason, this.disconnectReasonObjects);
         }
     }
+
+    public SocketAddress getRemoteAddress() {
+        return this.address;
+    }
     
     public void sendAndQuit() {
         this.flush();
@@ -308,6 +316,10 @@ public class Connection
                 ex.printStackTrace();
             }
         }).start();
+    }
+
+    public int countDelayedPackets() {
+        return this.outgoing_slow.size();
     }
     
     static {

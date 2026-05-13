@@ -12,7 +12,15 @@ public class AwardStatPacket extends Packet
 {
     public int statId;
     public int count;
-    
+
+    public AwardStatPacket() {
+    }
+
+    public AwardStatPacket(final int statId, final int count) {
+        this.statId = statId;
+        this.count = count;
+    }
+
     @Override
     public void handle(final PacketListener listener) {
         listener.handleAwardStat(this);

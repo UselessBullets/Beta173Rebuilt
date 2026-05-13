@@ -4,9 +4,12 @@
 
 package net.minecraft.network.packet;
 
+import net.minecraft.world.level.Level;
+
 import java.io.DataOutputStream;
 import java.util.zip.DataFormatException;
 import java.io.IOException;
+import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 import java.io.DataInputStream;
 
@@ -23,6 +26,27 @@ public class BlockRegionUpdatePacket extends Packet
     
     public BlockRegionUpdatePacket() {
         this.shouldDelay = true;
+    }
+
+    public BlockRegionUpdatePacket(final int x, final int y, final int z, final int xs, final int ys, final int zs, final Level level) {
+        this.shouldDelay = true;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.xs = xs;
+        this.ys = ys;
+        this.zs = zs;
+        final byte[] blocksAndData = level.getBlocksAndData(x, y, z, xs, ys, zs);
+        final Deflater deflater = new Deflater(-1);
+        try {
+            deflater.setInput(blocksAndData);
+            deflater.finish();
+            this.buffer = new byte[xs * ys * zs * 5 / 2];
+            this.size = deflater.deflate(this.buffer);
+        }
+        finally {
+            deflater.end();
+        }
     }
     
     @Override

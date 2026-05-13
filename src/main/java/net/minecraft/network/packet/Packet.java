@@ -148,9 +148,9 @@ public abstract class Packet
         map(8, true, false, SetHealthPacket.class);
         map(9, true, true, RespawnPacket.class);
         map(10, true, true, MovePlayerPacket.class);
-        map(11, true, true, MovePlayerPacket_Pos.class);
-        map(12, true, true, MovePlayerPacket_Rot.class);
-        map(13, true, true, MovePlayerPacket_PosRot.class);
+        map(11, true, true, MovePlayerPacket.Pos.class);
+        map(12, true, true, MovePlayerPacket.Rot.class);
+        map(13, true, true, MovePlayerPacket.PosRot.class);
         map(14, false, true, PlayerActionPacket.class);
         map(15, false, true, UseItemPacket.class);
         map(16, false, true, SetCarriedItemPacket.class);
@@ -167,9 +167,9 @@ public abstract class Packet
         map(28, true, false, SetEntityMotionPacket.class);
         map(29, true, false, RemoveEntityPacket.class);
         map(30, true, false, MoveEntityPacket.class);
-        map(31, true, false, MoveEntityPacket_Pos.class);
-        map(32, true, false, MoveEntityPacket_Rot.class);
-        map(33, true, false, MoveEntityPacket_PosRot.class);
+        map(31, true, false, MoveEntityPacket.Pos.class);
+        map(32, true, false, MoveEntityPacket.Rot.class);
+        map(33, true, false, MoveEntityPacket.PosRot.class);
         map(34, true, false, TeleportEntityPacket.class);
         map(38, true, false, EntityEventPacket.class);
         map(39, true, false, SetRidingPacket.class);

@@ -46,4 +46,28 @@ public class PlayerInputPacket extends Packet
     public int getEstimatedSize() {
         return 18;
     }
+
+    public float getXa() {
+        return this.xa;
+    }
+
+    public float getXRot() {
+        return this.xRot;
+    }
+
+    public float getYa() {
+        return this.ya;
+    }
+
+    public float getYRot() {
+        return this.yRot;
+    }
+
+    public boolean isJumping() {
+        return this.isJumping;
+    }
+
+    public boolean isSneaking() {
+        return this.isSneaking;
+    }
 }

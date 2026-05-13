@@ -4,6 +4,9 @@
 
 package net.minecraft.network.packet;
 
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
+
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -19,6 +22,25 @@ public class ChunkTilesUpdatePacket extends Packet
     
     public ChunkTilesUpdatePacket() {
         this.shouldDelay = true;
+    }
+
+    public ChunkTilesUpdatePacket(final int xc, final int zc, final short[] positions, final int count, final Level level) {
+        this.shouldDelay = true;
+        this.xc = xc;
+        this.zc = zc;
+        this.count = count;
+        this.positions = new short[count];
+        this.blocks = new byte[count];
+        this.data = new byte[count];
+        final LevelChunk chunk = level.getChunk(xc, zc);
+        for (int i = 0; i < count; ++i) {
+            final int n = positions[i] >> 12 & 0xF;
+            final int n2 = positions[i] >> 8 & 0xF;
+            final int n3 = positions[i] & 0xFF;
+            this.positions[i] = positions[i];
+            this.blocks[i] = (byte)chunk.getTile(n, n3, n2);
+            this.data[i] = (byte)chunk.getData(n, n3, n2);
+        }
     }
     
     @Override

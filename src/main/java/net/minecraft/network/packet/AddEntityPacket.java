@@ -4,6 +4,9 @@
 
 package net.minecraft.network.packet;
 
+import net.minecraft.world.entity.Entity;
+import util.Mth;
+
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -19,7 +22,50 @@ public class AddEntityPacket extends Packet
     public int za;
     public int type;
     public int data;
-    
+
+    public AddEntityPacket() {
+    }
+
+    public AddEntityPacket(final Entity e, final int type) {
+        this(e, type, 0);
+    }
+
+    public AddEntityPacket(final Entity e, final int type, final int data) {
+        this.id = e.entityId;
+        this.x = Mth.floor(e.x * 32.0);
+        this.y = Mth.floor(e.y * 32.0);
+        this.z = Mth.floor(e.z * 32.0);
+        this.type = type;
+        this.data = data;
+        if (data > 0) {
+            double xd = e.xd;
+            double yd = e.yd;
+            double zd = e.zd;
+            final double n = 3.9;
+            if (xd < -n) {
+                xd = -n;
+            }
+            if (yd < -n) {
+                yd = -n;
+            }
+            if (zd < -n) {
+                zd = -n;
+            }
+            if (xd > n) {
+                xd = n;
+            }
+            if (yd > n) {
+                yd = n;
+            }
+            if (zd > n) {
+                zd = n;
+            }
+            this.xa = (int)(xd * 8000.0);
+            this.ya = (int)(yd * 8000.0);
+            this.za = (int)(zd * 8000.0);
+        }
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.id = dis.readInt();

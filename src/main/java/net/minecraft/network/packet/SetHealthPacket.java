@@ -11,7 +11,14 @@ import java.io.IOException;
 public class SetHealthPacket extends Packet
 {
     public int health;
-    
+
+    public SetHealthPacket() {
+    }
+
+    public SetHealthPacket(final int health) {
+        this.health = health;
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.health = dis.readShort();

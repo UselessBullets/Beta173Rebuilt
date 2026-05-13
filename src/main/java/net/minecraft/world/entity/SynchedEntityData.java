@@ -34,7 +34,7 @@ public class SynchedEntityData
     private boolean isDirty;
     
     public SynchedEntityData() {
-        this.itemsById = new HashMap();
+        this.itemsById = new HashMap<>();
     }
     
     public void define(final int id, final Object value) {
@@ -71,6 +71,10 @@ public class SynchedEntityData
             this.isDirty = true;
         }
     }
+
+    public boolean isDirty() {
+        return this.isDirty;
+    }
     
     public static void pack(final List<DataItem> items, final DataOutputStream output) throws IOException {
         if (items != null) {
@@ -80,6 +84,23 @@ public class SynchedEntityData
             }
         }
         output.writeByte(EOF_MARKER);
+    }
+
+    public ArrayList<DataItem> packDirty() {
+        ArrayList<DataItem> list = null;
+        if (this.isDirty) {
+            for (final DataItem e : this.itemsById.values()) {
+                if (e.isDirty()) {
+                    e.setDirty(false);
+                    if (list == null) {
+                        list = new ArrayList<>();
+                    }
+                    list.add(e);
+                }
+            }
+        }
+        this.isDirty = false;
+        return list;
     }
     
     public void packAll(final DataOutputStream output) throws IOException {
@@ -221,6 +242,10 @@ public class SynchedEntityData
 
         public int getType() {
             return this.type;
+        }
+
+        public boolean isDirty() {
+            return this.dirty;
         }
 
         public void setDirty(final boolean dirty) {

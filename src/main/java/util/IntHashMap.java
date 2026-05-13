@@ -38,6 +38,19 @@ public class IntHashMap<V>
         }
         return null;
     }
+
+    public boolean containsKey(final int key) {
+        return this.getEntry(key) != null;
+    }
+
+    final Entry<V> getEntry(final int key) {
+        for (Entry<V> next = this.table[indexFor(hash(key), this.table.length)]; next != null; next = next.next) {
+            if (next.key == key) {
+                return next;
+            }
+        }
+        return null;
+    }
     
     public void put(final int key, final V value) {
         final int hash = hash(key);

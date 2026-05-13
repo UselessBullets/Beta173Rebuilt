@@ -22,6 +22,13 @@ public class LoginPacket extends Packet
         this.userName = userName;
         this.clientVersion = clientVersion;
     }
+
+    public LoginPacket(final String userName, final int clientVersion, final long seed, final byte dimension) {
+        this.userName = userName;
+        this.clientVersion = clientVersion;
+        this.seed = seed;
+        this.dimension = dimension;
+    }
     
     @Override
     public void read(final DataInputStream dis) throws IOException {

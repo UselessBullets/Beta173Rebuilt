@@ -31,6 +31,15 @@ public class TeleportEntityPacket extends Packet
         this.yRot = (byte)(entity.yRot * 256.0f / 360.0f);
         this.xRot = (byte)(entity.xRot * 256.0f / 360.0f);
     }
+
+    public TeleportEntityPacket(final int id, final int x, final int y, final int z, final byte yRot, final byte xRot) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.yRot = yRot;
+        this.xRot = xRot;
+    }
     
     @Override
     public void read(final DataInputStream dis) throws IOException {

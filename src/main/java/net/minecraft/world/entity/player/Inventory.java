@@ -36,6 +36,10 @@ public class Inventory implements Container
         }
         return null;
     }
+
+    public static int getSelectionSize() {
+        return 9;
+    }
     
     private int getSlot(final int tileId) {
         for (int i = 0; i < this.items.length; ++i) {

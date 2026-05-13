@@ -5,6 +5,8 @@
 package net.minecraft.world.level.tile.entity;
 
 import java.util.HashMap;
+
+import net.minecraft.network.packet.Packet;
 import net.minecraft.world.level.tile.Tile;
 import com.mojang.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -87,6 +89,10 @@ public class TileEntity
     
     public Tile getTile() {
         return Tile.tiles[this.level.getTile(this.x, this.y, this.z)];
+    }
+
+    public Packet getUpdatePacket() {
+        return null;
     }
     
     public boolean isRemoved() {

@@ -285,6 +285,10 @@ public class Item
     
     public void onCraftedBy(final ItemInstance itemInstance, final Level level, final Player player) {
     }
+
+    public boolean isComplex() {
+        return false;
+    }
     
     static {
         Item.random = new Random();

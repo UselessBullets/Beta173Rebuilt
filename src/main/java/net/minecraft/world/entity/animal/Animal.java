@@ -4,13 +4,14 @@
 
 package net.minecraft.world.entity.animal;
 
+import net.minecraft.world.entity.Creature;
 import util.Mth;
 import com.mojang.nbt.CompoundTag;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.PathfinderMob;
 
-public abstract class Animal extends PathfinderMob
+public abstract class Animal extends PathfinderMob implements Creature
 {
     public Animal(final Level level) {
         super(level);

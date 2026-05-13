@@ -28,7 +28,17 @@ public class MockedLevelStorage implements LevelStorage
     
     public void saveLevelData(final LevelData levelData) {
     }
-    
+
+    @Override
+    public PlayerIO getPlayerIO() {
+        return null;
+    }
+
+    @Override
+    public void closeAll() {
+
+    }
+
     public File getDataFile(final String id) {
         return null;
     }

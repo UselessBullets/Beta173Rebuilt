@@ -17,6 +17,13 @@ public class ChunkVisibilityPacket extends Packet
     public ChunkVisibilityPacket() {
         this.shouldDelay = false;
     }
+
+    public ChunkVisibilityPacket(final int x, final int y, final boolean visible) {
+        this.shouldDelay = false;
+        this.x = x;
+        this.y = y;
+        this.visible = visible;
+    }
     
     @Override
     public void read(final DataInputStream dis) throws IOException {

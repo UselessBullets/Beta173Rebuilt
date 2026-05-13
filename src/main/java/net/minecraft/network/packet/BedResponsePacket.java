@@ -12,7 +12,14 @@ public class BedResponsePacket extends Packet
 {
     public static final String[] BED_RESPONSES;
     public int type;
-    
+
+    public BedResponsePacket() {
+    }
+
+    public BedResponsePacket(final int type) {
+        this.type = type;
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.type = dis.readByte();

@@ -58,4 +58,8 @@ public class Slot
     public ItemInstance remove(final int c) {
         return this.container.removeItem(this.slot, c);
     }
+
+    public boolean isAt(final Container container, final int slot) {
+        return container == this.container && slot == this.slot;
+    }
 }

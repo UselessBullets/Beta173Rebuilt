@@ -4,6 +4,8 @@
 
 package net.minecraft.world.entity.monster;
 
-public interface Enemy
+import net.minecraft.world.entity.Creature;
+
+public interface Enemy extends Creature
 {
 }

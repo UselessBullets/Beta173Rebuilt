@@ -13,7 +13,16 @@ public class ContainerSetDataPacket extends Packet
     public int containerId;
     public int id;
     public int value;
-    
+
+    public ContainerSetDataPacket() {
+    }
+
+    public ContainerSetDataPacket(final int containerId, final int id, final int value) {
+        this.containerId = containerId;
+        this.id = id;
+        this.value = value;
+    }
+
     @Override
     public void handle(final PacketListener listener) {
         listener.handleContainerSetData(this);

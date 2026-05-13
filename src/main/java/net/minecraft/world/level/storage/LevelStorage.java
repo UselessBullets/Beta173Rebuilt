@@ -6,6 +6,8 @@ package net.minecraft.world.level.storage;
 
 import java.io.File;
 import java.util.List;
+
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.LevelData;
@@ -18,9 +20,13 @@ public interface LevelStorage
     
     ChunkStorage createChunkStorage(final Dimension dimension);
     
-    void saveLevelData(final LevelData levelData, final List players);
+    void saveLevelData(final LevelData levelData, final List<Player> players);
     
     void saveLevelData(final LevelData levelData);
+
+    PlayerIO getPlayerIO();
+
+    void closeAll();
     
     File getDataFile(final String id);
 }

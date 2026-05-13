@@ -15,7 +15,18 @@ public class TileEventPacket extends Packet
     public int z;
     public int b0;
     public int b1;
-    
+
+    public TileEventPacket() {
+    }
+
+    public TileEventPacket(final int x, final int y, final int z, final int b0, final int b1) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.b0 = b0;
+        this.b1 = b1;
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.x = dis.readInt();

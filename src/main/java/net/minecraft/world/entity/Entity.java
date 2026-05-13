@@ -970,6 +970,10 @@ public abstract class Entity
     
     public void handleInsidePortal() {
     }
+
+    public ItemInstance[] getEquipmentSlots() {
+        return null;
+    }
     
     public void lerpMotion(final double xd, final double yd, final double zd) {
         this.xd = xd;
@@ -999,6 +1003,10 @@ public abstract class Entity
     
     public boolean isSneaking() {
         return this.getSharedFlag(1);
+    }
+
+    public void setSneaking(final boolean value) {
+        this.setSharedFlag(1, value);
     }
     
     protected boolean getSharedFlag(final int flag) {

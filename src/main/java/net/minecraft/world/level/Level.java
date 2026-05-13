@@ -26,7 +26,7 @@ import util.Mth;
 import net.minecraft.world.level.chunk.ChunkCache;
 import com.mojang.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.client.ClientChunkCache;
+
 import java.util.HashSet;
 import net.minecraft.world.level.biome.BiomeSource;
 import java.util.ArrayList;
@@ -235,7 +235,7 @@ public class Level implements LevelSource
     }
     
     protected ChunkSource createChunkSource() {
-        return new ClientChunkCache(this, this.levelStorage.createChunkStorage(this.dimension), this.dimension.createRandomLevelSource());
+        return new ServerChunkCache(this, this.levelStorage.createChunkStorage(this.dimension), this.dimension.createRandomLevelSource());
     }
     
     protected void setInitialSpawn() {
@@ -903,6 +903,21 @@ public class Level implements LevelSource
             this.updateSleepingPlayerList();
         }
     }
+
+    public void removeEntityImmediately(final Entity e) {
+        e.remove();
+        if (e instanceof Player) {
+            this.players.remove(e);
+            this.updateSleepingPlayerList();
+        }
+        final int xChunk = e.xChunk;
+        final int zChunk = e.zChunk;
+        if (e.inChunk && this.hasChunk(xChunk, zChunk)) {
+            this.getChunk(xChunk, zChunk).removeEntity(e);
+        }
+        this.entities.remove(e);
+        this.entityRemoved(e);
+    }
     
     public void addListener(final LevelListener listener) {
         this.listeners.add(listener);
@@ -1054,6 +1069,21 @@ public class Level implements LevelSource
             final int tile = chunk.getTile(x, i, z);
             final Material material = (tile == 0) ? Material.air : Tile.tiles[tile].material;
             if (material.blocksMotion() || material.isLiquid()) {
+                return i + 1;
+            }
+            --i;
+        }
+        return -1;
+    }
+
+    public int f(int x, int z) { // TODO find proper name
+        final LevelChunk chunk = this.getChunkAt(x, z);
+        int i = 127;
+        x &= 0xF;
+        z &= 0xF;
+        while (i > 0) {
+            final int tile = chunk.getTile(x, i, z);
+            if (tile != 0 && Tile.tiles[tile].material.blocksMotion()) {
                 return i + 1;
             }
             --i;
@@ -1255,6 +1285,34 @@ public class Level implements LevelSource
             }
         }
         return true;
+    }
+
+    public boolean containsAnyBlocks(final AABB box) {
+        int floor = Mth.floor(box.x0);
+        final int floor2 = Mth.floor(box.x1 + 1.0);
+        int floor3 = Mth.floor(box.y0);
+        final int floor4 = Mth.floor(box.y1 + 1.0);
+        int floor5 = Mth.floor(box.z0);
+        final int floor6 = Mth.floor(box.z1 + 1.0);
+        if (box.x0 < 0.0) {
+            --floor;
+        }
+        if (box.y0 < 0.0) {
+            --floor3;
+        }
+        if (box.z0 < 0.0) {
+            --floor5;
+        }
+        for (int i = floor; i < floor2; ++i) {
+            for (int j = floor3; j < floor4; ++j) {
+                for (int k = floor5; k < floor6; ++k) {
+                    if (Tile.tiles[this.getTile(i, j, k)] != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
     
     public boolean containsAnyLiquid(final AABB box) {
@@ -1971,6 +2029,45 @@ public class Level implements LevelSource
         }
         return null;
     }
+
+    public byte[] getBlocksAndData(final int x, final int y, final int z, final int xs, final int ys, final int zs) {
+        final byte[] data = new byte[xs * ys * zs * 5 / 2];
+        final int n = x >> 4;
+        final int n2 = z >> 4;
+        final int n3 = x + xs - 1 >> 4;
+        final int n4 = z + zs - 1 >> 4;
+        int blocksAndData = 0;
+        int y2 = y;
+        int y3 = y + ys;
+        if (y2 < 0) {
+            y2 = 0;
+        }
+        if (y3 > 128) {
+            y3 = 128;
+        }
+        for (int i = n; i <= n3; ++i) {
+            int x2 = x - i * 16;
+            int x3 = x + xs - i * 16;
+            if (x2 < 0) {
+                x2 = 0;
+            }
+            if (x3 > 16) {
+                x3 = 16;
+            }
+            for (int j = n2; j <= n4; ++j) {
+                int z2 = z - j * 16;
+                int z3 = z + zs - j * 16;
+                if (z2 < 0) {
+                    z2 = 0;
+                }
+                if (z3 > 16) {
+                    z3 = 16;
+                }
+                blocksAndData = this.getChunk(i, j).getBlocksAndData(data, x2, y2, z2, x3, y3, z3, blocksAndData);
+            }
+        }
+        return data;
+    }
     
     public void setBlocksAndData(final int x, final int y, final int z, final int xs, final int ys, final int za, final byte[] data) {
         final int n = x >> 4;
@@ -2019,6 +2116,14 @@ public class Level implements LevelSource
     
     public void setTime(final long time) {
         this.levelData.setTime(time);
+    }
+
+    public void b(final long long1) { // TODO figure out what the right name for this is
+        final long n = long1 - this.levelData.getTime();
+        for (final TickNextTickData tickNextTickData : this.tickNextTickSet) {
+            tickNextTickData.delay += n;
+        }
+        this.setTime(long1);
     }
     
     public long getSeed() {
@@ -2102,7 +2207,11 @@ public class Level implements LevelSource
             Tile.tiles[tile].triggerEvent(this, x, y, z, b0, b1);
         }
     }
-    
+
+    public LevelStorage getLevelStorage() {
+        return this.levelStorage;
+    }
+
     public LevelData getLevelData() {
         return this.levelData;
     }

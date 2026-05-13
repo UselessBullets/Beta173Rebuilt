@@ -5,7 +5,6 @@
 package net.minecraft.client.multiplayer;
 
 import net.minecraft.stats.Stat;
-import net.minecraft.world.item.ItemInstance;
 import net.minecraft.network.packet.ContainerClosePacket;
 import net.minecraft.network.packet.RespawnPacket;
 import net.minecraft.network.packet.AnimatePacket;
@@ -13,10 +12,6 @@ import net.minecraft.network.packet.ChatPacket;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.network.packet.PlayerActionPacket;
 import net.minecraft.network.packet.MovePlayerPacket;
-import net.minecraft.network.packet.MovePlayerPacket_Rot;
-import net.minecraft.network.packet.MovePlayerPacket_PosRot;
-import net.minecraft.network.packet.MovePlayerPacket_Pos;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.PlayerCommandPacket;
 import util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -93,23 +88,23 @@ public class MultiplayerLocalPlayer extends LocalPlayer
         final boolean b2 = n5 != 0.0 || n6 != 0.0;
         if (this.riding != null) {
             if (b2) {
-                this.connection.send(new MovePlayerPacket_Pos(this.xd, -999.0, -999.0, this.zd, this.onGround));
+                this.connection.send(new MovePlayerPacket.Pos(this.xd, -999.0, -999.0, this.zd, this.onGround));
             }
             else {
-                this.connection.send(new MovePlayerPacket_PosRot(this.xd, -999.0, -999.0, this.zd, this.yRot, this.xRot, this.onGround));
+                this.connection.send(new MovePlayerPacket.PosRot(this.xd, -999.0, -999.0, this.zd, this.yRot, this.xRot, this.onGround));
             }
             b = false;
         }
         else if (b && b2) {
-            this.connection.send(new MovePlayerPacket_PosRot(this.x, this.bb.y0, this.y, this.z, this.yRot, this.xRot, this.onGround));
+            this.connection.send(new MovePlayerPacket.PosRot(this.x, this.bb.y0, this.y, this.z, this.yRot, this.xRot, this.onGround));
             this.noSendTime = 0;
         }
         else if (b) {
-            this.connection.send(new MovePlayerPacket_Pos(this.x, this.bb.y0, this.y, this.z, this.onGround));
+            this.connection.send(new MovePlayerPacket.Pos(this.x, this.bb.y0, this.y, this.z, this.onGround));
             this.noSendTime = 0;
         }
         else if (b2) {
-            this.connection.send(new MovePlayerPacket_Rot(this.yRot, this.xRot, this.onGround));
+            this.connection.send(new MovePlayerPacket.Rot(this.yRot, this.xRot, this.onGround));
             this.noSendTime = 0;
         }
         else {

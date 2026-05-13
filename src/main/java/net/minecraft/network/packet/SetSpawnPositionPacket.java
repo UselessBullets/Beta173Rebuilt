@@ -13,7 +13,16 @@ public class SetSpawnPositionPacket extends Packet
     public int x;
     public int y;
     public int z;
-    
+
+    public SetSpawnPositionPacket() {
+    }
+
+    public SetSpawnPositionPacket(final int x, final int y, final int z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.x = dis.readInt();

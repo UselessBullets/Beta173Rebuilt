@@ -51,7 +51,7 @@ public class PlayerChunkMap
     
     public void tick() {
         for (int i = 0; i < this.changedChunks.size(); ++i) {
-            ((PlayerChunk)this.changedChunks.get(i)).broadcastChanges();
+            this.changedChunks.get(i).broadcastChanges();
         }
         this.changedChunks.clear();
     }
@@ -285,9 +285,9 @@ public class PlayerChunkMap
                 final int ys = this.yChangeMax - this.yChangeMin + 2;
                 final int zs = this.zChangeMax - this.zChangeMin + 1;
                 this.broadcast(new BlockRegionUpdatePacket(n, yChangeMin2, n2, xs, ys, zs, level));
-                final List tileEntitiesInRegion = level.getTileEntitiesInRegion(n, yChangeMin2, n2, n + xs, yChangeMin2 + ys, n2 + zs);
+                final List<TileEntity> tileEntitiesInRegion = level.getTileEntitiesInRegion(n, yChangeMin2, n2, n + xs, yChangeMin2 + ys, n2 + zs);
                 for (int i = 0; i < tileEntitiesInRegion.size(); ++i) {
-                    this.broadcast((TileEntity)tileEntitiesInRegion.get(i));
+                    this.broadcast(tileEntitiesInRegion.get(i));
                 }
             }
             else {

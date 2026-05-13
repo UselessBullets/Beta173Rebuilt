@@ -23,8 +23,8 @@ public class Creeper extends Monster
     @Override
     protected void definedSynchedData() {
         super.definedSynchedData();
-        this.entityData.define(16, -1);
-        this.entityData.define(17, 0);
+        this.entityData.define(16, (byte)-1);
+        this.entityData.define(17, (byte)0);
     }
     
     @Override

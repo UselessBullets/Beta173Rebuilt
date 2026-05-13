@@ -113,9 +113,9 @@ public class EntityTracker
     public void removePlayer(final Entity e) {
         if (e instanceof ServerPlayer) {
             final ServerPlayer sp = (ServerPlayer)e;
-            final Iterator iterator = this.entities.iterator();
+            final Iterator<TrackedEntity> iterator = this.entities.iterator();
             while (iterator.hasNext()) {
-                ((TrackedEntity)iterator.next()).removePlayer(sp);
+                iterator.next().removePlayer(sp);
             }
         }
         final TrackedEntity trackedEntity = (TrackedEntity)this.entityMap.remove(e.entityId);
@@ -126,7 +126,7 @@ public class EntityTracker
     }
     
     public void tick() {
-        final ArrayList list = new ArrayList();
+        final ArrayList<Entity> list = new ArrayList<>();
         for (final TrackedEntity trackedEntity : this.entities) {
             trackedEntity.tick(this.server.getLevel(this.dimension).players);
             if (trackedEntity.moved && trackedEntity.e instanceof ServerPlayer) {
@@ -144,23 +144,23 @@ public class EntityTracker
     }
     
     public void broadcast(final Entity e, final Packet packet) {
-        final TrackedEntity trackedEntity = (TrackedEntity)this.entityMap.get(e.entityId);
+        final TrackedEntity trackedEntity = this.entityMap.get(e.entityId);
         if (trackedEntity != null) {
             trackedEntity.broadcast(packet);
         }
     }
     
     public void broadcastAndSend(final Entity e, final Packet packet) {
-        final TrackedEntity trackedEntity = (TrackedEntity)this.entityMap.get(e.entityId);
+        final TrackedEntity trackedEntity = this.entityMap.get(e.entityId);
         if (trackedEntity != null) {
             trackedEntity.broadcastAndSend(packet);
         }
     }
     
     public void clear(final ServerPlayer serverPlayer) {
-        final Iterator iterator = this.entities.iterator();
+        final Iterator<TrackedEntity> iterator = this.entities.iterator();
         while (iterator.hasNext()) {
-            ((TrackedEntity)iterator.next()).clear(serverPlayer);
+            iterator.next().clear(serverPlayer);
         }
     }
 }

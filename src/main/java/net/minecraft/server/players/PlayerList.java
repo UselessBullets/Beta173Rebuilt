@@ -8,10 +8,8 @@ import net.minecraft.network.packet.SetTimePacket;
 import net.minecraft.world.level.tile.entity.TileEntity;
 import net.minecraft.network.packet.ChatPacket;
 import java.util.Iterator;
-import java.io.Writer;
 import java.io.PrintWriter;
 import java.io.FileWriter;
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import net.minecraft.world.level.PortalForcer;
@@ -19,10 +17,8 @@ import net.minecraft.Pos;
 import net.minecraft.network.packet.RespawnPacket;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.BedResponsePacket;
-import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.PendingConnection;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
@@ -54,11 +50,11 @@ public class PlayerList
     private boolean doWhiteList;
     
     public PlayerList(final MinecraftServer server) {
-        this.players = new ArrayList();
-        this.bans = new HashSet();
-        this.ipBans = new HashSet();
-        this.ops = new HashSet();
-        this.whitelist = new HashSet();
+        this.players = new ArrayList<>();
+        this.bans = new HashSet<>();
+        this.ipBans = new HashSet<>();
+        this.ops = new HashSet<>();
+        this.whitelist = new HashSet<>();
         this.chunkMaps = new PlayerChunkMap[2];
         this.server = server;
         this.banFile = server.getFile("banned-players.txt");
@@ -252,7 +248,7 @@ public class PlayerList
     
     public void broadcastAll(final Packet packet) {
         for (int i = 0; i < this.players.size(); ++i) {
-            ((ServerPlayer)this.players.get(i)).connection.send(packet);
+            this.players.get(i).connection.send(packet);
         }
     }
     
@@ -271,7 +267,7 @@ public class PlayerList
             if (i > 0) {
                 s += ", ";
             }
-            s += ((ServerPlayer)this.players.get(i)).name;
+            s += this.players.get(i).name;
         }
         return s;
     }
@@ -304,9 +300,9 @@ public class PlayerList
     private void saveBans() {
         try {
             final PrintWriter printWriter = new PrintWriter(new FileWriter(this.banFile, false));
-            final Iterator iterator = this.bans.iterator();
+            final Iterator<String> iterator = this.bans.iterator();
             while (iterator.hasNext()) {
-                printWriter.println((String)iterator.next());
+                printWriter.println(iterator.next());
             }
             printWriter.close();
         }
@@ -343,9 +339,9 @@ public class PlayerList
     private void saveIpBans() {
         try {
             final PrintWriter printWriter = new PrintWriter(new FileWriter(this.ipBanFile, false));
-            final Iterator iterator = this.ipBans.iterator();
+            final Iterator<String> iterator = this.ipBans.iterator();
             while (iterator.hasNext()) {
-                printWriter.println((String)iterator.next());
+                printWriter.println(iterator.next());
             }
             printWriter.close();
         }
@@ -382,9 +378,9 @@ public class PlayerList
     private void saveOps() {
         try {
             final PrintWriter printWriter = new PrintWriter(new FileWriter(this.opFile, false));
-            final Iterator iterator = this.ops.iterator();
+            final Iterator<String> iterator = this.ops.iterator();
             while (iterator.hasNext()) {
-                printWriter.println((String)iterator.next());
+                printWriter.println(iterator.next());
             }
             printWriter.close();
         }
@@ -411,9 +407,9 @@ public class PlayerList
     private void saveWhitelist() {
         try {
             final PrintWriter printWriter = new PrintWriter(new FileWriter(this.whiteListFile, false));
-            final Iterator iterator = this.whitelist.iterator();
+            final Iterator<String> iterator = this.whitelist.iterator();
             while (iterator.hasNext()) {
-                printWriter.println((String)iterator.next());
+                printWriter.println(iterator.next());
             }
             printWriter.close();
         }
@@ -506,7 +502,7 @@ public class PlayerList
         this.saveWhitelist();
     }
     
-    public Set getWhiteList() {
+    public Set<String> getWhiteList() {
         return this.whitelist;
     }
     

@@ -154,21 +154,15 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     }
     
     public void start() {
-        IsomPreview bd = this;
-        new Thread() {
-            final /* synthetic */ IsomPreview a = bd;
-
-            @Override
-            public void run() {
-                while (this.a.running) {
-                    this.a.render();
-                    try {
-                        Thread.sleep(1L);
-                    }
-                    catch (final Exception ex) {}
+        new Thread(() -> {
+            while (running) {
+                render();
+                try {
+                    Thread.sleep(1L);
                 }
+                catch (final Exception ex) {}
             }
-        }.start();
+        }).start();
         for (int i = 0; i < 8; ++i) {
             new Thread(this).start();
         }

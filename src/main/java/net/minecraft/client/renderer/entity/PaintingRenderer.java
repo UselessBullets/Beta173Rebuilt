@@ -4,10 +4,8 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
-import net.minecraft.world.entity.Painting_Motive;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Painting;
 import java.util.Random;
@@ -29,7 +27,7 @@ public class PaintingRenderer extends EntityRenderer<Painting>
         GL11.glRotatef(rot, 0.0f, 1.0f, 0.0f);
         GL11.glEnable(GL_RESCALE_NORMAL);
         this.bindTexture("/art/kz.png");
-        final Painting_Motive motive = entity.motive;
+        final Painting.Motive motive = entity.motive;
         final float n = 0.0625f;
         GL11.glScalef(n, n, n);
         this.renderPainting(entity, motive.w, motive.h, motive.uo, motive.vo);

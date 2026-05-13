@@ -24,7 +24,6 @@ import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.network.packet.ContainerOpenPacket;
 import net.minecraft.network.packet.SetRidingPacket;
 import net.minecraft.network.packet.EntityActionAtPositionPacket;
-import net.minecraft.world.entity.player.Player_BedSleepingResult;
 import net.minecraft.network.packet.AnimatePacket;
 import net.minecraft.server.EntityTracker;
 import net.minecraft.network.packet.TakeItemEntityPacket;
@@ -282,9 +281,9 @@ public class ServerPlayer extends Player implements ContainerListener
     }
     
     @Override
-    public Player_BedSleepingResult startSleepInBed(final int x, final int y, final int z) {
-        final Player_BedSleepingResult startSleepInBed = super.startSleepInBed(x, y, z);
-        if (startSleepInBed == Player_BedSleepingResult.OK) {
+    public BedSleepingResult startSleepInBed(final int x, final int y, final int z) {
+        final BedSleepingResult startSleepInBed = super.startSleepInBed(x, y, z);
+        if (startSleepInBed == BedSleepingResult.OK) {
             final EntityTracker tracker = this.server.getTracker(this.dimension);
             final EntityActionAtPositionPacket entityActionAtPositionPacket = new EntityActionAtPositionPacket(this, 0, x, y, z);
             tracker.broadcast(this, entityActionAtPositionPacket);

@@ -8,7 +8,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.HitResult_Type;
 import util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.player.Player;
@@ -45,7 +44,7 @@ public class BucketItem extends Item
         if (clip == null) {
             return itemInstance;
         }
-        if (clip.type == HitResult_Type.TILE) {
+        if (clip.type == HitResult.Type.TILE) {
             int x2 = clip.x;
             int y2 = clip.y;
             int z2 = clip.z;

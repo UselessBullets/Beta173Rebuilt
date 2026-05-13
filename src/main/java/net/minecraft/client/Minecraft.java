@@ -24,7 +24,6 @@ import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.client.gamemode.CreativeMode;
-import net.minecraft.world.phys.HitResult_Type;
 import net.minecraft.client.gui.PauseScreen;
 import net.minecraft.client.gui.OutOfMemoryScreen;
 import net.minecraft.client.renderer.Chunk;
@@ -786,7 +785,7 @@ public abstract class Minecraft implements Runnable
         if (button == 0 && this.missTime > 0) {
             return;
         }
-        if (down && this.hitResult != null && this.hitResult.type == HitResult_Type.TILE && button == 0) {
+        if (down && this.hitResult != null && this.hitResult.type == HitResult.Type.TILE && button == 0) {
             final int x = this.hitResult.x;
             final int y = this.hitResult.y;
             final int z = this.hitResult.z;
@@ -811,7 +810,7 @@ public abstract class Minecraft implements Runnable
                 this.missTime = 10;
             }
         }
-        else if (this.hitResult.type == HitResult_Type.ENTITY) {
+        else if (this.hitResult.type == HitResult.Type.ENTITY) {
             if (button == 0) {
                 this.gameMode.attack(this.player, this.hitResult.entity);
             }
@@ -819,7 +818,7 @@ public abstract class Minecraft implements Runnable
                 this.gameMode.interact(this.player, this.hitResult.entity);
             }
         }
-        else if (this.hitResult.type == HitResult_Type.TILE) {
+        else if (this.hitResult.type == HitResult.Type.TILE) {
             final int x = this.hitResult.x;
             final int y = this.hitResult.y;
             final int z = this.hitResult.z;

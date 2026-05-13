@@ -11,7 +11,7 @@ public class PickaxeItem extends DiggerItem
 {
     private static Tile[] diggables;
     
-    protected PickaxeItem(final int id, final Item_Tier tier) {
+    protected PickaxeItem(final int id, final Tier tier) {
         super(id, 2, tier, PickaxeItem.diggables);
     }
     

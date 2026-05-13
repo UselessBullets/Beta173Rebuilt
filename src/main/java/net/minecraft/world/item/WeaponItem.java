@@ -12,7 +12,7 @@ public class WeaponItem extends Item
 {
     private int damage;
     
-    public WeaponItem(final int id, final Item_Tier tier) {
+    public WeaponItem(final int id, final Tier tier) {
         super(id);
         this.maxStackSize = 1;
         this.setMaxDamage(tier.getUses());

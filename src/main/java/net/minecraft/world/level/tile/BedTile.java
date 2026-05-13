@@ -9,9 +9,7 @@ import java.util.Random;
 import net.minecraft.world.level.LevelSource;
 import net.minecraft.Direction;
 import net.minecraft.Pos;
-import java.util.Iterator;
-import net.minecraft.world.entity.player.Player_BedSleepingResult;
-import net.minecraft.world.entity.Entity;
+
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Material;
@@ -74,12 +72,12 @@ public class BedTile extends Tile
             }
             setOccupied(level, x, y, z, false);
         }
-        final Player_BedSleepingResult startSleepInBed = player.startSleepInBed(x, y, z);
-        if (startSleepInBed == Player_BedSleepingResult.OK) {
+        final Player.BedSleepingResult startSleepInBed = player.startSleepInBed(x, y, z);
+        if (startSleepInBed == Player.BedSleepingResult.OK) {
             setOccupied(level, x, y, z, true);
             return true;
         }
-        if (startSleepInBed == Player_BedSleepingResult.NOT_POSSIBLE_NOW) {
+        if (startSleepInBed == Player.BedSleepingResult.NOT_POSSIBLE_NOW) {
             player.displayClientMessage("tile.bed.noSleep");
         }
         return true;

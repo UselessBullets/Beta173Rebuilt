@@ -13,9 +13,9 @@ public class DiggerItem extends Item
     private Tile[] tiles;
     private float speed;
     private int attackDamage;
-    protected Item_Tier tier;
+    protected Tier tier;
     
-    protected DiggerItem(final int id, final int attackDamage, final Item_Tier tier, final Tile[] tiles) {
+    protected DiggerItem(final int id, final int attackDamage, final Tier tier, final Tile[] tiles) {
         super(id);
         this.speed = 4.0f;
         this.tier = tier;

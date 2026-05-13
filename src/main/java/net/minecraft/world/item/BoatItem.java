@@ -5,10 +5,8 @@
 package net.minecraft.world.item;
 
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.Boat;
 import net.minecraft.world.level.tile.Tile;
-import net.minecraft.world.phys.HitResult_Type;
 import util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.player.Player;
@@ -39,7 +37,7 @@ public class BoatItem extends Item
         if (clip == null) {
             return itemInstance;
         }
-        if (clip.type == HitResult_Type.TILE) {
+        if (clip.type == HitResult.Type.TILE) {
             final int x = clip.x;
             int y = clip.y;
             final int z = clip.z;

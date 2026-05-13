@@ -10,7 +10,7 @@ public class HatchetItem extends DiggerItem
 {
     private static Tile[] diggables;
     
-    protected HatchetItem(final int id, final Item_Tier tier) {
+    protected HatchetItem(final int id, final Tier tier) {
         super(id, 3, tier, HatchetItem.diggables);
     }
     

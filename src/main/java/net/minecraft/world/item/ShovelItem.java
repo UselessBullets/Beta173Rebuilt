@@ -10,7 +10,7 @@ public class ShovelItem extends DiggerItem
 {
     private static Tile[] diggables;
     
-    public ShovelItem(final int id, final Item_Tier tier) {
+    public ShovelItem(final int id, final Tier tier) {
         super(id, 1, tier, ShovelItem.diggables);
     }
     

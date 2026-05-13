@@ -293,9 +293,9 @@ public class Item
     static {
         Item.random = new Random();
         Item.items = new Item[32000];
-        Item.shovel_iron = new ShovelItem(0, Item_Tier.IRON).setIcon(2, 5).setDescriptionId("shovelIron");
-        Item.pickAxe_iron = new PickaxeItem(1, Item_Tier.IRON).setIcon(2, 6).setDescriptionId("pickaxeIron");
-        Item.hatchet_iron = new HatchetItem(2, Item_Tier.IRON).setIcon(2, 7).setDescriptionId("hatchetIron");
+        Item.shovel_iron = new ShovelItem(0, Tier.IRON).setIcon(2, 5).setDescriptionId("shovelIron");
+        Item.pickAxe_iron = new PickaxeItem(1, Tier.IRON).setIcon(2, 6).setDescriptionId("pickaxeIron");
+        Item.hatchet_iron = new HatchetItem(2, Tier.IRON).setIcon(2, 7).setDescriptionId("hatchetIron");
         Item.flintAndSteel = new FlintAndSteelItem(3).setIcon(5, 0).setDescriptionId("flintAndSteel");
         Item.apple = new FoodItem(4, 4, false).setIcon(10, 0).setDescriptionId("apple");
         Item.bow = new BowItem(5).setIcon(5, 1).setDescriptionId("bow");
@@ -304,34 +304,34 @@ public class Item
         Item.emerald = new Item(8).setIcon(7, 3).setDescriptionId("emerald");
         Item.ironIngot = new Item(9).setIcon(7, 1).setDescriptionId("ingotIron");
         Item.goldIngot = new Item(10).setIcon(7, 2).setDescriptionId("ingotGold");
-        Item.sword_iron = new WeaponItem(11, Item_Tier.IRON).setIcon(2, 4).setDescriptionId("swordIron");
-        Item.sword_wood = new WeaponItem(12, Item_Tier.WOOD).setIcon(0, 4).setDescriptionId("swordWood");
-        Item.shovel_wood = new ShovelItem(13, Item_Tier.WOOD).setIcon(0, 5).setDescriptionId("shovelWood");
-        Item.pickAxe_wood = new PickaxeItem(14, Item_Tier.WOOD).setIcon(0, 6).setDescriptionId("pickaxeWood");
-        Item.hatchet_wood = new HatchetItem(15, Item_Tier.WOOD).setIcon(0, 7).setDescriptionId("hatchetWood");
-        Item.sword_stone = new WeaponItem(16, Item_Tier.STONE).setIcon(1, 4).setDescriptionId("swordStone");
-        Item.shovel_stone = new ShovelItem(17, Item_Tier.STONE).setIcon(1, 5).setDescriptionId("shovelStone");
-        Item.pickAxe_stone = new PickaxeItem(18, Item_Tier.STONE).setIcon(1, 6).setDescriptionId("pickaxeStone");
-        Item.hatchet_stone = new HatchetItem(19, Item_Tier.STONE).setIcon(1, 7).setDescriptionId("hatchetStone");
-        Item.sword_emerald = new WeaponItem(20, Item_Tier.EMERALD).setIcon(3, 4).setDescriptionId("swordDiamond");
-        Item.shovel_emerald = new ShovelItem(21, Item_Tier.EMERALD).setIcon(3, 5).setDescriptionId("shovelDiamond");
-        Item.pickAxe_emerald = new PickaxeItem(22, Item_Tier.EMERALD).setIcon(3, 6).setDescriptionId("pickaxeDiamond");
-        Item.hatchet_emerald = new HatchetItem(23, Item_Tier.EMERALD).setIcon(3, 7).setDescriptionId("hatchetDiamond");
+        Item.sword_iron = new WeaponItem(11, Tier.IRON).setIcon(2, 4).setDescriptionId("swordIron");
+        Item.sword_wood = new WeaponItem(12, Tier.WOOD).setIcon(0, 4).setDescriptionId("swordWood");
+        Item.shovel_wood = new ShovelItem(13, Tier.WOOD).setIcon(0, 5).setDescriptionId("shovelWood");
+        Item.pickAxe_wood = new PickaxeItem(14, Tier.WOOD).setIcon(0, 6).setDescriptionId("pickaxeWood");
+        Item.hatchet_wood = new HatchetItem(15, Tier.WOOD).setIcon(0, 7).setDescriptionId("hatchetWood");
+        Item.sword_stone = new WeaponItem(16, Tier.STONE).setIcon(1, 4).setDescriptionId("swordStone");
+        Item.shovel_stone = new ShovelItem(17, Tier.STONE).setIcon(1, 5).setDescriptionId("shovelStone");
+        Item.pickAxe_stone = new PickaxeItem(18, Tier.STONE).setIcon(1, 6).setDescriptionId("pickaxeStone");
+        Item.hatchet_stone = new HatchetItem(19, Tier.STONE).setIcon(1, 7).setDescriptionId("hatchetStone");
+        Item.sword_emerald = new WeaponItem(20, Tier.EMERALD).setIcon(3, 4).setDescriptionId("swordDiamond");
+        Item.shovel_emerald = new ShovelItem(21, Tier.EMERALD).setIcon(3, 5).setDescriptionId("shovelDiamond");
+        Item.pickAxe_emerald = new PickaxeItem(22, Tier.EMERALD).setIcon(3, 6).setDescriptionId("pickaxeDiamond");
+        Item.hatchet_emerald = new HatchetItem(23, Tier.EMERALD).setIcon(3, 7).setDescriptionId("hatchetDiamond");
         Item.stick = new Item(24).setIcon(5, 3).handEquipped().setDescriptionId("stick");
         Item.bowl = new Item(25).setIcon(7, 4).setDescriptionId("bowl");
         Item.mushroomStew = new BowlFoodItem(26, 10).setIcon(8, 4).setDescriptionId("mushroomStew");
-        Item.sword_gold = new WeaponItem(27, Item_Tier.GOLD).setIcon(4, 4).setDescriptionId("swordGold");
-        Item.shovel_gold = new ShovelItem(28, Item_Tier.GOLD).setIcon(4, 5).setDescriptionId("shovelGold");
-        Item.pickAxe_gold = new PickaxeItem(29, Item_Tier.GOLD).setIcon(4, 6).setDescriptionId("pickaxeGold");
-        Item.hatchet_gold = new HatchetItem(30, Item_Tier.GOLD).setIcon(4, 7).setDescriptionId("hatchetGold");
+        Item.sword_gold = new WeaponItem(27, Tier.GOLD).setIcon(4, 4).setDescriptionId("swordGold");
+        Item.shovel_gold = new ShovelItem(28, Tier.GOLD).setIcon(4, 5).setDescriptionId("shovelGold");
+        Item.pickAxe_gold = new PickaxeItem(29, Tier.GOLD).setIcon(4, 6).setDescriptionId("pickaxeGold");
+        Item.hatchet_gold = new HatchetItem(30, Tier.GOLD).setIcon(4, 7).setDescriptionId("hatchetGold");
         Item.string = new Item(31).setIcon(8, 0).setDescriptionId("string");
         Item.feather = new Item(32).setIcon(8, 1).setDescriptionId("feather");
         Item.sulphur = new Item(33).setIcon(8, 2).setDescriptionId("sulphur");
-        Item.hoe_wood = new HoeItem(34, Item_Tier.WOOD).setIcon(0, 8).setDescriptionId("hoeWood");
-        Item.hoe_stone = new HoeItem(35, Item_Tier.STONE).setIcon(1, 8).setDescriptionId("hoeStone");
-        Item.hoe_iron = new HoeItem(36, Item_Tier.IRON).setIcon(2, 8).setDescriptionId("hoeIron");
-        Item.hoe_emerald = new HoeItem(37, Item_Tier.EMERALD).setIcon(3, 8).setDescriptionId("hoeDiamond");
-        Item.hoe_gold = new HoeItem(38, Item_Tier.GOLD).setIcon(4, 8).setDescriptionId("hoeGold");
+        Item.hoe_wood = new HoeItem(34, Tier.WOOD).setIcon(0, 8).setDescriptionId("hoeWood");
+        Item.hoe_stone = new HoeItem(35, Tier.STONE).setIcon(1, 8).setDescriptionId("hoeStone");
+        Item.hoe_iron = new HoeItem(36, Tier.IRON).setIcon(2, 8).setDescriptionId("hoeIron");
+        Item.hoe_emerald = new HoeItem(37, Tier.EMERALD).setIcon(3, 8).setDescriptionId("hoeDiamond");
+        Item.hoe_gold = new HoeItem(38, Tier.GOLD).setIcon(4, 8).setDescriptionId("hoeGold");
         Item.seeds = new SeedItem(39, Tile.crops.id).setIcon(9, 0).setDescriptionId("seeds");
         Item.wheat = new Item(40).setIcon(9, 1).setDescriptionId("wheat");
         Item.bread = new FoodItem(41, 5, false).setIcon(9, 2).setDescriptionId("bread");
@@ -400,5 +400,42 @@ public class Item
         Item.record_01 = new RecordingItem(2000, "13").setIcon(0, 15).setDescriptionId("record");
         Item.record_02 = new RecordingItem(2001, "cat").setIcon(1, 15).setDescriptionId("record");
         Stats.buildItemStats();
+    }
+
+    public enum Tier
+    {
+        WOOD(0, 59, 2.0f, 0),
+        STONE(1, 131, 4.0f, 1),
+        IRON(2, 250, 6.0f, 2),
+        EMERALD(3, 1561, 8.0f, 3),
+        GOLD(0, 32, 12.0f, 0);
+
+        private final int level;
+        private final int uses;
+        private final float speed;
+        private final int damage;
+
+        private Tier(final int level, final int uses, final float speed, final int damage) {
+            this.level = level;
+            this.uses = uses;
+            this.speed = speed;
+            this.damage = damage;
+        }
+
+        public int getUses() {
+            return this.uses;
+        }
+
+        public float getSpeed() {
+            return this.speed;
+        }
+
+        public int getAttackDamageBonus() {
+            return this.damage;
+        }
+
+        public int getLevel() {
+            return this.level;
+        }
     }
 }

@@ -20,7 +20,6 @@ import net.minecraft.client.particle.NoteParticle;
 import net.minecraft.client.particle.SmokeParticle;
 import net.minecraft.client.particle.BubbleParticle;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult_Type;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.entity.player.Player;
@@ -1062,7 +1061,7 @@ public class LevelRenderer implements LevelListener
     }
     
     public void renderHitOutline(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float partialTick) {
-        if (mode == 0 && h.type == HitResult_Type.TILE) {
+        if (mode == 0 && h.type == HitResult.Type.TILE) {
             GL11.glEnable(GL_BLEND);
             GL11.glBlendFunc(770, 771);
             GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.4f);

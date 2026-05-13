@@ -8,7 +8,7 @@ import net.minecraft.world.entity.Entity;
 
 public class HitResult
 {
-    public HitResult_Type type;
+    public Type type;
     public int x;
     public int y;
     public int z;
@@ -17,7 +17,7 @@ public class HitResult
     public Entity entity;
     
     public HitResult(final int x, final int y, final int z, final int f, final Vec3 pos) {
-        this.type = HitResult_Type.TILE;
+        this.type = Type.TILE;
         this.x = x;
         this.y = y;
         this.z = z;
@@ -26,8 +26,14 @@ public class HitResult
     }
     
     public HitResult(final Entity entity) {
-        this.type = HitResult_Type.ENTITY;
+        this.type = Type.ENTITY;
         this.entity = entity;
         this.pos = Vec3.newTemp(entity.x, entity.y, entity.z);
+    }
+
+    public enum Type
+    {
+        TILE,
+        ENTITY;
     }
 }

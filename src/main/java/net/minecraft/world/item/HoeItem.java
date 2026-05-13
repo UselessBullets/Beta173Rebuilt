@@ -4,14 +4,13 @@
 
 package net.minecraft.world.item;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.player.Player;
 
 public class HoeItem extends Item
 {
-    public HoeItem(final int id, final Item_Tier tier) {
+    public HoeItem(final int id, final Tier tier) {
         super(id);
         this.maxStackSize = 1;
         this.setMaxDamage(tier.getUses());

@@ -563,19 +563,19 @@ public abstract class Player extends Mob
         return !this.isSleeping && super.isInWall();
     }
     
-    public Player_BedSleepingResult startSleepInBed(final int x, final int y, final int z) {
+    public BedSleepingResult startSleepInBed(final int x, final int y, final int z) {
         if (!this.level.isClientSide) {
             if (this.isSleeping() || !this.isAlive()) {
-                return Player_BedSleepingResult.OTHER_PROBLEM;
+                return BedSleepingResult.OTHER_PROBLEM;
             }
             if (this.level.dimension.foggy) {
-                return Player_BedSleepingResult.NOT_POSSIBLE_HERE;
+                return BedSleepingResult.NOT_POSSIBLE_HERE;
             }
             if (this.level.isDay()) {
-                return Player_BedSleepingResult.NOT_POSSIBLE_NOW;
+                return BedSleepingResult.NOT_POSSIBLE_NOW;
             }
             if (Math.abs(this.x - x) > 3.0 || Math.abs(this.y - y) > 2.0 || Math.abs(this.z - z) > 3.0) {
-                return Player_BedSleepingResult.TOO_FAR_AWAY;
+                return BedSleepingResult.TOO_FAR_AWAY;
             }
         }
         this.setSize(0.2f, 0.2f);
@@ -618,7 +618,7 @@ public abstract class Player extends Mob
         if (!this.level.isClientSide) {
             this.level.updateSleepingPlayerList();
         }
-        return Player_BedSleepingResult.OK;
+        return BedSleepingResult.OK;
     }
     
     private void setBedOffset(final int bedDirection) {
@@ -848,5 +848,14 @@ public abstract class Player extends Mob
             return;
         }
         this.isInsidePortal = true;
+    }
+
+    public enum BedSleepingResult
+    {
+        OK,
+        NOT_POSSIBLE_HERE,
+        NOT_POSSIBLE_NOW,
+        TOO_FAR_AWAY,
+        OTHER_PROBLEM;
     }
 }

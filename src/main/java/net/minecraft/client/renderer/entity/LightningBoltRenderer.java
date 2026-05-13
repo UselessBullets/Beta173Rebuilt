@@ -91,7 +91,7 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt>
             }
         }
         GL11.glDisable(3042);
-        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_LIGHTING);
         GL11.glEnable(GL_TEXTURE_2D);
     }
 }

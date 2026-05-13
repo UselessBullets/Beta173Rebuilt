@@ -22,7 +22,7 @@ public class Lighting
     }
     
     public static void turnOn() {
-        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_LIGHTING);
         GL11.glEnable(16384);
         GL11.glEnable(16385);
         GL11.glEnable(GL_COLOR_MATERIAL);

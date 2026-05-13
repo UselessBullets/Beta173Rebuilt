@@ -55,7 +55,7 @@ public class FootstepParticle extends Particle
         t.vertexUV(n4 - n3, n5, n6 - n3, 0.0, 0.0);
         t.end();
         GL11.glDisable(3042);
-        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_LIGHTING);
     }
     
     @Override

@@ -31,7 +31,7 @@ public class FallingTileRenderer extends EntityRenderer<FallingTile>
         final Level level = entity.getLevel();
         GL11.glDisable(GL_LIGHTING);
         this.tileRenderer.renderBlock(tt, level, Mth.floor(entity.x), Mth.floor(entity.y), Mth.floor(entity.z));
-        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_LIGHTING);
         GL11.glPopMatrix();
     }
 }

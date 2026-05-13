@@ -204,7 +204,7 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
         GL11.glEnable(GL_DEPTH_TEST);
         GL11.glDepthMask(true);
         font.draw(name, -font.width(name) / 2, n2, -1);
-        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_LIGHTING);
         GL11.glDisable(3042);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glPopMatrix();

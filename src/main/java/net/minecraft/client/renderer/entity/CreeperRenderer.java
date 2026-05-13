@@ -73,7 +73,7 @@ public class CreeperRenderer extends MobRenderer<Creeper>
                 GL11.glMatrixMode(5890);
                 GL11.glLoadIdentity();
                 GL11.glMatrixMode(5888);
-                GL11.glDisable(GL_LIGHTING);
+                GL11.glEnable(GL_LIGHTING);
                 GL11.glDisable(3042);
             }
         }

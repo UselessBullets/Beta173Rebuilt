@@ -129,7 +129,7 @@ public class AchievementPopup extends GuiComponent
         GL11.glDisable(GL_LIGHTING);
         GL11.glEnable(GL_RESCALE_NORMAL);
         GL11.glEnable(GL_COLOR_MATERIAL);
-        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_LIGHTING);
         this.ir.renderGuiItem(this.mc.font, this.mc.textures, this.ach.icon, x + 8, y + 8);
         GL11.glDisable(GL_LIGHTING);
         GL11.glDepthMask(true);

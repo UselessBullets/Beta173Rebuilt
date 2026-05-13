@@ -63,7 +63,7 @@ public abstract class AbstractContainerScreen extends Screen
                 final int x = slot2.x;
                 final int y = slot2.y;
                 this.fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
-                GL11.glDisable(GL_LIGHTING);
+                GL11.glEnable(GL_LIGHTING);
                 GL11.glEnable(GL_DEPTH_TEST);
             }
         }
@@ -89,7 +89,7 @@ public abstract class AbstractContainerScreen extends Screen
         }
         GL11.glPopMatrix();
         super.render(xm, ym, partialTick);
-        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_LIGHTING);
         GL11.glEnable(GL_DEPTH_TEST);
     }
     
@@ -108,7 +108,7 @@ public abstract class AbstractContainerScreen extends Screen
                 GL11.glDisable(GL_LIGHTING);
                 this.minecraft.textures.bind(this.minecraft.textures.loadTexture("/gui/items.png"));
                 this.blit(x, y, noItemIcon % 16 * 16, noItemIcon / 16 * 16, 16, 16);
-                GL11.glDisable(GL_LIGHTING);
+                GL11.glEnable(GL_LIGHTING);
                 return;
             }
         }

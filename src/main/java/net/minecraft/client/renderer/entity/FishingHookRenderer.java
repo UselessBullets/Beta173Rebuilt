@@ -79,7 +79,7 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook>
                 instance.vertex(x + n22 * n26, y + n23 * (n26 * n26 + n26) * 0.5 + 0.25, z + n24 * n26);
             }
             instance.end();
-            GL11.glDisable(GL_LIGHTING);
+            GL11.glEnable(GL_LIGHTING);
             GL11.glEnable(GL_TEXTURE_2D);
         }
     }

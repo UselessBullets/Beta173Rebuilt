@@ -110,7 +110,7 @@ public abstract class EntityRenderer<T extends Entity>
         }
         instance.end();
         GL11.glPopMatrix();
-        GL11.glDisable(GL_LIGHTING);
+        GL11.glEnable(GL_LIGHTING);
     }
     
     private void renderShadow(final Entity e, final double x, final double y, final double z, final float pow, final float partialTick) {

@@ -154,7 +154,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
                 GL11.glColor4f(n4, n5, n6, 1.0f);
             }
             this.blit(x, y, icon % 16 * 16, icon / 16 * 16, 16, 16);
-            GL11.glDisable(GL_LIGHTING);
+            GL11.glEnable(GL_LIGHTING);
         }
         GL11.glEnable(GL_CULL_FACE);
     }
@@ -175,7 +175,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
             GL11.glDisable(GL_LIGHTING);
             GL11.glDisable(GL_DEPTH_TEST);
             font.drawShadow(string, x + 19 - 2 - font.width(string), y + 6 + 3, 16777215);
-            GL11.glDisable(GL_LIGHTING);
+            GL11.glEnable(GL_LIGHTING);
             GL11.glEnable(GL_DEPTH_TEST);
         }
         if (item.isDamaged()) {
@@ -191,7 +191,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
             this.fillRect(instance, x + 2, y + 13, 12, 1, c2);
             this.fillRect(instance, x + 2, y + 13, w, 1, c);
             GL11.glEnable(GL_TEXTURE_2D);
-            GL11.glDisable(GL_LIGHTING);
+            GL11.glEnable(GL_LIGHTING);
             GL11.glEnable(GL_DEPTH_TEST);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }

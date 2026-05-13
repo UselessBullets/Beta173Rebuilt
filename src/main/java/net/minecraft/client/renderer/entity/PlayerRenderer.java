@@ -135,7 +135,7 @@ public class PlayerRenderer extends MobRenderer<Player>
                     GL11.glEnable(GL_TEXTURE_2D);
                     GL11.glDepthMask(true);
                     font.draw(name, -font.width(name) / 2, 0, 553648127);
-                    GL11.glDisable(GL_LIGHTING);
+                    GL11.glEnable(GL_LIGHTING);
                     GL11.glDisable(3042);
                     GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
                     GL11.glPopMatrix();

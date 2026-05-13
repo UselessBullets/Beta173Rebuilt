@@ -145,7 +145,7 @@ public class AchievementScreen extends Screen
 
         this.renderLabels();
 
-        glDisable(GL_LIGHTING);
+        glEnable(GL_LIGHTING);
         glEnable(GL_DEPTH_TEST);
     }
     
@@ -313,7 +313,7 @@ public class AchievementScreen extends Screen
                     glColor4f(br, br, br, 1.0f);
                     itemRenderer.setColor = false;
                 }
-                glDisable(GL_LIGHTING);
+                glEnable(GL_LIGHTING);
                 glEnable(GL_CULL_FACE);
                 itemRenderer.renderGuiItem(this.minecraft.font, this.minecraft.textures, ach.icon, xx + 3, yy + 3);
                 glDisable(GL_LIGHTING);
@@ -373,7 +373,7 @@ public class AchievementScreen extends Screen
             this.font.drawShadow(name, x, y, this.statsCounter.canTake(ach) ? (ach.isGolden() ? -128 : -1) : (ach.isGolden() ? -8355776 : -8355712));
         }
         glEnable(GL_DEPTH_TEST);
-        glDisable(GL_LIGHTING);
+        glEnable(GL_LIGHTING);
         Lighting.turnOff();
     }
     

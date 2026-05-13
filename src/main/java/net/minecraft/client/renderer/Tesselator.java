@@ -89,7 +89,7 @@ public class Tesselator
                     GL11.glTexCoordPointer(2, 5126, 32, 12L);
                 }
                 else {
-                    this.fb.position(0);
+                    this.fb.position(3);
                     GL11.glTexCoordPointer(2, 32, this.fb);
                 }
                 GL11.glEnableClientState(32888);

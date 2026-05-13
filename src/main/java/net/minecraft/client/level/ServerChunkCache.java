@@ -2,16 +2,16 @@
 // Decompiled by Procyon v0.6.0
 // 
 
-package net.minecraft.world.level;
+package net.minecraft.client.level;
 
-import net.minecraft.Pos;
 import util.ProgressListener;
 import java.io.IOException;
-
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import net.minecraft.world.level.Level;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
@@ -20,19 +20,17 @@ import java.util.Set;
 import net.minecraft.world.level.chunk.ChunkSource;
 
 public class ServerChunkCache implements ChunkSource
-{ // TODO mappings had two classes for this, they're the same class so have been merged
+{
     private Set<Integer> toDrop;
     private LevelChunk emptyChunk;
     private ChunkSource source;
     private ChunkStorage storage;
-    public boolean autoCreate;
     private Map<Integer, LevelChunk> cache;
     private List<LevelChunk> loadedChunkList;
     private Level level;
     
     public ServerChunkCache(final Level level, final ChunkStorage storage, final ChunkSource source) {
         this.toDrop = new HashSet<>();
-        this.autoCreate = false;
         this.cache = new HashMap<>();
         this.loadedChunkList = new ArrayList<>();
         this.emptyChunk = new EmptyLevelChunk(level, new byte[32768], 0, 0);
@@ -43,16 +41,6 @@ public class ServerChunkCache implements ChunkSource
     
     public boolean hasChunk(final int x, final int z) {
         return this.cache.containsKey(ChunkPos.hashCode(x, z));
-    }
-
-    public void drop(final int x, final int z) {
-        final Pos sharedSpawnPos = this.level.getSharedSpawnPos();
-        final int n = x * 16 + 8 - sharedSpawnPos.x;
-        final int n2 = z * 16 + 8 - sharedSpawnPos.z;
-        final int n3 = 128;
-        if (n < -n3 || n > n3 || n2 < -n3 || n2 > n3) {
-            this.toDrop.add(ChunkPos.hashCode(x, z));
-        }
     }
     
     public LevelChunk create(final int x, final int z) {
@@ -94,9 +82,6 @@ public class ServerChunkCache implements ChunkSource
     public LevelChunk getChunk(final int x, final int z) {
         final LevelChunk levelChunk = this.cache.get(ChunkPos.hashCode(x, z));
         if (levelChunk == null) {
-            return this.create(x, z);
-        }
-        if (this.level.isFindingSpawn || this.autoCreate) {
             return this.create(x, z);
         }
         return levelChunk;

@@ -4,20 +4,18 @@
 
 package net.minecraft.client;
 
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.TextArea;
+import java.awt.*;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.Sys;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.io.Writer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.awt.LayoutManager;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Panel;
 
 public class CrashInfoPanel extends Panel
 {
@@ -62,10 +60,39 @@ public class CrashInfoPanel extends Panel
         final String string5 = string4 + "--- BEGIN ERROR REPORT " + Integer.toHexString(string4.hashCode()) + " --------\n" + string2;
         final TextArea comp = new TextArea(string5 + "--- END ERROR REPORT " + Integer.toHexString(string5.hashCode()) + " ----------\n" + "\n" + "\n", 0, 0, 1);
         comp.setFont(new Font("Monospaced", 0, 12));
-        this.add(new CrashInfoPanel_LogoBorder(), "North");
-        this.add(new CrashInfoPanel_Border(80), "East");
-        this.add(new CrashInfoPanel_Border(80), "West");
-        this.add(new CrashInfoPanel_Border(100), "South");
+        this.add(new LogoBorder(), "North");
+        this.add(new Border(80), "East");
+        this.add(new Border(80), "West");
+        this.add(new Border(100), "South");
         this.add(comp, "Center");
+    }
+
+    static class LogoBorder extends Canvas
+    {
+        private BufferedImage image;
+
+        public LogoBorder() {
+            try {
+                this.image = ImageIO.read(CrashInfoPanel.class.getResource("/gui/logo.png"));
+            }
+            catch (final IOException ex) {}
+            final int n = 100;
+            this.setPreferredSize(new Dimension(n, n));
+            this.setMinimumSize(new Dimension(n, n));
+        }
+
+        @Override
+        public void paint(final Graphics g) {
+            super.paint(g);
+            g.drawImage(this.image, this.getWidth() / 2 - this.image.getWidth() / 2, 32, null);
+        }
+    }
+
+    static class Border extends Canvas
+    {
+        public Border(final int size) {
+            this.setPreferredSize(new Dimension(size, size));
+            this.setMinimumSize(new Dimension(size, size));
+        }
     }
 }

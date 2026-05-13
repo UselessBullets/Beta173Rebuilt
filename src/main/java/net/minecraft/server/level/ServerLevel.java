@@ -9,9 +9,7 @@ import net.minecraft.network.packet.TileEventPacket;
 import net.minecraft.network.packet.ExplodePacket;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.network.packet.EntityEventPacket;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.AddGlobalEntityPacketPacket;
-import net.minecraft.world.level.ServerChunkCache;
 import util.Mth;
 import net.minecraft.world.level.tile.entity.TileEntity;
 import java.util.ArrayList;
@@ -33,12 +31,12 @@ public class ServerLevel extends Level
     public boolean canEditSpawn;
     public boolean noSave;
     private MinecraftServer server;
-    private IntHashMap entitiesById;
+    private IntHashMap<Entity> entitiesById;
     
     public ServerLevel(final MinecraftServer server, final LevelStorage levelStorage, final String levelName, final int dimension, final long seed) {
         super(levelStorage, levelName, seed, Dimension.getNew(dimension));
         this.canEditSpawn = false;
-        this.entitiesById = new IntHashMap();
+        this.entitiesById = new IntHashMap<>();
         this.server = server;
     }
     
@@ -61,8 +59,8 @@ public class ServerLevel extends Level
         return this.cache = new ServerChunkCache(this, this.levelStorage.createChunkStorage(this.dimension), this.dimension.createRandomLevelSource());
     }
     
-    public List getTileEntitiesInRegion(final int x0, final int y0, final int z0, final int x1, final int y1, final int z1) {
-        final ArrayList list = new ArrayList();
+    public List<TileEntity> getTileEntitiesInRegion(final int x0, final int y0, final int z0, final int x1, final int y1, final int z1) {
+        final ArrayList<TileEntity> list = new ArrayList<>();
         for (int i = 0; i < this.tileEntityList.size(); ++i) {
             final TileEntity tileEntity = this.tileEntityList.get(i);
             if (tileEntity.x >= x0 && tileEntity.y >= y0 && tileEntity.z >= z0 && tileEntity.x < x1 && tileEntity.y < y1 && tileEntity.z < z1) {

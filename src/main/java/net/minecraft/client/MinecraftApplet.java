@@ -5,7 +5,6 @@
 package net.minecraft.client;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Canvas;
 import java.applet.Applet;
 
@@ -21,7 +20,20 @@ public class MinecraftApplet extends Applet
     
     @Override
     public void init() {
-        this.canvas = new MinecraftApplet_Canvas(this);
+        this.canvas = new Canvas() {
+
+            @Override
+            public synchronized void addNotify() {
+                super.addNotify();
+                startGameThread();
+            }
+
+            @Override
+            public synchronized void removeNotify() {
+                stopGameThread();
+                super.removeNotify();
+            }
+        };
         boolean fullscreen = false;
         if (this.getParameter("fullscreen") != null) {
             fullscreen = this.getParameter("fullscreen").equalsIgnoreCase("true");

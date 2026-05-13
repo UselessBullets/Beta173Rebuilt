@@ -121,14 +121,14 @@ public class LevelRenderer implements LevelListener
         this.cullstep = 0;
         this.mc = mc;
         this.textures = textures;
-        final int n = 64;
-        this.chunkLists = MemoryTracker.genLists(n * n * n * 3);
+        final int maxChunksWidth = 64;
+        this.chunkLists = MemoryTracker.genLists(maxChunksWidth * maxChunksWidth * maxChunksWidth * 3);
         this.occlusionCheck = mc.getOpenGLCapabilities().hasOcclusionChecks();
         if (this.occlusionCheck) {
             this.resultBuffer.clear();
-            (this.occlusionCheckIds = MemoryTracker.createIntBuffer(n * n * n)).clear();
-            this.occlusionCheckIds.position();
-            this.occlusionCheckIds.limit();
+            (this.occlusionCheckIds = MemoryTracker.createIntBuffer(maxChunksWidth * maxChunksWidth * maxChunksWidth)).clear();
+            this.occlusionCheckIds.position(0);
+            this.occlusionCheckIds.limit(maxChunksWidth * maxChunksWidth * maxChunksWidth);
             ARBOcclusionQuery.glGenQueriesARB(this.occlusionCheckIds);
         }
         this.starList = MemoryTracker.genLists(3);

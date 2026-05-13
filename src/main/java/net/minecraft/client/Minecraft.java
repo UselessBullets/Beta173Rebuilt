@@ -83,6 +83,9 @@ import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Textures;
 import java.awt.Canvas;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.client.player.LocalPlayer;
@@ -273,7 +276,7 @@ public abstract class Minecraft implements Runnable
         this.gameRenderer = new GameRenderer(this);
         EntityRenderDispatcher.instance.itemInHandRenderer = new ItemInHandRenderer(this);
         this.stats = new StatsCounter(this.user, this.workingDirectory);
-        Achievements.openInventory.setDescFormatter(new Minecraft_DescFormatter(this));
+        Achievements.openInventory.setDescFormatter(i18nValue -> String.format(i18nValue, Keyboard.getKeyName(options.keyBuild.key)));
         this.renderLoadingScreen();
         Keyboard.create();
         Mouse.create();
@@ -923,7 +926,19 @@ public abstract class Minecraft implements Runnable
     }
     
     private void verify() {
-        new Minecraft_ThreadVerify(this).start();
+        new Thread(() -> {
+            try {
+                final HttpURLConnection httpURLConnection = (HttpURLConnection)new URL("https://login.minecraft.net/session?name=" + user.name + "&session=" + user.sessionId).openConnection();
+                httpURLConnection.connect();
+                if (httpURLConnection.getResponseCode() == 400) {
+                    warezTime = System.currentTimeMillis();
+                }
+                httpURLConnection.disconnect();
+            }
+            catch (final Exception ex) {
+                ex.printStackTrace();
+            }
+        }).start();
     }
     
     public void tick() {

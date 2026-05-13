@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level;
 
+import net.minecraft.client.level.ServerChunkCache;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.Pos;

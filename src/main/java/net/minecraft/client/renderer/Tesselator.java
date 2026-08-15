@@ -5,7 +5,8 @@
 package net.minecraft.client.renderer;
 
 import java.nio.ByteOrder;
-import org.lwjgl.opengl.GL11;
+
+import org.lwjgl.opengl.ARBBufferObject;
 import org.lwjgl.opengl.ARBVertexBufferObject;
 import org.lwjgl.opengl.GLContext;
 import net.minecraft.client.MemoryTracker;
@@ -13,12 +14,14 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class Tesselator
 {
-    private static boolean TRIANGLE_MODE;
-    private static boolean USE_VBO;
-    private static final int MAX_MEMORY_USE = 16777216;
-    private static final int MAX_FLOATS = 2097152;
+    private static boolean TRIANGLE_MODE = true;
+    private static boolean USE_VBO = false;
+    private static final int MAX_MEMORY_USE = 16 * 1024 * 1024;
+    private static final int MAX_FLOATS = MAX_MEMORY_USE / 4 / 2;
     private ByteBuffer buffer;
     private IntBuffer ib;
     private FloatBuffer fb;
@@ -38,7 +41,7 @@ public class Tesselator
     private double yo;
     private double zo;
     private int normal;
-    public static final Tesselator instance;
+    public static final Tesselator instance = new Tesselator(MAX_FLOATS);
     private boolean tesselating;
     private boolean vboMode;
     private IntBuffer vboIds;
@@ -58,14 +61,17 @@ public class Tesselator
         this.vboMode = false;
         this.vboId = 0;
         this.vboCounts = 10;
+
         this.size = size;
         this.buffer = MemoryTracker.createByteBuffer(size * 4);
         this.ib = this.buffer.asIntBuffer();
         this.fb = this.buffer.asFloatBuffer();
         this.array = new int[size];
         this.vboMode = (Tesselator.USE_VBO && GLContext.getCapabilities().GL_ARB_vertex_buffer_object);
+
         if (this.vboMode) {
-            ARBVertexBufferObject.glGenBuffersARB(this.vboIds = MemoryTracker.createIntBuffer(this.vboCounts));
+            this.vboIds = MemoryTracker.createIntBuffer(this.vboCounts);
+            ARBVertexBufferObject.glGenBuffersARB(this.vboIds);
         }
     }
     
@@ -81,63 +87,58 @@ public class Tesselator
             this.buffer.limit(this.p * 4);
             if (this.vboMode) {
                 this.vboId = (this.vboId + 1) % this.vboCounts;
-                ARBVertexBufferObject.glBindBufferARB(34962, this.vboIds.get(this.vboId));
-                ARBVertexBufferObject.glBufferDataARB(34962, this.buffer, 35040);
+                ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, this.vboIds.get(this.vboId));
+                ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, this.buffer, ARBBufferObject.GL_STREAM_DRAW_ARB);
             }
             if (this.hasTexture) {
                 if (this.vboMode) {
-                    GL11.glTexCoordPointer(2, 5126, 32, 12L);
+                    glTexCoordPointer(2, GL_FLOAT, 32, 12L);
                 }
                 else {
                     this.fb.position(3);
-                    GL11.glTexCoordPointer(2, 32, this.fb);
+                    glTexCoordPointer(2, 32, this.fb);
                 }
-                GL11.glEnableClientState(32888);
+                glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             }
             if (this.hasColor) {
                 if (this.vboMode) {
-                    GL11.glColorPointer(4, 5121, 32, 20L);
+                    glColorPointer(4, GL_UNSIGNED_BYTE, 32, 20L);
                 }
                 else {
                     this.buffer.position(20);
-                    GL11.glColorPointer(4, true, 32, this.buffer);
+                    glColorPointer(4, true, 32, this.buffer);
                 }
-                GL11.glEnableClientState(32886);
+                glEnableClientState(GL_COLOR_ARRAY);
             }
             if (this.hasNormal) {
                 if (this.vboMode) {
-                    GL11.glNormalPointer(5120, 32, 24L);
+                    glNormalPointer(GL_BYTE, 32, 24L);
                 }
                 else {
                     this.buffer.position(24);
-                    GL11.glNormalPointer(32, this.buffer);
+                    glNormalPointer(32, this.buffer);
                 }
-                GL11.glEnableClientState(32885);
+                glEnableClientState(GL_NORMAL_ARRAY);
             }
             if (this.vboMode) {
-                GL11.glVertexPointer(3, 5126, 32, 0L);
+                glVertexPointer(3, GL_FLOAT, 32, 0L);
             }
             else {
                 this.fb.position(0);
-                GL11.glVertexPointer(3, 32, this.fb);
+                glVertexPointer(3, 32, this.fb);
             }
-            GL11.glEnableClientState(32884);
-            if (this.mode == 7 && Tesselator.TRIANGLE_MODE) {
-                GL11.glDrawArrays(4, 0, this.vertices);
+            glEnableClientState(GL_VERTEX_ARRAY);
+            if (this.mode == GL_QUADS && Tesselator.TRIANGLE_MODE) {
+                glDrawArrays(GL_TRIANGLES, 0, this.vertices);
             }
             else {
-                GL11.glDrawArrays(this.mode, 0, this.vertices);
+                glDrawArrays(this.mode, 0, this.vertices);
             }
-            GL11.glDisableClientState(32884);
-            if (this.hasTexture) {
-                GL11.glDisableClientState(32888);
-            }
-            if (this.hasColor) {
-                GL11.glDisableClientState(32886);
-            }
-            if (this.hasNormal) {
-                GL11.glDisableClientState(32885);
-            }
+
+            glDisableClientState(GL_VERTEX_ARRAY);
+            if (this.hasTexture) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+            if (this.hasColor) glDisableClientState(GL_COLOR_ARRAY);
+            if (this.hasNormal) glDisableClientState(GL_NORMAL_ARRAY);
         }
         this.clear();
     }
@@ -150,7 +151,7 @@ public class Tesselator
     }
     
     public void begin() {
-        this.begin(7);
+        this.begin(GL_QUADS);
     }
     
     public void begin(final int mode) {
@@ -188,30 +189,15 @@ public class Tesselator
         if (this.noColor) {
             return;
         }
-        if (r > 255) {
-            r = 255;
-        }
-        if (g > 255) {
-            g = 255;
-        }
-        if (b > 255) {
-            b = 255;
-        }
-        if (a > 255) {
-            a = 255;
-        }
-        if (r < 0) {
-            r = 0;
-        }
-        if (g < 0) {
-            g = 0;
-        }
-        if (b < 0) {
-            b = 0;
-        }
-        if (a < 0) {
-            a = 0;
-        }
+        if (r > 255) r = 255;
+        if (g > 255) g = 255;
+        if (b > 255) b = 255;
+        if (a > 255) a = 255;
+        if (r < 0) r = 0;
+        if (g < 0) g = 0;
+        if (b < 0) b = 0;
+        if (a < 0) a = 0;
+
         this.hasColor = true;
         if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
             this.col = (a << 24 | b << 16 | g << 8 | r);
@@ -228,7 +214,7 @@ public class Tesselator
     
     public void vertex(final double x, final double y, final double z) {
         ++this.count;
-        if (this.mode == 7 && Tesselator.TRIANGLE_MODE && this.count % 4 == 0) {
+        if (this.mode == GL_QUADS && Tesselator.TRIANGLE_MODE && this.count % 4 == 0) {
             for (int i = 0; i < 2; ++i) {
                 final int n = 8 * (3 - i);
                 if (this.hasTexture) {
@@ -297,10 +283,5 @@ public class Tesselator
         this.yo += y;
         this.zo += z;
     }
-    
-    static {
-        Tesselator.TRIANGLE_MODE = true;
-        Tesselator.USE_VBO = false;
-        instance = new Tesselator(MAX_FLOATS);
-    }
+
 }

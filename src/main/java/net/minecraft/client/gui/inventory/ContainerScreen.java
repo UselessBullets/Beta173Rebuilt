@@ -17,29 +17,32 @@ public class ContainerScreen extends AbstractContainerScreen
     
     public ContainerScreen(final Container inventory, final Container container) {
         super(new ContainerMenu(inventory, container));
-        this.containerRows = 0;
+
         this.inventory = inventory;
         this.container = container;
         this.passEvents = false;
-        final int n = 222 - 108;
+
+        final int defaultHeight = 222;
+        final int noRowHeight = defaultHeight - 6 * 18;
         this.containerRows = container.getContainerSize() / 9;
-        this.imageHeight = n + this.containerRows * 18;
+
+        this.imageHeight = noRowHeight + this.containerRows * 18;
     }
     
     @Override
     protected void renderLabels() {
-        this.font.draw(this.container.getName(), 8, 6, 0x404040);
+        this.font.draw(this.container.getName(), 8, 2 + 2 + 2, 0x404040);
         this.font.draw(this.inventory.getName(), 8, this.imageHeight - 96 + 2, 0x404040);
     }
     
     @Override
     protected void renderBg(final float partialTick) {
-        final int loadTexture = this.minecraft.textures.loadTexture("/gui/container.png");
+        final int tex = this.minecraft.textures.loadTexture("/gui/container.png");
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.textures.bind(loadTexture);
-        final int n = (this.width - this.imageWidth) / 2;
-        final int y = (this.height - this.imageHeight) / 2;
-        this.blit(n, y, 0, 0, this.imageWidth, this.containerRows * 18 + 17);
-        this.blit(n, y + this.containerRows * 18 + 17, 0, 126, this.imageWidth, 96);
+        this.minecraft.textures.bind(tex);
+        final int xo = (this.width - this.imageWidth) / 2;
+        final int yo = (this.height - this.imageHeight) / 2;
+        this.blit(xo, yo, 0, 0, this.imageWidth, this.containerRows * 18 + 17);
+        this.blit(xo, yo + this.containerRows * 18 + 17, 0, 222 - 96, this.imageWidth, 96);
     }
 }

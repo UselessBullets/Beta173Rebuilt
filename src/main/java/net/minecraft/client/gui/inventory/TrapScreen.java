@@ -19,15 +19,17 @@ public class TrapScreen extends AbstractContainerScreen
     
     @Override
     protected void renderLabels() {
-        this.font.draw("Dispenser", 60, 6, 0x404040);
+        this.font.draw("Dispenser", 16 + 4 + 40, 2 + 2 + 2, 0x404040);
         this.font.draw("Inventory", 8, this.imageHeight - 96 + 2, 0x404040);
     }
     
     @Override
     protected void renderBg(final float partialTick) {
-        final int loadTexture = this.minecraft.textures.loadTexture("/gui/trap.png");
+        final int tex = this.minecraft.textures.loadTexture("/gui/trap.png");
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.textures.bind(loadTexture);
-        this.blit((this.width - this.imageWidth) / 2, (this.height - this.imageHeight) / 2, 0, 0, this.imageWidth, this.imageHeight);
+        this.minecraft.textures.bind(tex);
+        final int xo = (this.width - this.imageWidth) / 2;
+        final int yo = (this.height - this.imageHeight) / 2;
+        this.blit(xo, yo, 0, 0, this.imageWidth, this.imageHeight);
     }
 }

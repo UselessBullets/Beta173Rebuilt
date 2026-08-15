@@ -26,6 +26,7 @@ public class InventoryScreen extends AbstractContainerScreen
     
     public InventoryScreen(final Player player) {
         super(player.inventoryMenu);
+
         this.passEvents = true;
         player.awardStat(Achievements.openInventory, 1);
     }
@@ -37,7 +38,7 @@ public class InventoryScreen extends AbstractContainerScreen
     
     @Override
     protected void renderLabels() {
-        this.font.draw("Crafting", 86, 16, 0x404040);
+        this.font.draw("Crafting", 84 + 2, 8 * 2, 0x404040);
     }
     
     @Override
@@ -49,39 +50,46 @@ public class InventoryScreen extends AbstractContainerScreen
     
     @Override
     protected void renderBg(final float partialTick) {
-        final int loadTexture = this.minecraft.textures.loadTexture("/gui/inventory.png");
+        final int tex = this.minecraft.textures.loadTexture("/gui/inventory.png");
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.textures.bind(loadTexture);
-        final int x = (this.width - this.imageWidth) / 2;
-        final int y = (this.height - this.imageHeight) / 2;
-        this.blit(x, y, 0, 0, this.imageWidth, this.imageHeight);
+        this.minecraft.textures.bind(tex);
+        final int xo = (this.width - this.imageWidth) / 2;
+        final int yo = (this.height - this.imageHeight) / 2;
+        this.blit(xo, yo, 0, 0, this.imageWidth, this.imageHeight);
+
         GL11.glEnable(GL_RESCALE_NORMAL);
         GL11.glEnable(GL_COLOR_MATERIAL);
+
         GL11.glPushMatrix();
-        GL11.glTranslatef((float)(x + 51), (float)(y + 75), 50.0f);
-        final float n = 30.0f;
-        GL11.glScalef(-n, n, n);
+        GL11.glTranslatef((float)(xo + 51), (float)(yo + 75), 50.0f);
+        final float ss = 30.0f;
+        GL11.glScalef(-ss, ss, ss);
         GL11.glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
-        final float yBodyRot = this.minecraft.player.yBodyRot;
-        final float yRot = this.minecraft.player.yRot;
-        final float xRot = this.minecraft.player.xRot;
-        final float n2 = x + 51 - this.xMouse;
-        final float n3 = y + 75 - 50 - this.yMouse;
-        GL11.glRotatef(135.0f, 0.0f, 1.0f, 0.0f);
+
+        final float oybr = this.minecraft.player.yBodyRot;
+        final float oyr = this.minecraft.player.yRot;
+        final float oxr = this.minecraft.player.xRot;
+
+        final float xd = xo + 51 - this.xMouse;
+        final float yd = yo + 75 - 50 - this.yMouse;
+
+        GL11.glRotatef(45 + 90, 0.0f, 1.0f, 0.0f);
         Lighting.turnOn();
-        GL11.glRotatef(-135.0f, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(-(float)Math.atan(n3 / 40.0f) * 20.0f, 1.0f, 0.0f, 0.0f);
-        this.minecraft.player.yBodyRot = (float)Math.atan(n2 / 40.0f) * 20.0f;
-        this.minecraft.player.yRot = (float)Math.atan(n2 / 40.0f) * 40.0f;
-        this.minecraft.player.xRot = -(float)Math.atan(n3 / 40.0f) * 20.0f;
+        GL11.glRotatef(-45 - 90, 0.0f, 1.0f, 0.0f);
+
+        GL11.glRotatef(-(float)Math.atan(yd / 40.0f) * 20.0f, 1.0f, 0.0f, 0.0f);
+
+        this.minecraft.player.yBodyRot = (float)Math.atan(xd / 40.0f) * 20.0f;
+        this.minecraft.player.yRot = (float)Math.atan(xd / 40.0f) * 40.0f;
+        this.minecraft.player.xRot = -(float)Math.atan(yd / 40.0f) * 20.0f;
         this.minecraft.player.emission = 1.0f;
         GL11.glTranslatef(0.0f, this.minecraft.player.heightOffset, 0.0f);
         EntityRenderDispatcher.instance.playerRotY = 180.0f;
         EntityRenderDispatcher.instance.render(this.minecraft.player, 0.0, 0.0, 0.0, 0.0f, 1.0f);
         this.minecraft.player.emission = 0.0f;
-        this.minecraft.player.yBodyRot = yBodyRot;
-        this.minecraft.player.yRot = yRot;
-        this.minecraft.player.xRot = xRot;
+        this.minecraft.player.yBodyRot = oybr;
+        this.minecraft.player.yRot = oyr;
+        this.minecraft.player.xRot = oxr;
         GL11.glPopMatrix();
         Lighting.turnOff();
         GL11.glDisable(GL_RESCALE_NORMAL);

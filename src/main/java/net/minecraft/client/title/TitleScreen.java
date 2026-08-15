@@ -5,6 +5,7 @@
 package net.minecraft.client.title;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.client.Minecraft;
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.client.skins.TexturePackSelectScreen;
@@ -129,7 +130,7 @@ public class TitleScreen extends Screen
         glScalef(n3, n3, n3);
         this.drawCenteredString(this.font, this.splash, 0, -8, 0xffff00);
         glPopMatrix();
-        this.drawString(this.font, "Minecraft " + SharedConstants.VERSION_STRING, 2, 2, 0x505050);
+        this.drawString(this.font, Minecraft.VERSION_STRING, 2, 2, 0x505050);
         final String s = "Copyright Mojang AB. Do not distribute.";
         this.drawString(this.font, s, this.width - this.font.width(s) - 2, this.height - 10, 0xffffff);
         super.render(xm, ym, partialTick);

@@ -4,10 +4,10 @@
 
 package net.minecraft.client.gui;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.locale.language.Language;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.client.GuiMessage;
 import java.awt.Color;
@@ -27,214 +27,239 @@ import static org.lwjgl.opengl.GL12.*;
 
 public class Gui extends GuiComponent
 {
-    private static ItemRenderer itemRenderer;
+    private static final int MAX_MESSAGE_WIDTH = 320;
+    private static ItemRenderer itemRenderer = new ItemRenderer();
     private List<GuiMessage> guiMessages;
     private Random random;
     private Minecraft minecraft;
     public String selectedName;
     private int tickCount;
-    private String nowPlayingString;
-    private int nowPlayingTime;
+    private String overlayMessageString;
+    private int overlayMessageTime;
     private boolean nowPlayingColor;
     public float progress;
     float tbr;
     
     public Gui(final Minecraft minecraft) {
-        this.guiMessages = new ArrayList();
+        this.guiMessages = new ArrayList<>();
         this.random = new Random();
         this.selectedName = null;
         this.tickCount = 0;
-        this.nowPlayingString = "";
-        this.nowPlayingTime = 0;
+        this.overlayMessageString = "";
+        this.overlayMessageTime = 0;
         this.nowPlayingColor = false;
         this.tbr = 1.0f;
         this.minecraft = minecraft;
     }
     
     public void render(final float partialTick, final boolean mouseFree, final int xMouse, final int yMouse) {
-        final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
-        final int width = screenSizeCalculator.getWidth();
-        final int height = screenSizeCalculator.getHeight();
+        final ScreenSizeCalculator ssc = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
+        final int screenWidth = ssc.getWidth();
+        final int screenHeight = ssc.getHeight();
+        final int quickSelectWidth = 182;
+        final int quickSelectHeight = 22;
+
         final Font font = this.minecraft.font;
         this.minecraft.gameRenderer.setupGuiScreen();
+
         glEnable(GL_BLEND);
+
         if (Minecraft.useFancyGraphics()) {
-            this.renderVignette(this.minecraft.player.getBrightness(partialTick), width, height);
+            this.renderVignette(this.minecraft.player.getBrightness(partialTick), screenWidth, screenHeight);
         }
-        final ItemInstance armor = this.minecraft.player.inventory.getArmor(3);
-        if (!this.minecraft.options.thirdPersonView && armor != null && armor.id == Tile.pumpkin.id) {
-            this.renderPumpkin(width, height);
+
+        final ItemInstance headGear = this.minecraft.player.inventory.getArmor(3);
+        if (!this.minecraft.options.thirdPersonView && headGear != null && headGear.id == Tile.pumpkin.id) {
+            this.renderPumpkin(screenWidth, screenHeight);
         }
-        final float br = this.minecraft.player.oPortalTime + (this.minecraft.player.portalTime - this.minecraft.player.oPortalTime) * partialTick;
-        if (br > 0.0f) {
-            this.renderTp(br, width, height);
+
+        final float pt = this.minecraft.player.oPortalTime + (this.minecraft.player.portalTime - this.minecraft.player.oPortalTime) * partialTick;
+        if (pt > 0.0f) {
+            this.renderTp(pt, screenWidth, screenHeight);
         }
+
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/gui.png"));
         final Inventory inventory = this.minecraft.player.inventory;
         this.blitOffset = -90.0f;
-        this.blit(width / 2 - 91, height - 22, 0, 0, 182, 22);
-        this.blit(width / 2 - 91 - 1 + inventory.selected * 20, height - 22 - 1, 0, 22, 24, 22);
+        this.blit((screenWidth - quickSelectWidth) / 2, screenHeight - quickSelectHeight, 0, 0, quickSelectWidth, quickSelectHeight);
+        this.blit((screenWidth - quickSelectWidth) / 2 - 1 + inventory.selected * 20, screenHeight - 22 - 1, 0, 22, 24, quickSelectWidth);
+
         glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/icons.png"));
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR);
-        this.blit(width / 2 - 7, height / 2 - 7, 0, 0, 16, 16);
+
+        this.blit(screenWidth / 2 - 7, screenHeight / 2 - 7, 0, 0, 16, 16);
         glDisable(GL_BLEND);
-        boolean b = this.minecraft.player.invulnerableTime / 3 % 2 == 1;
-        if (this.minecraft.player.invulnerableTime < 10) {
-            b = false;
-        }
+
+        boolean blink = this.minecraft.player.invulnerableTime / 3 % 2 == 1;
+        if (this.minecraft.player.invulnerableTime < 10) blink = false;
+
         final int health = this.minecraft.player.health;
         final int lastHealth = this.minecraft.player.lastHealth;
-        this.random.setSeed(this.tickCount * 312871);
+        this.random.setSeed(this.tickCount * 312871L);
+
         if (this.minecraft.gameMode.canHurtPlayer()) {
-            final int armor2 = this.minecraft.player.getArmor();
-            for (int i = 0; i < 10; ++i) {
-                int n = height - 32;
-                if (armor2 > 0) {
-                    final int x = width / 2 + 91 - i * 8 - 9;
-                    if (i * 2 + 1 < armor2) {
-                        this.blit(x, n, 34, 9, 9, 9);
-                    }
-                    if (i * 2 + 1 == armor2) {
-                        this.blit(x, n, 25, 9, 9, 9);
-                    }
-                    if (i * 2 + 1 > armor2) {
-                        this.blit(x, n, 16, 9, 9, 9);
-                    }
+            final int armor = this.minecraft.player.getArmor();
+            // render health and armor
+            for (int i = 0; i < (Player.MAX_HEALTH / 2); ++i) {
+                int yo = screenHeight - 32;
+                if (armor > 0) {
+                    final int xo = (screenWidth + quickSelectWidth) / 2 - i * 8 - 9;
+
+                    // Useless - Below comment was in LCE leak, is amusing
+                    // HEALTH
+                    if (i * 2 + 1 < armor) this.blit(xo, yo, 34, 9, 9, 9);
+                    if (i * 2 + 1 == armor) this.blit(xo, yo, 25, 9, 9, 9);
+                    if (i * 2 + 1 > armor) this.blit(xo, yo, 16, 9, 9, 9);
                 }
-                int n2 = 0;
-                if (b) {
-                    n2 = 1;
-                }
-                final int x2 = width / 2 - 91 + i * 8;
+                final int healthTexBaseX = 16;
+
+                int bg = 0;
+                if (blink) bg = 1;
+
+                final int xo = (screenWidth - quickSelectWidth) / 2 + i * 8;
                 if (health <= 4) {
-                    n += this.random.nextInt(2);
+                    yo += this.random.nextInt(2);
                 }
-                this.blit(x2, n, 16 + n2 * 9, 0, 9, 9);
-                if (b) {
+
+                this.blit(xo, yo, 16 + bg * 9, 0, 9, 9);
+                if (blink) {
                     if (i * 2 + 1 < lastHealth) {
-                        this.blit(x2, n, 70, 0, 9, 9);
+                        this.blit(xo, yo, 70, 0, 9, 9);
                     }
                     if (i * 2 + 1 == lastHealth) {
-                        this.blit(x2, n, 79, 0, 9, 9);
+                        this.blit(xo, yo, 79, 0, 9, 9);
                     }
                 }
-                if (i * 2 + 1 < health) {
-                    this.blit(x2, n, 52, 0, 9, 9);
-                }
-                if (i * 2 + 1 == health) {
-                    this.blit(x2, n, 61, 0, 9, 9);
-                }
+                if (i * 2 + 1 < health) this.blit(xo, yo, healthTexBaseX + 4 * 9, 0, 9, 9); ;
+                if (i * 2 + 1 == health) this.blit(xo, yo, healthTexBaseX + 5 * 9, 0, 9, 9);
             }
+
+            // render air bubbles
             if (this.minecraft.player.isUnderLiquid(Material.water)) {
-                for (int n3 = (int)Math.ceil((this.minecraft.player.airSupply - 2) * 10.0 / 300.0), n4 = (int)Math.ceil(this.minecraft.player.airSupply * 10.0 / 300.0) - n3, j = 0; j < n3 + n4; ++j) {
-                    if (j < n3) {
-                        this.blit(width / 2 - 91 + j * 8, height - 32 - 9, 16, 18, 9, 9);
-                    }
-                    else {
-                        this.blit(width / 2 - 91 + j * 8, height - 32 - 9, 25, 18, 9, 9);
-                    }
+                int count = (int)Math.ceil((this.minecraft.player.airSupply - 2) * 10.0 / Player.TOTAL_AIR_SUPPLY);
+                int extra = (int)Math.ceil(this.minecraft.player.airSupply * 10.0 / Player.TOTAL_AIR_SUPPLY) - count;
+                for (int i = 0; i < count + extra; ++i) {
+                    // Air bubbles
+                    if (i < count) this.blit((screenWidth - quickSelectWidth) / 2 + i * 8, screenHeight - 32 - 9, 16, 18, 9, 9);
+                    else this.blit((screenWidth - quickSelectWidth) / 2 + i * 8, screenHeight - 32 - 9, 25, 18, 9, 9);
                 }
             }
         }
+
         glDisable(GL_BLEND);
         glEnable(GL_RESCALE_NORMAL);
         glPushMatrix();
         glRotatef(120.0f, 1.0f, 0.0f, 0.0f);
         Lighting.turnOn();
         glPopMatrix();
-        for (int k = 0; k < 9; ++k) {
-            this.renderSlot(k, width / 2 - 90 + k * 20 + 2, height - 16 - 3, partialTick);
+        for (int i = 0; i < 9; ++i) {
+            final int x = screenWidth / 2 - 9 * 10 + i * 20 + 2;
+            final int y = screenHeight - 16 - 3;
+            this.renderSlot(i, x, y, partialTick);
         }
         Lighting.turnOff();
         glDisable(GL_RESCALE_NORMAL);
+
+        // if the player is falling asleep we render a dark overlay
         if (this.minecraft.player.getSleepTimer() > 0) {
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_ALPHA_TEST);
-            final int sleepTimer = this.minecraft.player.getSleepTimer();
-            float n5 = sleepTimer / 100.0f;
-            if (n5 > 1.0f) {
-                n5 = 1.0f - (sleepTimer - 100) / 10.0f;
+            final int timer = this.minecraft.player.getSleepTimer();
+            float amount = timer / (float) Player.SLEEP_DURATION;
+            if (amount > 1.0f) {
+                // waking up
+                amount = 1.0f - (timer - Player.SLEEP_DURATION) / (float) Player.WAKE_UP_DURATION;
             }
-            this.fill(0, 0, width, height, (int)(220.0f * n5) << 24 | 0x101020);
+            final int color = (int)(220.0f * amount) << 24 | 0x101020;
+            this.fill(0, 0, screenWidth, screenHeight, color);
             glEnable(GL_ALPHA_TEST);
             glEnable(GL_DEPTH_TEST);
         }
+
         if (this.minecraft.options.renderDebug) {
             glPushMatrix();
-            if (Minecraft.warezTime > 0L) {
-                glTranslatef(0.0f, 32.0f, 0.0f);
-            }
-            font.drawShadow("Minecraft " + SharedConstants.VERSION_STRING + " (" + this.minecraft.fpsString + ")", 2, 2, 0xffffff);
-            font.drawShadow(this.minecraft.gatherStats1(), 2, 12, 0xffffff);
-            font.drawShadow(this.minecraft.gatherStats2(), 2, 22, 0xffffff);
-            font.drawShadow(this.minecraft.gatherStats4(), 2, 32, 0xffffff);
-            font.drawShadow(this.minecraft.gatherStats3(), 2, 42, 0xffffff);
-            final long maxMemory = Runtime.getRuntime().maxMemory();
-            final long totalMemory = Runtime.getRuntime().totalMemory();
-            final long n6 = totalMemory - Runtime.getRuntime().freeMemory();
-            final String string = "Used memory: " + n6 * 100L / maxMemory + "% (" + n6 / 1024L / 1024L + "MB) of " + maxMemory / 1024L / 1024L + "MB";
-            this.drawString(font, string, width - font.width(string) - 2, 2, 0xe0e0e0);
-            final String string2 = "Allocated memory: " + totalMemory * 100L / maxMemory + "% (" + totalMemory / 1024L / 1024L + "MB)";
-            this.drawString(font, string2, width - font.width(string2) - 2, 12, 0xe0e0e0);
-            this.drawString(font, "x: " + this.minecraft.player.x, 2, 64, 0xe0e0e0);
-            this.drawString(font, "y: " + this.minecraft.player.y, 2, 72, 0xe0e0e0);
-            this.drawString(font, "z: " + this.minecraft.player.z, 2, 80, 0xe0e0e0);
-            this.drawString(font, "f: " + (Mth.floor(this.minecraft.player.yRot * 4.0f / 360.0f + 0.5) & 0x3), 2, 88, 0xe0e0e0);
+            if (Minecraft.warezTime > 0L) glTranslatef(0.0f, 32.0f, 0.0f);
+            font.drawShadow(Minecraft.VERSION_STRING + " (" + this.minecraft.fpsString + ")", 2, 2, 0xffffff);
+            font.drawShadow(this.minecraft.gatherStats1(), 2, 2 + 10, 0xffffff);
+            font.drawShadow(this.minecraft.gatherStats2(), 2, 2 + 20, 0xffffff);
+            font.drawShadow(this.minecraft.gatherStats4(), 2, 2 + 30, 0xffffff);
+            font.drawShadow(this.minecraft.gatherStats3(), 2, 2 + 40, 0xffffff);
+
+            final long max = Runtime.getRuntime().maxMemory();
+            final long total = Runtime.getRuntime().totalMemory();
+            final long free = Runtime.getRuntime().freeMemory();
+            final long used = total - free;
+
+            String msg = "Used memory: " + used * 100L / max + "% (" + used / 1024L / 1024L + "MB) of " + max / 1024L / 1024L + "MB";
+            this.drawString(font, msg, screenWidth - font.width(msg) - 2, 2, 0xe0e0e0);
+
+            msg = "Allocated memory: " + total * 100L / max + "% (" + total / 1024L / 1024L + "MB)";
+            this.drawString(font, msg, screenWidth - font.width(msg) - 2, 12, 0xe0e0e0);
+
+            this.drawString(font, "x: " + this.minecraft.player.x, 2, 8 * 8, 0xe0e0e0);
+            this.drawString(font, "y: " + this.minecraft.player.y, 2, 8 * 9, 0xe0e0e0);
+            this.drawString(font, "z: " + this.minecraft.player.z, 2, 8 * 10, 0xe0e0e0);
+            this.drawString(font, "f: " + (Mth.floor(this.minecraft.player.yRot * 4.0f / 360.0f + 0.5) & 0x3), 2, 8 * 11, 0xe0e0e0);
             glPopMatrix();
         }
-        if (this.nowPlayingTime > 0) {
-            final float n7 = this.nowPlayingTime - partialTick;
-            int n8 = (int)(n7 * 256.0f / 20.0f);
-            if (n8 > 255) {
-                n8 = 255;
-            }
-            if (n8 > 0) {
+
+        // Jukebox CD message
+        if (this.overlayMessageTime > 0) {
+            final float t = this.overlayMessageTime - partialTick;
+            int alpha = (int)(t * 256.0f / 20.0f);
+            if (alpha > 255) alpha = 255;
+            if (alpha > 0) {
                 glPushMatrix();
-                glTranslatef((float)(width / 2), (float)(height - 48), 0.0f);
+                glTranslatef((float)(screenWidth / 2), (float)(screenHeight - 48), 0.0f);
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                int n9 = 16777215;
+
+                int col = 0xffffff;
                 if (this.nowPlayingColor) {
-                    n9 = (Color.HSBtoRGB(n7 / 50.0f, 0.7f, 0.6f) & 0xFFFFFF);
+                    col = (Color.HSBtoRGB(t / 50.0f, 0.7f, 0.6f) & 0xFFFFFF);
                 }
-                font.draw(this.nowPlayingString, -font.width(this.nowPlayingString) / 2, -4, n9 + (n8 << 24));
+
+                font.draw(this.overlayMessageString, -font.width(this.overlayMessageString) / 2, -4, col + (alpha << 24));
                 glDisable(GL_BLEND);
                 glPopMatrix();
             }
         }
-        int n10 = 10;
-        boolean b2 = false;
+
+        int max = 10;
+        boolean isChatting = false;
         if (this.minecraft.screen instanceof ChatScreen) {
-            n10 = 20;
-            b2 = true;
+            max = 20;
+            isChatting = true;
         }
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_ALPHA_TEST);
+
         glPushMatrix();
-        glTranslatef(0.0f, (float)(height - 48), 0.0f);
-        for (int n11 = 0; n11 < this.guiMessages.size() && n11 < n10; ++n11) {
-            if (((GuiMessage)this.guiMessages.get(n11)).ticks < 200 || b2) {
-                double n12 = (1.0 - this.guiMessages.get(n11).ticks / 200.0) * 10.0;
-                if (n12 < 0.0) {
-                    n12 = 0.0;
-                }
-                if (n12 > 1.0) {
-                    n12 = 1.0;
-                }
-                int n13 = (int)(255.0 * (n12 * n12));
-                if (b2) {
-                    n13 = 255;
-                }
-                if (n13 > 0) {
-                    final int n14 = 2;
-                    final int y = -n11 * 9;
-                    final String string3 = this.guiMessages.get(n11).string;
-                    this.fill(n14, y - 1, n14 + 320, y + 8, n13 / 2 << 24);
+        glTranslatef(0.0f, (float)(screenHeight - 48), 0.0f);
+        for (int i = 0; i < this.guiMessages.size() && i < max; ++i) {
+            if (this.guiMessages.get(i).ticks < 20 * 10 || isChatting) {
+                double t = this.guiMessages.get(i).ticks / (20.0 * 10.0);
+                t = 1 - t;
+                t = t * 10;
+                if (t < 0.0) t = 0.0;
+                if (t > 1.0) t = 1.0;
+                t = t * t;
+                int alpha = (int)(255.0 * t);
+                if (isChatting) alpha = 255;
+
+                if (alpha > 0) {
+                    final int x = 2;
+                    final int y = -i * 9;
+
+                    final String msg = this.guiMessages.get(i).string;
+                    this.fill(x, y - 1, x + MAX_MESSAGE_WIDTH, y + 8, alpha / 2 << 24);
                     glEnable(GL_BLEND);
-                    font.drawShadow(string3, n14, y, 0xffffff + (n13 << 24));
+
+                    font.drawShadow(msg, x, y, 0xffffff + (alpha << 24));
                 }
             }
         }
@@ -249,14 +274,15 @@ public class Gui extends GuiComponent
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         glDisable(GL_ALPHA_TEST);
+
         glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("%blur%/misc/pumpkinblur.png"));
-        final Tesselator instance = Tesselator.instance;
-        instance.begin();
-        instance.vertexUV(0.0, h, -90.0, 0.0, 1.0);
-        instance.vertexUV(w, h, -90.0, 1.0, 1.0);
-        instance.vertexUV(w, 0.0, -90.0, 1.0, 0.0);
-        instance.vertexUV(0.0, 0.0, -90.0, 0.0, 0.0);
-        instance.end();
+        final Tesselator t = Tesselator.instance;
+        t.begin();
+        t.vertexUV(0, h, -90.0, 0.0, 1.0);
+        t.vertexUV(w, h, -90.0, 1.0, 1.0);
+        t.vertexUV(w, 0, -90.0, 1.0, 0.0);
+        t.vertexUV(0, 0, -90.0, 0.0, 0.0);
+        t.end();
         glDepthMask(true);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_ALPHA_TEST);
@@ -265,13 +291,10 @@ public class Gui extends GuiComponent
     
     private void renderVignette(float br, final int w, final int h) {
         br = 1.0f - br;
-        if (br < 0.0f) {
-            br = 0.0f;
-        }
-        if (br > 1.0f) {
-            br = 1.0f;
-        }
-        this.tbr += (float)((br - this.tbr) * 0.01);
+        if (br < 0.0f) br = 0.0f;
+        if (br > 1.0f) br = 1.0f;
+        this.tbr += (br - this.tbr) * 0.01f;
+
         glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
         glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
@@ -296,23 +319,25 @@ public class Gui extends GuiComponent
             br *= br;
             br = br * 0.8f + 0.2f;
         }
+
         glDisable(GL_ALPHA_TEST);
         glDisable(GL_DEPTH_TEST);
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glColor4f(1.0f, 1.0f, 1.0f, br);
         glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/terrain.png"));
-        final float n = Tile.portalTile.tex % 16 / 16.0f;
-        final float n2 = Tile.portalTile.tex / 16 / 16.0f;
-        final float n3 = (Tile.portalTile.tex % 16 + 1) / 16.0f;
-        final float n4 = (Tile.portalTile.tex / 16 + 1) / 16.0f;
-        final Tesselator instance = Tesselator.instance;
-        instance.begin();
-        instance.vertexUV(0.0, h, -90.0, n, n4);
-        instance.vertexUV(w, h, -90.0, n3, n4);
-        instance.vertexUV(w, 0.0, -90.0, n3, n2);
-        instance.vertexUV(0.0, 0.0, -90.0, n, n2);
-        instance.end();
+
+        final float u0 = Tile.portalTile.tex % 16 / 16.0f;
+        final float v0 = Tile.portalTile.tex / 16 / 16.0f;
+        final float u1 = (Tile.portalTile.tex % 16 + 1) / 16.0f;
+        final float v1 = (Tile.portalTile.tex / 16 + 1) / 16.0f;
+        final Tesselator t = Tesselator.instance;
+        t.begin();
+        t.vertexUV(0.0, h, -90.0, u0, v1);
+        t.vertexUV(w, h, -90.0, u1, v1);
+        t.vertexUV(w, 0.0, -90.0, u1, v0);
+        t.vertexUV(0.0, 0.0, -90.0, u0, v0);
+        t.end();
         glDepthMask(true);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_ALPHA_TEST);
@@ -320,33 +345,33 @@ public class Gui extends GuiComponent
     }
     
     private void renderSlot(final int slot, final int x, final int y, final float partialTick) {
-        final ItemInstance itemInstance = this.minecraft.player.inventory.items[slot];
-        if (itemInstance == null) {
-            return;
-        }
-        final float n = itemInstance.popTime - partialTick;
-        if (n > 0.0f) {
+        final ItemInstance item = this.minecraft.player.inventory.items[slot];
+        if (item == null) return;
+
+        final float pop = item.popTime - partialTick;
+        if (pop > 0.0f) {
             glPushMatrix();
-            final float n2 = 1.0f + n / 5.0f;
+            final float squeeze = 1.0f + pop / 5.0f;
             glTranslatef((float)(x + 8), (float)(y + 12), 0.0f);
-            glScalef(1.0f / n2, (n2 + 1.0f) / 2.0f, 1.0f);
+            glScalef(1.0f / squeeze, (squeeze + 1.0f) / 2.0f, 1.0f);
             glTranslatef((float)(-(x + 8)), (float)(-(y + 12)), 0.0f);
         }
-        Gui.itemRenderer.renderGuiItem(this.minecraft.font, this.minecraft.textures, itemInstance, x, y);
-        if (n > 0.0f) {
+
+        Gui.itemRenderer.renderGuiItem(this.minecraft.font, this.minecraft.textures, item, x, y);
+
+        if (pop > 0.0f) {
             glPopMatrix();
         }
-        Gui.itemRenderer.renderGuiItemDecorations(this.minecraft.font, this.minecraft.textures, itemInstance, x, y);
+
+        Gui.itemRenderer.renderGuiItemDecorations(this.minecraft.font, this.minecraft.textures, item, x, y);
     }
     
     public void tick() {
-        if (this.nowPlayingTime > 0) {
-            --this.nowPlayingTime;
-        }
+        if (this.overlayMessageTime > 0) --this.overlayMessageTime;
         ++this.tickCount;
+
         for (int i = 0; i < this.guiMessages.size(); ++i) {
-            final GuiMessage guiMessage = this.guiMessages.get(i);
-            ++guiMessage.ticks;
+            this.guiMessages.get(i).ticks++;
         }
     }
     
@@ -355,11 +380,14 @@ public class Gui extends GuiComponent
     }
     
     public void addMessage(String str) {
-        while (this.minecraft.font.width(str) > 320) {
-            int n;
-            for (n = 1; n < str.length() && this.minecraft.font.width(str.substring(0, n + 1)) <= 320; ++n) {}
-            this.addMessage(str.substring(0, n));
-            str = str.substring(n);
+        while (this.minecraft.font.width(str) > MAX_MESSAGE_WIDTH) {
+            int i = 1;
+            while (i < str.length() && this.minecraft.font.width(str.substring(0, i + 1)) <= MAX_MESSAGE_WIDTH) {
+                ++i;
+            }
+
+            this.addMessage(str.substring(0, i));
+            str = str.substring(i);
         }
         this.guiMessages.add(0, new GuiMessage(str));
         while (this.guiMessages.size() > 50) {
@@ -368,16 +396,15 @@ public class Gui extends GuiComponent
     }
     
     public void setNowPlaying(final String str) {
-        this.nowPlayingString = "Now playing: " + str;
-        this.nowPlayingTime = 60;
+        this.overlayMessageString = "Now playing: " + str;
+        this.overlayMessageTime = 20 * 3;
         this.nowPlayingColor = true;
     }
     
-    public void displayClientMessage(final String message) {
-        this.addMessage(Language.getInstance().getElement(message));
+    public void displayClientMessage(final String messageId) {
+        Language language = Language.getInstance();
+        String languageString = language.getElement(messageId);
+        this.addMessage(languageString);
     }
-    
-    static {
-        Gui.itemRenderer = new ItemRenderer();
-    }
+
 }

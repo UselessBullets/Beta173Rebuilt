@@ -99,6 +99,8 @@ public abstract class Minecraft implements Runnable
 {
     public static byte[] __unused_byte_buffer;
     private static Minecraft instance;
+
+    public static final String VERSION_STRING = "Minecraft " + SharedConstants.VERSION_STRING;
     public GameMode gameMode;
     private boolean fullscreen;
     private boolean hasCrashed;
@@ -252,7 +254,7 @@ public abstract class Minecraft implements Runnable
         else {
             Display.setDisplayMode(new DisplayMode(this.width, this.height));
         }
-        Display.setTitle("Minecraft " + SharedConstants.VERSION_STRING);
+        Display.setTitle(VERSION_STRING);
         try {
             Display.create();
         }

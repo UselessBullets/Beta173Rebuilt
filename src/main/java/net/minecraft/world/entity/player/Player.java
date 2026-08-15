@@ -41,6 +41,16 @@ import net.minecraft.world.entity.Mob;
 
 public abstract class Player extends Mob
 {
+    public static final int MAX_NAME_LENGTH = 16 + 4;
+    public static final int MAX_HEALTH = 20;
+    public static final int SWING_DURATION = 6;
+    public static final int SLEEP_DURATION = 100;
+    public static final int WAKE_UP_DURATION = 10;
+
+    public static final int CHAT_VISIBILITY_FULL = 0;
+    public static final int CHAT_VISIBILITY_SYSTEM = 1;
+    public static final int CHAT_VISIBILITY_HIDDEN = 2;
+
     public Inventory inventory;
     public AbstractContainerMenu inventoryMenu;
     public AbstractContainerMenu containerMenu;

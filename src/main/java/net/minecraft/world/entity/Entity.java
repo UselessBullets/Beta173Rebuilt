@@ -25,6 +25,7 @@ import net.minecraft.world.level.Level;
 
 public abstract class Entity
 {
+    public static final short TOTAL_AIR_SUPPLY = 20 * 15;
     private static int entityCounter;
     public int entityId;
     public double viewScale;

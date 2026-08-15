@@ -26,7 +26,7 @@ public class OutOfMemoryScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
     }
     
     @Override

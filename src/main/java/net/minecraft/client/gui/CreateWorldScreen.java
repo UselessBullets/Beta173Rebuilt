@@ -102,14 +102,14 @@ public class CreateWorldScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
         if (this.nameEdit.inFocus) {
-            this.nameEdit.keyPressed(ch, eventKey);
+            this.nameEdit.keyPressed(eventCharacter, eventKey);
         }
         else {
-            this.seedEdit.keyPressed(ch, eventKey);
+            this.seedEdit.keyPressed(eventCharacter, eventKey);
         }
-        if (ch == '\r') {
+        if (eventCharacter == '\r') {
             this.buttonClicked(this.buttons.get(0));
         }
         this.buttons.get(0).active = (this.nameEdit.getValue().length() > 0);

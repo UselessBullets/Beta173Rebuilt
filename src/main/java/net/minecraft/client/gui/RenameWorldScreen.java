@@ -55,10 +55,10 @@ public class RenameWorldScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
-        this.nameEdit.keyPressed(ch, eventKey);
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
+        this.nameEdit.keyPressed(eventCharacter, eventKey);
         this.buttons.get(0).active = (this.nameEdit.getValue().trim().length() > 0);
-        if (ch == '\r') {
+        if (eventCharacter == '\r') {
             this.buttonClicked(this.buttons.get(0));
         }
     }

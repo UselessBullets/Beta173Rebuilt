@@ -5,11 +5,9 @@
 package net.minecraft.client.gui.inventory;
 
 import net.minecraft.SharedConstants;
-import net.minecraft.world.level.tile.entity.TileEntity;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderDispatcher;
 import net.minecraft.world.level.tile.Tile;
 import org.lwjgl.opengl.GL11;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.SignUpdatePacket;
 import net.minecraft.client.gui.Button;
 import org.lwjgl.input.Keyboard;
@@ -62,7 +60,7 @@ public class TextEditScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
         if (eventKey == 200) {
             this.line = (this.line - 1 & 0x3);
         }
@@ -72,11 +70,11 @@ public class TextEditScreen extends Screen
         if (eventKey == 14 && this.sign.messages[this.line].length() > 0) {
             this.sign.messages[this.line] = this.sign.messages[this.line].substring(0, this.sign.messages[this.line].length() - 1);
         }
-        if (TextEditScreen.allowedChars.indexOf(ch) >= 0 && this.sign.messages[this.line].length() < 15) {
+        if (TextEditScreen.allowedChars.indexOf(eventCharacter) >= 0 && this.sign.messages[this.line].length() < 15) {
             final StringBuilder sb = new StringBuilder();
             final String[] messages = this.sign.messages;
             final int line = this.line;
-            messages[line] = sb.append(messages[line]).append(ch).toString();
+            messages[line] = sb.append(messages[line]).append(eventCharacter).toString();
         }
     }
     

@@ -4,8 +4,6 @@
 
 package net.minecraft.client.gui;
 
-import net.minecraft.network.packet.Packet;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.network.packet.PlayerCommandPacket;
 import net.minecraft.client.multiplayer.MultiplayerLocalPlayer;
 import net.minecraft.locale.language.Language;
@@ -25,7 +23,7 @@ public class InBedChatScreen extends ChatScreen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
         if (eventKey == 1) {
             this.sendWakeUp();
         }
@@ -36,7 +34,7 @@ public class InBedChatScreen extends ChatScreen
             this.message = "";
         }
         else {
-            super.keyPressed(ch, eventKey);
+            super.keyPressed(eventCharacter, eventKey);
         }
     }
     

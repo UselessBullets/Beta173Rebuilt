@@ -6,7 +6,6 @@ package net.minecraft.client.gui;
 
 import org.lwjgl.opengl.GL11;
 import net.minecraft.client.title.TitleScreen;
-import net.minecraft.world.level.Level;
 
 public class DeathScreen extends Screen
 {
@@ -21,7 +20,7 @@ public class DeathScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
     }
     
     @Override

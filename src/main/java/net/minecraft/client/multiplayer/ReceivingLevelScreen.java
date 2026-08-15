@@ -6,7 +6,6 @@ package net.minecraft.client.multiplayer;
 
 import net.minecraft.locale.language.Language;
 import net.minecraft.client.gui.Button;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.KeepAlivePacket;
 import net.minecraft.client.gui.Screen;
 
@@ -21,7 +20,7 @@ public class ReceivingLevelScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
     }
     
     @Override

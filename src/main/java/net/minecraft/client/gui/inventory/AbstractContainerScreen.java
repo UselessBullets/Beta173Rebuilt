@@ -4,14 +4,12 @@
 
 package net.minecraft.client.gui.inventory;
 
-import net.minecraft.world.entity.player.Player;
 import org.lwjgl.input.Keyboard;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.locale.language.Language;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.client.Lighting;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.gui.Screen;
@@ -21,7 +19,7 @@ import static org.lwjgl.opengl.GL12.*;
 
 public abstract class AbstractContainerScreen extends Screen
 {
-    private static ItemRenderer itemRenderer;
+    private static ItemRenderer itemRenderer = new ItemRenderer();
     protected int imageWidth;
     protected int imageHeight;
     public AbstractContainerMenu menu;
@@ -29,6 +27,7 @@ public abstract class AbstractContainerScreen extends Screen
     public AbstractContainerScreen(final AbstractContainerMenu menu) {
         this.imageWidth = 176;
         this.imageHeight = 166;
+
         this.menu = menu;
     }
     
@@ -41,56 +40,73 @@ public abstract class AbstractContainerScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.renderBackground();
-        final int n = (this.width - this.imageWidth) / 2;
-        final int n2 = (this.height - this.imageHeight) / 2;
+        final int xo = (this.width - this.imageWidth) / 2;
+        final int yo = (this.height - this.imageHeight) / 2;
+
         this.renderBg(partialTick);
-        GL11.glPushMatrix();
-        GL11.glRotatef(120.0f, 1.0f, 0.0f, 0.0f);
+
+        glPushMatrix();
+        glRotatef(120.0f, 1.0f, 0.0f, 0.0f);
         Lighting.turnOn();
-        GL11.glPopMatrix();
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float)n, (float)n2, 0.0f);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glEnable(GL_RESCALE_NORMAL);
-        Slot slot = null;
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef((float)xo, (float)yo, 0.0f);
+
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glEnable(GL_RESCALE_NORMAL);
+
+        Slot hoveredSlot = null;
         for (int i = 0; i < this.menu.slots.size(); ++i) {
-            final Slot slot2 = this.menu.slots.get(i);
-            this.renderSlot(slot2);
-            if (this.isHovering(slot2, xm, ym)) {
-                slot = slot2;
-                GL11.glDisable(GL_LIGHTING);
-                GL11.glDisable(GL_DEPTH_TEST);
-                final int x = slot2.x;
-                final int y = slot2.y;
+            final Slot slot = this.menu.slots.get(i);
+
+            this.renderSlot(slot);
+
+            if (this.isHovering(slot, xm, ym)) {
+                hoveredSlot = slot;
+
+                glDisable(GL_LIGHTING);
+                glDisable(GL_DEPTH_TEST);
+
+                final int x = slot.x;
+                final int y = slot.y;
                 this.fillGradient(x, y, x + 16, y + 16, 0x80ffffff, 0x80ffffff);
-                GL11.glEnable(GL_LIGHTING);
-                GL11.glEnable(GL_DEPTH_TEST);
+                glEnable(GL_LIGHTING);
+                glEnable(GL_DEPTH_TEST);
             }
         }
+
         final Inventory inventory = this.minecraft.player.inventory;
         if (inventory.getCarried() != null) {
-            GL11.glTranslatef(0.0f, 0.0f, 32.0f);
-            AbstractContainerScreen.itemRenderer.renderGuiItem(this.font, this.minecraft.textures, inventory.getCarried(), xm - n - 8, ym - n2 - 8);
-            AbstractContainerScreen.itemRenderer.renderGuiItemDecorations(this.font, this.minecraft.textures, inventory.getCarried(), xm - n - 8, ym - n2 - 8);
+            glTranslatef(0.0f, 0.0f, 32.0f);
+            AbstractContainerScreen.itemRenderer.renderGuiItem(this.font, this.minecraft.textures, inventory.getCarried(), xm - xo - 8, ym - yo - 8);
+            AbstractContainerScreen.itemRenderer.renderGuiItemDecorations(this.font, this.minecraft.textures, inventory.getCarried(), xm - xo - 8, ym - yo - 8);
         }
-        GL11.glDisable(GL_RESCALE_NORMAL);
+        glDisable(GL_RESCALE_NORMAL);
         Lighting.turnOff();
-        GL11.glDisable(GL_LIGHTING);
-        GL11.glDisable(GL_DEPTH_TEST);
+
+        glDisable(GL_LIGHTING);
+        glDisable(GL_DEPTH_TEST);
+
         this.renderLabels();
-        if (inventory.getCarried() == null && slot != null && slot.hasItem()) {
-            final String trim = ("" + Language.getInstance().getElementName(slot.getItem().getDescriptionId())).trim();
-            if (trim.length() > 0) {
-                final int x2 = xm - n + 12;
-                final int y2 = ym - n2 - 12;
-                this.fillGradient(x2 - 3, y2 - 3, x2 + this.font.width(trim) + 3, y2 + 8 + 3, 0xc0000000, 0xc0000000);
-                this.font.drawShadow(trim, x2, y2, -1);
+
+        if (inventory.getCarried() == null && hoveredSlot != null && hoveredSlot.hasItem()) {
+            final String elementName = (Language.getInstance().getElementName(hoveredSlot.getItem().getDescriptionId())).trim();
+            if (elementName.length() > 0) {
+                final int x = xm - xo + 12;
+                final int y = ym - yo - 12;
+                final int width = this.font.width(elementName);
+                this.fillGradient(x - 3, y - 3, x + width + 3, y + 8 + 3, 0xc0000000, 0xc0000000);
+
+                this.font.drawShadow(elementName, x, y, 0xffffffff);
             }
         }
-        GL11.glPopMatrix();
+
+        glPopMatrix();
+
         super.render(xm, ym, partialTick);
-        GL11.glEnable(GL_LIGHTING);
-        GL11.glEnable(GL_DEPTH_TEST);
+        glEnable(GL_LIGHTING);
+        glEnable(GL_DEPTH_TEST);
     }
     
     protected void renderLabels() {
@@ -102,16 +118,18 @@ public abstract class AbstractContainerScreen extends Screen
         final int x = slot.x;
         final int y = slot.y;
         final ItemInstance item = slot.getItem();
+
         if (item == null) {
-            final int noItemIcon = slot.getNoItemIcon();
-            if (noItemIcon >= 0) {
-                GL11.glDisable(GL_LIGHTING);
+            final int icon = slot.getNoItemIcon();
+            if (icon >= 0) {
+                glDisable(GL_LIGHTING);
                 this.minecraft.textures.bind(this.minecraft.textures.loadTexture("/gui/items.png"));
-                this.blit(x, y, noItemIcon % 16 * 16, noItemIcon / 16 * 16, 16, 16);
-                GL11.glEnable(GL_LIGHTING);
+                this.blit(x, y, icon % 16 * 16, icon / 16 * 16, 16, 16);
+                glEnable(GL_LIGHTING);
                 return;
             }
         }
+
         AbstractContainerScreen.itemRenderer.renderGuiItem(this.font, this.minecraft.textures, item, x, y);
         AbstractContainerScreen.itemRenderer.renderGuiItemDecorations(this.font, this.minecraft.textures, item, x, y);
     }
@@ -119,19 +137,18 @@ public abstract class AbstractContainerScreen extends Screen
     private Slot findSlot(final int x, final int y) {
         for (int i = 0; i < this.menu.slots.size(); ++i) {
             final Slot slot = this.menu.slots.get(i);
-            if (this.isHovering(slot, x, y)) {
-                return slot;
-            }
+            if (this.isHovering(slot, x, y)) return slot;
         }
         return null;
     }
     
-    private boolean isHovering(final Slot slot, int x, int y) {
-        final int n = (this.width - this.imageWidth) / 2;
-        final int n2 = (this.height - this.imageHeight) / 2;
-        x -= n;
-        y -= n2;
-        return x >= slot.x - 1 && x < slot.x + 16 + 1 && y >= slot.y - 1 && y < slot.y + 16 + 1;
+    private boolean isHovering(final Slot slot, int xm, int ym) {
+        final int xo = (this.width - this.imageWidth) / 2;
+        final int yo = (this.height - this.imageHeight) / 2;
+        xm -= xo;
+        ym -= yo;
+
+        return xm >= slot.x - 1 && xm < slot.x + 16 + 1 && ym >= slot.y - 1 && ym < slot.y + 16 + 1;
     }
     
     @Override
@@ -139,18 +156,21 @@ public abstract class AbstractContainerScreen extends Screen
         super.mouseClicked(x, y, buttonNum);
         if (buttonNum == 0 || buttonNum == 1) {
             final Slot slot = this.findSlot(x, y);
-            final int n = (this.width - this.imageWidth) / 2;
-            final int n2 = (this.height - this.imageHeight) / 2;
-            final boolean b = x < n || y < n2 || x >= n + this.imageWidth || y >= n2 + this.imageHeight;
-            int index = -1;
-            if (slot != null) {
-                index = slot.index;
+
+            final int xo = (this.width - this.imageWidth) / 2;
+            final int yo = (this.height - this.imageHeight) / 2;
+            final boolean clickedOutside = x < xo || y < yo || x >= xo + this.imageWidth || y >= yo + this.imageHeight;
+
+            int slotId = -1;
+            if (slot != null) slotId = slot.index;
+
+            if (clickedOutside) {
+                slotId = AbstractContainerMenu.CLICKED_OUTSIDE;
             }
-            if (b) {
-                index = -999;
-            }
-            if (index != -1) {
-                this.minecraft.gameMode.handleInventoryMouseClick(this.menu.containerId, index, buttonNum, index != -999 && (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54)), this.minecraft.player);
+
+            if (slotId != -1) {
+                boolean quickKey = slotId != AbstractContainerMenu.CLICKED_OUTSIDE && (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT));
+                this.minecraft.gameMode.handleInventoryMouseClick(this.menu.containerId, slotId, buttonNum, quickKey, this.minecraft.player);
             }
         }
     }
@@ -161,17 +181,15 @@ public abstract class AbstractContainerScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
-        if (eventKey == 1 || eventKey == this.minecraft.options.keyBuild.key) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
+        if (eventKey == Keyboard.KEY_ESCAPE || eventKey == this.minecraft.options.keyBuild.key) {
             this.minecraft.player.closeContainer();
         }
     }
     
     @Override
     public void removed() {
-        if (this.minecraft.player == null) {
-            return;
-        }
+        if (this.minecraft.player == null) return;
         this.minecraft.gameMode.handleCloseInventory(this.menu.containerId, this.minecraft.player);
     }
     
@@ -183,12 +201,7 @@ public abstract class AbstractContainerScreen extends Screen
     @Override
     public void tick() {
         super.tick();
-        if (!this.minecraft.player.isAlive() || this.minecraft.player.removed) {
-            this.minecraft.player.closeContainer();
-        }
+        if (!this.minecraft.player.isAlive() || this.minecraft.player.removed) this.minecraft.player.closeContainer();
     }
-    
-    static {
-        AbstractContainerScreen.itemRenderer = new ItemRenderer();
-    }
+
 }

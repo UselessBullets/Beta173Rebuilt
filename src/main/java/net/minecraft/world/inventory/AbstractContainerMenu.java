@@ -15,6 +15,12 @@ import java.util.List;
 
 public abstract class AbstractContainerMenu
 {
+    public static final int CLICKED_OUTSIDE = -999;
+
+    public static final int CLICK_PICKUP = 0;
+    public static final int CLICK_QUICK_MOVE = 1;
+    public static final int CLICK_SWAP = 2;
+    public static final int CLICK_CLONE = 3;
     public List<ItemInstance> lastSlots;
     public List<Slot> slots;
     public int containerId;

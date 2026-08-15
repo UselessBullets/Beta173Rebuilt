@@ -51,14 +51,14 @@ public class ControlsScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
         if (this.selectedKey >= 0) {
             this.options.setKey(this.selectedKey, eventKey);
             this.buttons.get(this.selectedKey).msg = this.options.getKeyMessage(this.selectedKey);
             this.selectedKey = -1;
         }
         else {
-            super.keyPressed(ch, eventKey);
+            super.keyPressed(eventCharacter, eventKey);
         }
     }
     

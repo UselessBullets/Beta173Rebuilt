@@ -82,13 +82,13 @@ public class AchievementScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
         if (eventKey == this.minecraft.options.keyBuild.key) {
             this.minecraft.setScreen(null);
             this.minecraft.grabMouse();
         }
         else {
-            super.keyPressed(ch, eventKey);
+            super.keyPressed(eventCharacter, eventKey);
         }
     }
     

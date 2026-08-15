@@ -34,7 +34,7 @@ public class ChatScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
         if (eventKey == 1) {
             this.minecraft.setScreen(null);
             return;
@@ -52,8 +52,8 @@ public class ChatScreen extends Screen
         if (eventKey == 14 && this.message.length() > 0) {
             this.message = this.message.substring(0, this.message.length() - 1);
         }
-        if (ChatScreen.allowedChars.indexOf(ch) >= 0 && this.message.length() < 100) {
-            this.message += ch;
+        if (ChatScreen.allowedChars.indexOf(eventCharacter) >= 0 && this.message.length() < 100) {
+            this.message += eventCharacter;
         }
     }
     

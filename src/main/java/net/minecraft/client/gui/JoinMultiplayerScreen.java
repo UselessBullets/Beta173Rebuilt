@@ -84,9 +84,9 @@ public class JoinMultiplayerScreen extends Screen
     }
     
     @Override
-    protected void keyPressed(final char ch, final int eventKey) {
-        this.ipEdit.keyPressed(ch, eventKey);
-        if (ch == '\r') {
+    protected void keyPressed(final char eventCharacter, final int eventKey) {
+        this.ipEdit.keyPressed(eventCharacter, eventKey);
+        if (eventCharacter == '\r') {
             this.buttonClicked(this.buttons.get(0));
         }
         this.buttons.get(0).active = (this.ipEdit.getValue().length() > 0);

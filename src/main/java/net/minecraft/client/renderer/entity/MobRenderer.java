@@ -200,10 +200,10 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
         instance.vertex(n3 + 1, -1 + n2, 0.0);
         instance.end();
         GL11.glEnable(GL_TEXTURE_2D);
-        font.draw(name, -font.width(name) / 2, n2, 553648127);
+        font.draw(name, -font.width(name) / 2, n2, 0x20ffffff);
         GL11.glEnable(GL_DEPTH_TEST);
         GL11.glDepthMask(true);
-        font.draw(name, -font.width(name) / 2, n2, -1);
+        font.draw(name, -font.width(name) / 2, n2, 0xffffffff);
         GL11.glEnable(GL_LIGHTING);
         GL11.glDisable(GL_BLEND);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);

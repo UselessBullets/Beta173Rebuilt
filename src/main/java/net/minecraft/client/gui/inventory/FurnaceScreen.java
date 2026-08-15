@@ -21,8 +21,8 @@ public class FurnaceScreen extends AbstractContainerScreen
     
     @Override
     protected void renderLabels() {
-        this.font.draw("Furnace", 60, 6, 4210752);
-        this.font.draw("Inventory", 8, this.imageHeight - 96 + 2, 4210752);
+        this.font.draw("Furnace", 60, 6, 0x404040);
+        this.font.draw("Inventory", 8, this.imageHeight - 96 + 2, 0x404040);
     }
     
     @Override

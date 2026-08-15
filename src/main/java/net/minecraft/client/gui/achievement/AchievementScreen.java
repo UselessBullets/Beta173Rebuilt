@@ -369,7 +369,7 @@ public class AchievementScreen extends Screen
                 this.fillGradient(x - 3, y - 3, x + width + 3, y + this.font.wordWrapHeight(value, width) + 12 + 3, 0xc0000000, 0xc0000000);
                 this.font.drawWordWrapInternal(value, x, y + 12, width, 0xff705050);
             }
-            this.font.drawShadow(name, x, y, this.statsCounter.canTake(ach) ? (ach.isGolden() ? -128 : -1) : (ach.isGolden() ? -8355776 : -8355712));
+            this.font.drawShadow(name, x, y, this.statsCounter.canTake(ach) ? (ach.isGolden() ? -128 : -1) : (ach.isGolden() ? 0xff808040 : 0xff808080));
         }
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LIGHTING);

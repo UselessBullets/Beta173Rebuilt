@@ -37,7 +37,7 @@ public class InventoryScreen extends AbstractContainerScreen
     
     @Override
     protected void renderLabels() {
-        this.font.draw("Crafting", 86, 16, 4210752);
+        this.font.draw("Crafting", 86, 16, 0x404040);
     }
     
     @Override

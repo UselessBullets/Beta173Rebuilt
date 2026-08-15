@@ -125,8 +125,8 @@ public class ProgressRenderer implements ProgressListener
                 instance.end();
                 GL11.glEnable(GL_TEXTURE_2D);
             }
-            this.minecraft.font.drawShadow(this.title, (width - this.minecraft.font.width(this.title)) / 2, height / 2 - 4 - 16, 16777215);
-            this.minecraft.font.drawShadow(this.status, (width - this.minecraft.font.width(this.status)) / 2, height / 2 - 4 + 8, 16777215);
+            this.minecraft.font.drawShadow(this.title, (width - this.minecraft.font.width(this.title)) / 2, height / 2 - 4 - 16, 0xffffff);
+            this.minecraft.font.drawShadow(this.status, (width - this.minecraft.font.width(this.status)) / 2, height / 2 - 4 + 8, 0xffffff);
             Display.update();
             try {
                 Thread.yield();

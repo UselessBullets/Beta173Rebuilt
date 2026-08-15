@@ -165,22 +165,22 @@ public class Gui extends GuiComponent
             if (Minecraft.warezTime > 0L) {
                 glTranslatef(0.0f, 32.0f, 0.0f);
             }
-            font.drawShadow("Minecraft Beta 1.7.3 (" + this.minecraft.fpsString + ")", 2, 2, 16777215);
-            font.drawShadow(this.minecraft.gatherStats1(), 2, 12, 16777215);
-            font.drawShadow(this.minecraft.gatherStats2(), 2, 22, 16777215);
-            font.drawShadow(this.minecraft.gatherStats4(), 2, 32, 16777215);
-            font.drawShadow(this.minecraft.gatherStats3(), 2, 42, 16777215);
+            font.drawShadow("Minecraft Beta 1.7.3 (" + this.minecraft.fpsString + ")", 2, 2, 0xffffff);
+            font.drawShadow(this.minecraft.gatherStats1(), 2, 12, 0xffffff);
+            font.drawShadow(this.minecraft.gatherStats2(), 2, 22, 0xffffff);
+            font.drawShadow(this.minecraft.gatherStats4(), 2, 32, 0xffffff);
+            font.drawShadow(this.minecraft.gatherStats3(), 2, 42, 0xffffff);
             final long maxMemory = Runtime.getRuntime().maxMemory();
             final long totalMemory = Runtime.getRuntime().totalMemory();
             final long n6 = totalMemory - Runtime.getRuntime().freeMemory();
             final String string = "Used memory: " + n6 * 100L / maxMemory + "% (" + n6 / 1024L / 1024L + "MB) of " + maxMemory / 1024L / 1024L + "MB";
-            this.drawString(font, string, width - font.width(string) - 2, 2, 14737632);
+            this.drawString(font, string, width - font.width(string) - 2, 2, 0xe0e0e0);
             final String string2 = "Allocated memory: " + totalMemory * 100L / maxMemory + "% (" + totalMemory / 1024L / 1024L + "MB)";
-            this.drawString(font, string2, width - font.width(string2) - 2, 12, 14737632);
-            this.drawString(font, "x: " + this.minecraft.player.x, 2, 64, 14737632);
-            this.drawString(font, "y: " + this.minecraft.player.y, 2, 72, 14737632);
-            this.drawString(font, "z: " + this.minecraft.player.z, 2, 80, 14737632);
-            this.drawString(font, "f: " + (Mth.floor(this.minecraft.player.yRot * 4.0f / 360.0f + 0.5) & 0x3), 2, 88, 14737632);
+            this.drawString(font, string2, width - font.width(string2) - 2, 12, 0xe0e0e0);
+            this.drawString(font, "x: " + this.minecraft.player.x, 2, 64, 0xe0e0e0);
+            this.drawString(font, "y: " + this.minecraft.player.y, 2, 72, 0xe0e0e0);
+            this.drawString(font, "z: " + this.minecraft.player.z, 2, 80, 0xe0e0e0);
+            this.drawString(font, "f: " + (Mth.floor(this.minecraft.player.yRot * 4.0f / 360.0f + 0.5) & 0x3), 2, 88, 0xe0e0e0);
             glPopMatrix();
         }
         if (this.nowPlayingTime > 0) {
@@ -233,7 +233,7 @@ public class Gui extends GuiComponent
                     final String string3 = this.guiMessages.get(n11).string;
                     this.fill(n14, y - 1, n14 + 320, y + 8, n13 / 2 << 24);
                     glEnable(GL_BLEND);
-                    font.drawShadow(string3, n14, y, 16777215 + (n13 << 24));
+                    font.drawShadow(string3, n14, y, 0xffffff + (n13 << 24));
                 }
             }
         }

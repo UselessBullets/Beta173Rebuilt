@@ -28,8 +28,8 @@ public class ContainerScreen extends AbstractContainerScreen
     
     @Override
     protected void renderLabels() {
-        this.font.draw(this.container.getName(), 8, 6, 4210752);
-        this.font.draw(this.inventory.getName(), 8, this.imageHeight - 96 + 2, 4210752);
+        this.font.draw(this.container.getName(), 8, 6, 0x404040);
+        this.font.draw(this.inventory.getName(), 8, this.imageHeight - 96 + 2, 0x404040);
     }
     
     @Override

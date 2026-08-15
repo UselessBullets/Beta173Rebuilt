@@ -174,7 +174,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
             final String string = "" + item.count;
             GL11.glDisable(GL_LIGHTING);
             GL11.glDisable(GL_DEPTH_TEST);
-            font.drawShadow(string, x + 19 - 2 - font.width(string), y + 6 + 3, 16777215);
+            font.drawShadow(string, x + 19 - 2 - font.width(string), y + 6 + 3, 0xffffff);
             GL11.glEnable(GL_LIGHTING);
             GL11.glEnable(GL_DEPTH_TEST);
         }

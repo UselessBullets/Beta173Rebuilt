@@ -620,7 +620,7 @@ public class LevelRenderer implements LevelListener
         final float[] sunriseColor = this.level.dimension.getSunriseColor(this.level.getTimeOfDay(alpha), alpha);
         if (sunriseColor != null) {
             glDisable(GL_TEXTURE_2D);
-            glShadeModel(7425);
+            glShadeModel(GL_SMOOTH);
             glPushMatrix();
             glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
             glRotatef((this.level.getTimeOfDay(alpha) > 0.5f) ? 180.0f : 0.0f, 0.0f, 0.0f, 1.0f);

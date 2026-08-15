@@ -241,7 +241,7 @@ public abstract class ScrolledSelectionList
         GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         GL11.glDisable(GL_ALPHA_TEST);
-        GL11.glShadeModel(7425);
+        GL11.glShadeModel(GL_SMOOTH);
         GL11.glDisable(GL_TEXTURE_2D);
         instance.begin();
         instance.color(0, 0);

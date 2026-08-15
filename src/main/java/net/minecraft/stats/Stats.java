@@ -26,8 +26,8 @@ public class Stats
     protected static Map<Integer, Stat> statsById;
     public static List<Stat> all;
     public static List<Stat> generalStats;
-    public static List<ItemStat> blocksMinedStats;
-    public static List<ItemStat> itemsCraftedStats;
+    public static List<ItemStat> itemStats;
+    public static List<ItemStat> blocksStats;
     public static Stat startGame;
     public static Stat createWorld;
     public static Stat loadWorld;
@@ -79,14 +79,14 @@ public class Stats
         if (!Stats.blockStatsLoaded || !Stats.itemStatsLoaded) {
             return;
         }
-        final HashSet<Integer> set = new HashSet();
-        final Iterator iterator = Recipes.getInstance().getRecipes().iterator();
+        final HashSet<Integer> set = new HashSet<>();
+        final Iterator<Recipe> iterator = Recipes.getInstance().getRecipes().iterator();
         while (iterator.hasNext()) {
-            set.add(((Recipe)iterator.next()).getResultItem().id);
+            set.add(iterator.next().getResultItem().id);
         }
-        final Iterator iterator2 = FurnaceRecipes.getInstance().getRecipies().values().iterator();
+        final Iterator<ItemInstance> iterator2 = FurnaceRecipes.getInstance().getRecipies().values().iterator();
         while (iterator2.hasNext()) {
-            set.add(((ItemInstance)iterator2.next()).id);
+            set.add(iterator2.next().id);
         }
         Stats.itemCrafted = new Stat[32000];
         for (final Integer n : set) {
@@ -102,7 +102,7 @@ public class Stats
         for (int i = 0; i < 256; ++i) {
             if (Tile.tiles[i] != null && Tile.tiles[i].isCollectStatistics()) {
                 stats[i] = new ItemStat(idOff + i, I18n.get(nameKey, Tile.tiles[i].getName()), i).postConstruct();
-                Stats.itemsCraftedStats.add((ItemStat) stats[i]);
+                Stats.blocksStats.add((ItemStat) stats[i]);
             }
         }
         remapIds(stats);
@@ -117,7 +117,7 @@ public class Stats
             if (Item.items[i] != null) {
                 result[i] = new ItemStat(idOff + i, I18n.get(nameKey, Item.items[i].getName()), i).postConstruct();
                 if (i >= Tile.tiles.length) {
-                    Stats.blocksMinedStats.add((ItemStat) result[i]);
+                    Stats.itemStats.add((ItemStat) result[i]);
                 }
             }
         }
@@ -158,7 +158,7 @@ public class Stats
             return;
         }
         Stats.all.remove(stats[id1]);
-        Stats.itemsCraftedStats.remove(stats[id1]);
+        Stats.blocksStats.remove(stats[id1]);
         Stats.generalStats.remove(stats[id1]);
         stats[id1] = stats[id2];
     }
@@ -171,8 +171,8 @@ public class Stats
         Stats.statsById = new HashMap<>();
         Stats.all = new ArrayList<>();
         Stats.generalStats = new ArrayList<>();
-        Stats.blocksMinedStats = new ArrayList<>();
-        Stats.itemsCraftedStats = new ArrayList<>();
+        Stats.itemStats = new ArrayList<>();
+        Stats.blocksStats = new ArrayList<>();
         Stats.startGame = new GeneralStat(1000, I18n.get("stat.startGame")).setAwardLocallyOnly().postConstruct();
         Stats.createWorld = new GeneralStat(1001, I18n.get("stat.createWorld")).setAwardLocallyOnly().postConstruct();
         Stats.loadWorld = new GeneralStat(1002, I18n.get("stat.loadWorld")).setAwardLocallyOnly().postConstruct();

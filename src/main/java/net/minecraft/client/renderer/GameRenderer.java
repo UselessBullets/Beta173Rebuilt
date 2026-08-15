@@ -493,7 +493,7 @@ public class GameRenderer
             GL11.glEnable(GL_FOG);
             this.setupFog(1, partialTick);
             if (this.mc.options.ambientOcclusion) {
-                GL11.glShadeModel(7425);
+                GL11.glShadeModel(GL_SMOOTH);
             }
             final FrustumCuller frustumCuller = new FrustumCuller();
             frustumCuller.prepare(xOff, yOff, zOff);
@@ -538,7 +538,7 @@ public class GameRenderer
             GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             if (this.mc.options.fancyGraphics) {
                 if (this.mc.options.ambientOcclusion) {
-                    GL11.glShadeModel(7425);
+                    GL11.glShadeModel(GL_SMOOTH);
                 }
                 GL11.glColorMask(false, false, false, false);
                 final int render = levelRenderer.render(cameraTargetPlayer, 1, partialTick);

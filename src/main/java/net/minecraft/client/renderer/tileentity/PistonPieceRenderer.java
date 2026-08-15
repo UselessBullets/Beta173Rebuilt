@@ -32,7 +32,7 @@ public class PistonPieceRenderer extends TileEntityRenderer<PistonPieceEntity>
             GL11.glEnable(GL_BLEND);
             GL11.glDisable(GL_CULL_FACE);
             if (Minecraft.useAmbientOcclusion()) {
-                GL11.glShadeModel(7425);
+                GL11.glShadeModel(GL_SMOOTH);
             }
             else {
                 GL11.glShadeModel(GL_FLAT);

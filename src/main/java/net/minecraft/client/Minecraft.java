@@ -288,7 +288,7 @@ public abstract class Minecraft implements Runnable
         }
         this.checkGlError("Pre startup");
         glEnable(GL_TEXTURE_2D);
-        glShadeModel(7425);
+        glShadeModel(GL_SMOOTH);
         glClearDepth(1.0);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);

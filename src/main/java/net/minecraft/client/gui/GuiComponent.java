@@ -4,7 +4,6 @@
 
 package net.minecraft.client.gui;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.Tesselator;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -51,18 +50,18 @@ public class GuiComponent
         final float n5 = (col >> 8 & 0xFF) / 255.0f;
         final float n6 = (col & 0xFF) / 255.0f;
         final Tesselator instance = Tesselator.instance;
-        GL11.glEnable(GL_BLEND);
-        GL11.glDisable(GL_TEXTURE_2D);
-        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glColor4f(n4, n5, n6, n3);
+        glEnable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4f(n4, n5, n6, n3);
         instance.begin();
         instance.vertex(x0, y1, 0.0);
         instance.vertex(x1, y1, 0.0);
         instance.vertex(x1, y0, 0.0);
         instance.vertex(x0, y0, 0.0);
         instance.end();
-        GL11.glEnable(GL_TEXTURE_2D);
-        GL11.glDisable(GL_BLEND);
+        glEnable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
     }
     
     protected void fillGradient(final int x0, final int y0, final int x1, final int y1, final int col1, final int col2) {
@@ -74,11 +73,11 @@ public class GuiComponent
         final float r2 = (col2 >> 16 & 0xFF) / 255.0f;
         final float g2 = (col2 >> 8 & 0xFF) / 255.0f;
         final float b2 = (col2 & 0xFF) / 255.0f;
-        GL11.glDisable(GL_TEXTURE_2D);
-        GL11.glEnable(GL_BLEND);
-        GL11.glDisable(GL_ALPHA_TEST);
-        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glShadeModel(7425);
+        glDisable(GL_TEXTURE_2D);
+        glEnable(GL_BLEND);
+        glDisable(GL_ALPHA_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glShadeModel(GL_SMOOTH);
         final Tesselator instance = Tesselator.instance;
         instance.begin();
         instance.color(r, g, b, a);
@@ -88,10 +87,10 @@ public class GuiComponent
         instance.vertex(x0, y1, 0.0);
         instance.vertex(x1, y1, 0.0);
         instance.end();
-        GL11.glShadeModel(GL_FLAT);
-        GL11.glDisable(GL_BLEND);
-        GL11.glEnable(GL_ALPHA_TEST);
-        GL11.glEnable(GL_TEXTURE_2D);
+        glShadeModel(GL_FLAT);
+        glDisable(GL_BLEND);
+        glEnable(GL_ALPHA_TEST);
+        glEnable(GL_TEXTURE_2D);
     }
     
     public void drawCenteredString(final Font font, final String str, final int x, final int y, final int color) {

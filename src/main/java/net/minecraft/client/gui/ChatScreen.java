@@ -11,7 +11,7 @@ public class ChatScreen extends Screen
 {
     protected String message;
     private int frame;
-    private static final String allowedChars;
+    private static final String allowedChars = SharedConstants.acceptableLetters;
     
     public ChatScreen() {
         this.message = "";
@@ -35,11 +35,11 @@ public class ChatScreen extends Screen
     
     @Override
     protected void keyPressed(final char eventCharacter, final int eventKey) {
-        if (eventKey == 1) {
+        if (eventKey == Keyboard.KEY_ESCAPE) {
             this.minecraft.setScreen(null);
             return;
         }
-        if (eventKey == 28) {
+        if (eventKey == Keyboard.KEY_RETURN) {
             if (this.message.trim().length() > 0) {
                 final String trim = this.message.trim();
                 if (!this.minecraft.handleClientSideCommand(trim)) {
@@ -49,10 +49,8 @@ public class ChatScreen extends Screen
             this.minecraft.setScreen(null);
             return;
         }
-        if (eventKey == 14 && this.message.length() > 0) {
-            this.message = this.message.substring(0, this.message.length() - 1);
-        }
-        if (ChatScreen.allowedChars.indexOf(eventCharacter) >= 0 && this.message.length() < 100) {
+        if (eventKey == Keyboard.KEY_BACK && this.message.length() > 0) this.message = this.message.substring(0, this.message.length() - 1);
+        if (ChatScreen.allowedChars.indexOf(eventCharacter) >= 0 && this.message.length() < SharedConstants.maxChatLength) {
             this.message += eventCharacter;
         }
     }
@@ -61,6 +59,7 @@ public class ChatScreen extends Screen
     public void render(final int xm, final int ym, final float partialTick) {
         this.fill(2, this.height - 14, this.width - 2, this.height - 2, 0x80000000);
         this.drawString(this.font, "> " + this.message + ((this.frame / 6 % 2 == 0) ? "_" : ""), 4, this.height - 12, 0xe0e0e0);
+
         super.render(xm, ym, partialTick);
     }
     
@@ -72,9 +71,9 @@ public class ChatScreen extends Screen
                     this.message += " ";
                 }
                 this.message += this.minecraft.gui.selectedName;
-                final int endIndex = 100;
-                if (this.message.length() > endIndex) {
-                    this.message = this.message.substring(0, endIndex);
+                final int maxLength = SharedConstants.maxChatLength;
+                if (this.message.length() > maxLength) {
+                    this.message = this.message.substring(0, maxLength);
                 }
             }
             else {
@@ -82,8 +81,5 @@ public class ChatScreen extends Screen
             }
         }
     }
-    
-    static {
-        allowedChars = SharedConstants.acceptableLetters;
-    }
+
 }

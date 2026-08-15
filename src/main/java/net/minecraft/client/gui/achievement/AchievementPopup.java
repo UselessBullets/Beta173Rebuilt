@@ -4,6 +4,7 @@
 
 package net.minecraft.client.gui.achievement;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Lighting;
 import net.minecraft.client.gui.ScreenSizeCalculator;
 import net.minecraft.locale.language.I18n;
@@ -74,7 +75,7 @@ public class AchievementPopup extends GuiComponent
             glDepthMask(false);
             Lighting.turnOff();
             this.prepareWindow();
-            final String title = "Minecraft Beta 1.7.3   Unlicensed Copy :(";
+            final String title = "Minecraft " + SharedConstants.VERSION_STRING + "   Unlicensed Copy :(";
             final String msg1 = "(Or logged in from another location)";
             final String msg2 = "Purchase at minecraft.net";
             this.mc.font.drawShadow(title, 2, 2 + 9 * 0, 0xffffff);

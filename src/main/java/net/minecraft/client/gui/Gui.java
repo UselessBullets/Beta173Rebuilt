@@ -4,6 +4,7 @@
 
 package net.minecraft.client.gui;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.locale.language.Language;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.world.entity.player.Inventory;
@@ -165,7 +166,7 @@ public class Gui extends GuiComponent
             if (Minecraft.warezTime > 0L) {
                 glTranslatef(0.0f, 32.0f, 0.0f);
             }
-            font.drawShadow("Minecraft Beta 1.7.3 (" + this.minecraft.fpsString + ")", 2, 2, 0xffffff);
+            font.drawShadow("Minecraft " + SharedConstants.VERSION_STRING + " (" + this.minecraft.fpsString + ")", 2, 2, 0xffffff);
             font.drawShadow(this.minecraft.gatherStats1(), 2, 12, 0xffffff);
             font.drawShadow(this.minecraft.gatherStats2(), 2, 22, 0xffffff);
             font.drawShadow(this.minecraft.gatherStats4(), 2, 32, 0xffffff);

@@ -4,6 +4,7 @@
 
 package net.minecraft.client;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Options.Option;
 import net.minecraft.client.multiplayer.MultiplayerLocalPlayer;
 import net.minecraft.client.multiplayer.ClientConnection;
@@ -251,7 +252,7 @@ public abstract class Minecraft implements Runnable
         else {
             Display.setDisplayMode(new DisplayMode(this.width, this.height));
         }
-        Display.setTitle("Minecraft Minecraft Beta 1.7.3");
+        Display.setTitle("Minecraft " + SharedConstants.VERSION_STRING);
         try {
             Display.create();
         }

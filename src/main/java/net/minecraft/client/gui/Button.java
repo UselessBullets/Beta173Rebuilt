@@ -23,10 +23,9 @@ public class Button extends GuiComponent
     }
     
     public Button(final int id, final int x, final int y, final int w, final int h, final String msg) {
-        this.w = 200;
-        this.h = 20;
         this.active = true;
         this.visible = true;
+
         this.id = id;
         this.x = x;
         this.y = y;
@@ -36,27 +35,26 @@ public class Button extends GuiComponent
     }
     
     protected int getYImage(final boolean hovered) {
-        int n = 1;
-        if (!this.active) {
-            n = 0;
-        }
-        else if (hovered) {
-            n = 2;
-        }
-        return n;
+        int res = 1;
+        if (!this.active) res = 0;
+        else if (hovered) res = 2;
+        return res;
     }
     
     public void render(final Minecraft minecraft, final int xm, final int ym) {
-        if (!this.visible) {
-            return;
-        }
+        if (!this.visible) return;
+
         final Font font = minecraft.font;
+
         glBindTexture(GL_TEXTURE_2D, minecraft.textures.loadTexture("/gui/gui.png"));
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
         final boolean hovered = xm >= this.x && ym >= this.y && xm < this.x + this.w && ym < this.y + this.h;
         final int yImage = this.getYImage(hovered);
+
         this.blit(this.x, this.y, 0, 46 + yImage * 20, this.w / 2, this.h);
         this.blit(this.x + this.w / 2, this.y, 200 - this.w / 2, 46 + yImage * 20, this.w / 2, this.h);
+
         this.renderBg(minecraft, xm, ym);
         if (!this.active) {
             this.drawCenteredString(font, this.msg, this.x + this.w / 2, this.y + (this.h - 8) / 2, 0xffa0a0a0);

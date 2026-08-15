@@ -6,6 +6,7 @@ package net.minecraft.client;
 
 import java.awt.*;
 
+import net.minecraft.SharedConstants;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.Sys;
 
@@ -30,7 +31,7 @@ public class CrashInfoPanel extends Panel
         try {
             s = s + "Generated " + new SimpleDateFormat().format(new Date()) + "\n";
             s += "\n";
-            s += "Minecraft: Minecraft Beta 1.7.3\n";
+            s += "Minecraft: Minecraft " + SharedConstants.VERSION_STRING + "\n";
             s = s + "OS: " + System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ") version " + System.getProperty("os.version") + "\n";
             s = s + "Java: " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor") + "\n";
             s = s + "VM: " + System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.info") + "), " + System.getProperty("java.vm.vendor") + "\n";

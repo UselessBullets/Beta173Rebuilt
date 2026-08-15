@@ -31,7 +31,7 @@ public class PaintingRenderer extends EntityRenderer<Painting>
         final float n = 0.0625f;
         GL11.glScalef(n, n, n);
         this.renderPainting(entity, motive.w, motive.h, motive.uo, motive.vo);
-        GL11.glDisable(32826);
+        GL11.glDisable(GL_RESCALE_NORMAL);
         GL11.glPopMatrix();
     }
     

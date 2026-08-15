@@ -121,7 +121,7 @@ public class PlayerRenderer extends MobRenderer<Player>
                     GL11.glTranslatef(0.0f, 0.25f / n, 0.0f);
                     GL11.glDepthMask(false);
                     GL11.glEnable(GL_BLEND);
-                    GL11.glBlendFunc(770, 771);
+                    GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     final Tesselator instance = Tesselator.instance;
                     GL11.glDisable(GL_TEXTURE_2D);
                     instance.begin();
@@ -136,7 +136,7 @@ public class PlayerRenderer extends MobRenderer<Player>
                     GL11.glDepthMask(true);
                     font.draw(name, -font.width(name) / 2, 0, 553648127);
                     GL11.glEnable(GL_LIGHTING);
-                    GL11.glDisable(3042);
+                    GL11.glDisable(GL_BLEND);
                     GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
                     GL11.glPopMatrix();
                 }

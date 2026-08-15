@@ -47,7 +47,7 @@ public class TntRenderer extends EntityRenderer<PrimedTnt>
             GL11.glColor4f(1.0f, 1.0f, 1.0f, n4);
             this.tileRenderer.renderTile(Tile.tnt, 0, 1.0f);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-            GL11.glDisable(3042);
+            GL11.glDisable(GL_BLEND);
             GL11.glEnable(GL_LIGHTING);
             GL11.glEnable(GL_TEXTURE_2D);
         }

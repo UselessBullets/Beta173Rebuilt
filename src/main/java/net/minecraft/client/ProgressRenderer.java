@@ -42,11 +42,11 @@ public class ProgressRenderer implements ProgressListener
         if (this.minecraft.running) {
             this.title = title;
             final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
-            GL11.glClear(256);
-            GL11.glMatrixMode(5889);
+            GL11.glClear(GL_DEPTH_BUFFER_BIT);
+            GL11.glMatrixMode(GL_PROJECTION);
             GL11.glLoadIdentity();
             GL11.glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 100.0, 300.0);
-            GL11.glMatrixMode(5888);
+            GL11.glMatrixMode(GL_MODELVIEW);
             GL11.glLoadIdentity();
             GL11.glTranslatef(0.0f, 0.0f, -200.0f);
             return;
@@ -87,16 +87,16 @@ public class ProgressRenderer implements ProgressListener
             final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
             final int width = screenSizeCalculator.getWidth();
             final int height = screenSizeCalculator.getHeight();
-            GL11.glClear(256);
-            GL11.glMatrixMode(5889);
+            GL11.glClear(GL_DEPTH_BUFFER_BIT);
+            GL11.glMatrixMode(GL_PROJECTION);
             GL11.glLoadIdentity();
             GL11.glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 100.0, 300.0);
-            GL11.glMatrixMode(5888);
+            GL11.glMatrixMode(GL_MODELVIEW);
             GL11.glLoadIdentity();
             GL11.glTranslatef(0.0f, 0.0f, -200.0f);
             GL11.glClear(16640);
             final Tesselator instance = Tesselator.instance;
-            GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/gui/background.png"));
+            GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
             final float n = 32.0f;
             instance.begin();
             instance.color(4210752);

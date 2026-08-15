@@ -41,7 +41,7 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook>
         instance.vertexUV(n7 - n8, 1.0f - n9, 0.0, n4, n5);
         instance.vertexUV(0.0f - n8, 1.0f - n9, 0.0, n3, n5);
         instance.end();
-        GL11.glDisable(32826);
+        GL11.glDisable(GL_RESCALE_NORMAL);
         GL11.glPopMatrix();
         if (entity.owner != null) {
             final float n10 = (entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * partialTick) * 3.1415927f / 180.0f;

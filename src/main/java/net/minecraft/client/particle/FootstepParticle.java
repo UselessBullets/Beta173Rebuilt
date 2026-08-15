@@ -46,7 +46,7 @@ public class FootstepParticle extends Particle
         final float brightness = this.level.getBrightness(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z));
         this.textures.bind(this.textures.loadTexture("/misc/footprint.png"));
         GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         t.begin();
         t.color(brightness, brightness, brightness, a);
         t.vertexUV(n4 - n3, n5, n6 + n3, 0.0, 1.0);
@@ -54,7 +54,7 @@ public class FootstepParticle extends Particle
         t.vertexUV(n4 + n3, n5, n6 - n3, 1.0, 0.0);
         t.vertexUV(n4 - n3, n5, n6 - n3, 0.0, 0.0);
         t.end();
-        GL11.glDisable(3042);
+        GL11.glDisable(GL_BLEND);
         GL11.glEnable(GL_LIGHTING);
     }
     

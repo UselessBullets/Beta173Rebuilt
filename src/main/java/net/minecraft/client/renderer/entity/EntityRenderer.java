@@ -115,7 +115,7 @@ public abstract class EntityRenderer<T extends Entity>
     
     private void renderShadow(final Entity e, final double x, final double y, final double z, final float pow, final float partialTick) {
         GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         final Textures textures = this.entityRenderDispatcher.textures;
         textures.bind(textures.loadTexture("%clamp%/misc/shadow.png"));
         final Level level = this.getLevel();
@@ -147,7 +147,7 @@ public abstract class EntityRenderer<T extends Entity>
         }
         instance.end();
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glDisable(3042);
+        GL11.glDisable(GL_BLEND);
         GL11.glDepthMask(true);
     }
     

@@ -4,8 +4,8 @@
 
 package net.minecraft.client;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.Tesselator;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.MapItemSavedData;
 import net.minecraft.world.entity.player.Player;
@@ -17,90 +17,98 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Minimap
 {
+    private static final int w = MapItem.IMAGE_WIDTH;
+    private static final int h = MapItem.IMAGE_HEIGHT;
     private int[] pixels;
     private int mapTexture;
     private Options options;
     private Font font;
     
     public Minimap(final Font font, final Options options, final Textures textures) {
-        this.pixels = new int[16384];
+        this.pixels = new int[w * h];
         this.options = options;
         this.font = font;
-        this.mapTexture = textures.getTexture(new BufferedImage(128, 128, 2));
-        for (int i = 0; i < 16384; ++i) {
-            this.pixels[i] = 0;
+        this.mapTexture = textures.getTexture(new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB));
+        for (int i = 0; i < w * h; ++i) {
+            this.pixels[i] = 0x00000000;
         }
     }
     
     public void render(final Player player, final Textures textures, final MapItemSavedData data) {
-        for (int i = 0; i < 16384; ++i) {
-            final byte b = data.colors[i];
-            if (b / 4 == 0) {
-                this.pixels[i] = (i + i / 128 & 0x1) * 8 + 16 << 24;
+        for (int i = 0; i < w * h; ++i) {
+            final byte c = data.colors[i];
+            if (c / 4 == 0) {
+                this.pixels[i] = (i + i / w & 0x1) * 8 + 16 << 24;
             }
             else {
-                final int col = MaterialColor.colors[b / 4].col;
-                final int n = b & 0x3;
-                int n2 = 220;
-                if (n == 2) {
-                    n2 = 255;
-                }
-                if (n == 0) {
-                    n2 = 180;
-                }
-                int n3 = (col >> 16 & 0xFF) * n2 / 255;
-                int n4 = (col >> 8 & 0xFF) * n2 / 255;
-                int n5 = (col & 0xFF) * n2 / 255;
+                final int color = MaterialColor.colors[c / 4].col;
+                final int brightness = c & 0x3;
+
+                int br = 220;
+                if (brightness == 2) { br = 255; }
+                if (brightness == 0) { br = 180; }
+
+                int r = (color >> 16 & 0xFF) * br / 255;
+                int g = (color >> 8 & 0xFF) * br / 255;
+                int b = (color & 0xFF) * br / 255;
+
                 if (this.options.anaglyph3d) {
-                    final int n6 = (n3 * 30 + n4 * 59 + n5 * 11) / 100;
-                    final int n7 = (n3 * 30 + n4 * 70) / 100;
-                    final int n8 = (n3 * 30 + n5 * 70) / 100;
-                    n3 = n6;
-                    n4 = n7;
-                    n5 = n8;
+                    r = (r * 30 + g * 59 + b * 11) / 100;
+                    g = (r * 30 + g * 70) / 100;
+                    b = (r * 30 + b * 70) / 100;
                 }
-                this.pixels[i] = (0xFF000000 | n3 << 16 | n4 << 8 | n5);
+                this.pixels[i] = (0xFF000000 | r << 16 | g << 8 | b);
             }
         }
-        textures.replaceTextureDirect(this.pixels, 128, 128, this.mapTexture);
+
+        textures.replaceTextureDirect(this.pixels, w, h, this.mapTexture);
+
         final int x = 0;
         final int y = 0;
-        final Tesselator instance = Tesselator.instance;
-        final float n9 = 0.0f;
-        GL11.glBindTexture(3553, this.mapTexture);
-        GL11.glEnable(GL_BLEND);
-        GL11.glDisable(3008);
-        instance.begin();
-        instance.vertexUV(x + 0 + n9, y + 128 - n9, -0.009999999776482582, 0.0, 1.0);
-        instance.vertexUV(x + 128 - n9, y + 128 - n9, -0.009999999776482582, 1.0, 1.0);
-        instance.vertexUV(x + 128 - n9, y + 0 + n9, -0.009999999776482582, 1.0, 0.0);
-        instance.vertexUV(x + 0 + n9, y + 0 + n9, -0.009999999776482582, 0.0, 0.0);
-        instance.end();
-        GL11.glEnable(3008);
-        GL11.glDisable(3042);
+        final Tesselator t = Tesselator.instance;
+
+        final float vo = 0.0f;
+
+        glBindTexture(GL_TEXTURE_2D, this.mapTexture);
+        glEnable(GL_BLEND);
+        glDisable(GL_ALPHA_TEST);
+        t.begin();
+        final float offset = -0.01f;
+        t.vertexUV(x + 0 + vo, y + h - vo, offset, 0.0, 1.0);
+        t.vertexUV(x + w - vo, y + h - vo, offset, 1.0, 1.0);
+        t.vertexUV(x + w - vo, y + 0 + vo, offset, 1.0, 0.0);
+        t.vertexUV(x + 0 + vo, y + 0 + vo, offset, 0.0, 0.0);
+        t.end();
+        glEnable(GL_ALPHA_TEST);
+        glDisable(GL_BLEND);
+
         textures.bind(textures.loadTexture("/misc/mapicons.png"));
-        for (final MapItemSavedData.MapDecoration mapDecoration : data.decorations) {
-            GL11.glPushMatrix();
-            GL11.glTranslatef(x + mapDecoration.x / 2.0f + 64.0f, y + mapDecoration.y / 2.0f + 64.0f, -0.02f);
-            GL11.glRotatef(mapDecoration.rot * 360 / 16.0f, 0.0f, 0.0f, 1.0f);
-            GL11.glScalef(4.0f, 4.0f, 3.0f);
-            GL11.glTranslatef(-0.125f, 0.125f, 0.0f);
-            final float n10 = (mapDecoration.imgIndex % 4 + 0) / 4.0f;
-            final float n11 = (mapDecoration.imgIndex / 4 + 0) / 4.0f;
-            final float n12 = (mapDecoration.imgIndex % 4 + 1) / 4.0f;
-            final float n13 = (mapDecoration.imgIndex / 4 + 1) / 4.0f;
-            instance.begin();
-            instance.vertexUV(-1.0, 1.0, 0.0, n10, n11);
-            instance.vertexUV(1.0, 1.0, 0.0, n12, n11);
-            instance.vertexUV(1.0, -1.0, 0.0, n12, n13);
-            instance.vertexUV(-1.0, -1.0, 0.0, n10, n13);
-            instance.end();
-            GL11.glPopMatrix();
+
+        for (final MapItemSavedData.MapDecoration dec : data.decorations) {
+            glPushMatrix();
+            glTranslatef(x + dec.x / 2.0f + 64.0f, y + dec.y / 2.0f + 64.0f, -0.02f);
+            glRotatef(dec.rot * 360 / 16.0f, 0.0f, 0.0f, 1.0f);
+            glScalef(4.0f, 4.0f, 3.0f);
+            glTranslatef(-0.125f, 0.125f, 0.0f);
+
+            final float u0 = (dec.imgIndex % 4 + 0) / 4.0f;
+            final float v0 = (dec.imgIndex / 4 + 0) / 4.0f;
+            final float u1 = (dec.imgIndex % 4 + 1) / 4.0f;
+            final float v1 = (dec.imgIndex / 4 + 1) / 4.0f;
+
+            t.begin();
+            t.vertexUV(-1.0, 1.0, 0.0, u0, v0);
+            t.vertexUV(1.0, 1.0, 0.0, u1, v0);
+            t.vertexUV(1.0, -1.0, 0.0, u1, v1);
+            t.vertexUV(-1.0, -1.0, 0.0, u0, v1);
+            t.end();
+            glPopMatrix();
         }
-        GL11.glPushMatrix();
-        GL11.glTranslatef(0.0f, 0.0f, -0.04f);
-        GL11.glScalef(1.0f, 1.0f, 1.0f);
-        this.font.draw(data.id, x, y, -16777216);
-        GL11.glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(0.0f, 0.0f, -0.04f);
+        glScalef(1.0f, 1.0f, 1.0f);
+        this.font.draw(data.id, x, y, 0xff000000);
+        glPopMatrix();
     }
 }

@@ -39,7 +39,7 @@ public class FireballRenderer extends EntityRenderer<Fireball>
         instance.vertexUV(n6 - n7, 1.0f - n8, 0.0, n3, n4);
         instance.vertexUV(0.0f - n7, 1.0f - n8, 0.0, n2, n4);
         instance.end();
-        GL11.glDisable(32826);
+        GL11.glDisable(GL_RESCALE_NORMAL);
         GL11.glPopMatrix();
     }
 }

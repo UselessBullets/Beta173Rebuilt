@@ -61,7 +61,7 @@ public class CreeperRenderer extends MobRenderer<Creeper>
                 GL11.glLoadIdentity();
                 GL11.glTranslatef(n * 0.01f, n * 0.01f, 0.0f);
                 this.setArmor(this.armorModel);
-                GL11.glMatrixMode(5888);
+                GL11.glMatrixMode(GL_MODELVIEW);
                 GL11.glEnable(GL_BLEND);
                 final float n2 = 0.5f;
                 GL11.glColor4f(n2, n2, n2, 1.0f);
@@ -72,9 +72,9 @@ public class CreeperRenderer extends MobRenderer<Creeper>
             if (layer == 2) {
                 GL11.glMatrixMode(5890);
                 GL11.glLoadIdentity();
-                GL11.glMatrixMode(5888);
+                GL11.glMatrixMode(GL_MODELVIEW);
                 GL11.glEnable(GL_LIGHTING);
-                GL11.glDisable(3042);
+                GL11.glDisable(GL_BLEND);
             }
         }
         return false;

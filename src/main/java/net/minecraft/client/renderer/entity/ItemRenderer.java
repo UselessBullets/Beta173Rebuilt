@@ -110,7 +110,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
                 GL11.glPopMatrix();
             }
         }
-        GL11.glDisable(32826);
+        GL11.glDisable(GL_RESCALE_NORMAL);
         GL11.glPopMatrix();
     }
     

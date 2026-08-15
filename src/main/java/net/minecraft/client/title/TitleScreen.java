@@ -5,7 +5,6 @@
 package net.minecraft.client.title;
 
 import util.Mth;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.client.skins.TexturePackSelectScreen;
 import net.minecraft.client.gui.JoinMultiplayerScreen;
@@ -16,14 +15,14 @@ import net.minecraft.locale.language.Language;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Calendar;
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import net.minecraft.client.gui.Button;
 import java.util.Random;
 import net.minecraft.client.gui.Screen;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class TitleScreen extends Screen
 {
@@ -117,18 +116,18 @@ public class TitleScreen extends Screen
         final Tesselator instance = Tesselator.instance;
         final int n = this.width / 2 - 274 / 2;
         final int n2 = 30;
-        GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/title/mclogo.png"));
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/title/mclogo.png"));
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.blit(n + 0, n2 + 0, 0, 0, 155, 44);
         this.blit(n + 155, n2 + 0, 0, 45, 155, 44);
         instance.color(16777215);
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float)(this.width / 2 + 90), 70.0f, 0.0f);
-        GL11.glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
+        glPushMatrix();
+        glTranslatef((float)(this.width / 2 + 90), 70.0f, 0.0f);
+        glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
         final float n3 = (1.8f - Mth.abs(Mth.sin(System.currentTimeMillis() % 1000L / 1000.0f * 3.1415927f * 2.0f) * 0.1f)) * 100.0f / (this.font.width(this.splash) + 32);
-        GL11.glScalef(n3, n3, n3);
+        glScalef(n3, n3, n3);
         this.drawCenteredString(this.font, this.splash, 0, -8, 16776960);
-        GL11.glPopMatrix();
+        glPopMatrix();
         this.drawString(this.font, "Minecraft Beta 1.7.3", 2, 2, 5263440);
         final String s = "Copyright Mojang AB. Do not distribute.";
         this.drawString(this.font, s, this.width - this.font.width(s) - 2, this.height - 10, 16777215);

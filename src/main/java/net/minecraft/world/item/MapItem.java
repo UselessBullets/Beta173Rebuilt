@@ -18,6 +18,8 @@ import net.minecraft.world.level.Level;
 
 public class MapItem extends ComplexItem
 {
+    public static final int IMAGE_WIDTH = 128;
+    public static final int IMAGE_HEIGHT = 128;
     protected MapItem(final int id) {
         super(id);
         this.setMaxStackSize(1);

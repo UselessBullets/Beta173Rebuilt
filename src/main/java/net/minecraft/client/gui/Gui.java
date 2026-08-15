@@ -14,7 +14,7 @@ import util.Mth;
 import net.minecraft.client.Lighting;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.tile.Tile;
-import org.lwjgl.opengl.GL11;
+
 import java.util.ArrayList;
 import net.minecraft.client.Minecraft;
 import java.util.Random;
@@ -56,7 +56,7 @@ public class Gui extends GuiComponent
         final int height = screenSizeCalculator.getHeight();
         final Font font = this.minecraft.font;
         this.minecraft.gameRenderer.setupGuiScreen();
-        GL11.glEnable(GL_BLEND);
+        glEnable(GL_BLEND);
         if (Minecraft.useFancyGraphics()) {
             this.renderVignette(this.minecraft.player.getBrightness(partialTick), width, height);
         }
@@ -68,17 +68,17 @@ public class Gui extends GuiComponent
         if (br > 0.0f) {
             this.renderTp(br, width, height);
         }
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/gui/gui.png"));
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/gui.png"));
         final Inventory inventory = this.minecraft.player.inventory;
         this.blitOffset = -90.0f;
         this.blit(width / 2 - 91, height - 22, 0, 0, 182, 22);
         this.blit(width / 2 - 91 - 1 + inventory.selected * 20, height - 22 - 1, 0, 22, 24, 22);
-        GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/gui/icons.png"));
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(775, 769);
+        glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/icons.png"));
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR);
         this.blit(width / 2 - 7, height / 2 - 7, 0, 0, 16, 16);
-        GL11.glDisable(3042);
+        glDisable(GL_BLEND);
         boolean b = this.minecraft.player.invulnerableTime / 3 % 2 == 1;
         if (this.minecraft.player.invulnerableTime < 10) {
             b = false;
@@ -137,33 +137,33 @@ public class Gui extends GuiComponent
                 }
             }
         }
-        GL11.glDisable(3042);
-        GL11.glEnable(GL_RESCALE_NORMAL);
-        GL11.glPushMatrix();
-        GL11.glRotatef(120.0f, 1.0f, 0.0f, 0.0f);
+        glDisable(GL_BLEND);
+        glEnable(GL_RESCALE_NORMAL);
+        glPushMatrix();
+        glRotatef(120.0f, 1.0f, 0.0f, 0.0f);
         Lighting.turnOn();
-        GL11.glPopMatrix();
+        glPopMatrix();
         for (int k = 0; k < 9; ++k) {
             this.renderSlot(k, width / 2 - 90 + k * 20 + 2, height - 16 - 3, partialTick);
         }
         Lighting.turnOff();
-        GL11.glDisable(32826);
+        glDisable(GL_RESCALE_NORMAL);
         if (this.minecraft.player.getSleepTimer() > 0) {
-            GL11.glDisable(GL_DEPTH_TEST);
-            GL11.glDisable(3008);
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_ALPHA_TEST);
             final int sleepTimer = this.minecraft.player.getSleepTimer();
             float n5 = sleepTimer / 100.0f;
             if (n5 > 1.0f) {
                 n5 = 1.0f - (sleepTimer - 100) / 10.0f;
             }
             this.fill(0, 0, width, height, (int)(220.0f * n5) << 24 | 0x101020);
-            GL11.glEnable(3008);
-            GL11.glEnable(GL_DEPTH_TEST);
+            glEnable(GL_ALPHA_TEST);
+            glEnable(GL_DEPTH_TEST);
         }
         if (this.minecraft.options.renderDebug) {
-            GL11.glPushMatrix();
+            glPushMatrix();
             if (Minecraft.warezTime > 0L) {
-                GL11.glTranslatef(0.0f, 32.0f, 0.0f);
+                glTranslatef(0.0f, 32.0f, 0.0f);
             }
             font.drawShadow("Minecraft Beta 1.7.3 (" + this.minecraft.fpsString + ")", 2, 2, 16777215);
             font.drawShadow(this.minecraft.gatherStats1(), 2, 12, 16777215);
@@ -181,7 +181,7 @@ public class Gui extends GuiComponent
             this.drawString(font, "y: " + this.minecraft.player.y, 2, 72, 14737632);
             this.drawString(font, "z: " + this.minecraft.player.z, 2, 80, 14737632);
             this.drawString(font, "f: " + (Mth.floor(this.minecraft.player.yRot * 4.0f / 360.0f + 0.5) & 0x3), 2, 88, 14737632);
-            GL11.glPopMatrix();
+            glPopMatrix();
         }
         if (this.nowPlayingTime > 0) {
             final float n7 = this.nowPlayingTime - partialTick;
@@ -190,17 +190,17 @@ public class Gui extends GuiComponent
                 n8 = 255;
             }
             if (n8 > 0) {
-                GL11.glPushMatrix();
-                GL11.glTranslatef((float)(width / 2), (float)(height - 48), 0.0f);
-                GL11.glEnable(GL_BLEND);
-                GL11.glBlendFunc(770, 771);
+                glPushMatrix();
+                glTranslatef((float)(width / 2), (float)(height - 48), 0.0f);
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 int n9 = 16777215;
                 if (this.nowPlayingColor) {
                     n9 = (Color.HSBtoRGB(n7 / 50.0f, 0.7f, 0.6f) & 0xFFFFFF);
                 }
                 font.draw(this.nowPlayingString, -font.width(this.nowPlayingString) / 2, -4, n9 + (n8 << 24));
-                GL11.glDisable(3042);
-                GL11.glPopMatrix();
+                glDisable(GL_BLEND);
+                glPopMatrix();
             }
         }
         int n10 = 10;
@@ -209,11 +209,11 @@ public class Gui extends GuiComponent
             n10 = 20;
             b2 = true;
         }
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
-        GL11.glDisable(3008);
-        GL11.glPushMatrix();
-        GL11.glTranslatef(0.0f, (float)(height - 48), 0.0f);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDisable(GL_ALPHA_TEST);
+        glPushMatrix();
+        glTranslatef(0.0f, (float)(height - 48), 0.0f);
         for (int n11 = 0; n11 < this.guiMessages.size() && n11 < n10; ++n11) {
             if (((GuiMessage)this.guiMessages.get(n11)).ticks < 200 || b2) {
                 double n12 = (1.0 - this.guiMessages.get(n11).ticks / 200.0) * 10.0;
@@ -232,23 +232,23 @@ public class Gui extends GuiComponent
                     final int y = -n11 * 9;
                     final String string3 = this.guiMessages.get(n11).string;
                     this.fill(n14, y - 1, n14 + 320, y + 8, n13 / 2 << 24);
-                    GL11.glEnable(GL_BLEND);
+                    glEnable(GL_BLEND);
                     font.drawShadow(string3, n14, y, 16777215 + (n13 << 24));
                 }
             }
         }
-        GL11.glPopMatrix();
-        GL11.glEnable(3008);
-        GL11.glDisable(3042);
+        glPopMatrix();
+        glEnable(GL_ALPHA_TEST);
+        glDisable(GL_BLEND);
     }
     
     private void renderPumpkin(final int w, final int h) {
-        GL11.glDisable(GL_DEPTH_TEST);
-        GL11.glDepthMask(false);
-        GL11.glBlendFunc(770, 771);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glDisable(3008);
-        GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("%blur%/misc/pumpkinblur.png"));
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glDisable(GL_ALPHA_TEST);
+        glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("%blur%/misc/pumpkinblur.png"));
         final Tesselator instance = Tesselator.instance;
         instance.begin();
         instance.vertexUV(0.0, h, -90.0, 0.0, 1.0);
@@ -256,10 +256,10 @@ public class Gui extends GuiComponent
         instance.vertexUV(w, 0.0, -90.0, 1.0, 0.0);
         instance.vertexUV(0.0, 0.0, -90.0, 0.0, 0.0);
         instance.end();
-        GL11.glDepthMask(true);
-        GL11.glEnable(GL_DEPTH_TEST);
-        GL11.glEnable(3008);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glDepthMask(true);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_ALPHA_TEST);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
     
     private void renderVignette(float br, final int w, final int h) {
@@ -271,11 +271,11 @@ public class Gui extends GuiComponent
             br = 1.0f;
         }
         this.tbr += (float)((br - this.tbr) * 0.01);
-        GL11.glDisable(GL_DEPTH_TEST);
-        GL11.glDepthMask(false);
-        GL11.glBlendFunc(0, 769);
-        GL11.glColor4f(this.tbr, this.tbr, this.tbr, 1.0f);
-        GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("%blur%/misc/vignette.png"));
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
+        glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+        glColor4f(this.tbr, this.tbr, this.tbr, 1.0f);
+        glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("%blur%/misc/vignette.png"));
         final Tesselator instance = Tesselator.instance;
         instance.begin();
         instance.vertexUV(0.0, h, -90.0, 0.0, 1.0);
@@ -283,10 +283,10 @@ public class Gui extends GuiComponent
         instance.vertexUV(w, 0.0, -90.0, 1.0, 0.0);
         instance.vertexUV(0.0, 0.0, -90.0, 0.0, 0.0);
         instance.end();
-        GL11.glDepthMask(true);
-        GL11.glEnable(GL_DEPTH_TEST);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glBlendFunc(770, 771);
+        glDepthMask(true);
+        glEnable(GL_DEPTH_TEST);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
     
     private void renderTp(float br, final int w, final int h) {
@@ -295,12 +295,12 @@ public class Gui extends GuiComponent
             br *= br;
             br = br * 0.8f + 0.2f;
         }
-        GL11.glDisable(3008);
-        GL11.glDisable(GL_DEPTH_TEST);
-        GL11.glDepthMask(false);
-        GL11.glBlendFunc(770, 771);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, br);
-        GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/terrain.png"));
+        glDisable(GL_ALPHA_TEST);
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4f(1.0f, 1.0f, 1.0f, br);
+        glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/terrain.png"));
         final float n = Tile.portalTile.tex % 16 / 16.0f;
         final float n2 = Tile.portalTile.tex / 16 / 16.0f;
         final float n3 = (Tile.portalTile.tex % 16 + 1) / 16.0f;
@@ -312,10 +312,10 @@ public class Gui extends GuiComponent
         instance.vertexUV(w, 0.0, -90.0, n3, n2);
         instance.vertexUV(0.0, 0.0, -90.0, n, n2);
         instance.end();
-        GL11.glDepthMask(true);
-        GL11.glEnable(GL_DEPTH_TEST);
-        GL11.glEnable(3008);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glDepthMask(true);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_ALPHA_TEST);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
     
     private void renderSlot(final int slot, final int x, final int y, final float partialTick) {
@@ -325,15 +325,15 @@ public class Gui extends GuiComponent
         }
         final float n = itemInstance.popTime - partialTick;
         if (n > 0.0f) {
-            GL11.glPushMatrix();
+            glPushMatrix();
             final float n2 = 1.0f + n / 5.0f;
-            GL11.glTranslatef((float)(x + 8), (float)(y + 12), 0.0f);
-            GL11.glScalef(1.0f / n2, (n2 + 1.0f) / 2.0f, 1.0f);
-            GL11.glTranslatef((float)(-(x + 8)), (float)(-(y + 12)), 0.0f);
+            glTranslatef((float)(x + 8), (float)(y + 12), 0.0f);
+            glScalef(1.0f / n2, (n2 + 1.0f) / 2.0f, 1.0f);
+            glTranslatef((float)(-(x + 8)), (float)(-(y + 12)), 0.0f);
         }
         Gui.itemRenderer.renderGuiItem(this.minecraft.font, this.minecraft.textures, itemInstance, x, y);
         if (n > 0.0f) {
-            GL11.glPopMatrix();
+            glPopMatrix();
         }
         Gui.itemRenderer.renderGuiItemDecorations(this.minecraft.font, this.minecraft.textures, itemInstance, x, y);
     }

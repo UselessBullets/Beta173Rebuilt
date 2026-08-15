@@ -66,7 +66,7 @@ public class ArrowRenderer extends EntityRenderer<Arrow>
             instance.vertexUV(-8.0, 2.0, 0.0, n2, n5);
             instance.end();
         }
-        GL11.glDisable(32826);
+        GL11.glDisable(GL_RESCALE_NORMAL);
         GL11.glPopMatrix();
     }
 }

@@ -28,14 +28,14 @@ public class PistonPieceRenderer extends TileEntityRenderer<PistonPieceEntity>
             final Tesselator instance = Tesselator.instance;
             this.bindTexture("/terrain.png");
             Lighting.turnOff();
-            GL11.glBlendFunc(770, 771);
+            GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             GL11.glEnable(GL_BLEND);
-            GL11.glDisable(2884);
+            GL11.glDisable(GL_CULL_FACE);
             if (Minecraft.useAmbientOcclusion()) {
                 GL11.glShadeModel(7425);
             }
             else {
-                GL11.glShadeModel(7424);
+                GL11.glShadeModel(GL_FLAT);
             }
             instance.begin();
             instance.offset((float)x - entity.x + entity.getXOff(partialTick), (float)y - entity.y + entity.getYOff(partialTick), (float)z - entity.z + entity.getZOff(partialTick));

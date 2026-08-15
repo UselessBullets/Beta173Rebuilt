@@ -5,12 +5,11 @@
 package net.minecraft.client.renderer;
 
 import javax.imageio.ImageIO;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Iterator;
 import net.minecraft.client.renderer.ptexture.DynamicTexture;
-import org.lwjgl.opengl.GL11;
+
 import java.io.InputStream;
 import net.minecraft.client.skins.TexturePack;
 import java.io.IOException;
@@ -24,6 +23,8 @@ import net.minecraft.client.Options;
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class Textures
 {
@@ -183,26 +184,26 @@ public class Textures
     }
     
     public void loadTexture(final BufferedImage img, final int id) {
-        GL11.glBindTexture(3553, id);
+        glBindTexture(GL_TEXTURE_2D, id);
         if (Textures.MIPMAP) {
-            GL11.glTexParameteri(3553, 10241, 9986);
-            GL11.glTexParameteri(3553, 10240, 9728);
+            glTexParameteri(3553, 10241, 9986);
+            glTexParameteri(3553, 10240, 9728);
         }
         else {
-            GL11.glTexParameteri(3553, 10241, 9728);
-            GL11.glTexParameteri(3553, 10240, 9728);
+            glTexParameteri(3553, 10241, 9728);
+            glTexParameteri(3553, 10240, 9728);
         }
         if (this.blur) {
-            GL11.glTexParameteri(3553, 10241, 9729);
-            GL11.glTexParameteri(3553, 10240, 9729);
+            glTexParameteri(3553, 10241, 9729);
+            glTexParameteri(3553, 10240, 9729);
         }
         if (this.clamp) {
-            GL11.glTexParameteri(3553, 10242, 10496);
-            GL11.glTexParameteri(3553, 10243, 10496);
+            glTexParameteri(3553, 10242, 10496);
+            glTexParameteri(3553, 10243, 10496);
         }
         else {
-            GL11.glTexParameteri(3553, 10242, 10497);
-            GL11.glTexParameteri(3553, 10243, 10497);
+            glTexParameteri(3553, 10242, 10497);
+            glTexParameteri(3553, 10243, 10497);
         }
         final int width = img.getWidth();
         final int height = img.getHeight();
@@ -230,7 +231,7 @@ public class Textures
         this.pixels.clear();
         this.pixels.put(src);
         this.pixels.position(0).limit(src.length);
-        GL11.glTexImage2D(3553, 0, 6408, width, height, 0, 6408, 5121, this.pixels);
+        glTexImage2D(3553, 0, 6408, width, height, 0, 6408, 5121, this.pixels);
         if (Textures.MIPMAP) {
             for (int j = 1; j <= 4; ++j) {
                 final int n8 = width >> j - 1;
@@ -241,32 +242,32 @@ public class Textures
                         this.pixels.putInt((k + l * n9) * 4, this.crispBlend(this.crispBlend(this.pixels.getInt((k * 2 + 0 + (l * 2 + 0) * n8) * 4), this.pixels.getInt((k * 2 + 1 + (l * 2 + 0) * n8) * 4)), this.crispBlend(this.pixels.getInt((k * 2 + 1 + (l * 2 + 1) * n8) * 4), this.pixels.getInt((k * 2 + 0 + (l * 2 + 1) * n8) * 4))));
                     }
                 }
-                GL11.glTexImage2D(3553, j, 6408, n9, n10, 0, 6408, 5121, this.pixels);
+                glTexImage2D(3553, j, 6408, n9, n10, 0, 6408, 5121, this.pixels);
             }
         }
     }
     
     public void replaceTextureDirect(final int[] rawPixels, final int w, final int h, final int id) {
-        GL11.glBindTexture(3553, id);
+        glBindTexture(GL_TEXTURE_2D, id);
         if (Textures.MIPMAP) {
-            GL11.glTexParameteri(3553, 10241, 9986);
-            GL11.glTexParameteri(3553, 10240, 9728);
+            glTexParameteri(3553, 10241, 9986);
+            glTexParameteri(3553, 10240, 9728);
         }
         else {
-            GL11.glTexParameteri(3553, 10241, 9728);
-            GL11.glTexParameteri(3553, 10240, 9728);
+            glTexParameteri(3553, 10241, 9728);
+            glTexParameteri(3553, 10240, 9728);
         }
         if (this.blur) {
-            GL11.glTexParameteri(3553, 10241, 9729);
-            GL11.glTexParameteri(3553, 10240, 9729);
+            glTexParameteri(3553, 10241, 9729);
+            glTexParameteri(3553, 10240, 9729);
         }
         if (this.clamp) {
-            GL11.glTexParameteri(3553, 10242, 10496);
-            GL11.glTexParameteri(3553, 10243, 10496);
+            glTexParameteri(3553, 10242, 10496);
+            glTexParameteri(3553, 10243, 10496);
         }
         else {
-            GL11.glTexParameteri(3553, 10242, 10497);
-            GL11.glTexParameteri(3553, 10243, 10497);
+            glTexParameteri(3553, 10242, 10497);
+            glTexParameteri(3553, 10243, 10497);
         }
         final byte[] src = new byte[w * h * 4];
         for (int i = 0; i < rawPixels.length; ++i) {
@@ -290,7 +291,7 @@ public class Textures
         this.pixels.clear();
         this.pixels.put(src);
         this.pixels.position(0).limit(src.length);
-        GL11.glTexSubImage2D(3553, 0, 0, 0, w, h, 6408, 5121, this.pixels);
+        glTexSubImage2D(3553, 0, 0, 0, w, h, 6408, 5121, this.pixels);
     }
     
     public void releaseTexture(final int id) {
@@ -298,7 +299,7 @@ public class Textures
         this.ib.clear();
         this.ib.put(id);
         this.ib.flip();
-        GL11.glDeleteTextures(this.ib);
+        glDeleteTextures(this.ib);
     }
     
     public int loadHttpTexture(final String url, final String backup) {
@@ -363,7 +364,7 @@ public class Textures
             dynamicTexture.bindTexture(this);
             for (int j = 0; j < dynamicTexture.replicate; ++j) {
                 for (int k = 0; k < dynamicTexture.replicate; ++k) {
-                    GL11.glTexSubImage2D(3553, 0, dynamicTexture.tex % 16 * 16 + j * 16, dynamicTexture.tex / 16 * 16 + k * 16, 16, 16, 6408, 5121, this.pixels);
+                    glTexSubImage2D(3553, 0, dynamicTexture.tex % 16 * 16 + j * 16, dynamicTexture.tex / 16 * 16 + k * 16, 16, 16, 6408, 5121, this.pixels);
                     if (Textures.MIPMAP) {
                         for (int l = 1; l <= 4; ++l) {
                             final int n = 16 >> l - 1;
@@ -373,7 +374,7 @@ public class Textures
                                     this.pixels.putInt((n3 + n4 * n2) * 4, this.smoothBlend(this.smoothBlend(this.pixels.getInt((n3 * 2 + 0 + (n4 * 2 + 0) * n) * 4), this.pixels.getInt((n3 * 2 + 1 + (n4 * 2 + 0) * n) * 4)), this.smoothBlend(this.pixels.getInt((n3 * 2 + 1 + (n4 * 2 + 1) * n) * 4), this.pixels.getInt((n3 * 2 + 0 + (n4 * 2 + 1) * n) * 4))));
                                 }
                             }
-                            GL11.glTexSubImage2D(3553, l, dynamicTexture.tex % 16 * n2, dynamicTexture.tex / 16 * n2, n2, n2, 6408, 5121, this.pixels);
+                            glTexSubImage2D(3553, l, dynamicTexture.tex % 16 * n2, dynamicTexture.tex / 16 * n2, n2, n2, 6408, 5121, this.pixels);
                         }
                     }
                 }
@@ -385,8 +386,8 @@ public class Textures
                 this.pixels.clear();
                 this.pixels.put(dynamicTexture2.pixels);
                 this.pixels.position(0).limit(dynamicTexture2.pixels.length);
-                GL11.glBindTexture(3553, dynamicTexture2.copyTo);
-                GL11.glTexSubImage2D(3553, 0, 0, 0, 16, 16, 6408, 5121, this.pixels);
+                glBindTexture(GL_TEXTURE_2D, dynamicTexture2.copyTo);
+                glTexSubImage2D(3553, 0, 0, 0, 16, 16, 6408, 5121, this.pixels);
                 if (Textures.MIPMAP) {
                     for (int n6 = 1; n6 <= 4; ++n6) {
                         final int n7 = 16 >> n6 - 1;
@@ -396,7 +397,7 @@ public class Textures
                                 this.pixels.putInt((n9 + n10 * n8) * 4, this.smoothBlend(this.smoothBlend(this.pixels.getInt((n9 * 2 + 0 + (n10 * 2 + 0) * n7) * 4), this.pixels.getInt((n9 * 2 + 1 + (n10 * 2 + 0) * n7) * 4)), this.smoothBlend(this.pixels.getInt((n9 * 2 + 1 + (n10 * 2 + 1) * n7) * 4), this.pixels.getInt((n9 * 2 + 0 + (n10 * 2 + 1) * n7) * 4))));
                             }
                         }
-                        GL11.glTexSubImage2D(3553, n6, 0, 0, n8, n8, 6408, 5121, this.pixels);
+                        glTexSubImage2D(3553, n6, 0, 0, n8, n8, 6408, 5121, this.pixels);
                     }
                 }
             }
@@ -490,7 +491,7 @@ public class Textures
         if (id < 0) {
             return;
         }
-        GL11.glBindTexture(3553, id);
+        glBindTexture(GL_TEXTURE_2D, id);
     }
     
     static {

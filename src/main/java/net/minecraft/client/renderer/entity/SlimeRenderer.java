@@ -25,11 +25,11 @@ public class SlimeRenderer extends MobRenderer<Slime>
             this.setArmor(this.slimeArmor);
             GL11.glEnable(2977);
             GL11.glEnable(GL_BLEND);
-            GL11.glBlendFunc(770, 771);
+            GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             return true;
         }
         if (layer == 1) {
-            GL11.glDisable(3042);
+            GL11.glDisable(GL_BLEND);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
         return false;

@@ -47,15 +47,15 @@ public class ItemInHandRenderer
     public void renderItem(final Mob mob, final ItemInstance item) {
         GL11.glPushMatrix();
         if (item.id < 256 && TileRenderer.canRender(Tile.tiles[item.id].getRenderShape())) {
-            GL11.glBindTexture(3553, this.mc.textures.loadTexture("/terrain.png"));
+            GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             this.tileRenderer.renderTile(Tile.tiles[item.id], item.getAuxValue(), mob.getBrightness(1.0f));
         }
         else {
             if (item.id < 256) {
-                GL11.glBindTexture(3553, this.mc.textures.loadTexture("/terrain.png"));
+                GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             }
             else {
-                GL11.glBindTexture(3553, this.mc.textures.loadTexture("/gui/items.png"));
+                GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/gui/items.png"));
             }
             final Tesselator instance = Tesselator.instance;
             final int itemInHandIcon = mob.getItemInHandIcon(item);
@@ -136,7 +136,7 @@ public class ItemInHandRenderer
                 instance.vertexUV(n5, n21, 0.0f - n9, n, n20);
             }
             instance.end();
-            GL11.glDisable(32826);
+            GL11.glDisable(GL_RESCALE_NORMAL);
         }
         GL11.glPopMatrix();
     }
@@ -176,7 +176,7 @@ public class ItemInHandRenderer
             GL11.glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(n5 * -85.0f, 0.0f, 0.0f, 1.0f);
             GL11.glEnable(GL_RESCALE_NORMAL);
-            GL11.glBindTexture(3553, this.mc.textures.loadHttpTexture(this.mc.player.customTextureUrl, this.mc.player.getTexture()));
+            GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadHttpTexture(this.mc.player.customTextureUrl, this.mc.player.getTexture()));
             for (int i = 0; i < 2; ++i) {
                 final int n6 = i * 2 - 1;
                 GL11.glPushMatrix();
@@ -252,7 +252,7 @@ public class ItemInHandRenderer
             final float sin5 = Mth.sin(attackAnim6 * attackAnim6 * 3.1415927f);
             GL11.glRotatef(Mth.sin(Mth.sqrt(attackAnim6) * 3.1415927f) * 70.0f, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(-sin5 * 20.0f, 0.0f, 0.0f, 1.0f);
-            GL11.glBindTexture(3553, this.mc.textures.loadHttpTexture(this.mc.player.customTextureUrl, this.mc.player.getTexture()));
+            GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadHttpTexture(this.mc.player.customTextureUrl, this.mc.player.getTexture()));
             GL11.glTranslatef(-1.0f, 3.6f, 3.5f);
             GL11.glRotatef(120.0f, 0.0f, 0.0f, 1.0f);
             GL11.glRotatef(200.0f, 1.0f, 0.0f, 0.0f);
@@ -266,21 +266,21 @@ public class ItemInHandRenderer
             playerRenderer2.renderHand();
             GL11.glPopMatrix();
         }
-        GL11.glDisable(32826);
+        GL11.glDisable(GL_RESCALE_NORMAL);
         Lighting.turnOff();
     }
     
     public void renderScreenEffect(final float partialTick) {
-        GL11.glDisable(3008);
+        GL11.glDisable(GL_ALPHA_TEST);
         if (this.mc.player.isOnFire()) {
-            GL11.glBindTexture(3553, this.mc.textures.loadTexture("/terrain.png"));
+            GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             this.renderFire(partialTick);
         }
         if (this.mc.player.isInWall()) {
             final int floor = Mth.floor(this.mc.player.x);
             final int floor2 = Mth.floor(this.mc.player.y);
             final int floor3 = Mth.floor(this.mc.player.z);
-            GL11.glBindTexture(3553, this.mc.textures.loadTexture("/terrain.png"));
+            GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             int n = this.mc.level.getTile(floor, floor2, floor3);
             if (this.mc.level.isSolidBlockingTile(floor, floor2, floor3)) {
                 this.renderTex(partialTick, Tile.tiles[n].getTexture(2));
@@ -303,10 +303,10 @@ public class ItemInHandRenderer
             }
         }
         if (this.mc.player.isUnderLiquid(Material.water)) {
-            GL11.glBindTexture(3553, this.mc.textures.loadTexture("/misc/water.png"));
+            GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/misc/water.png"));
             this.renderWater(partialTick);
         }
-        GL11.glEnable(3008);
+        GL11.glEnable(GL_ALPHA_TEST);
     }
     
     private void renderTex(final float partialTick, final int tex) {
@@ -340,7 +340,7 @@ public class ItemInHandRenderer
         final float brightness = this.mc.player.getBrightness(partialTick);
         GL11.glColor4f(brightness, brightness, brightness, 0.5f);
         GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         GL11.glPushMatrix();
         final float n = 4.0f;
         final float n2 = -1.0f;
@@ -358,14 +358,14 @@ public class ItemInHandRenderer
         instance.end();
         GL11.glPopMatrix();
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glDisable(3042);
+        GL11.glDisable(GL_BLEND);
     }
     
     private void renderFire(final float partialTick) {
         final Tesselator instance = Tesselator.instance;
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
         GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         final float n = 1.0f;
         for (int i = 0; i < 2; ++i) {
             GL11.glPushMatrix();
@@ -392,7 +392,7 @@ public class ItemInHandRenderer
             GL11.glPopMatrix();
         }
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glDisable(3042);
+        GL11.glDisable(GL_BLEND);
     }
     
     public void tick() {

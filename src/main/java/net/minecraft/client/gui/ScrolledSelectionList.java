@@ -189,9 +189,9 @@ public abstract class ScrolledSelectionList
         }
         this.capYPosition();
         GL11.glDisable(GL_LIGHTING);
-        GL11.glDisable(2912);
+        GL11.glDisable(GL_FOG);
         final Tesselator instance = Tesselator.instance;
-        GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/gui/background.png"));
+        GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         final float n9 = 32.0f;
         instance.begin();
@@ -239,8 +239,8 @@ public abstract class ScrolledSelectionList
         this.renderHoleBackground(0, this.y0, 255, 255);
         this.renderHoleBackground(this.y1, this.height, 255, 255);
         GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
-        GL11.glDisable(3008);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glDisable(GL_ALPHA_TEST);
         GL11.glShadeModel(7425);
         GL11.glDisable(GL_TEXTURE_2D);
         instance.begin();
@@ -296,14 +296,14 @@ public abstract class ScrolledSelectionList
         }
         this.renderDecorations(xm, ym);
         GL11.glEnable(GL_TEXTURE_2D);
-        GL11.glShadeModel(7424);
-        GL11.glEnable(3008);
-        GL11.glDisable(3042);
+        GL11.glShadeModel(GL_FLAT);
+        GL11.glEnable(GL_ALPHA_TEST);
+        GL11.glDisable(GL_BLEND);
     }
     
     private void renderHoleBackground(final int y0, final int y1, final int a0, final int a1) {
         final Tesselator instance = Tesselator.instance;
-        GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/gui/background.png"));
+        GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         final float n = 32.0f;
         instance.begin();

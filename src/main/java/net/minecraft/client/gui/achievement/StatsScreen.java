@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.*;
 
 public class StatsScreen extends Screen
@@ -106,14 +107,14 @@ public class StatsScreen extends Screen
     
     private void blitSlot(final int x, final int y, final int item) {
         this.blitSlotBg(x + 1, y + 1);
-        GL11.glEnable(GL_RESCALE_NORMAL);
-        GL11.glPushMatrix();
-        GL11.glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
+        glEnable(GL_RESCALE_NORMAL);
+        glPushMatrix();
+        glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
         Lighting.turnOn();
-        GL11.glPopMatrix();
+        glPopMatrix();
         StatsScreen.itemRenderer.renderGuiItem(this.font, this.minecraft.textures, item, 0, Item.items[item].getIcon(0), x + 2, y + 2);
         Lighting.turnOff();
-        GL11.glDisable(32826);
+        glDisable(GL_RESCALE_NORMAL);
     }
     
     private void blitSlotBg(final int x, final int y) {
@@ -122,7 +123,7 @@ public class StatsScreen extends Screen
     
     private void blitSlotIcon(final int x, final int y, final int sx, final int sy) {
         final int loadTexture = this.minecraft.textures.loadTexture("/gui/slot.png");
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.textures.bind(loadTexture);
         final Tesselator instance = Tesselator.instance;
         instance.begin();

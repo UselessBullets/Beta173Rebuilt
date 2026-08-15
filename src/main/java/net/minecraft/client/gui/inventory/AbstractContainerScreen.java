@@ -73,7 +73,7 @@ public abstract class AbstractContainerScreen extends Screen
             AbstractContainerScreen.itemRenderer.renderGuiItem(this.font, this.minecraft.textures, inventory.getCarried(), xm - n - 8, ym - n2 - 8);
             AbstractContainerScreen.itemRenderer.renderGuiItemDecorations(this.font, this.minecraft.textures, inventory.getCarried(), xm - n - 8, ym - n2 - 8);
         }
-        GL11.glDisable(32826);
+        GL11.glDisable(GL_RESCALE_NORMAL);
         Lighting.turnOff();
         GL11.glDisable(GL_LIGHTING);
         GL11.glDisable(GL_DEPTH_TEST);

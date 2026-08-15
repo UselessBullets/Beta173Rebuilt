@@ -131,13 +131,13 @@ public class LevelRenderer implements LevelListener
             ARBOcclusionQuery.glGenQueriesARB(this.occlusionCheckIds);
         }
         this.starList = MemoryTracker.genLists(3);
-        GL11.glPushMatrix();
-        GL11.glNewList(this.starList, 4864);
+        glPushMatrix();
+        glNewList(this.starList, 4864);
         this.renderStars();
-        GL11.glEndList();
-        GL11.glPopMatrix();
+        glEndList();
+        glPopMatrix();
         final Tesselator instance = Tesselator.instance;
-        GL11.glNewList(this.skyList = this.starList + 1, 4864);
+        glNewList(this.skyList = this.starList + 1, 4864);
         final int n2 = 64;
         final int n3 = 256 / n2 + 2;
         final float n4 = 16.0f;
@@ -151,8 +151,8 @@ public class LevelRenderer implements LevelListener
                 instance.end();
             }
         }
-        GL11.glEndList();
-        GL11.glNewList(this.darkList = this.starList + 2, 4864);
+        glEndList();
+        glNewList(this.darkList = this.starList + 2, 4864);
         final float n5 = -16.0f;
         instance.begin();
         for (int k = -n2 * n3; k <= n2 * n3; k += n2) {
@@ -164,7 +164,7 @@ public class LevelRenderer implements LevelListener
             }
         }
         instance.end();
-        GL11.glEndList();
+        glEndList();
     }
     
     private void renderStars() {
@@ -446,14 +446,14 @@ public class LevelRenderer implements LevelListener
                 if (j > this.sortedChunks.length) {
                     j = this.sortedChunks.length;
                 }
-                GL11.glDisable(GL_TEXTURE_2D);
-                GL11.glDisable(GL_LIGHTING);
-                GL11.glDisable(3008);
-                GL11.glDisable(2912);
-                GL11.glColorMask(false, false, false, false);
-                GL11.glDepthMask(false);
+                glDisable(GL_TEXTURE_2D);
+                glDisable(GL_LIGHTING);
+                glDisable(GL_ALPHA_TEST);
+                glDisable(GL_FOG);
+                glColorMask(false, false, false, false);
+                glDepthMask(false);
                 this.checkQueryResults(n10, j);
-                GL11.glPushMatrix();
+                glPushMatrix();
                 float n11 = 0.0f;
                 float n12 = 0.0f;
                 float n13 = 0.0f;
@@ -476,7 +476,7 @@ public class LevelRenderer implements LevelListener
                                 final float n19 = n16 - n12;
                                 final float n20 = n17 - n13;
                                 if (n18 != 0.0f || n19 != 0.0f || n20 != 0.0f) {
-                                    GL11.glTranslatef(n18, n19, n20);
+                                    glTranslatef(n18, n19, n20);
                                     n11 += n18;
                                     n12 += n19;
                                     n13 += n20;
@@ -489,22 +489,22 @@ public class LevelRenderer implements LevelListener
                         }
                     }
                 }
-                GL11.glPopMatrix();
+                glPopMatrix();
                 if (this.mc.options.anaglyph3d) {
                     if (GameRenderer.anaglyphPass == 0) {
-                        GL11.glColorMask(false, true, true, true);
+                        glColorMask(false, true, true, true);
                     }
                     else {
-                        GL11.glColorMask(true, false, false, true);
+                        glColorMask(true, false, false, true);
                     }
                 }
                 else {
-                    GL11.glColorMask(true, true, true, true);
+                    glColorMask(true, true, true, true);
                 }
-                GL11.glDepthMask(true);
-                GL11.glEnable(GL_TEXTURE_2D);
-                GL11.glEnable(3008);
-                GL11.glEnable(2912);
+                glDepthMask(true);
+                glEnable(GL_TEXTURE_2D);
+                glEnable(GL_ALPHA_TEST);
+                glEnable(GL_FOG);
                 n9 += this.renderChunks(n10, j, layer, alpha);
             } while (j < this.sortedChunks.length);
         }
@@ -593,7 +593,7 @@ public class LevelRenderer implements LevelListener
         if (this.mc.level.dimension.foggy) {
             return;
         }
-        GL11.glDisable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_2D);
         final Vec3 skyColor = this.level.getSkyColor(this.mc.cameraTargetPlayer, alpha);
         float n = (float)skyColor.x;
         float n2 = (float)skyColor.y;
@@ -606,24 +606,24 @@ public class LevelRenderer implements LevelListener
             n2 = n5;
             n3 = n6;
         }
-        GL11.glColor3f(n, n2, n3);
+        glColor3f(n, n2, n3);
         final Tesselator instance = Tesselator.instance;
-        GL11.glDepthMask(false);
-        GL11.glEnable(2912);
-        GL11.glColor3f(n, n2, n3);
-        GL11.glCallList(this.skyList);
-        GL11.glDisable(2912);
-        GL11.glDisable(3008);
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
+        glDepthMask(false);
+        glEnable(GL_FOG);
+        glColor3f(n, n2, n3);
+        glCallList(this.skyList);
+        glDisable(GL_FOG);
+        glDisable(GL_ALPHA_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Lighting.turnOff();
         final float[] sunriseColor = this.level.dimension.getSunriseColor(this.level.getTimeOfDay(alpha), alpha);
         if (sunriseColor != null) {
-            GL11.glDisable(GL_TEXTURE_2D);
-            GL11.glShadeModel(7425);
-            GL11.glPushMatrix();
-            GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-            GL11.glRotatef((this.level.getTimeOfDay(alpha) > 0.5f) ? 180.0f : 0.0f, 0.0f, 0.0f, 1.0f);
+            glDisable(GL_TEXTURE_2D);
+            glShadeModel(7425);
+            glPushMatrix();
+            glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            glRotatef((this.level.getTimeOfDay(alpha) > 0.5f) ? 180.0f : 0.0f, 0.0f, 0.0f, 1.0f);
             float r = sunriseColor[0];
             float g = sunriseColor[1];
             float b = sunriseColor[2];
@@ -647,22 +647,22 @@ public class LevelRenderer implements LevelListener
                 instance.vertex(sin * 120.0f, cos * 120.0f, -cos * 40.0f * sunriseColor[3]);
             }
             instance.end();
-            GL11.glPopMatrix();
-            GL11.glShadeModel(7424);
+            glPopMatrix();
+            glShadeModel(GL_FLAT);
         }
-        GL11.glEnable(GL_TEXTURE_2D);
-        GL11.glBlendFunc(770, 1);
-        GL11.glPushMatrix();
+        glEnable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glPushMatrix();
         final float n12 = 1.0f - this.level.getRainLevel(alpha);
         final float n13 = 0.0f;
         final float n14 = 0.0f;
         final float n15 = 0.0f;
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, n12);
-        GL11.glTranslatef(n13, n14, n15);
-        GL11.glRotatef(0.0f, 0.0f, 0.0f, 1.0f);
-        GL11.glRotatef(this.level.getTimeOfDay(alpha) * 360.0f, 1.0f, 0.0f, 0.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, n12);
+        glTranslatef(n13, n14, n15);
+        glRotatef(0.0f, 0.0f, 0.0f, 1.0f);
+        glRotatef(this.level.getTimeOfDay(alpha) * 360.0f, 1.0f, 0.0f, 0.0f);
         final float n16 = 30.0f;
-        GL11.glBindTexture(3553, this.textures.loadTexture("/terrain/sun.png"));
+        glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain/sun.png"));
         instance.begin();
         instance.vertexUV(-n16, 100.0, -n16, 0.0, 0.0);
         instance.vertexUV(n16, 100.0, -n16, 1.0, 0.0);
@@ -670,34 +670,34 @@ public class LevelRenderer implements LevelListener
         instance.vertexUV(-n16, 100.0, n16, 0.0, 1.0);
         instance.end();
         final float n17 = 20.0f;
-        GL11.glBindTexture(3553, this.textures.loadTexture("/terrain/moon.png"));
+        glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain/moon.png"));
         instance.begin();
         instance.vertexUV(-n17, -100.0, n17, 1.0, 1.0);
         instance.vertexUV(n17, -100.0, n17, 0.0, 1.0);
         instance.vertexUV(n17, -100.0, -n17, 0.0, 0.0);
         instance.vertexUV(-n17, -100.0, -n17, 1.0, 0.0);
         instance.end();
-        GL11.glDisable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_2D);
         final float n18 = this.level.getStarBrightness(alpha) * n12;
         if (n18 > 0.0f) {
-            GL11.glColor4f(n18, n18, n18, n18);
-            GL11.glCallList(this.starList);
+            glColor4f(n18, n18, n18, n18);
+            glCallList(this.starList);
         }
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glDisable(3042);
-        GL11.glEnable(3008);
-        GL11.glEnable(2912);
-        GL11.glPopMatrix();
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glDisable(GL_BLEND);
+        glEnable(GL_ALPHA_TEST);
+        glEnable(GL_FOG);
+        glPopMatrix();
         if (this.level.dimension.hasGround()) {
-            GL11.glColor3f(n * 0.2f + 0.04f, n2 * 0.2f + 0.04f, n3 * 0.6f + 0.1f);
+            glColor3f(n * 0.2f + 0.04f, n2 * 0.2f + 0.04f, n3 * 0.6f + 0.1f);
         }
         else {
-            GL11.glColor3f(n, n2, n3);
+            glColor3f(n, n2, n3);
         }
-        GL11.glDisable(GL_TEXTURE_2D);
-        GL11.glCallList(this.darkList);
-        GL11.glEnable(GL_TEXTURE_2D);
-        GL11.glDepthMask(true);
+        glDisable(GL_TEXTURE_2D);
+        glCallList(this.darkList);
+        glEnable(GL_TEXTURE_2D);
+        glDepthMask(true);
     }
     
     public void renderClouds(final float alpha) {
@@ -708,14 +708,14 @@ public class LevelRenderer implements LevelListener
             this.renderAdvancedClouds(alpha);
             return;
         }
-        GL11.glDisable(2884);
+        glDisable(GL_CULL_FACE);
         final float n = (float)(this.mc.cameraTargetPlayer.yOld + (this.mc.cameraTargetPlayer.y - this.mc.cameraTargetPlayer.yOld) * alpha);
         final int n2 = 32;
         final int n3 = 256 / n2;
         final Tesselator instance = Tesselator.instance;
-        GL11.glBindTexture(3553, this.textures.loadTexture("/environment/clouds.png"));
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
+        glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/environment/clouds.png"));
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         final Vec3 cloudColor = this.level.getCloudColor(alpha);
         float r = (float)cloudColor.x;
         float g = (float)cloudColor.y;
@@ -749,9 +749,9 @@ public class LevelRenderer implements LevelListener
             }
         }
         instance.end();
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glDisable(3042);
-        GL11.glEnable(GL_CULL_FACE);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
     }
     
     public boolean isInCloud(final double double1, final double double2, final double double3, final float float4) {
@@ -759,7 +759,7 @@ public class LevelRenderer implements LevelListener
     }
     
     public void renderAdvancedClouds(final float alpha) {
-        GL11.glDisable(2884);
+        glDisable(GL_CULL_FACE);
         final float n = (float)(this.mc.cameraTargetPlayer.yOld + (this.mc.cameraTargetPlayer.y - this.mc.cameraTargetPlayer.yOld) * alpha);
         final Tesselator instance = Tesselator.instance;
         final float n2 = 12.0f;
@@ -771,9 +771,9 @@ public class LevelRenderer implements LevelListener
         final int floor2 = Mth.floor(n5 / 2048.0);
         final double n7 = n4 - floor * 2048;
         final double n8 = n5 - floor2 * 2048;
-        GL11.glBindTexture(3553, this.textures.loadTexture("/environment/clouds.png"));
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
+        glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/environment/clouds.png"));
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         final Vec3 cloudColor = this.level.getCloudColor(alpha);
         float r = (float)cloudColor.x;
         float g = (float)cloudColor.y;
@@ -796,21 +796,21 @@ public class LevelRenderer implements LevelListener
         final int n19 = 8;
         final int n20 = 3;
         final float n21 = 9.765625E-4f;
-        GL11.glScalef(n2, 1.0f, n2);
+        glScalef(n2, 1.0f, n2);
         for (int i = 0; i < 2; ++i) {
             if (i == 0) {
-                GL11.glColorMask(false, false, false, false);
+                glColorMask(false, false, false, false);
             }
             else if (this.mc.options.anaglyph3d) {
                 if (GameRenderer.anaglyphPass == 0) {
-                    GL11.glColorMask(false, true, true, true);
+                    glColorMask(false, true, true, true);
                 }
                 else {
-                    GL11.glColorMask(true, false, false, true);
+                    glColorMask(true, false, false, true);
                 }
             }
             else {
-                GL11.glColorMask(true, true, true, true);
+                glColorMask(true, true, true, true);
             }
             for (int j = -n20 + 1; j <= n20; ++j) {
                 for (int k = -n20 + 1; k <= n20; ++k) {
@@ -877,9 +877,9 @@ public class LevelRenderer implements LevelListener
                 }
             }
         }
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glDisable(3042);
-        GL11.glEnable(GL_CULL_FACE);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
     }
     
     public boolean updateDirtyChunks(final Mob player, final boolean force) {
@@ -993,47 +993,47 @@ public class LevelRenderer implements LevelListener
     
     public void renderHit(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float partialTick) {
         final Tesselator instance = Tesselator.instance;
-        GL11.glEnable(GL_BLEND);
-        GL11.glEnable(3008);
-        GL11.glBlendFunc(770, 1);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, (Mth.sin(System.currentTimeMillis() / 100.0f) * 0.2f + 0.4f) * 0.5f);
+        glEnable(GL_BLEND);
+        glEnable(GL_ALPHA_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glColor4f(1.0f, 1.0f, 1.0f, (Mth.sin(System.currentTimeMillis() / 100.0f) * 0.2f + 0.4f) * 0.5f);
         if (mode == 0) {
             if (this.destroyProgress > 0.0f) {
-                GL11.glBlendFunc(774, 768);
-                GL11.glBindTexture(3553, this.textures.loadTexture("/terrain.png"));
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-                GL11.glPushMatrix();
+                glBlendFunc(774, 768);
+                glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain.png"));
+                glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+                glPushMatrix();
                 final int tile = this.level.getTile(h.x, h.y, h.z);
                 Tile rock = (tile > 0) ? Tile.tiles[tile] : null;
-                GL11.glDisable(3008);
-                GL11.glPolygonOffset(-3.0f, -3.0f);
-                GL11.glEnable(32823);
+                glDisable(GL_ALPHA_TEST);
+                glPolygonOffset(-3.0f, -3.0f);
+                glEnable(32823);
                 final double n = player.xOld + (player.x - player.xOld) * partialTick;
                 final double n2 = player.yOld + (player.y - player.yOld) * partialTick;
                 final double n3 = player.zOld + (player.z - player.zOld) * partialTick;
                 if (rock == null) {
                     rock = Tile.rock;
                 }
-                GL11.glEnable(3008);
+                glEnable(GL_ALPHA_TEST);
                 instance.begin();
                 instance.offset(-n, -n2, -n3);
                 instance.noColor();
                 this.tileRenderer.tesselateInWorld(rock, h.x, h.y, h.z, 240 + (int)(this.destroyProgress * 10.0f));
                 instance.end();
                 instance.offset(0.0, 0.0, 0.0);
-                GL11.glDisable(3008);
-                GL11.glPolygonOffset(0.0f, 0.0f);
-                GL11.glDisable(32823);
-                GL11.glEnable(3008);
-                GL11.glDepthMask(true);
-                GL11.glPopMatrix();
+                glDisable(GL_ALPHA_TEST);
+                glPolygonOffset(0.0f, 0.0f);
+                glDisable(32823);
+                glEnable(GL_ALPHA_TEST);
+                glDepthMask(true);
+                glPopMatrix();
             }
         }
         else if (inventoryItem != null) {
-            GL11.glBlendFunc(770, 771);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             final float n4 = Mth.sin(System.currentTimeMillis() / 100.0f) * 0.2f + 0.8f;
-            GL11.glColor4f(n4, n4, n4, Mth.sin(System.currentTimeMillis() / 200.0f) * 0.2f + 0.5f);
-            GL11.glBindTexture(3553, this.textures.loadTexture("/terrain.png"));
+            glColor4f(n4, n4, n4, Mth.sin(System.currentTimeMillis() / 200.0f) * 0.2f + 0.5f);
+            glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain.png"));
             int x = h.x;
             int y = h.y;
             int z = h.z;
@@ -1056,27 +1056,27 @@ public class LevelRenderer implements LevelListener
                 ++x;
             }
         }
-        GL11.glDisable(3042);
-        GL11.glDisable(3008);
+        glDisable(GL_BLEND);
+        glDisable(GL_ALPHA_TEST);
     }
     
     public void renderHitOutline(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float partialTick) {
         if (mode == 0 && h.type == HitResult.Type.TILE) {
-            GL11.glEnable(GL_BLEND);
-            GL11.glBlendFunc(770, 771);
-            GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
-            GL11.glLineWidth(2.0f);
-            GL11.glDisable(GL_TEXTURE_2D);
-            GL11.glDepthMask(false);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
+            glLineWidth(2.0f);
+            glDisable(GL_TEXTURE_2D);
+            glDepthMask(false);
             final float n = 0.002f;
             final int tile = this.level.getTile(h.x, h.y, h.z);
             if (tile > 0) {
                 Tile.tiles[tile].updateShape(this.level, h.x, h.y, h.z);
                 this.render(Tile.tiles[tile].getTileAABB(this.level, h.x, h.y, h.z).grow(n, n, n).cloneMove(-(player.xOld + (player.x - player.xOld) * partialTick), -(player.yOld + (player.y - player.yOld) * partialTick), -(player.zOld + (player.z - player.zOld) * partialTick)));
             }
-            GL11.glDepthMask(true);
-            GL11.glEnable(GL_TEXTURE_2D);
-            GL11.glDisable(3042);
+            glDepthMask(true);
+            glEnable(GL_TEXTURE_2D);
+            glDisable(GL_BLEND);
         }
     }
     

@@ -287,17 +287,17 @@ public abstract class Minecraft implements Runnable
             ex3.printStackTrace();
         }
         this.checkGlError("Pre startup");
-        GL11.glEnable(GL_TEXTURE_2D);
-        GL11.glShadeModel(7425);
-        GL11.glClearDepth(1.0);
-        GL11.glEnable(GL_DEPTH_TEST);
-        GL11.glDepthFunc(GL_LEQUAL);
-        GL11.glEnable(3008);
-        GL11.glAlphaFunc(516, 0.1f);
-        GL11.glCullFace(1029);
-        GL11.glMatrixMode(5889);
-        GL11.glLoadIdentity();
-        GL11.glMatrixMode(5888);
+        glEnable(GL_TEXTURE_2D);
+        glShadeModel(7425);
+        glClearDepth(1.0);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(516, 0.1f);
+        glCullFace(1029);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
         this.checkGlError("Startup");
         this.openGLCapabilities = new OpenGLCapabilities();
         this.soundEngine.init(this.options);
@@ -311,7 +311,7 @@ public abstract class Minecraft implements Runnable
         this.textures.addDynamicTexture(new FireTexture(0));
         this.textures.addDynamicTexture(new FireTexture(1));
         this.levelRenderer = new LevelRenderer(this, this.textures);
-        GL11.glViewport(0, 0, this.width, this.height);
+        glViewport(0, 0, this.width, this.height);
         this.particleEngine = new ParticleEngine(this.level, this.textures);
         try {
             (this.bgLoader = new BackgroundDownloader(this.workingDirectory, this)).start();
@@ -329,20 +329,20 @@ public abstract class Minecraft implements Runnable
     
     private void renderLoadingScreen() throws LWJGLException {
         final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.options, this.width, this.height);
-        GL11.glClear(16640);
-        GL11.glMatrixMode(5889);
-        GL11.glLoadIdentity();
-        GL11.glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 1000.0, 3000.0);
-        GL11.glMatrixMode(5888);
-        GL11.glLoadIdentity();
-        GL11.glTranslatef(0.0f, 0.0f, -2000.0f);
-        GL11.glViewport(0, 0, this.width, this.height);
-        GL11.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(16640);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 1000.0, 3000.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslatef(0.0f, 0.0f, -2000.0f);
+        glViewport(0, 0, this.width, this.height);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         final Tesselator instance = Tesselator.instance;
-        GL11.glDisable(GL_LIGHTING);
-        GL11.glEnable(GL_TEXTURE_2D);
-        GL11.glDisable(2912);
-        GL11.glBindTexture(3553, this.textures.loadTexture("/title/mojang.png"));
+        glDisable(GL_LIGHTING);
+        glEnable(GL_TEXTURE_2D);
+        glDisable(GL_FOG);
+        glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/title/mojang.png"));
         instance.begin();
         instance.color(16777215);
         instance.vertexUV(0.0, this.height, 0.0, 0.0, 0.0);
@@ -352,13 +352,13 @@ public abstract class Minecraft implements Runnable
         instance.end();
         final int w = 256;
         final int h = 256;
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         instance.color(16777215);
         this.blit((screenSizeCalculator.getWidth() - w) / 2, (screenSizeCalculator.getHeight() - h) / 2, 0, 0, w, h);
-        GL11.glDisable(GL_LIGHTING);
-        GL11.glDisable(2912);
-        GL11.glEnable(3008);
-        GL11.glAlphaFunc(516, 0.1f);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_FOG);
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(516, 0.1f);
         Display.swapBuffers();
     }
     
@@ -473,7 +473,7 @@ public abstract class Minecraft implements Runnable
     }
     
     private void checkGlError(final String str) {
-        final int glGetError = GL11.glGetError();
+        final int glGetError = glGetError();
         if (glGetError != 0) {
             final String gluErrorString = GLU.gluErrorString(glGetError);
             System.out.println("########## GL ERROR ##########");
@@ -563,7 +563,7 @@ public abstract class Minecraft implements Runnable
                     this.checkGlError("Pre render");
                     TileRenderer.fancy = this.options.fancyGraphics;
                     this.soundEngine.update(this.player, this.timer.partialTick);
-                    GL11.glEnable(GL_TEXTURE_2D);
+                    glEnable(GL_TEXTURE_2D);
                     if (this.level != null) {
                         this.level.updateLights();
                     }
@@ -681,15 +681,15 @@ public abstract class Minecraft implements Runnable
         Minecraft.tickTimes[Minecraft.frameTimePos & Minecraft.frameTimes.length - 1] = tickTime;
         Minecraft.frameTimes[Minecraft.frameTimePos++ & Minecraft.frameTimes.length - 1] = nanoTime - this.lastTimer;
         this.lastTimer = nanoTime;
-        GL11.glClear(256);
-        GL11.glMatrixMode(5889);
-        GL11.glLoadIdentity();
-        GL11.glOrtho(0.0, (double)this.width, (double)this.height, 0.0, 1000.0, 3000.0);
-        GL11.glMatrixMode(5888);
-        GL11.glLoadIdentity();
-        GL11.glTranslatef(0.0f, 0.0f, -2000.0f);
-        GL11.glLineWidth(1.0f);
-        GL11.glDisable(GL_TEXTURE_2D);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0.0, (double)this.width, (double)this.height, 0.0, 1000.0, 3000.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslatef(0.0f, 0.0f, -2000.0f);
+        glLineWidth(1.0f);
+        glDisable(GL_TEXTURE_2D);
         final Tesselator instance = Tesselator.instance;
         instance.begin(7);
         final int n2 = (int)(n / 200000L);
@@ -736,7 +736,7 @@ public abstract class Minecraft implements Runnable
             instance.vertex(j + 0.5f, this.height - (n8 - n9) + 0.5f, 0.0);
         }
         instance.end();
-        GL11.glEnable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_2D);
     }
     
     public void stop() {
@@ -956,7 +956,7 @@ public abstract class Minecraft implements Runnable
         if (!this.pause && this.level != null) {
             this.gameMode.tick();
         }
-        GL11.glBindTexture(3553, this.textures.loadTexture("/terrain.png"));
+        glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain.png"));
         if (!this.pause) {
             this.textures.tick();
         }

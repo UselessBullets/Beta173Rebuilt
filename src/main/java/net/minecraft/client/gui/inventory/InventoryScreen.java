@@ -84,7 +84,7 @@ public class InventoryScreen extends AbstractContainerScreen
         this.minecraft.player.xRot = xRot;
         GL11.glPopMatrix();
         Lighting.turnOff();
-        GL11.glDisable(32826);
+        GL11.glDisable(GL_RESCALE_NORMAL);
     }
     
     @Override

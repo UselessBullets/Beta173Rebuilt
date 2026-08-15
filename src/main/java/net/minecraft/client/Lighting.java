@@ -5,7 +5,7 @@
 package net.minecraft.client;
 
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
+
 import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -15,33 +15,36 @@ public class Lighting
     private static FloatBuffer lb;
     
     public static void turnOff() {
-        GL11.glDisable(GL_LIGHTING);
-        GL11.glDisable(16384);
-        GL11.glDisable(16385);
-        GL11.glDisable(2903);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHT0);
+        glDisable(GL_LIGHT1);
+        glDisable(GL_COLOR_MATERIAL);
     }
     
     public static void turnOn() {
-        GL11.glEnable(GL_LIGHTING);
-        GL11.glEnable(16384);
-        GL11.glEnable(16385);
-        GL11.glEnable(GL_COLOR_MATERIAL);
-        GL11.glColorMaterial(1032, 5634);
-        final float n = 0.4f;
-        final float n2 = 0.6f;
-        final float n3 = 0.0f;
-        final Vec3 normalize = Vec3.newTemp(0.20000000298023224, 1.0, -0.699999988079071).normalize();
-        GL11.glLight(16384, 4611, getBuffer(normalize.x, normalize.y, normalize.z, 0.0));
-        GL11.glLight(16384, 4609, getBuffer(n2, n2, n2, 1.0f));
-        GL11.glLight(16384, 4608, getBuffer(0.0f, 0.0f, 0.0f, 1.0f));
-        GL11.glLight(16384, 4610, getBuffer(n3, n3, n3, 1.0f));
-        final Vec3 normalize2 = Vec3.newTemp(-0.20000000298023224, 1.0, 0.699999988079071).normalize();
-        GL11.glLight(16385, 4611, getBuffer(normalize2.x, normalize2.y, normalize2.z, 0.0));
-        GL11.glLight(16385, 4609, getBuffer(n2, n2, n2, 1.0f));
-        GL11.glLight(16385, 4608, getBuffer(0.0f, 0.0f, 0.0f, 1.0f));
-        GL11.glLight(16385, 4610, getBuffer(n3, n3, n3, 1.0f));
-        GL11.glShadeModel(7424);
-        GL11.glLightModel(2899, getBuffer(n, n, n, 1.0f));
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+        glEnable(GL_LIGHT1);
+        glEnable(GL_COLOR_MATERIAL);
+        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+        final float a = 0.4f;
+        final float d = 0.6f;
+        final float s = 0.0f;
+
+        Vec3 l = Vec3.newTemp(0.2, 1.0, -0.7).normalize();
+        glLight(GL_LIGHT0, GL_POSITION, getBuffer(l.x, l.y, l.z, 0.0));
+        glLight(GL_LIGHT0, GL_DIFFUSE, getBuffer(d, d, d, 1.0f));
+        glLight(GL_LIGHT0, GL_AMBIENT, getBuffer(0.0f, 0.0f, 0.0f, 1.0f));
+        glLight(GL_LIGHT0, GL_SPECULAR, getBuffer(s, s, s, 1.0f));
+
+        l = Vec3.newTemp(-0.2, 1.0, 0.7).normalize();
+        glLight(GL_LIGHT1, GL_POSITION, getBuffer(l.x, l.y, l.z, 0.0));
+        glLight(GL_LIGHT1, GL_DIFFUSE, getBuffer(d, d, d, 1.0f));
+        glLight(GL_LIGHT1, GL_AMBIENT, getBuffer(0.0f, 0.0f, 0.0f, 1.0f));
+        glLight(GL_LIGHT1, GL_SPECULAR, getBuffer(s, s, s, 1.0f));
+
+        glShadeModel(GL_FLAT);
+        glLightModel(GL_LIGHT_MODEL_AMBIENT, getBuffer(a, a, a, 1.0f));
     }
     
     private static FloatBuffer getBuffer(final double a, final double b, final double c, final double d) {

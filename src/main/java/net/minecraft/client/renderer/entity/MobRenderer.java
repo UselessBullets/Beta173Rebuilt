@@ -32,7 +32,7 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
     
     public void render(final T entity, final double x, final double y, final double z, final float rot, final float partialTick) {
         GL11.glPushMatrix();
-        GL11.glDisable(2884);
+        GL11.glDisable(GL_CULL_FACE);
         this.model.attackTime = this.getAttackAnim(entity, partialTick);
         if (this.armor != null) {
             this.armor.attackTime = this.model.attackTime;
@@ -59,14 +59,14 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
                 r = 1.0f;
             }
             this.bindTexture(entity.customTextureUrl, entity.getTexture());
-            GL11.glEnable(3008);
+            GL11.glEnable(GL_ALPHA_TEST);
             this.model.prepareMobModel(entity, time, r, partialTick);
             this.model.render(time, r, bob, n - bodyRot, n2, n3);
             for (int i = 0; i < 4; ++i) {
                 if (this.prepareArmor(entity, i, partialTick)) {
                     this.armor.render(time, r, bob, n - bodyRot, n2, n3);
-                    GL11.glDisable(3042);
-                    GL11.glEnable(3008);
+                    GL11.glDisable(GL_BLEND);
+                    GL11.glEnable(GL_ALPHA_TEST);
                 }
             }
             this.additionalRendering(entity, partialTick);
@@ -74,9 +74,9 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
             final int overlayColor = this.getOverlayColor(entity, brightness, partialTick);
             if ((overlayColor >> 24 & 0xFF) > 0 || entity.hurtTime > 0 || entity.deathTime > 0) {
                 GL11.glDisable(GL_TEXTURE_2D);
-                GL11.glDisable(3008);
+                GL11.glDisable(GL_ALPHA_TEST);
                 GL11.glEnable(GL_BLEND);
-                GL11.glBlendFunc(770, 771);
+                GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 GL11.glDepthFunc(514);
                 if (entity.hurtTime > 0 || entity.deathTime > 0) {
                     GL11.glColor4f(brightness, 0.0f, 0.0f, 0.4f);
@@ -103,11 +103,11 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
                     }
                 }
                 GL11.glDepthFunc(GL_LEQUAL);
-                GL11.glDisable(3042);
-                GL11.glEnable(3008);
+                GL11.glDisable(GL_BLEND);
+                GL11.glEnable(GL_ALPHA_TEST);
                 GL11.glEnable(GL_TEXTURE_2D);
             }
-            GL11.glDisable(32826);
+            GL11.glDisable(GL_RESCALE_NORMAL);
         }
         catch (final Exception ex) {
             ex.printStackTrace();
@@ -184,7 +184,7 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
         GL11.glDepthMask(false);
         GL11.glDisable(GL_DEPTH_TEST);
         GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 771);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         final Tesselator instance = Tesselator.instance;
         int n2 = 0;
         if (name.equals("deadmau5")) {
@@ -205,7 +205,7 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
         GL11.glDepthMask(true);
         font.draw(name, -font.width(name) / 2, n2, -1);
         GL11.glEnable(GL_LIGHTING);
-        GL11.glDisable(3042);
+        GL11.glDisable(GL_BLEND);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glPopMatrix();
     }

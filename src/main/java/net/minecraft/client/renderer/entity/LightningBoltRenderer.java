@@ -4,9 +4,8 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import java.util.Random;
-import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.world.entity.global.LightningBolt;
 
@@ -16,10 +15,10 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt>
 {
     public void render(final LightningBolt entity, final double x, final double y, final double z, final float rot, final float partialTick) {
         final Tesselator instance = Tesselator.instance;
-        GL11.glDisable(GL_TEXTURE_2D);
-        GL11.glDisable(GL_LIGHTING);
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(770, 1);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_LIGHTING);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         final double[] array = new double[8];
         final double[] array2 = new double[8];
         double n = 0.0;
@@ -90,8 +89,8 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt>
                 }
             }
         }
-        GL11.glDisable(3042);
-        GL11.glEnable(GL_LIGHTING);
-        GL11.glEnable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+        glEnable(GL_LIGHTING);
+        glEnable(GL_TEXTURE_2D);
     }
 }

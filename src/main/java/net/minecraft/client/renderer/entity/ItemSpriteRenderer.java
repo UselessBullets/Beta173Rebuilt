@@ -42,7 +42,7 @@ public class ItemSpriteRenderer extends EntityRenderer<Entity>
         instance.vertexUV(n5 - n6, 1.0f - n7, 0.0, n2, n3);
         instance.vertexUV(0.0f - n6, 1.0f - n7, 0.0, n, n3);
         instance.end();
-        GL11.glDisable(32826);
+        GL11.glDisable(GL_RESCALE_NORMAL);
         GL11.glPopMatrix();
     }
 }

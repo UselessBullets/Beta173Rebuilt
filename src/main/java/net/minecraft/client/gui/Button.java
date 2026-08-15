@@ -4,9 +4,9 @@
 
 package net.minecraft.client.gui;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 
+import static org.lwjgl.opengl.GL11.*;
 public class Button extends GuiComponent
 {
     protected int w;
@@ -51,8 +51,8 @@ public class Button extends GuiComponent
             return;
         }
         final Font font = minecraft.font;
-        GL11.glBindTexture(3553, minecraft.textures.loadTexture("/gui/gui.png"));
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glBindTexture(GL_TEXTURE_2D, minecraft.textures.loadTexture("/gui/gui.png"));
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         final boolean hovered = xm >= this.x && ym >= this.y && xm < this.x + this.w && ym < this.y + this.h;
         final int yImage = this.getYImage(hovered);
         this.blit(this.x, this.y, 0, 46 + yImage * 20, this.w / 2, this.h);

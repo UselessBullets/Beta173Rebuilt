@@ -6,16 +6,16 @@ package net.minecraft.client.skins;
 
 import java.io.IOException;
 import java.util.zip.ZipEntry;
-import org.lwjgl.opengl.GL11;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
-import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import net.minecraft.client.Minecraft;
 import java.io.File;
 import java.awt.image.BufferedImage;
 import java.util.zip.ZipFile;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class FileTexturePack extends TexturePack
 {
@@ -92,7 +92,7 @@ public class FileTexturePack extends TexturePack
             minecraft.textures.bind(this.texture);
         }
         else {
-            GL11.glBindTexture(3553, minecraft.textures.loadTexture("/gui/unknown_pack.png"));
+            glBindTexture(GL_TEXTURE_2D, minecraft.textures.loadTexture("/gui/unknown_pack.png"));
         }
     }
     

@@ -143,9 +143,9 @@ public class Screen extends GuiComponent
     
     public void renderDirtBackground(final int vo) {
         GL11.glDisable(GL_LIGHTING);
-        GL11.glDisable(2912);
+        GL11.glDisable(GL_FOG);
         final Tesselator instance = Tesselator.instance;
-        GL11.glBindTexture(3553, this.minecraft.textures.loadTexture("/gui/background.png"));
+        GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         final float n = 32.0f;
         instance.begin();

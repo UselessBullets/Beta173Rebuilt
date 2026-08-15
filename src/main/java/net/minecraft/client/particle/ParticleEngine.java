@@ -6,7 +6,6 @@ package net.minecraft.client.particle;
 
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.client.renderer.Tesselator;
-import org.lwjgl.opengl.GL11;
 import util.Mth;
 import net.minecraft.world.entity.Entity;
 import java.util.ArrayList;
@@ -14,6 +13,8 @@ import java.util.Random;
 import net.minecraft.client.renderer.Textures;
 import java.util.List;
 import net.minecraft.world.level.Level;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class ParticleEngine
 {
@@ -80,7 +81,7 @@ public class ParticleEngine
                 if (i == ITEM_TEXTURE) {
                     n = this.textures.loadTexture("/gui/items.png");
                 }
-                GL11.glBindTexture(3553, n);
+                glBindTexture(GL_TEXTURE_2D, n);
                 final Tesselator instance = Tesselator.instance;
                 instance.begin();
                 for (int j = 0; j < this.particles[i].size(); ++j) {

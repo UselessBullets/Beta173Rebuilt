@@ -4,8 +4,9 @@
 
 package net.minecraft.client.renderer.ptexture;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.Textures;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class DynamicTexture
 {
@@ -30,10 +31,10 @@ public class DynamicTexture
     
     public void bindTexture(final Textures textures) {
         if (this.textureId == 0) {
-            GL11.glBindTexture(3553, textures.loadTexture("/terrain.png"));
+            glBindTexture(GL_TEXTURE_2D, textures.loadTexture("/terrain.png"));
         }
         else if (this.textureId == 1) {
-            GL11.glBindTexture(3553, textures.loadTexture("/gui/items.png"));
+            glBindTexture(GL_TEXTURE_2D, textures.loadTexture("/gui/items.png"));
         }
     }
 }

@@ -10,7 +10,6 @@ import net.minecraft.stats.Achievement;
 import net.minecraft.world.level.tile.Tile;
 import java.util.Random;
 import util.Mth;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Mouse;
 import net.minecraft.client.gui.Button;
 import net.minecraft.client.gui.SmallButton;

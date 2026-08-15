@@ -6,7 +6,6 @@ package net.minecraft.client.gui.achievement;
 
 import net.minecraft.client.Lighting;
 import net.minecraft.client.gui.ScreenSizeCalculator;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.locale.language.I18n;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.stats.Achievement;
@@ -50,89 +49,89 @@ public class AchievementPopup extends GuiComponent
     }
     
     private void prepareWindow() {
-        GL11.glViewport(0, 0, this.mc.width, this.mc.height);
-        GL11.glMatrixMode(5889);
-        GL11.glLoadIdentity();
-        GL11.glMatrixMode(5888);
-        GL11.glLoadIdentity();
+        glViewport(0, 0, this.mc.width, this.mc.height);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
         this.width = this.mc.width;
         this.height = this.mc.height;
         final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.mc.options, this.mc.width, this.mc.height);
         this.width = screenSizeCalculator.getWidth();
         this.height = screenSizeCalculator.getHeight();
-        GL11.glClear(256);
-        GL11.glMatrixMode(5889);
-        GL11.glLoadIdentity();
-        GL11.glOrtho(0.0, (double)this.width, (double)this.height, 0.0, 1000.0, 3000.0);
-        GL11.glMatrixMode(5888);
-        GL11.glLoadIdentity();
-        GL11.glTranslatef(0.0f, 0.0f, -2000.0f);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0.0, this.width, this.height, 0.0, 1000.0, 3000.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslatef(0.0f, 0.0f, -2000.0f);
     }
     
     public void render() {
         if (Minecraft.warezTime > 0L) {
-            GL11.glDisable(GL_DEPTH_TEST);
-            GL11.glDepthMask(false);
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(false);
             Lighting.turnOff();
             this.prepareWindow();
-            final String str = "Minecraft Beta 1.7.3   Unlicensed Copy :(";
-            final String str2 = "(Or logged in from another location)";
-            final String str3 = "Purchase at minecraft.net";
-            this.mc.font.drawShadow(str, 2, 2, 16777215);
-            this.mc.font.drawShadow(str2, 2, 11, 16777215);
-            this.mc.font.drawShadow(str3, 2, 20, 16777215);
-            GL11.glDepthMask(true);
-            GL11.glEnable(GL_DEPTH_TEST);
+            final String title = "Minecraft Beta 1.7.3   Unlicensed Copy :(";
+            final String msg1 = "(Or logged in from another location)";
+            final String msg2 = "Purchase at minecraft.net";
+            this.mc.font.drawShadow(title, 2, 2 + 9 * 0, 0xffffff);
+            this.mc.font.drawShadow(msg1, 2, 2 + 9 * 1, 0xffffff);
+            this.mc.font.drawShadow(msg2, 2, 2 + 9 * 2, 0xffffff);
+            glDepthMask(true);
+            glEnable(GL_DEPTH_TEST);
         }
-        if (this.ach == null || this.startTime == 0L) {
+        if (this.ach == null || this.startTime == 0L) { return; }
+
+        final double time = (System.currentTimeMillis() - this.startTime) / 3000.0;
+        if (this.isHelper) {
+        } else if (!this.isHelper && (time < 0.0 || time > 1.0)) {
+            this.startTime = 0L;
             return;
         }
-        final double n = (System.currentTimeMillis() - this.startTime) / 3000.0;
-        if (!this.isHelper) {
-            if (!this.isHelper && (n < 0.0 || n > 1.0)) {
-                this.startTime = 0L;
-                return;
-            }
-        }
+
         this.prepareWindow();
-        GL11.glDisable(GL_DEPTH_TEST);
-        GL11.glDepthMask(false);
-        double n2 = n * 2.0;
-        if (n2 > 1.0) {
-            n2 = 2.0 - n2;
-        }
-        double n3 = 1.0 - n2 * 4.0;
-        if (n3 < 0.0) {
-            n3 = 0.0;
-        }
-        final double n4 = n3 * n3;
-        final double n5 = n4 * n4;
-        final int x = this.width - 160;
-        final int y = 0 - (int)(n5 * 36.0);
-        final int loadTexture = this.mc.textures.loadTexture("/achievement/bg.png");
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glEnable(GL_TEXTURE_2D);
-        GL11.glBindTexture(3553, loadTexture);
-        GL11.glDisable(GL_LIGHTING);
-        this.blit(x, y, 96, 202, 160, 32);
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(false);
+
+        double yo = time * 2.0;
+        if (yo > 1.0) { yo = 2.0 - yo; }
+        yo = yo * 4.0;
+        yo = 1.0 - yo;
+        if (yo < 0.0) { yo = 0.0; }
+        yo = yo * yo;
+        yo = yo * yo;
+
+        final int xx = this.width - 160;
+        final int yy = 0 - (int)(yo * 36.0);
+        final int tex = this.mc.textures.loadTexture("/achievement/bg.png");
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glDisable(GL_LIGHTING);
+
+        this.blit(xx, yy, 96, 202, 160, 32);
+
         if (this.isHelper) {
-            this.mc.font.drawWordWrapInternal(this.desc, x + 30, y + 7, 120, -1);
+            this.mc.font.drawWordWrapInternal(this.desc, xx + 30, yy + 7, 120, 0xffffffff);
         }
         else {
-            this.mc.font.draw(this.title, x + 30, y + 7, -256);
-            this.mc.font.draw(this.desc, x + 30, y + 18, -1);
+            this.mc.font.draw(this.title, xx + 30, yy + 7, 0xffffff00);
+            this.mc.font.draw(this.desc, xx + 30, yy + 18, 0xffffffff);
         }
-        GL11.glPushMatrix();
-        GL11.glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
+        glPushMatrix();
+        glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
         Lighting.turnOn();
-        GL11.glPopMatrix();
-        GL11.glDisable(GL_LIGHTING);
-        GL11.glEnable(GL_RESCALE_NORMAL);
-        GL11.glEnable(GL_COLOR_MATERIAL);
-        GL11.glEnable(GL_LIGHTING);
-        this.ir.renderGuiItem(this.mc.font, this.mc.textures, this.ach.icon, x + 8, y + 8);
-        GL11.glDisable(GL_LIGHTING);
-        GL11.glDepthMask(true);
-        GL11.glEnable(GL_DEPTH_TEST);
+        glPopMatrix();
+        glDisable(GL_LIGHTING);
+        glEnable(GL_RESCALE_NORMAL);
+        glEnable(GL_COLOR_MATERIAL);
+        glEnable(GL_LIGHTING);
+        this.ir.renderGuiItem(this.mc.font, this.mc.textures, this.ach.icon, xx + 8, yy + 8);
+        glDisable(GL_LIGHTING);
+        glDepthMask(true);
+        glEnable(GL_DEPTH_TEST);
     }
 }

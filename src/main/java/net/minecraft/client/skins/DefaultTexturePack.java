@@ -4,11 +4,12 @@
 
 package net.minecraft.client.skins;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class DefaultTexturePack extends TexturePack
 {
@@ -43,7 +44,7 @@ public class DefaultTexturePack extends TexturePack
             minecraft.textures.bind(this.texture);
         }
         else {
-            GL11.glBindTexture(3553, minecraft.textures.loadTexture("/gui/unknown_pack.png"));
+            glBindTexture(GL_TEXTURE_2D, minecraft.textures.loadTexture("/gui/unknown_pack.png"));
         }
     }
 }

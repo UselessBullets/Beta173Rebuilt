@@ -5,15 +5,17 @@
 package net.minecraft.client.gui;
 
 import net.minecraft.SharedConstants;
-import java.awt.image.BufferedImage;
-import org.lwjgl.opengl.GL11;
-import net.minecraft.client.renderer.Tesselator;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 import net.minecraft.client.MemoryTracker;
-import net.minecraft.client.renderer.Textures;
 import net.minecraft.client.Options;
+import net.minecraft.client.renderer.Tesselator;
+import net.minecraft.client.renderer.Textures;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.nio.IntBuffer;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class Font
 {
@@ -62,7 +64,7 @@ public class Font
         this.listPos = MemoryTracker.genLists(288);
         final Tesselator instance = Tesselator.instance;
         for (int k = 0; k < 256; ++k) {
-            GL11.glNewList(this.listPos + k, 4864);
+            glNewList(this.listPos + k, 4864);
             instance.begin();
             final int n6 = k % 16 * 8;
             final int n7 = k / 16 * 8;
@@ -74,8 +76,8 @@ public class Font
             instance.vertexUV(0.0f + n8, 0.0, 0.0, (n6 + n8) / 128.0f + n9, n7 / 128.0f + n10);
             instance.vertexUV(0.0, 0.0, 0.0, n6 / 128.0f + n9, n7 / 128.0f + n10);
             instance.end();
-            GL11.glTranslatef((float)this.charWidths[k], 0.0f, 0.0f);
-            GL11.glEndList();
+            glTranslatef((float)this.charWidths[k], 0.0f, 0.0f);
+            glEndList();
         }
         for (int l = 0; l < 32; ++l) {
             final int n11 = (l >> 3 & 0x1) * 85;
@@ -99,9 +101,9 @@ public class Font
                 n13 /= 4;
                 n14 /= 4;
             }
-            GL11.glNewList(this.listPos + 256 + l, 4864);
-            GL11.glColor3f(n12 / 255.0f, n13 / 255.0f, n14 / 255.0f);
-            GL11.glEndList();
+            glNewList(this.listPos + 256 + l, 4864);
+            glColor3f(n12 / 255.0f, n13 / 255.0f, n14 / 255.0f);
+            glEndList();
         }
     }
     
@@ -123,7 +125,7 @@ public class Font
             color = (color & 0xFCFCFC) >> 2;
             color += n;
         }
-        GL11.glBindTexture(3553, this.fontTexture);
+        glBindTexture(GL_TEXTURE_2D, this.fontTexture);
         final float n2 = (color >> 16 & 0xFF) / 255.0f;
         final float n3 = (color >> 8 & 0xFF) / 255.0f;
         final float n4 = (color & 0xFF) / 255.0f;
@@ -131,10 +133,10 @@ public class Font
         if (n5 == 0.0f) {
             n5 = 1.0f;
         }
-        GL11.glColor4f(n2, n3, n4, n5);
+        glColor4f(n2, n3, n4, n5);
         this.ib.clear();
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float)x, (float)y, 0.0f);
+        glPushMatrix();
+        glTranslatef((float)x, (float)y, 0.0f);
         for (int i = 0; i < str.length(); ++i) {
             while (str.length() > i + 1 && str.charAt(i) == '§') {
                 int index = "0123456789abcdef".indexOf(str.toLowerCase().charAt(i + 1));
@@ -144,7 +146,7 @@ public class Font
                 this.ib.put(this.listPos + 256 + index + (darken ? 16 : 0));
                 if (this.ib.remaining() == 0) {
                     this.ib.flip();
-                    GL11.glCallLists(this.ib);
+                    glCallLists(this.ib);
                     this.ib.clear();
                 }
                 i += 2;
@@ -157,13 +159,13 @@ public class Font
             }
             if (this.ib.remaining() == 0) {
                 this.ib.flip();
-                GL11.glCallLists(this.ib);
+                glCallLists(this.ib);
                 this.ib.clear();
             }
         }
         this.ib.flip();
-        GL11.glCallLists(this.ib);
-        GL11.glPopMatrix();
+        glCallLists(this.ib);
+        glPopMatrix();
     }
     
     public int width(final String str) {

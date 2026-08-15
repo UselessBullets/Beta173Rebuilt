@@ -33,8 +33,8 @@ public class SpiderRenderer extends MobRenderer<Spider>
         this.bindTexture("/mob/spider_eyes.png");
         final float n = (1.0f - mob.getBrightness(1.0f)) * 0.5f;
         GL11.glEnable(GL_BLEND);
-        GL11.glDisable(3008);
-        GL11.glBlendFunc(770, 771);
+        GL11.glDisable(GL_ALPHA_TEST);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, n);
         return true;
     }

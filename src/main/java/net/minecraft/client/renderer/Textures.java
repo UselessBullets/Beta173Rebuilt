@@ -5,11 +5,12 @@
 package net.minecraft.client.renderer;
 
 import javax.imageio.ImageIO;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.Iterator;
 import net.minecraft.client.renderer.ptexture.DynamicTexture;
 import org.lwjgl.opengl.GL11;
-import java.awt.image.ImageObserver;
-import java.awt.Image;
 import java.io.InputStream;
 import net.minecraft.client.skins.TexturePack;
 import java.io.IOException;
@@ -22,8 +23,6 @@ import net.minecraft.client.skins.TexturePackRepository;
 import net.minecraft.client.Options;
 import java.util.Map;
 import java.util.List;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.HashMap;
 
 public class Textures

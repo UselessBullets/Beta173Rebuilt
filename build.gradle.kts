@@ -1,5 +1,10 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.kotlin.dsl.register
+
 plugins {
     id("java")
+    id("com.gradleup.shadow") version ("8.3.5")
+    id("org.cyclonedx.bom") version ("2.3.1")
 }
 
 group = "net.minecraft"
@@ -27,26 +32,40 @@ dependencies {
     implementation("net.java.jutils:jutils:1.0.0")
 }
 
-task("copyNatives", Copy::class) {
+tasks.register("copyNatives", Copy::class.java, {
     configurations.runtimeClasspath.get()
         .filter { it.extension == "jar" && it.name.contains("platform") }
-        .forEach { from(zipTree(it).filter { file -> !file.name.contains("META-INF") && !file.name.contains(".MF") }).into(layout.buildDirectory.dir("natives").get()) }
-}
+        .forEach {
+            from(zipTree(it).filter { file -> !file.name.contains("META-INF") && !file.name.contains(".MF") }).into(
+                layout.buildDirectory.dir("natives").get()
+            )
+        }
+})
 
-task("runServer", JavaExec::class) {
+tasks.register("runServer", JavaExec::class.java, {
     val mpDir = File(workingDir, "mp")
     mpDir.mkdir()
     workingDir = mpDir
     mainClass.set("net.minecraft.server.MinecraftServer")
     classpath = sourceSets["main"].runtimeClasspath
-}
+})
 
-task("runClient", JavaExec::class) {
+tasks.register("runClient", JavaExec::class.java, {
     dependsOn(tasks["copyNatives"])
     mainClass.set("net.minecraft.client.Minecraft")
     classpath = sourceSets["main"].runtimeClasspath
+//    args = listOf("-Dhttp.proxyHost=betacraft.ee", "-Dhttp.proxyPort=11705", "-Djava.util.Arrays.useLegacyMergeSort=true");
 
     systemProperty("java.library.path", layout.buildDirectory.dir("natives").get().asFile.absolutePath)
+})
+
+tasks.withType(JavaCompile::class.java) {
+    options.isIncremental = false
+    options.encoding = "UTF-8"
+    if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+        options.compilerArgs.add("--release")
+        options.compilerArgs.add("8")
+    }
 }
 
 java {

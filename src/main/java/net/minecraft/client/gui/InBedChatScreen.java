@@ -4,6 +4,7 @@
 
 package net.minecraft.client.gui;
 
+import net.minecraft.client.multiplayer.ClientConnection;
 import net.minecraft.network.packet.PlayerCommandPacket;
 import net.minecraft.client.multiplayer.MultiplayerLocalPlayer;
 import net.minecraft.locale.language.Language;
@@ -11,10 +12,12 @@ import org.lwjgl.input.Keyboard;
 
 public class InBedChatScreen extends ChatScreen
 {
+    private static final int WAKE_UP_BUTTON = 1;
     @Override
     public void init() {
         Keyboard.enableRepeatEvents(true);
-        this.buttons.add(new Button(1, this.width / 2 - 100, this.height - 40, Language.getInstance().getElement("multiplayer.stopSleeping")));
+        Language language = Language.getInstance();
+        this.buttons.add(new Button(WAKE_UP_BUTTON, this.width / 2 - 100, this.height - 40, language.getElement("multiplayer.stopSleeping")));
     }
     
     @Override
@@ -24,10 +27,10 @@ public class InBedChatScreen extends ChatScreen
     
     @Override
     protected void keyPressed(final char eventCharacter, final int eventKey) {
-        if (eventKey == 1) {
+        if (eventKey == Keyboard.KEY_ESCAPE) {
             this.sendWakeUp();
         }
-        else if (eventKey == 28) {
+        else if (eventKey == Keyboard.KEY_RETURN) {
             if (this.message.trim().length() > 0) {
                 this.minecraft.player.chat(this.message.trim());
             }
@@ -45,7 +48,7 @@ public class InBedChatScreen extends ChatScreen
     
     @Override
     protected void buttonClicked(final Button button) {
-        if (button.id == 1) {
+        if (button.id == WAKE_UP_BUTTON) {
             this.sendWakeUp();
         }
         else {
@@ -55,7 +58,8 @@ public class InBedChatScreen extends ChatScreen
     
     private void sendWakeUp() {
         if (this.minecraft.player instanceof MultiplayerLocalPlayer) {
-            ((MultiplayerLocalPlayer)this.minecraft.player).connection.send(new PlayerCommandPacket(this.minecraft.player, 3));
+            ClientConnection connection = ((MultiplayerLocalPlayer)this.minecraft.player).connection;
+            connection.send(new PlayerCommandPacket(this.minecraft.player, PlayerCommandPacket.STOP_SLEEPING));
         }
     }
 }

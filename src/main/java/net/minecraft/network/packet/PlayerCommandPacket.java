@@ -12,6 +12,10 @@ import net.minecraft.world.entity.Entity;
 
 public class PlayerCommandPacket extends Packet
 {
+    public static final int START_SNEAKING = 1;
+    public static final int STOP_SNEAKING = 2;
+    public static final int STOP_SLEEPING = 3;
+
     public int id;
     public int action;
     

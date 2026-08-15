@@ -11,7 +11,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.item.Item;
 import net.minecraft.client.Lighting;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.gui.Button;
 import net.minecraft.locale.language.Language;
 import net.minecraft.locale.language.I18n;
@@ -53,34 +52,41 @@ public class StatsScreen extends Screen
     @Override
     public void init() {
         this.title = I18n.get("gui.stats");
-        (this.statsList = new GeneralStatisticsList(this)).init(this.buttons, 1, 1);
-        (this.itemStatsList = new ItemStatisticsList(this)).init(this.buttons, 1, 1);
-        (this.blockStatsList = new BlockStatisticsList(this)).init(this.buttons, 1, 1);
+
+        this.statsList = new GeneralStatisticsList(this);
+        this.statsList.init(this.buttons, 1, 1);
+
+        this.itemStatsList = new ItemStatisticsList(this);
+        this.itemStatsList.init(this.buttons, 1, 1);
+
+        this.blockStatsList = new BlockStatisticsList(this);
+        this.blockStatsList.init(this.buttons, 1, 1);
+
         this.activeList = this.statsList;
+
         this.postInit();
     }
     
     public void postInit() {
-        final Language instance = Language.getInstance();
-        this.buttons.add(new Button(BUTTON_CANCEL_ID, this.width / 2 + 4, this.height - 28, 150, 20, instance.getElement("gui.done")));
-        this.buttons.add(new Button(BUTTON_STATS_ID, this.width / 2 - 154, this.height - 52, 100, 20, instance.getElement("stat.generalButton")));
-        final Button button;
-        this.buttons.add(button = new Button(BUTTON_BLOCKITEMSTATS_ID, this.width / 2 - 46, this.height - 52, 100, 20, instance.getElement("stat.blocksButton")));
-        final Button button2;
-        this.buttons.add(button2 = new Button(BUTTON_ITEMSTATS_ID, this.width / 2 + 62, this.height - 52, 100, 20, instance.getElement("stat.itemsButton")));
+        final Language language = Language.getInstance();
+        this.buttons.add(new Button(BUTTON_CANCEL_ID, this.width / 2 + 4, this.height - 28, 150, 20, language.getElement("gui.done")));
+
+        final Button blockButton, itemButton;
+        this.buttons.add(new Button(BUTTON_STATS_ID, this.width / 2 - 154, this.height - 52, 100, 20, language.getElement("stat.generalButton")));
+        this.buttons.add(blockButton = new Button(BUTTON_BLOCKITEMSTATS_ID, this.width / 2 - 46, this.height - 52, 100, 20, language.getElement("stat.blocksButton")));
+        this.buttons.add(itemButton = new Button(BUTTON_ITEMSTATS_ID, this.width / 2 + 62, this.height - 52, 100, 20, language.getElement("stat.itemsButton")));
+
         if (this.blockStatsList.getNumberOfItems() == 0) {
-            button.active = false;
+            blockButton.active = false;
         }
         if (this.itemStatsList.getNumberOfItems() == 0) {
-            button2.active = false;
+            itemButton.active = false;
         }
     }
     
     @Override
     protected void buttonClicked(final Button button) {
-        if (!button.active) {
-            return;
-        }
+        if (!button.active) return;
         if (button.id == BUTTON_CANCEL_ID) {
             this.minecraft.setScreen(this.lastScreen);
         }
@@ -101,7 +107,7 @@ public class StatsScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.activeList.render(xm, ym, partialTick);
-        this.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
+        this.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xffffff);
         super.render(xm, ym, partialTick);
     }
     
@@ -278,9 +284,9 @@ public class StatsScreen extends Screen
         @Override
         protected void renderItem(final int i, final int x, final int y, final int h, final Tesselator t) {
             final Stat stat = Stats.generalStats.get(i);
-            this.statsScreen.drawString(this.statsScreen.font, stat.name, x + 2, y + 1, (i % 2 == 0) ? 16777215 : 9474192);
+            this.statsScreen.drawString(this.statsScreen.font, stat.name, x + 2, y + 1, (i % 2 == 0) ? 0xffffff : 0x909090);
             final String format = stat.format(this.statsScreen.stats.getValue(stat));
-            this.statsScreen.drawString(this.statsScreen.font, format, x + 2 + 213 - this.statsScreen.font.width(format), y + 1, (i % 2 == 0) ? 16777215 : 9474192);
+            this.statsScreen.drawString(this.statsScreen.font, format, x + 2 + 213 - this.statsScreen.font.width(format), y + 1, (i % 2 == 0) ? 0xffffff : 0x909090);
         }
     }
 
@@ -493,11 +499,11 @@ public class StatsScreen extends Screen
         protected void renderStat(final ItemStat stat, final int x, final int y, final boolean shaded) {
             if (stat != null) {
                 final String format = stat.format(this.ss.stats.getValue(stat));
-                this.ss.drawString(this.ss.font, format, x - this.ss.font.width(format), y + 5, shaded ? 16777215 : 9474192);
+                this.ss.drawString(this.ss.font, format, x - this.ss.font.width(format), y + 5, shaded ? 0xffffff : 0x909090);
             }
             else {
                 final String s = "-";
-                this.ss.drawString(this.ss.font, s, x - this.ss.font.width(s), y + 5, shaded ? 16777215 : 9474192);
+                this.ss.drawString(this.ss.font, s, x - this.ss.font.width(s), y + 5, shaded ? 0xffffff : 0x909090);
             }
         }
 
@@ -532,7 +538,7 @@ public class StatsScreen extends Screen
                 if (trim.length() > 0) {
                     final int x = mouseX + 12;
                     final int y = mouseY - 12;
-                    this.ss.fillGradient(x - 3, y - 3, x + this.ss.font.width(trim) + 3, y + 8 + 3, -1073741824, -1073741824);
+                    this.ss.fillGradient(x - 3, y - 3, x + this.ss.font.width(trim) + 3, y + 8 + 3, 0xc0000000, 0xc0000000);
                     this.ss.font.drawShadow(trim, x, y, -1);
                 }
             }
@@ -546,7 +552,7 @@ public class StatsScreen extends Screen
             if (trim.length() > 0) {
                 final int x2 = x + 12;
                 final int y = z - 12;
-                this.ss.fillGradient(x2 - 3, y - 3, x2 + this.ss.font.width(trim) + 3, y + 8 + 3, -1073741824, -1073741824);
+                this.ss.fillGradient(x2 - 3, y - 3, x2 + this.ss.font.width(trim) + 3, y + 8 + 3, 0xc0000000, 0xc0000000);
                 this.ss.font.drawShadow(trim, x2, y, -1);
             }
         }

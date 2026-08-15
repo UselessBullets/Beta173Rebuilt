@@ -15,9 +15,9 @@ public class ErrorScreen extends Screen
     
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
-        this.fillGradient(0, 0, this.width, this.height, -12574688, -11530224);
-        this.drawCenteredString(this.font, this.title, this.width / 2, 90, 16777215);
-        this.drawCenteredString(this.font, this.message, this.width / 2, 110, 16777215);
+        this.fillGradient(0, 0, this.width, this.height, 0xff402020, 0xff501010);
+        this.drawCenteredString(this.font, this.title, this.width / 2, 90, 0xffffff);
+        this.drawCenteredString(this.font, this.message, this.width / 2, 110, 0xffffff);
         super.render(xm, ym, partialTick);
     }
     

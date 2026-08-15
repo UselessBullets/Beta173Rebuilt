@@ -87,12 +87,12 @@ public class ConnectScreen extends Screen
         this.renderBackground();
         final Language instance = Language.getInstance();
         if (this.connection == null) {
-            this.drawCenteredString(this.font, instance.getElement("connect.connecting"), this.width / 2, this.height / 2 - 50, 16777215);
-            this.drawCenteredString(this.font, "", this.width / 2, this.height / 2 - 10, 16777215);
+            this.drawCenteredString(this.font, instance.getElement("connect.connecting"), this.width / 2, this.height / 2 - 50, 0xffffff);
+            this.drawCenteredString(this.font, "", this.width / 2, this.height / 2 - 10, 0xffffff);
         }
         else {
-            this.drawCenteredString(this.font, instance.getElement("connect.authorizing"), this.width / 2, this.height / 2 - 50, 16777215);
-            this.drawCenteredString(this.font, this.connection.message, this.width / 2, this.height / 2 - 10, 16777215);
+            this.drawCenteredString(this.font, instance.getElement("connect.authorizing"), this.width / 2, this.height / 2 - 50, 0xffffff);
+            this.drawCenteredString(this.font, this.connection.message, this.width / 2, this.height / 2 - 10, 0xffffff);
         }
         super.render(xm, ym, partialTick);
     }

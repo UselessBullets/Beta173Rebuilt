@@ -47,7 +47,7 @@ public class ReceivingLevelScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.renderDirtBackground(0);
-        this.drawCenteredString(this.font, Language.getInstance().getElement("multiplayer.downloadingTerrain"), this.width / 2, this.height / 2 - 50, 16777215);
+        this.drawCenteredString(this.font, Language.getInstance().getElement("multiplayer.downloadingTerrain"), this.width / 2, this.height / 2 - 50, 0xffffff);
         super.render(xm, ym, partialTick);
     }
 }

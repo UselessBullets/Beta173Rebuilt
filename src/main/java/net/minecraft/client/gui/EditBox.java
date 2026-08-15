@@ -84,13 +84,13 @@ public class EditBox extends GuiComponent
     }
     
     public void render() {
-        this.fill(this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, -6250336);
-        this.fill(this.x, this.y, this.x + this.width, this.y + this.height, -16777216);
+        this.fill(this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, 0xffa0a0a0);
+        this.fill(this.x, this.y, this.x + this.width, this.y + this.height, 0xff000000);
         if (this.active) {
-            this.drawString(this.font, this.value + ((this.inFocus && this.frame / 6 % 2 == 0) ? "_" : ""), this.x + 4, this.y + (this.height - 8) / 2, 14737632);
+            this.drawString(this.font, this.value + ((this.inFocus && this.frame / 6 % 2 == 0) ? "_" : ""), this.x + 4, this.y + (this.height - 8) / 2, 0xe0e0e0);
         }
         else {
-            this.drawString(this.font, this.value, this.x + 4, this.y + (this.height - 8) / 2, 7368816);
+            this.drawString(this.font, this.value, this.x + 4, this.y + (this.height - 8) / 2, 0x707070);
         }
     }
     

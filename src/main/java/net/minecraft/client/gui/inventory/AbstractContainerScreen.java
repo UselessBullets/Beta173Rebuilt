@@ -62,7 +62,7 @@ public abstract class AbstractContainerScreen extends Screen
                 GL11.glDisable(GL_DEPTH_TEST);
                 final int x = slot2.x;
                 final int y = slot2.y;
-                this.fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
+                this.fillGradient(x, y, x + 16, y + 16, 0x80ffffff, 0x80ffffff);
                 GL11.glEnable(GL_LIGHTING);
                 GL11.glEnable(GL_DEPTH_TEST);
             }
@@ -83,7 +83,7 @@ public abstract class AbstractContainerScreen extends Screen
             if (trim.length() > 0) {
                 final int x2 = xm - n + 12;
                 final int y2 = ym - n2 - 12;
-                this.fillGradient(x2 - 3, y2 - 3, x2 + this.font.width(trim) + 3, y2 + 8 + 3, -1073741824, -1073741824);
+                this.fillGradient(x2 - 3, y2 - 3, x2 + this.font.width(trim) + 3, y2 + 8 + 3, 0xc0000000, 0xc0000000);
                 this.font.drawShadow(trim, x2, y2, -1);
             }
         }

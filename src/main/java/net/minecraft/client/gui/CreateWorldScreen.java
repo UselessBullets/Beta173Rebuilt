@@ -127,11 +127,11 @@ public class CreateWorldScreen extends Screen
     public void render(final int xm, final int ym, final float partialTick) {
         final Language instance = Language.getInstance();
         this.renderBackground();
-        this.drawCenteredString(this.font, instance.getElement("selectWorld.create"), this.width / 2, this.height / 4 - 60 + 20, 16777215);
-        this.drawString(this.font, instance.getElement("selectWorld.enterName"), this.width / 2 - 100, 47, 10526880);
-        this.drawString(this.font, instance.getElement("selectWorld.resultFolder") + " " + this.resultFolder, this.width / 2 - 100, 85, 10526880);
-        this.drawString(this.font, instance.getElement("selectWorld.enterSeed"), this.width / 2 - 100, 104, 10526880);
-        this.drawString(this.font, instance.getElement("selectWorld.seedInfo"), this.width / 2 - 100, 140, 10526880);
+        this.drawCenteredString(this.font, instance.getElement("selectWorld.create"), this.width / 2, this.height / 4 - 60 + 20, 0xffffff);
+        this.drawString(this.font, instance.getElement("selectWorld.enterName"), this.width / 2 - 100, 47, 0xa0a0a0);
+        this.drawString(this.font, instance.getElement("selectWorld.resultFolder") + " " + this.resultFolder, this.width / 2 - 100, 85, 0xa0a0a0);
+        this.drawString(this.font, instance.getElement("selectWorld.enterSeed"), this.width / 2 - 100, 104, 0xa0a0a0);
+        this.drawString(this.font, instance.getElement("selectWorld.seedInfo"), this.width / 2 - 100, 140, 0xa0a0a0);
         this.nameEdit.render();
         this.seedEdit.render();
         super.render(xm, ym, partialTick);

@@ -66,7 +66,7 @@ public class OptionsScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.renderBackground();
-        this.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
+        this.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xffffff);
         super.render(xm, ym, partialTick);
     }
     

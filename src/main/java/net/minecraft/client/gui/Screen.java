@@ -134,7 +134,7 @@ public class Screen extends GuiComponent
     
     public void renderBackground(final int vo) {
         if (this.minecraft.level != null) {
-            this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+            this.fillGradient(0, 0, this.width, this.height, 0xc0101010, 0xd0101010);
         }
         else {
             this.renderDirtBackground(vo);

@@ -8,7 +8,6 @@ import util.Mth;
 import net.minecraft.client.gui.achievement.StatsScreen;
 import net.minecraft.client.gui.achievement.AchievementScreen;
 import net.minecraft.client.title.TitleScreen;
-import net.minecraft.world.level.Level;
 import net.minecraft.stats.Stats;
 import net.minecraft.locale.language.I18n;
 
@@ -75,7 +74,7 @@ public class PauseScreen extends Screen
             final int n = (int)(255.0f * (Mth.sin((this.visibleTime % 10 + partialTick) / 10.0f * 3.1415927f * 2.0f) * 0.2f + 0.8f));
             this.drawString(this.font, "Saving level..", 8, this.height - 16, n << 16 | n << 8 | n);
         }
-        this.drawCenteredString(this.font, "Game menu", this.width / 2, 40, 16777215);
+        this.drawCenteredString(this.font, "Game menu", this.width / 2, 40, 0xffffff);
         super.render(xm, ym, partialTick);
     }
 }

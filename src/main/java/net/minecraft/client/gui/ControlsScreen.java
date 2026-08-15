@@ -65,10 +65,10 @@ public class ControlsScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.renderBackground();
-        this.drawCenteredString(this.font, this.tile, this.width / 2, 20, 16777215);
+        this.drawCenteredString(this.font, this.tile, this.width / 2, 20, 0xffffff);
         final int leftScreenPosition = this.getLeftScreenPosition();
         for (int i = 0; i < this.options.keyMappings.length; ++i) {
-            this.drawString(this.font, this.options.getKeyDesciption(i), leftScreenPosition + i % 2 * 160 + 70 + 6, this.height / 6 + 24 * (i >> 1) + 7, -1);
+            this.drawString(this.font, this.options.getKeyDesciption(i), leftScreenPosition + i % 2 * 160 + 70 + 6, this.height / 6 + 24 * (i >> 1) + 7, 0xffffffff);
         }
         super.render(xm, ym, partialTick);
     }

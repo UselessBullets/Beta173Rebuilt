@@ -83,7 +83,7 @@ public class TextEditScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.renderBackground();
-        this.drawCenteredString(this.font, this.title, this.width / 2, 40, 16777215);
+        this.drawCenteredString(this.font, this.title, this.width / 2, 40, 0xffffff);
         GL11.glPushMatrix();
         GL11.glTranslatef((float)(this.width / 2), 0.0f, 50.0f);
         final float n = 93.75f;

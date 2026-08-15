@@ -126,11 +126,11 @@ public class TitleScreen extends Screen
         glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
         final float n3 = (1.8f - Mth.abs(Mth.sin(System.currentTimeMillis() % 1000L / 1000.0f * 3.1415927f * 2.0f) * 0.1f)) * 100.0f / (this.font.width(this.splash) + 32);
         glScalef(n3, n3, n3);
-        this.drawCenteredString(this.font, this.splash, 0, -8, 16776960);
+        this.drawCenteredString(this.font, this.splash, 0, -8, 0xffff00);
         glPopMatrix();
-        this.drawString(this.font, "Minecraft Beta 1.7.3", 2, 2, 5263440);
+        this.drawString(this.font, "Minecraft Beta 1.7.3", 2, 2, 0x505050);
         final String s = "Copyright Mojang AB. Do not distribute.";
-        this.drawString(this.font, s, this.width - this.font.width(s) - 2, this.height - 10, 16777215);
+        this.drawString(this.font, s, this.width - this.font.width(s) - 2, this.height - 10, 0xffffff);
         super.render(xm, ym, partialTick);
     }
     

@@ -59,8 +59,8 @@ public class ChatScreen extends Screen
     
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
-        this.fill(2, this.height - 14, this.width - 2, this.height - 2, Integer.MIN_VALUE);
-        this.drawString(this.font, "> " + this.message + ((this.frame / 6 % 2 == 0) ? "_" : ""), 4, this.height - 12, 14737632);
+        this.fill(2, this.height - 14, this.width - 2, this.height - 2, 0x80000000);
+        this.drawString(this.font, "> " + this.message + ((this.frame / 6 % 2 == 0) ? "_" : ""), 4, this.height - 12, 0xe0e0e0);
         super.render(xm, ym, partialTick);
     }
     

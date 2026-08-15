@@ -39,12 +39,12 @@ public class DeathScreen extends Screen
     
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
-        this.fillGradient(0, 0, this.width, this.height, 1615855616, -1602211792);
+        this.fillGradient(0, 0, this.width, this.height, 0x60500000, 0xa0803030);
         GL11.glPushMatrix();
         GL11.glScalef(2.0f, 2.0f, 2.0f);
-        this.drawCenteredString(this.font, "Game over!", this.width / 2 / 2, 30, 16777215);
+        this.drawCenteredString(this.font, "Game over!", this.width / 2 / 2, 30, 0xffffff);
         GL11.glPopMatrix();
-        this.drawCenteredString(this.font, "Score: &e" + this.minecraft.player.getScore(), this.width / 2, 100, 16777215);
+        this.drawCenteredString(this.font, "Score: &e" + this.minecraft.player.getScore(), this.width / 2, 100, 0xffffff);
         super.render(xm, ym, partialTick);
     }
     

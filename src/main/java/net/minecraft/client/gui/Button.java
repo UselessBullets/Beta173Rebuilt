@@ -59,13 +59,13 @@ public class Button extends GuiComponent
         this.blit(this.x + this.w / 2, this.y, 200 - this.w / 2, 46 + yImage * 20, this.w / 2, this.h);
         this.renderBg(minecraft, xm, ym);
         if (!this.active) {
-            this.drawCenteredString(font, this.msg, this.x + this.w / 2, this.y + (this.h - 8) / 2, -6250336);
+            this.drawCenteredString(font, this.msg, this.x + this.w / 2, this.y + (this.h - 8) / 2, 0xffa0a0a0);
         }
         else if (hovered) {
-            this.drawCenteredString(font, this.msg, this.x + this.w / 2, this.y + (this.h - 8) / 2, 16777120);
+            this.drawCenteredString(font, this.msg, this.x + this.w / 2, this.y + (this.h - 8) / 2, 0xffffa0);
         }
         else {
-            this.drawCenteredString(font, this.msg, this.x + this.w / 2, this.y + (this.h - 8) / 2, 14737632);
+            this.drawCenteredString(font, this.msg, this.x + this.w / 2, this.y + (this.h - 8) / 2, 0xe0e0e0);
         }
     }
     

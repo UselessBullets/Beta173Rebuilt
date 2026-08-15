@@ -132,12 +132,12 @@ public class LevelRenderer implements LevelListener
         }
         this.starList = MemoryTracker.genLists(3);
         glPushMatrix();
-        glNewList(this.starList, 4864);
+        glNewList(this.starList, GL_COMPILE);
         this.renderStars();
         glEndList();
         glPopMatrix();
         final Tesselator instance = Tesselator.instance;
-        glNewList(this.skyList = this.starList + 1, 4864);
+        glNewList(this.skyList = this.starList + 1, GL_COMPILE);
         final int n2 = 64;
         final int n3 = 256 / n2 + 2;
         final float n4 = 16.0f;
@@ -152,7 +152,7 @@ public class LevelRenderer implements LevelListener
             }
         }
         glEndList();
-        glNewList(this.darkList = this.starList + 2, 4864);
+        glNewList(this.darkList = this.starList + 2, GL_COMPILE);
         final float n5 = -16.0f;
         instance.begin();
         for (int k = -n2 * n3; k <= n2 * n3; k += n2) {

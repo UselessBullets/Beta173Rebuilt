@@ -22,6 +22,8 @@ import java.util.List;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class Chunk
 {
     public Level level;
@@ -95,14 +97,14 @@ public class Chunk
         this.zRender = z - this.zRenderOffs;
         final float n = 6.0f;
         this.bb = AABB.newPermanent(x - n, y - n, z - n, x + this.xs + n, y + this.ys + n, z + this.zs + n);
-        GL11.glNewList(this.lists + 2, 4864);
+        glNewList(this.lists + 2, GL_COMPILE);
         EntityRenderer.renderFlat(AABB.newTemp(this.xRenderOffs - n, this.yRenderOffs - n, this.zRenderOffs - n, this.xRenderOffs + this.xs + n, this.yRenderOffs + this.ys + n, this.zRenderOffs + this.zs + n));
-        GL11.glEndList();
+        glEndList();
         this.setDirty();
     }
     
     private void translateToPos() {
-        GL11.glTranslatef((float)this.xRenderOffs, (float)this.yRenderOffs, (float)this.zRenderOffs);
+        glTranslatef((float)this.xRenderOffs, (float)this.yRenderOffs, (float)this.zRenderOffs);
     }
     
     public void rebuild() {
@@ -137,13 +139,13 @@ public class Chunk
                         if (tile > 0) {
                             if (n5 == 0) {
                                 n5 = 1;
-                                GL11.glNewList(this.lists + j, 4864);
-                                GL11.glPushMatrix();
+                                glNewList(this.lists + j, GL_COMPILE);
+                                glPushMatrix();
                                 this.translateToPos();
                                 final float n6 = 1.000001f;
-                                GL11.glTranslatef(-this.zs / 2.0f, -this.ys / 2.0f, -this.zs / 2.0f);
-                                GL11.glScalef(n6, n6, n6);
-                                GL11.glTranslatef(this.zs / 2.0f, this.ys / 2.0f, this.zs / 2.0f);
+                                glTranslatef(-this.zs / 2.0f, -this.ys / 2.0f, -this.zs / 2.0f);
+                                glScalef(n6, n6, n6);
+                                glTranslatef(this.zs / 2.0f, this.ys / 2.0f, this.zs / 2.0f);
                                 Chunk.t.begin();
                                 Chunk.t.offset(-this.x, -this.y, -this.z);
                             }
@@ -167,8 +169,8 @@ public class Chunk
             }
             if (n5 != 0) {
                 Chunk.t.end();
-                GL11.glPopMatrix();
-                GL11.glEndList();
+                glPopMatrix();
+                glEndList();
                 Chunk.t.offset(0.0, 0.0, 0.0);
             }
             else {
@@ -226,7 +228,7 @@ public class Chunk
     }
     
     public void renderBB() {
-        GL11.glCallList(this.lists + 2);
+        glCallList(this.lists + 2);
     }
     
     public boolean isEmpty() {

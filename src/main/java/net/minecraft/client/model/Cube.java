@@ -8,6 +8,8 @@ import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.client.MemoryTracker;
 import org.lwjgl.opengl.GL11;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class Cube
 {
     private Vertex[] vertices;
@@ -103,27 +105,27 @@ public class Cube
             this.compile(scale);
         }
         if (this.xRot != 0.0f || this.yRot != 0.0f || this.zRot != 0.0f) {
-            GL11.glPushMatrix();
-            GL11.glTranslatef(this.x * scale, this.y * scale, this.z * scale);
+            glPushMatrix();
+            glTranslatef(this.x * scale, this.y * scale, this.z * scale);
             if (this.zRot != 0.0f) {
-                GL11.glRotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
+                glRotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
             }
             if (this.yRot != 0.0f) {
-                GL11.glRotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
+                glRotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
             }
             if (this.xRot != 0.0f) {
-                GL11.glRotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
+                glRotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
             }
-            GL11.glCallList(this.list);
-            GL11.glPopMatrix();
+            glCallList(this.list);
+            glPopMatrix();
         }
         else if (this.x != 0.0f || this.y != 0.0f || this.z != 0.0f) {
-            GL11.glTranslatef(this.x * scale, this.y * scale, this.z * scale);
-            GL11.glCallList(this.list);
-            GL11.glTranslatef(-this.x * scale, -this.y * scale, -this.z * scale);
+            glTranslatef(this.x * scale, this.y * scale, this.z * scale);
+            glCallList(this.list);
+            glTranslatef(-this.x * scale, -this.y * scale, -this.z * scale);
         }
         else {
-            GL11.glCallList(this.list);
+            glCallList(this.list);
         }
     }
     
@@ -137,19 +139,19 @@ public class Cube
         if (!this.compiled) {
             this.compile(scale);
         }
-        GL11.glPushMatrix();
-        GL11.glTranslatef(this.x * scale, this.y * scale, this.z * scale);
+        glPushMatrix();
+        glTranslatef(this.x * scale, this.y * scale, this.z * scale);
         if (this.yRot != 0.0f) {
-            GL11.glRotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
+            glRotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
         }
         if (this.xRot != 0.0f) {
-            GL11.glRotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
+            glRotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
         }
         if (this.zRot != 0.0f) {
-            GL11.glRotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
+            glRotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
         }
-        GL11.glCallList(this.list);
-        GL11.glPopMatrix();
+        glCallList(this.list);
+        glPopMatrix();
     }
     
     public void translateTo(final float scale) {
@@ -163,29 +165,29 @@ public class Cube
             this.compile(scale);
         }
         if (this.xRot != 0.0f || this.yRot != 0.0f || this.zRot != 0.0f) {
-            GL11.glTranslatef(this.x * scale, this.y * scale, this.z * scale);
+            glTranslatef(this.x * scale, this.y * scale, this.z * scale);
             if (this.zRot != 0.0f) {
-                GL11.glRotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
+                glRotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
             }
             if (this.yRot != 0.0f) {
-                GL11.glRotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
+                glRotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
             }
             if (this.xRot != 0.0f) {
-                GL11.glRotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
+                glRotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
             }
         }
         else if (this.x != 0.0f || this.y != 0.0f || this.z != 0.0f) {
-            GL11.glTranslatef(this.x * scale, this.y * scale, this.z * scale);
+            glTranslatef(this.x * scale, this.y * scale, this.z * scale);
         }
     }
     
     private void compile(final float scale) {
-        GL11.glNewList(this.list = MemoryTracker.genLists(1), 4864);
+        glNewList(this.list = MemoryTracker.genLists(1), GL_COMPILE);
         final Tesselator instance = Tesselator.instance;
         for (int i = 0; i < this.polygons.length; ++i) {
             this.polygons[i].render(instance, scale);
         }
-        GL11.glEndList();
+        glEndList();
         this.compiled = true;
     }
 }

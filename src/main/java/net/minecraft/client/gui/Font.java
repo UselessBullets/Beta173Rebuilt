@@ -23,86 +23,107 @@ public class Font
     public int fontTexture;
     private int listPos;
     private IntBuffer ib;
-    
+
+    // Useless - Added these font constants since they were variable in LCE leaks
+    private static final int FONT_COLUMNS = 16;
+    private static final int FONT_ROWS = 16;
+    private static final int FONT_CHAR_WIDTH = 8;
+    private static final int FONT_CHAR_HEIGHT = 8;
+
     public Font(final Options options, final String name, final Textures textures) {
-        this.charWidths = new int[256];
+        final int charC = FONT_COLUMNS * FONT_ROWS; // Number of characters in the font
+
+        this.charWidths = new int[charC];
         this.fontTexture = 0;
         this.ib = MemoryTracker.createIntBuffer(1024);
-        BufferedImage read;
+
+        BufferedImage img;
         try {
-            read = ImageIO.read(Textures.class.getResourceAsStream(name));
+            img = ImageIO.read(Textures.class.getResourceAsStream(name));
         }
         catch (final IOException cause) {
             throw new RuntimeException(cause);
         }
-        final int width = read.getWidth();
-        final int height = read.getHeight();
-        final int[] rgbArray = new int[width * height];
-        read.getRGB(0, 0, width, height, rgbArray, 0, width);
-        for (int i = 0; i < 256; ++i) {
-            final int n = i % 16;
-            final int n2 = i / 16;
-            int j;
-            for (j = 7; j >= 0; --j) {
-                final int n3 = n * 8 + j;
-                int n4 = 1;
-                for (int n5 = 0; n5 < 8 && n4 != 0; ++n5) {
-                    if ((rgbArray[n3 + (n2 * 8 + n5) * width] & 0xFF) > 0) {
-                        n4 = 0;
+
+        final int w = img.getWidth();
+        final int h = img.getHeight();
+        final int[] rawPixels = new int[w * h];
+        img.getRGB(0, 0, w, h, rawPixels, 0, w);
+
+        for (int i = 0; i < charC; ++i) {
+            final int xt = i % FONT_COLUMNS;
+            final int yt = i / FONT_COLUMNS;
+            int x = 7;
+            for (; x >= 0; --x) {
+                final int xPixel = xt * 8 + x;
+                boolean emptyColumn = true;
+                for (int y = 0; y < 8; ++y) {
+                    int yPixel = (yt * 8 + y) * w;
+                    int alpha = rawPixels[xPixel + yPixel] & 0xFF; // Check the alpha value
+                    if (alpha > 0) {
+                        emptyColumn = false;
+                        break;
                     }
                 }
-                if (n4 == 0) {
+                if (!emptyColumn) {
                     break;
                 }
             }
-            if (i == 32) {
-                j = 2;
-            }
-            this.charWidths[i] = j + 2;
+            if (i == ' ') x = 4 - 2;
+            this.charWidths[i] = x + 2;
         }
-        this.fontTexture = textures.getTexture(read);
+
+        this.fontTexture = textures.getTexture(img);
         this.listPos = MemoryTracker.genLists(288);
-        final Tesselator instance = Tesselator.instance;
-        for (int k = 0; k < 256; ++k) {
-            glNewList(this.listPos + k, 4864);
-            instance.begin();
-            final int n6 = k % 16 * 8;
-            final int n7 = k / 16 * 8;
-            final float n8 = 7.99f;
-            final float n9 = 0.0f;
-            final float n10 = 0.0f;
-            instance.vertexUV(0.0, 0.0f + n8, 0.0, n6 / 128.0f + n9, (n7 + n8) / 128.0f + n10);
-            instance.vertexUV(0.0f + n8, 0.0f + n8, 0.0, (n6 + n8) / 128.0f + n9, (n7 + n8) / 128.0f + n10);
-            instance.vertexUV(0.0f + n8, 0.0, 0.0, (n6 + n8) / 128.0f + n9, n7 / 128.0f + n10);
-            instance.vertexUV(0.0, 0.0, 0.0, n6 / 128.0f + n9, n7 / 128.0f + n10);
-            instance.end();
-            glTranslatef((float)this.charWidths[k], 0.0f, 0.0f);
+        final Tesselator t = Tesselator.instance;
+        for (int i = 0; i < charC; ++i) {
+            glNewList(this.listPos + i, GL_COMPILE);
+            t.begin();
+            final int ix = i % FONT_COLUMNS * FONT_CHAR_WIDTH;
+            final int iy = i / FONT_COLUMNS * FONT_CHAR_WIDTH;
+            final float s = 7.99f;
+            final float uo = 0.0f;
+            final float vo = 0.0f;
+            final float fontWidth = FONT_COLUMNS * FONT_CHAR_WIDTH;
+            final float fontHeight = FONT_ROWS * FONT_CHAR_HEIGHT;
+
+            t.vertexUV(0.0f    , 0.0f + s, 0.0, (ix + 0) / fontWidth + uo, (iy + s) / fontHeight + vo);
+            t.vertexUV(0.0f + s, 0.0f + s, 0.0, (ix + s) / fontWidth + uo, (iy + s) / fontHeight + vo);
+            t.vertexUV(0.0f + s, 0.0f    , 0.0, (ix + s) / fontWidth + uo, (iy + 0) / fontHeight + vo);
+            t.vertexUV(0.0f    , 0.0f    , 0.0, (ix + 0) / fontWidth + uo, (iy + 0) / fontHeight + vo);
+            t.end();
+            glTranslatef((float)this.charWidths[i], 0.0f, 0.0f);
             glEndList();
         }
-        for (int l = 0; l < 32; ++l) {
-            final int n11 = (l >> 3 & 0x1) * 85;
-            int n12 = (l >> 2 & 0x1) * 170 + n11;
-            int n13 = (l >> 1 & 0x1) * 170 + n11;
-            int n14 = (l >> 0 & 0x1) * 170 + n11;
-            if (l == 6) {
-                n12 += 85;
+
+        // calculate colors
+        for (int colorN = 0; colorN < 32; ++colorN) {
+            final int br = (colorN >> 3 & 0x1) * 85;
+            int red = (colorN >> 2 & 0x1) * 170 + br;
+            int green = (colorN >> 1 & 0x1) * 170 + br;
+            int blue = (colorN >> 0 & 0x1) * 170 + br;
+
+            if (colorN == 6) {
+                red += 85;
             }
-            final boolean b = l >= 16;
+
             if (options.anaglyph3d) {
-                final int n15 = (n12 * 30 + n13 * 59 + n14 * 11) / 100;
-                final int n16 = (n12 * 30 + n13 * 70) / 100;
-                final int n17 = (n12 * 30 + n14 * 70) / 100;
-                n12 = n15;
-                n13 = n16;
-                n14 = n17;
+                final int tmpRed = (red * 30 + green * 59 + blue * 11) / 100;
+                final int tmpGreen = (red * 30 + green * 70) / 100;
+                final int tmpBlue = (red * 30 + blue * 70) / 100;
+                red = tmpRed;
+                green = tmpGreen;
+                blue = tmpBlue;
             }
-            if (b) {
-                n12 /= 4;
-                n13 /= 4;
-                n14 /= 4;
+
+            if (colorN >= 16) {
+                red /= 4;
+                green /= 4;
+                blue /= 4;
             }
-            glNewList(this.listPos + 256 + l, 4864);
-            glColor3f(n12 / 255.0f, n13 / 255.0f, n14 / 255.0f);
+
+            glNewList(this.listPos + charC + colorN, GL_COMPILE);
+            glColor3f(red / 255.0f, green / 255.0f, blue / 255.0f);
             glEndList();
         }
     }
@@ -116,137 +137,160 @@ public class Font
         this.draw(str, x, y, color, false);
     }
     
-    public void draw(final String str, final int x, final int y, int color, final boolean darken) {
-        if (str == null) {
-            return;
-        }
-        if (darken) {
-            final int n = color & 0xFF000000;
-            color = (color & 0xFCFCFC) >> 2;
-            color += n;
-        }
-        glBindTexture(GL_TEXTURE_2D, this.fontTexture);
-        final float n2 = (color >> 16 & 0xFF) / 255.0f;
-        final float n3 = (color >> 8 & 0xFF) / 255.0f;
-        final float n4 = (color & 0xFF) / 255.0f;
-        float n5 = (color >> 24 & 0xFF) / 255.0f;
-        if (n5 == 0.0f) {
-            n5 = 1.0f;
-        }
-        glColor4f(n2, n3, n4, n5);
-        this.ib.clear();
-        glPushMatrix();
-        glTranslatef((float)x, (float)y, 0.0f);
-        for (int i = 0; i < str.length(); ++i) {
-            while (str.length() > i + 1 && str.charAt(i) == '§') {
-                int index = "0123456789abcdef".indexOf(str.toLowerCase().charAt(i + 1));
-                if (index < 0 || index > 15) {
-                    index = 15;
+    public void draw(final String str, final int x, final int y, int color, final boolean dropShadow) {
+        if (str != null) {
+            if (dropShadow) {
+                final int oldAlpha = color & 0xFF000000;
+                color = (color & 0xFCFCFC) >> 2;
+                color += oldAlpha;
+            }
+
+            glBindTexture(GL_TEXTURE_2D, this.fontTexture);
+            final float r = (color >> 16 & 0xFF) / 255.0f;
+            final float g = (color >> 8 & 0xFF) / 255.0f;
+            final float b = (color & 0xFF) / 255.0f;
+            float a = (color >> 24 & 0xFF) / 255.0f;
+            if (a == 0.0f) {
+                a = 1.0f;
+            }
+
+            glColor4f(r, g, b, a);
+            this.ib.clear();
+            glPushMatrix();
+            glTranslatef((float) x, (float) y, 0.0f);
+
+            for (int i = 0; i < str.length(); ++i) {
+                for (; str.length() > i + 1 && str.charAt(i) == '§'; i += 2) {
+                    int cc = "0123456789abcdef".indexOf(str.toLowerCase().charAt(i + 1));
+                    if (cc < 0 || cc > 15) {
+                        cc = 15;
+                    }
+
+                    this.ib.put(this.listPos + 256 + cc + (dropShadow ? 16 : 0));
+                    if (this.ib.remaining() == 0) {
+                        this.ib.flip();
+                        glCallLists(this.ib);
+                        this.ib.clear();
+                    }
                 }
-                this.ib.put(this.listPos + 256 + index + (darken ? 16 : 0));
+
+                if (i < str.length()) {
+                    final int ch = SharedConstants.acceptableLetters.indexOf(str.charAt(i));
+                    if (ch >= 0) {
+                        this.ib.put(this.listPos + ch + 32);
+                    }
+                }
+
                 if (this.ib.remaining() == 0) {
                     this.ib.flip();
                     glCallLists(this.ib);
                     this.ib.clear();
                 }
-                i += 2;
             }
-            if (i < str.length()) {
-                final int index2 = SharedConstants.acceptableLetters.indexOf(str.charAt(i));
-                if (index2 >= 0) {
-                    this.ib.put(this.listPos + index2 + 32);
-                }
-            }
-            if (this.ib.remaining() == 0) {
-                this.ib.flip();
-                glCallLists(this.ib);
-                this.ib.clear();
-            }
+
+            this.ib.flip();
+            glCallLists(this.ib);
+            glPopMatrix();
         }
-        this.ib.flip();
-        glCallLists(this.ib);
-        glPopMatrix();
+
     }
     
     public int width(final String str) {
-        if (str == null) {
-            return 0;
-        }
-        int n = 0;
+        if (str == null) return 0;
+        int len = 0;
+
         for (int i = 0; i < str.length(); ++i) {
-            if (str.charAt(i) == '§') {
+            char c = str.charAt(i);
+
+            if (c == '§') {
+                // Ignore the character used to define coloured text
                 ++i;
             }
             else {
-                final int index = SharedConstants.acceptableLetters.indexOf(str.charAt(i));
+                final int index = SharedConstants.acceptableLetters.indexOf(c);
                 if (index >= 0) {
-                    n += this.charWidths[index + 32];
+                    len += this.charWidths[index + 32];
                 }
             }
         }
-        return n;
+        return len;
     }
     
     public void drawWordWrapInternal(final String str, final int x, int y, final int w, final int col) {
-        final String[] split = str.split("\n");
-        if (split.length > 1) {
-            for (int i = 0; i < split.length; ++i) {
-                this.drawWordWrapInternal(split[i], x, y, w, col);
-                y += this.wordWrapHeight(split[i], w);
+        final String[] lines = str.split("\n");
+        if (lines.length > 1) {
+            for (int i = 0; i < lines.length; ++i) {
+                this.drawWordWrapInternal(lines[i], x, y, w, col);
+                y += this.wordWrapHeight(lines[i], w);
             }
             return;
         }
-        final String[] split2 = str.split(" ");
-        int j = 0;
-        while (j < split2.length) {
-            String s;
-            for (s = split2[j++] + " "; j < split2.length && this.width(s + split2[j]) < w; s = s + split2[j++] + " ") {}
-            while (this.width(s) > w) {
-                int beginIndex;
-                for (beginIndex = 0; this.width(s.substring(0, beginIndex + 1)) <= w; ++beginIndex) {}
-                if (s.substring(0, beginIndex).trim().length() > 0) {
-                    this.draw(s.substring(0, beginIndex), x, y, col);
+
+        final String[] words = str.split(" ");
+        int pos = 0;
+        while (pos < words.length) {
+            String line = words[pos++] + " ";
+            while (pos < words.length && this.width(line + words[pos]) < w) {
+                line += words[pos++] + " ";
+            }
+
+            while (this.width(line) > w) {
+                int l = 0;
+                while (this.width(line.substring(0, l + 1)) <= w) {
+                    ++l;
+                }
+                if (line.substring(0, l).trim().length() > 0) {
+                    this.draw(line.substring(0, l), x, y, col);
                     y += 8;
                 }
-                s = s.substring(beginIndex);
+                line = line.substring(l);
             }
-            if (s.trim().length() > 0) {
-                this.draw(s, x, y, col);
+
+            if (line.trim().length() > 0) {
+                this.draw(line, x, y, col);
                 y += 8;
             }
         }
     }
     
     public int wordWrapHeight(final String str, final int w) {
-        final String[] split = str.split("\n");
-        if (split.length > 1) {
-            int n = 0;
-            for (int i = 0; i < split.length; ++i) {
-                n += this.wordWrapHeight(split[i], w);
+        final String[] lines = str.split("\n");
+        if (lines.length > 1) {
+            int h = 0;
+            for (int i = 0; i < lines.length; ++i) {
+                h += this.wordWrapHeight(lines[i], w);
             }
-            return n;
+            return h;
         }
-        final String[] split2 = str.split(" ");
-        int j = 0;
-        int n2 = 0;
-        while (j < split2.length) {
-            String str2;
-            for (str2 = split2[j++] + " "; j < split2.length && this.width(str2 + split2[j]) < w; str2 = str2 + split2[j++] + " ") {}
-            while (this.width(str2) > w) {
-                int n3;
-                for (n3 = 0; this.width(str2.substring(0, n3 + 1)) <= w; ++n3) {}
-                if (str2.substring(0, n3).trim().length() > 0) {
-                    n2 += 8;
+
+        final String[] words = str.split(" ");
+        int pos = 0;
+        int y = 0;
+        while (pos < words.length) {
+            String line = words[pos++] + " ";
+            while (pos < words.length && this.width(line + words[pos]) < w) {
+                line += words[pos++] + " ";
+            }
+
+            while (this.width(line) > w) {
+                int l = 0;
+                while (this.width(line.substring(0, l + 1)) <= w) {
+                    ++l;
                 }
-                str2 = str2.substring(n3);
+                if (line.substring(0, l).trim().length() > 0) {
+                    y += 8;
+                }
+                line = line.substring(l);
             }
-            if (str2.trim().length() > 0) {
-                n2 += 8;
+
+            if (line.trim().length() > 0) {
+                y += 8;
             }
         }
-        if (n2 < 8) {
-            n2 += 8;
+
+        if (y < 8) {
+            y += 8;
         }
-        return n2;
+        return y;
     }
 }

@@ -12,7 +12,7 @@ public class ConfirmScreen extends Screen
     private String yetButton;
     private String noButton;
     private int id;
-    
+
     public ConfirmScreen(final Screen parent, final String title1, final String title2, final String yesButton, final String noButton, final int id) {
         this.parent = parent;
         this.title1 = title1;
@@ -24,8 +24,8 @@ public class ConfirmScreen extends Screen
     
     @Override
     public void init() {
-        this.buttons.add(new SmallButton(0, this.width / 2 - 155 + 0, this.height / 6 + 96, this.yetButton));
-        this.buttons.add(new SmallButton(1, this.width / 2 - 155 + 160, this.height / 6 + 96, this.noButton));
+        this.buttons.add(new SmallButton(0, this.width / 2 - 155 + 0 % 2 * 160, this.height / 6 + 24 * 4, this.yetButton));
+        this.buttons.add(new SmallButton(1, this.width / 2 - 155 + 1 % 2 * 160, this.height / 6 + 24 * 4, this.noButton));
     }
     
     @Override
@@ -36,8 +36,10 @@ public class ConfirmScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.renderBackground();
+
         this.drawCenteredString(this.font, this.title1, this.width / 2, 70, 0xffffff);
         this.drawCenteredString(this.font, this.title2, this.width / 2, 90, 0xffffff);
+
         super.render(xm, ym, partialTick);
     }
 }

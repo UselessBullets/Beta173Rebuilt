@@ -32,24 +32,29 @@ public class CreateWorldScreen extends Screen
     
     @Override
     public void init() {
-        final Language instance = Language.getInstance();
+        final Language language = Language.getInstance();
+
         Keyboard.enableRepeatEvents(true);
         this.buttons.clear();
-        this.buttons.add(new Button(0, this.width / 2 - 100, this.height / 4 + 96 + 12, instance.getElement("selectWorld.create")));
-        this.buttons.add(new Button(1, this.width / 2 - 100, this.height / 4 + 120 + 12, instance.getElement("gui.cancel")));
-        this.nameEdit = new EditBox(this, this.font, this.width / 2 - 100, 60, 200, 20, instance.getElement("selectWorld.newWorld"));
+        this.buttons.add(new Button(0, this.width / 2 - 100, this.height / 4 + 24 * 4 + 12, language.getElement("selectWorld.create")));
+        this.buttons.add(new Button(1, this.width / 2 - 100, this.height / 4 + 24 * 5 + 12, language.getElement("gui.cancel")));
+
+        this.nameEdit = new EditBox(this, this.font, this.width / 2 - 100, 60, 200, 20, language.getElement("selectWorld.newWorld"));
         this.nameEdit.inFocus = true;
         this.nameEdit.setMaxLength(32);
+
         this.seedEdit = new EditBox(this, this.font, this.width / 2 - 100, 116, 200, 20, "");
+
         this.updateResultFolder();
     }
     
     private void updateResultFolder() {
         this.resultFolder = this.nameEdit.getValue().trim();
-        final char[] illegal_FILE_CHARACTERS = SharedConstants.ILLEGAL_FILE_CHARACTERS;
-        for (int length = illegal_FILE_CHARACTERS.length, i = 0; i < length; ++i) {
-            this.resultFolder = this.resultFolder.replace(illegal_FILE_CHARACTERS[i], '_');
+
+        for (int i = 0; i < SharedConstants.ILLEGAL_FILE_CHARACTERS.length; ++i) {
+            this.resultFolder = this.resultFolder.replace(SharedConstants.ILLEGAL_FILE_CHARACTERS[i], '_');
         }
+
         if (Mth.isNullOrEmpty(this.resultFolder)) {
             this.resultFolder = "World";
         }
@@ -70,9 +75,7 @@ public class CreateWorldScreen extends Screen
     
     @Override
     protected void buttonClicked(final Button button) {
-        if (!button.active) {
-            return;
-        }
+        if (!button.active) return;
         if (button.id == 1) {
             this.minecraft.setScreen(this.lastScreen);
         }
@@ -82,58 +85,64 @@ public class CreateWorldScreen extends Screen
                 return;
             }
             this.done = true;
-            long nextLong = new Random().nextLong();
-            final String value = this.seedEdit.getValue();
-            if (!Mth.isNullOrEmpty(value)) {
+            long seedValue = new Random().nextLong();
+            final String seedString = this.seedEdit.getValue();
+
+            if (!Mth.isNullOrEmpty(seedString)) {
                 try {
-                    final long long1 = Long.parseLong(value);
-                    if (long1 != 0L) {
-                        nextLong = long1;
+                    final long value = Long.parseLong(seedString);
+                    if (value != 0L) {
+                        seedValue = value;
                     }
                 }
                 catch (final NumberFormatException ex) {
-                    nextLong = value.hashCode();
+                    seedValue = seedString.hashCode();
                 }
             }
+
             this.minecraft.gameMode = new SurvivalMode(this.minecraft);
-            this.minecraft.selectLevel(this.resultFolder, this.nameEdit.getValue(), nextLong);
+            this.minecraft.selectLevel(this.resultFolder, this.nameEdit.getValue(), seedValue);
             this.minecraft.setScreen(null);
         }
     }
     
     @Override
     protected void keyPressed(final char eventCharacter, final int eventKey) {
-        if (this.nameEdit.inFocus) {
-            this.nameEdit.keyPressed(eventCharacter, eventKey);
-        }
-        else {
-            this.seedEdit.keyPressed(eventCharacter, eventKey);
-        }
+        if (this.nameEdit.inFocus) this.nameEdit.keyPressed(eventCharacter, eventKey);
+        else this.seedEdit.keyPressed(eventCharacter, eventKey);
+
         if (eventCharacter == '\r') {
             this.buttonClicked(this.buttons.get(0));
         }
         this.buttons.get(0).active = (this.nameEdit.getValue().length() > 0);
+
         this.updateResultFolder();
     }
     
     @Override
     protected void mouseClicked(final int x, final int y, final int buttonNum) {
         super.mouseClicked(x, y, buttonNum);
+
         this.nameEdit.mouseClicked(x, y, buttonNum);
         this.seedEdit.mouseClicked(x, y, buttonNum);
     }
     
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
-        final Language instance = Language.getInstance();
+        final Language language = Language.getInstance();
+
         this.renderBackground();
-        this.drawCenteredString(this.font, instance.getElement("selectWorld.create"), this.width / 2, this.height / 4 - 60 + 20, 0xffffff);
-        this.drawString(this.font, instance.getElement("selectWorld.enterName"), this.width / 2 - 100, 47, 0xa0a0a0);
-        this.drawString(this.font, instance.getElement("selectWorld.resultFolder") + " " + this.resultFolder, this.width / 2 - 100, 85, 0xa0a0a0);
-        this.drawString(this.font, instance.getElement("selectWorld.enterSeed"), this.width / 2 - 100, 104, 0xa0a0a0);
-        this.drawString(this.font, instance.getElement("selectWorld.seedInfo"), this.width / 2 - 100, 140, 0xa0a0a0);
+
+        this.drawCenteredString(this.font, language.getElement("selectWorld.create"), this.width / 2, this.height / 4 - 60 + 20, 0xffffff);
+        this.drawString(this.font, language.getElement("selectWorld.enterName"), this.width / 2 - 100, 47, 0xa0a0a0);
+        this.drawString(this.font, language.getElement("selectWorld.resultFolder") + " " + this.resultFolder, this.width / 2 - 100, 85, 0xa0a0a0);
+
+        this.drawString(this.font, language.getElement("selectWorld.enterSeed"), this.width / 2 - 100, 104, 0xa0a0a0);
+        this.drawString(this.font, language.getElement("selectWorld.seedInfo"), this.width / 2 - 100, 140, 0xa0a0a0);
+
         this.nameEdit.render();
         this.seedEdit.render();
+
         super.render(xm, ym, partialTick);
     }
     

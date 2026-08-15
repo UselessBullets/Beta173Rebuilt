@@ -77,10 +77,10 @@ public class Pig extends Animal
     
     public void setSaddle(final boolean value) {
         if (value) {
-            this.entityData.set(16, 1);
+            this.entityData.set(16, (byte)1);
         }
         else {
-            this.entityData.set(16, 0);
+            this.entityData.set(16, (byte)0);
         }
     }
     

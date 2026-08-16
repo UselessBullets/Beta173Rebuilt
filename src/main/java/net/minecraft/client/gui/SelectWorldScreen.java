@@ -49,17 +49,23 @@ public class SelectWorldScreen extends Screen
     
     @Override
     public void init() {
-        final Language instance = Language.getInstance();
-        this.title = instance.getElement("selectWorld.title");
-        this.worldLang = instance.getElement("selectWorld.world");
-        this.conversionLang = instance.getElement("selectWorld.conversion");
+        final Language language = Language.getInstance();
+        this.title = language.getElement("selectWorld.title");
+
+        this.worldLang = language.getElement("selectWorld.world");
+        this.conversionLang = language.getElement("selectWorld.conversion");
         this.loadLevelList();
-        (this.worldSelectionList = new WorldSelectionList(this)).init(this.buttons, 4, 5);
+
+        this.worldSelectionList = new WorldSelectionList();
+        this.worldSelectionList.init(this.buttons, 4, 5);
+
         this.postInit();
     }
     
     private void loadLevelList() {
-        Collections.sort((this.levelList = this.minecraft.getLevelSource().getLevelList()));
+        LevelStorageSource levelSource = this.minecraft.getLevelSource();
+        this.levelList = levelSource.getLevelList();
+        Collections.sort(this.levelList);
         this.selectedWorld = -1;
     }
     
@@ -68,20 +74,22 @@ public class SelectWorldScreen extends Screen
     }
     
     protected String getWorldName(final int id) {
-        String str = this.levelList.get(id).getLevelName();
-        if (str == null || Mth.isNullOrEmpty(str)) {
-            str = Language.getInstance().getElement("selectWorld.world") + " " + (id + 1);
+        String levelName = this.levelList.get(id).getLevelName();
+        if (Mth.isNullOrEmpty(levelName)) {
+            levelName = Language.getInstance().getElement("selectWorld.world") + " " + (id + 1);
         }
-        return str;
+        return levelName;
     }
     
     public void postInit() {
-        final Language instance = Language.getInstance();
-        this.buttons.add(this.selectButton = new Button(BUTTON_SELECT_ID, this.width / 2 - 154, this.height - 52, 150, 20, instance.getElement("selectWorld.select")));
-        this.buttons.add(this.deleteButton = new Button(BUTTON_RENAME_ID, this.width / 2 - 154, this.height - 28, 70, 20, instance.getElement("selectWorld.rename")));
-        this.buttons.add(this.renameButton = new Button(BUTTON_DELETE_ID, this.width / 2 - 74, this.height - 28, 70, 20, instance.getElement("selectWorld.delete")));
-        this.buttons.add(new Button(BUTTON_CREATE_ID, this.width / 2 + 4, this.height - 52, 150, 20, instance.getElement("selectWorld.create")));
-        this.buttons.add(new Button(BUTTON_CANCEL_ID, this.width / 2 + 4, this.height - 28, 150, 20, instance.getElement("gui.cancel")));
+        final Language language = Language.getInstance();
+
+        this.buttons.add(this.selectButton = new Button(BUTTON_SELECT_ID, this.width / 2 - 154, this.height - 52, 150, 20, language.getElement("selectWorld.select")));
+        this.buttons.add(this.deleteButton = new Button(BUTTON_RENAME_ID, this.width / 2 - 154, this.height - 28, 70, 20, language.getElement("selectWorld.rename")));
+        this.buttons.add(this.renameButton = new Button(BUTTON_DELETE_ID, this.width / 2 - 74, this.height - 28, 70, 20, language.getElement("selectWorld.delete")));
+        this.buttons.add(new Button(BUTTON_CREATE_ID, this.width / 2 + 4, this.height - 52, 150, 20, language.getElement("selectWorld.create")));
+        this.buttons.add(new Button(BUTTON_CANCEL_ID, this.width / 2 + 4, this.height - 28, 150, 20, language.getElement("gui.cancel")));
+
         this.selectButton.active = false;
         this.deleteButton.active = false;
         this.renameButton.active = false;
@@ -89,15 +97,20 @@ public class SelectWorldScreen extends Screen
     
     @Override
     protected void buttonClicked(final Button button) {
-        if (!button.active) {
-            return;
-        }
+        if (!button.active) return;
         if (button.id == BUTTON_DELETE_ID) {
             final String worldName = this.getWorldName(this.selectedWorld);
             if (worldName != null) {
                 this.isDeleting = true;
+
                 final Language instance = Language.getInstance();
-                this.minecraft.setScreen(new ConfirmScreen(this, instance.getElement("selectWorld.deleteQuestion"), "'" + worldName + "' " + instance.getElement("selectWorld.deleteWarning"), instance.getElement("selectWorld.deleteButton"), instance.getElement("gui.cancel"), this.selectedWorld));
+                final String title = instance.getElement("selectWorld.deleteQuestion");
+                final String warning = "'" + worldName + "' " + instance.getElement("selectWorld.deleteWarning");
+                final String yes = instance.getElement("selectWorld.deleteButton");
+                final String no = instance.getElement("gui.cancel");
+
+                ConfirmScreen confirmScreen = new ConfirmScreen(this, title, warning, yes, no, this.selectedWorld);
+                this.minecraft.setScreen(confirmScreen);
             }
         }
         else if (button.id == BUTTON_SELECT_ID) {
@@ -119,16 +132,16 @@ public class SelectWorldScreen extends Screen
     
     public void worldSelected(final int id) {
         this.minecraft.setScreen(null);
-        if (this.done) {
-            return;
-        }
+        if (this.done) return;
         this.done = true;
         this.minecraft.gameMode = new SurvivalMode(this.minecraft);
-        String levelId = this.getWorldId(id);
-        if (levelId == null) {
-            levelId = "World" + id;
+
+        String worldFolderName = this.getWorldId(id);
+        if (worldFolderName == null) {
+            worldFolderName = "World" + id;
         }
-        this.minecraft.selectLevel(levelId, this.getWorldName(id), 0L);
+
+        this.minecraft.selectLevel(worldFolderName, this.getWorldName(id), 0L);
         this.minecraft.setScreen(null);
     }
     
@@ -140,6 +153,7 @@ public class SelectWorldScreen extends Screen
                 final LevelStorageSource levelSource = this.minecraft.getLevelSource();
                 levelSource.clearAll();
                 levelSource.deleteLevel(this.getWorldId(id));
+
                 this.loadLevelList();
             }
             this.minecraft.setScreen(this);
@@ -149,66 +163,72 @@ public class SelectWorldScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.worldSelectionList.render(xm, ym, partialTick);
+
         this.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xffffff);
+
         super.render(xm, ym, partialTick);
     }
 
-    static class WorldSelectionList extends ScrolledSelectionList
+    class WorldSelectionList extends ScrolledSelectionList
     {
-        final /* synthetic */ SelectWorldScreen sws;
-
-        public WorldSelectionList(final SelectWorldScreen sws) {
-            super(sws.minecraft, sws.width, sws.height, 32, sws.height - 64, 36);
-            this.sws = sws;
+        public WorldSelectionList() {
+            super(SelectWorldScreen.this.minecraft, SelectWorldScreen.this.width, SelectWorldScreen.this.height, 32, SelectWorldScreen.this.height - 64, 36);
         }
 
         @Override
         protected int getNumberOfItems() {
-            return this.sws.levelList.size();
+            return SelectWorldScreen.this.levelList.size();
         }
 
         @Override
         protected void selectItem(final int item, final boolean doubleClick) {
-            this.sws.selectedWorld = item;
-            final boolean active = this.sws.selectedWorld >= 0 && this.sws.selectedWorld < this.getNumberOfItems();
-            this.sws.selectButton.active = active;
-            this.sws.deleteButton.active = active;
-            this.sws.renameButton.active = active;
+            SelectWorldScreen.this.selectedWorld = item;
+            final boolean active = SelectWorldScreen.this.selectedWorld >= 0 && SelectWorldScreen.this.selectedWorld < this.getNumberOfItems();
+            SelectWorldScreen.this.selectButton.active = active;
+            SelectWorldScreen.this.deleteButton.active = active;
+            SelectWorldScreen.this.renameButton.active = active;
+
             if (doubleClick && active) {
-                this.sws.worldSelected(item);
+                SelectWorldScreen.this.worldSelected(item);
             }
         }
 
         @Override
         protected boolean isSelectedItem(final int item) {
-            return item == this.sws.selectedWorld;
+            return item == SelectWorldScreen.this.selectedWorld;
         }
 
         @Override
         protected int getMaxPosition() {
-            return this.sws.levelList.size() * 36;
+            return SelectWorldScreen.this.levelList.size() * 36;
         }
 
         @Override
         protected void renderBackground() {
-            this.sws.renderBackground();
+            SelectWorldScreen.this.renderBackground();
         }
 
         @Override
         protected void renderItem(final int i, final int x, final int y, final int h, final Tesselator t) {
-            final LevelSummary levelSummary = this.sws.levelList.get(i);
-            String s = levelSummary.getLevelName();
-            if (s == null || Mth.isNullOrEmpty(s)) {
-                s = this.sws.worldLang + " " + (i + 1);
+            final LevelSummary levelSummary = SelectWorldScreen.this.levelList.get(i);
+
+            String name = levelSummary.getLevelName();
+            if (Mth.isNullOrEmpty(name)) {
+                name = SelectWorldScreen.this.worldLang + " " + (i + 1);
             }
-            final String string = levelSummary.getLevelId() + " (" + this.sws.DATE_FORMAT.format(new Date(levelSummary.getLastPlayed())) + ", " + levelSummary.getSizeOnDisk() / 1024L * 100L / 1024L / 100.0f + " MB)";
-            String string2 = "";
+
+            String id = levelSummary.getLevelId();
+            String dateString = SelectWorldScreen.this.DATE_FORMAT.format(new Date(levelSummary.getLastPlayed()));
+            id = id + " (" + dateString + ", " + levelSummary.getSizeOnDisk() / 1024L * 100L / 1024L / 100.0f + " MB)";
+
+            String info = "";
             if (levelSummary.isRequiresConversion()) {
-                string2 = this.sws.conversionLang + " " + string2;
+                info = SelectWorldScreen.this.conversionLang + " " + info;
             }
-            this.sws.drawString(this.sws.font, s, x + 2, y + 1, 0xffffff);
-            this.sws.drawString(this.sws.font, string, x + 2, y + 12, 0x808080);
-            this.sws.drawString(this.sws.font, string2, x + 2, y + 12 + 10, 0x808080);
+
+            SelectWorldScreen.this.drawString(SelectWorldScreen.this.font, name, x + 2, y + 1, 0xffffff);
+            SelectWorldScreen.this.drawString(SelectWorldScreen.this.font, id, x + 2, y + 12, 0x808080);
+            SelectWorldScreen.this.drawString(SelectWorldScreen.this.font, info, x + 2, y + 12 + 10, 0x808080);
         }
     }
 }

@@ -4,7 +4,6 @@
 
 package net.minecraft.client.gui;
 
-import net.minecraft.client.Options;
 import net.minecraft.client.Options.Option;
 
 public class SmallButton extends Button

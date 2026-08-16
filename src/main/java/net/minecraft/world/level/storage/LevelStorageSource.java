@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.storage;
 
+import net.minecraft.world.level.LevelSummary;
 import util.ProgressListener;
 import net.minecraft.world.level.LevelData;
 import java.util.List;
@@ -14,7 +15,7 @@ public interface LevelStorageSource
     
     LevelStorage selectLevel(final String levelId, final boolean createPlayerDir);
     
-    List getLevelList();
+    List<LevelSummary> getLevelList();
     
     void clearAll();
     

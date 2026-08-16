@@ -422,9 +422,9 @@ public class Options
         private final boolean isBoolean;
         private final String captionId;
 
-        public static Option getItem(final int n) {
+        public static Option getItem(final int id) {
             for (final Option option : values()) {
-                if (option.getId() == n) {
+                if (option.getId() == id) {
                     return option;
                 }
             }

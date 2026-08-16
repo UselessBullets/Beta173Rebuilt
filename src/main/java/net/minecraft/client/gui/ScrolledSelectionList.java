@@ -14,6 +14,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 public abstract class ScrolledSelectionList
 {
+    private static final int NO_DRAG = -1;
+    private static final int DRAG_OUTSIDE = -2;
     private final Minecraft minecraft;
     private final int width;
     private final int height;
@@ -55,6 +57,7 @@ public abstract class ScrolledSelectionList
     protected void setRenderHeader(final boolean renderHeader, final int headerHeight) {
         this.renderHeader = renderHeader;
         this.headerHeight = headerHeight;
+
         if (!renderHeader) {
             this.headerHeight = 0;
         }
@@ -84,99 +87,95 @@ public abstract class ScrolledSelectionList
     }
     
     public int getItemAtPosition(final int x, final int y) {
-        final int n = this.width / 2 - 110;
-        final int n2 = this.width / 2 + 110;
-        final int n3 = y - this.y0 - this.headerHeight + (int)this.yo - 4;
-        final int n4 = n3 / this.itemHeight;
-        if (x >= n && x <= n2 && n4 >= 0 && n3 >= 0 && n4 < this.getNumberOfItems()) {
-            return n4;
+        final int x0 = this.width / 2 - (92 + 16 + 2);
+        final int x1 = this.width / 2 + (92 + 16 + 2);
+
+        final int clickSlotPos = y - this.y0 - this.headerHeight + (int)this.yo - 4;
+        final int slot = clickSlotPos / this.itemHeight;
+        if (x >= x0 && x <= x1 && slot >= 0 && clickSlotPos >= 0 && slot < this.getNumberOfItems()) {
+            return slot;
         }
         return -1;
     }
     
-    public void init(final List buttons, final int upButtonId, final int downButtonId) {
+    public void init(final List<Button> buttons, final int upButtonId, final int downButtonId) {
         this.upId = upButtonId;
         this.downId = downButtonId;
     }
     
     private void capYPosition() {
-        int n = this.getMaxPosition() - (this.y1 - this.y0 - 4);
-        if (n < 0) {
-            n /= 2;
-        }
-        if (this.yo < 0.0f) {
-            this.yo = 0.0f;
-        }
-        if (this.yo > n) {
-            this.yo = (float)n;
-        }
+        int max = this.getMaxPosition() - (this.y1 - this.y0 - 4);
+        if (max < 0) max /= 2;
+        if (this.yo < 0.0f) this.yo = 0.0f;
+        if (this.yo > max) this.yo = (float) max;
     }
     
     public void buttonClicked(final Button button) {
-        if (!button.active) {
-            return;
-        }
+        if (!button.active) return;
+
         if (button.id == this.upId) {
             this.yo -= this.itemHeight * 2 / 3;
-            this.yDrag = -2.0f;
+            this.yDrag = DRAG_OUTSIDE;
             this.capYPosition();
         }
         else if (button.id == this.downId) {
             this.yo += this.itemHeight * 2 / 3;
-            this.yDrag = -2.0f;
+            this.yDrag = DRAG_OUTSIDE;
             this.capYPosition();
         }
     }
     
     public void render(final int xm, final int ym, final float partialTick) {
         this.renderBackground();
-        final int numberOfItems = this.getNumberOfItems();
-        final int n = this.width / 2 + 124;
-        final int n2 = n + 6;
+
+        final int itemCount = this.getNumberOfItems();
+
+        final int xx0 = this.width / 2 + 124;
+        final int xx1 = xx0 + 6;
+
         if (Mouse.isButtonDown(0)) {
-            if (this.yDrag == -1.0f) {
-                boolean b = true;
+            if (this.yDrag == NO_DRAG) {
+                boolean doDrag = true;
                 if (ym >= this.y0 && ym <= this.y1) {
-                    final int n3 = this.width / 2 - 110;
-                    final int n4 = this.width / 2 + 110;
-                    final int n5 = ym - this.y0 - this.headerHeight + (int)this.yo - 4;
-                    final int n6 = n5 / this.itemHeight;
-                    if (xm >= n3 && xm <= n4 && n6 >= 0 && n5 >= 0 && n6 < numberOfItems) {
-                        this.selectItem(n6, n6 == this.lastSelection && System.currentTimeMillis() - this.lastSelectionTime < 250L);
-                        this.lastSelection = n6;
+                    final int x0 = this.width / 2 - (92 + 16 + 2);
+                    final int x1 = this.width / 2 + (92 + 16 + 2);
+
+                    final int clickSlotPos = ym - this.y0 - this.headerHeight + (int)this.yo - 4;
+                    final int slot = clickSlotPos / this.itemHeight;
+                    if (xm >= x0 && xm <= x1 && slot >= 0 && clickSlotPos >= 0 && slot < itemCount) {
+                        boolean doubleClick = slot == this.lastSelection && System.currentTimeMillis() - this.lastSelectionTime < 250L;
+
+                        this.selectItem(slot, doubleClick);
+                        this.lastSelection = slot;
                         this.lastSelectionTime = System.currentTimeMillis();
                     }
-                    else if (xm >= n3 && xm <= n4 && n5 < 0) {
-                        this.clickedHeader(xm - n3, ym - this.y0 + (int)this.yo - 4);
-                        b = false;
+                    else if (xm >= x0 && xm <= x1 && clickSlotPos < 0) {
+                        this.clickedHeader(xm - x0, ym - this.y0 + (int)this.yo - 4);
+                        doDrag = false;
                     }
-                    if (xm >= n && xm <= n2) {
+                    if (xm >= xx0 && xm <= xx1) {
                         this.yDragScale = -1.0f;
-                        int n7 = this.getMaxPosition() - (this.y1 - this.y0 - 4);
-                        if (n7 < 1) {
-                            n7 = 1;
-                        }
-                        int n8 = (int)((this.y1 - this.y0) * (this.y1 - this.y0) / (float)this.getMaxPosition());
-                        if (n8 < 32) {
-                            n8 = 32;
-                        }
-                        if (n8 > this.y1 - this.y0 - 8) {
-                            n8 = this.y1 - this.y0 - 8;
-                        }
-                        this.yDragScale /= (this.y1 - this.y0 - n8) / (float)n7;
+
+                        int max = this.getMaxPosition() - (this.y1 - this.y0 - 4);
+                        if (max < 1) max = 1;
+                        int barHeight = (int)((this.y1 - this.y0) * (this.y1 - this.y0) / (float)this.getMaxPosition());
+                        if (barHeight < 32) barHeight = 32;
+                        if (barHeight > this.y1 - this.y0 - 8) barHeight = this.y1 - this.y0 - 8;
+
+                        this.yDragScale /= (this.y1 - this.y0 - barHeight) / (float)max;
                     }
                     else {
                         this.yDragScale = 1.0f;
                     }
-                    if (b) {
+                    if (doDrag) {
                         this.yDrag = (float)ym;
                     }
                     else {
-                        this.yDrag = -2.0f;
+                        this.yDrag = DRAG_OUTSIDE;
                     }
                 }
                 else {
-                    this.yDrag = -2.0f;
+                    this.yDrag = DRAG_OUTSIDE;
                 }
             }
             else if (this.yDrag >= 0.0f) {
@@ -185,134 +184,152 @@ public abstract class ScrolledSelectionList
             }
         }
         else {
-            this.yDrag = -1.0f;
+            this.yDrag = NO_DRAG;
         }
         this.capYPosition();
+
         GL11.glDisable(GL_LIGHTING);
         GL11.glDisable(GL_FOG);
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
+
         GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        final float n9 = 32.0f;
-        instance.begin();
-        instance.color(0x202020);
-        instance.vertexUV(this.x0, this.y1, 0.0, this.x0 / n9, (this.y1 + (int)this.yo) / n9);
-        instance.vertexUV(this.x1, this.y1, 0.0, this.x1 / n9, (this.y1 + (int)this.yo) / n9);
-        instance.vertexUV(this.x1, this.y0, 0.0, this.x1 / n9, (this.y0 + (int)this.yo) / n9);
-        instance.vertexUV(this.x0, this.y0, 0.0, this.x0 / n9, (this.y0 + (int)this.yo) / n9);
-        instance.end();
-        final int n10 = this.width / 2 - 92 - 16;
-        final int y = this.y0 + 4 - (int)this.yo;
+        final float s = 32.0f;
+        t.begin();
+        t.color(0x202020);
+        t.vertexUV(this.x0, this.y1, 0.0, this.x0 / s, (this.y1 + (int)this.yo) / s);
+        t.vertexUV(this.x1, this.y1, 0.0, this.x1 / s, (this.y1 + (int)this.yo) / s);
+        t.vertexUV(this.x1, this.y0, 0.0, this.x1 / s, (this.y0 + (int)this.yo) / s);
+        t.vertexUV(this.x0, this.y0, 0.0, this.x0 / s, (this.y0 + (int)this.yo) / s);
+        t.end();
+
+        final int rowX = this.width / 2 - 92 - 16;
+        final int rowBaseY = this.y0 + 4 - (int)this.yo;
+
         if (this.renderHeader) {
-            this.renderHeader(n10, y, instance);
+            this.renderHeader(rowX, rowBaseY, t);
         }
-        for (int i = 0; i < numberOfItems; ++i) {
-            final int y2 = y + i * this.itemHeight + this.headerHeight;
+
+        for (int i = 0; i < itemCount; ++i) {
+            final int y = rowBaseY + i * this.itemHeight + this.headerHeight;
             final int h = this.itemHeight - 4;
-            if (y2 <= this.y1) {
-                if (y2 + h >= this.y0) {
-                    if (this.renderSelection && this.isSelectedItem(i)) {
-                        final int n11 = this.width / 2 - 110;
-                        final int n12 = this.width / 2 + 110;
-                        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                        GL11.glDisable(GL_TEXTURE_2D);
-                        instance.begin();
-                        instance.color(0x808080);
-                        instance.vertexUV(n11, y2 + h + 2, 0.0, 0.0, 1.0);
-                        instance.vertexUV(n12, y2 + h + 2, 0.0, 1.0, 1.0);
-                        instance.vertexUV(n12, y2 - 2, 0.0, 1.0, 0.0);
-                        instance.vertexUV(n11, y2 - 2, 0.0, 0.0, 0.0);
-                        instance.color(0x0);
-                        instance.vertexUV(n11 + 1, y2 + h + 1, 0.0, 0.0, 1.0);
-                        instance.vertexUV(n12 - 1, y2 + h + 1, 0.0, 1.0, 1.0);
-                        instance.vertexUV(n12 - 1, y2 - 1, 0.0, 1.0, 0.0);
-                        instance.vertexUV(n11 + 1, y2 - 1, 0.0, 0.0, 0.0);
-                        instance.end();
-                        GL11.glEnable(GL_TEXTURE_2D);
-                    }
-                    this.renderItem(i, n10, y2, h, instance);
-                }
+
+            if (y > this.y1 || y + h < this.y0) {
+                continue;
             }
+
+            if (this.renderSelection && this.isSelectedItem(i)) {
+                final int x0 = this.width / 2 - 110;
+                final int x1 = this.width / 2 + 110;
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                GL11.glDisable(GL_TEXTURE_2D);
+                t.begin();
+                t.color(0x808080);
+                t.vertexUV(x0, y + h + 2, 0.0, 0.0, 1.0);
+                t.vertexUV(x1, y + h + 2, 0.0, 1.0, 1.0);
+                t.vertexUV(x1, y - 2, 0.0, 1.0, 0.0);
+                t.vertexUV(x0, y - 2, 0.0, 0.0, 0.0);
+
+                t.color(0x000000);
+                t.vertexUV(x0 + 1, y + h + 1, 0.0, 0.0, 1.0);
+                t.vertexUV(x1 - 1, y + h + 1, 0.0, 1.0, 1.0);
+                t.vertexUV(x1 - 1, y - 1, 0.0, 1.0, 0.0);
+                t.vertexUV(x0 + 1, y - 1, 0.0, 0.0, 0.0);
+
+                t.end();
+                GL11.glEnable(GL_TEXTURE_2D);
+            }
+
+            this.renderItem(i, rowX, y, h, t);
         }
+
         GL11.glDisable(GL_DEPTH_TEST);
-        final int n13 = 4;
+
+        final int d = 4;
+
         this.renderHoleBackground(0, this.y0, 255, 255);
         this.renderHoleBackground(this.y1, this.height, 255, 255);
+
         GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         GL11.glDisable(GL_ALPHA_TEST);
         GL11.glShadeModel(GL_SMOOTH);
+
         GL11.glDisable(GL_TEXTURE_2D);
-        instance.begin();
-        instance.color(0, 0);
-        instance.vertexUV(this.x0, this.y0 + n13, 0.0, 0.0, 1.0);
-        instance.vertexUV(this.x1, this.y0 + n13, 0.0, 1.0, 1.0);
-        instance.color(0, 255);
-        instance.vertexUV(this.x1, this.y0, 0.0, 1.0, 0.0);
-        instance.vertexUV(this.x0, this.y0, 0.0, 0.0, 0.0);
-        instance.end();
-        instance.begin();
-        instance.color(0, 255);
-        instance.vertexUV(this.x0, this.y1, 0.0, 0.0, 1.0);
-        instance.vertexUV(this.x1, this.y1, 0.0, 1.0, 1.0);
-        instance.color(0, 0);
-        instance.vertexUV(this.x1, this.y1 - n13, 0.0, 1.0, 0.0);
-        instance.vertexUV(this.x0, this.y1 - n13, 0.0, 0.0, 0.0);
-        instance.end();
-        final int n14 = this.getMaxPosition() - (this.y1 - this.y0 - 4);
-        if (n14 > 0) {
-            int n15 = (this.y1 - this.y0) * (this.y1 - this.y0) / this.getMaxPosition();
-            if (n15 < 32) {
-                n15 = 32;
-            }
-            if (n15 > this.y1 - this.y0 - 8) {
-                n15 = this.y1 - this.y0 - 8;
-            }
-            int y3 = (int)this.yo * (this.y1 - this.y0 - n15) / n14 + this.y0;
-            if (y3 < this.y0) {
-                y3 = this.y0;
-            }
-            instance.begin();
-            instance.color(0, 255);
-            instance.vertexUV(n, this.y1, 0.0, 0.0, 1.0);
-            instance.vertexUV(n2, this.y1, 0.0, 1.0, 1.0);
-            instance.vertexUV(n2, this.y0, 0.0, 1.0, 0.0);
-            instance.vertexUV(n, this.y0, 0.0, 0.0, 0.0);
-            instance.end();
-            instance.begin();
-            instance.color(8421504, 255);
-            instance.vertexUV(n, y3 + n15, 0.0, 0.0, 1.0);
-            instance.vertexUV(n2, y3 + n15, 0.0, 1.0, 1.0);
-            instance.vertexUV(n2, y3, 0.0, 1.0, 0.0);
-            instance.vertexUV(n, y3, 0.0, 0.0, 0.0);
-            instance.end();
-            instance.begin();
-            instance.color(12632256, 255);
-            instance.vertexUV(n, y3 + n15 - 1, 0.0, 0.0, 1.0);
-            instance.vertexUV(n2 - 1, y3 + n15 - 1, 0.0, 1.0, 1.0);
-            instance.vertexUV(n2 - 1, y3, 0.0, 1.0, 0.0);
-            instance.vertexUV(n, y3, 0.0, 0.0, 0.0);
-            instance.end();
+
+        t.begin();
+        t.color(0x000000, 0);
+        t.vertexUV(this.x0, this.y0 + d, 0.0, 0.0, 1.0);
+        t.vertexUV(this.x1, this.y0 + d, 0.0, 1.0, 1.0);
+        t.color(0x000000, 255);
+        t.vertexUV(this.x1, this.y0, 0.0, 1.0, 0.0);
+        t.vertexUV(this.x0, this.y0, 0.0, 0.0, 0.0);
+        t.end();
+
+        t.begin();
+        t.color(0x000000, 255);
+        t.vertexUV(this.x0, this.y1, 0.0, 0.0, 1.0);
+        t.vertexUV(this.x1, this.y1, 0.0, 1.0, 1.0);
+        t.color(0x000000, 0);
+        t.vertexUV(this.x1, this.y1 - d, 0.0, 1.0, 0.0);
+        t.vertexUV(this.x0, this.y1 - d, 0.0, 0.0, 0.0);
+        t.end();
+
+        final int max = this.getMaxPosition() - (this.y1 - this.y0 - 4);
+        if (max > 0) {
+            int barHeight = (this.y1 - this.y0) * (this.y1 - this.y0) / this.getMaxPosition();
+            if (barHeight < 32) barHeight = 32;
+            if (barHeight > this.y1 - this.y0 - 8) barHeight = this.y1 - this.y0 - 8;
+
+            int yp = (int)this.yo * (this.y1 - this.y0 - barHeight) / max + this.y0;
+            if (yp < this.y0) yp = this.y0;
+
+            t.begin();
+            t.color(0x000000, 255);
+            t.vertexUV(xx0, this.y1, 0.0, 0.0, 1.0);
+            t.vertexUV(xx1, this.y1, 0.0, 1.0, 1.0);
+            t.vertexUV(xx1, this.y0, 0.0, 1.0, 0.0);
+            t.vertexUV(xx0, this.y0, 0.0, 0.0, 0.0);
+            t.end();
+
+            t.begin();
+            t.color(0x808080, 255);
+            t.vertexUV(xx0, yp + barHeight, 0.0, 0.0, 1.0);
+            t.vertexUV(xx1, yp + barHeight, 0.0, 1.0, 1.0);
+            t.vertexUV(xx1, yp, 0.0, 1.0, 0.0);
+            t.vertexUV(xx0, yp, 0.0, 0.0, 0.0);
+            t.end();
+
+            t.begin();
+            t.color(0xc0c0c0, 255);
+            t.vertexUV(xx0, yp + barHeight - 1, 0.0, 0.0, 1.0);
+            t.vertexUV(xx1 - 1, yp + barHeight - 1, 0.0, 1.0, 1.0);
+            t.vertexUV(xx1 - 1, yp, 0.0, 1.0, 0.0);
+            t.vertexUV(xx0, yp, 0.0, 0.0, 0.0);
+            t.end();
         }
+
         this.renderDecorations(xm, ym);
+
         GL11.glEnable(GL_TEXTURE_2D);
+
         GL11.glShadeModel(GL_FLAT);
         GL11.glEnable(GL_ALPHA_TEST);
         GL11.glDisable(GL_BLEND);
     }
     
     private void renderHoleBackground(final int y0, final int y1, final int a0, final int a1) {
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
         GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        final float n = 32.0f;
-        instance.begin();
-        instance.color(4210752, a1);
-        instance.vertexUV(0.0, y1, 0.0, 0.0, y1 / n);
-        instance.vertexUV(this.width, y1, 0.0, this.width / n, y1 / n);
-        instance.color(4210752, a0);
-        instance.vertexUV(this.width, y0, 0.0, this.width / n, y0 / n);
-        instance.vertexUV(0.0, y0, 0.0, 0.0, y0 / n);
-        instance.end();
+        final float s = 32.0f;
+        t.begin();
+        t.color(0x404040, a1);
+        t.vertexUV(0.0, y1, 0.0, 0.0, y1 / s);
+        t.vertexUV(this.width, y1, 0.0, this.width / s, y1 / s);
+        t.color(0x404040, a0);
+        t.vertexUV(this.width, y0, 0.0, this.width / s, y0 / s);
+        t.vertexUV(0.0, y0, 0.0, 0.0, y0 / s);
+        t.end();
     }
 }

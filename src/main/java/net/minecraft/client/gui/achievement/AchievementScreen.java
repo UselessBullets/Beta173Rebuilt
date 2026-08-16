@@ -32,10 +32,10 @@ public class AchievementScreen extends Screen
     private static final int ACHIEVEMENT_COORD_SCALE = 24;
     private static final int EDGE_VALUE_X = Achievements.ACHIEVEMENT_WIDTH_POSITION * ACHIEVEMENT_COORD_SCALE;
     private static final int EDGE_VALUE_Y = Achievements.ACHIEVEMENT_HEIGHT_POSITION * ACHIEVEMENT_COORD_SCALE;
-    private static final int xMin;
-    private static final int yMin;
-    private static final int xMax;
-    private static final int yMax;
+    private static final int xMin = Achievements.xMin * ACHIEVEMENT_COORD_SCALE - BIGMAP_WIDTH / 2;
+    private static final int yMin = Achievements.yMin * ACHIEVEMENT_COORD_SCALE - BIGMAP_WIDTH / 2;
+    private static final int xMax = Achievements.xMax * ACHIEVEMENT_COORD_SCALE - BIGMAP_HEIGHT / 2;
+    private static final int yMax = Achievements.yMax * ACHIEVEMENT_COORD_SCALE - BIGMAP_HEIGHT / 2;
     private static final int MAX_BG_TILE_Y = (EDGE_VALUE_Y * 2 - 1) / 16;
     protected int imageWidth;
     protected int imageHeight;
@@ -108,28 +108,16 @@ public class AchievementScreen extends Screen
                 else {
                     this.xScrollP -= xm - this.xLastScroll;
                     this.yScrollP -= ym - this.yLastScroll;
-                    final double xScrollP = this.xScrollP;
-                    this.xScrollO = xScrollP;
-                    this.xScrollTarget = xScrollP;
-                    final double yScrollP = this.yScrollP;
-                    this.yScrollO = yScrollP;
-                    this.yScrollTarget = yScrollP;
+                    this.xScrollTarget = this.xScrollO = this.xScrollP;
+                    this.yScrollTarget = this.yScrollO = this.yScrollP;
                 }
                 this.xLastScroll = xm;
                 this.yLastScroll = ym;
             }
-            if (this.xScrollTarget < AchievementScreen.xMin) {
-                this.xScrollTarget = AchievementScreen.xMin;
-            }
-            if (this.yScrollTarget < AchievementScreen.yMin) {
-                this.yScrollTarget = AchievementScreen.yMin;
-            }
-            if (this.xScrollTarget >= AchievementScreen.xMax) {
-                this.xScrollTarget = AchievementScreen.xMax - 1;
-            }
-            if (this.yScrollTarget >= AchievementScreen.yMax) {
-                this.yScrollTarget = AchievementScreen.yMax - 1;
-            }
+            if (this.xScrollTarget < AchievementScreen.xMin) this.xScrollTarget = AchievementScreen.xMin;
+            if (this.yScrollTarget < AchievementScreen.yMin) this.yScrollTarget = AchievementScreen.yMin;
+            if (this.xScrollTarget >= AchievementScreen.xMax) this.xScrollTarget = AchievementScreen.xMax - 1;
+            if (this.yScrollTarget >= AchievementScreen.yMax) this.yScrollTarget = AchievementScreen.yMax - 1;
         }
         else {
             this.scrolling = 0;
@@ -186,6 +174,7 @@ public class AchievementScreen extends Screen
 
         final int xBigMap = xo + BIGMAP_X;
         final int yBigMap = yo + BIGMAP_Y;
+
         this.blitOffset = 0.0f;
         glDepthFunc(GL_GEQUAL);
         glPushMatrix();
@@ -206,7 +195,7 @@ public class AchievementScreen extends Screen
             final int rockLevel = (Achievements.ACHIEVEMENT_HEIGHT_POSITION * 4) / 10;
             final int coalLevel = (Achievements.ACHIEVEMENT_HEIGHT_POSITION * 7) / 10;
             final int ironLevel = (Achievements.ACHIEVEMENT_HEIGHT_POSITION * 9) / 10;
-            final int emeraldLevel = (Achievements.ACHIEVEMENT_HEIGHT_POSITION * 19) / 10;
+            final int diamondLevel = (Achievements.ACHIEVEMENT_HEIGHT_POSITION * 19) / 10;
             final int bedrockLevel = (Achievements.ACHIEVEMENT_HEIGHT_POSITION * 31) / 10;
 
             final Random random = new Random();
@@ -222,7 +211,7 @@ public class AchievementScreen extends Screen
 
                     if (heightValue > bedrockLevel || topTile + tileY == MAX_BG_TILE_Y) {
                         tileType = Tile.unbreakable.tex;
-                    } else if (heightValue == emeraldLevel) {
+                    } else if (heightValue == diamondLevel) {
                         if (random.nextInt(2) == 0) {
                             tileType = Tile.emeraldOre.tex;
                         } else {
@@ -255,12 +244,13 @@ public class AchievementScreen extends Screen
             final int x2 = achievement.requires.x * ACHIEVEMENT_COORD_SCALE - xScroll + 11 + xBigMap;
             final int y2 = achievement.requires.y * ACHIEVEMENT_COORD_SCALE - yScroll + 11 + yBigMap;
 
-            final boolean hasTaken = this.statsCounter.hasTaken(achievement);
+            int color = 0;
+
+            final boolean taken = this.statsCounter.hasTaken(achievement);
             final boolean canTake = this.statsCounter.canTake(achievement);
 
             final int alph = (Math.sin(System.currentTimeMillis() % 600L / 600.0 * Math.PI * 2.0) > 0.6) ? 255 : 130;
-            int color;
-            if (hasTaken) color = 0xff707070;
+            if (taken) color = 0xff707070;
             else if (canTake) color = 0x00ff00 + (alph << 24);
             else color = 0xff000000;
 
@@ -269,7 +259,7 @@ public class AchievementScreen extends Screen
         }
 
         Achievement hoveredAchievement = null;
-        final ItemRenderer itemRenderer = new ItemRenderer();
+        final ItemRenderer ir = new ItemRenderer();
 
         glPushMatrix();
         glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
@@ -279,10 +269,12 @@ public class AchievementScreen extends Screen
         glEnable(GL_RESCALE_NORMAL);
         glEnable(GL_COLOR_MATERIAL);
         
-        for (int j = 0; j < Achievements.achievements.size(); ++j) {
-            final Achievement ach = Achievements.achievements.get(j);
+        for (int i = 0; i < Achievements.achievements.size(); ++i) {
+            final Achievement ach = Achievements.achievements.get(i);
+
             final int x = ach.x * ACHIEVEMENT_COORD_SCALE - xScroll;
             final int y = ach.y * ACHIEVEMENT_COORD_SCALE - yScroll;
+
             if (x >= -24 && y >= -24 && x <= BIGMAP_WIDTH && y <= BIGMAP_HEIGHT) {
                 if (this.statsCounter.hasTaken(ach)) {
                     final float br = 1.0f;
@@ -310,14 +302,14 @@ public class AchievementScreen extends Screen
                 if (!this.statsCounter.canTake(ach)) {
                     final float br = 0.1f;
                     glColor4f(br, br, br, 1.0f);
-                    itemRenderer.setColor = false;
+                    ir.setColor = false;
                 }
                 glEnable(GL_LIGHTING);
                 glEnable(GL_CULL_FACE);
-                itemRenderer.renderGuiItem(this.minecraft.font, this.minecraft.textures, ach.icon, xx + 3, yy + 3);
+                ir.renderGuiItem(this.minecraft.font, this.minecraft.textures, ach.icon, xx + 3, yy + 3);
                 glDisable(GL_LIGHTING);
                 if (!this.statsCounter.canTake(ach)) {
-                    itemRenderer.setColor = true;
+                    ir.setColor = true;
                 }
                 glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -371,6 +363,7 @@ public class AchievementScreen extends Screen
             }
             this.font.drawShadow(name, x, y, this.statsCounter.canTake(ach) ? (ach.isGolden() ? -128 : -1) : (ach.isGolden() ? 0xff808040 : 0xff808080));
         }
+        
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LIGHTING);
         Lighting.turnOff();
@@ -380,11 +373,5 @@ public class AchievementScreen extends Screen
     public boolean isPauseScreen() {
         return true;
     }
-    
-    static {
-        xMin = Achievements.xMin * ACHIEVEMENT_COORD_SCALE - BIGMAP_WIDTH / 2;
-        yMin = Achievements.yMin * ACHIEVEMENT_COORD_SCALE - BIGMAP_WIDTH / 2;
-        xMax = Achievements.xMax * ACHIEVEMENT_COORD_SCALE - BIGMAP_HEIGHT / 2;
-        yMax = Achievements.yMax * ACHIEVEMENT_COORD_SCALE - BIGMAP_HEIGHT / 2;
-    }
+
 }

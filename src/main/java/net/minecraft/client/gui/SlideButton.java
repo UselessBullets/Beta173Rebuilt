@@ -18,7 +18,6 @@ public class SlideButton extends Button
         super(id, x, y, 150, 20, msg);
         this.value = 1.0f;
         this.sliding = false;
-        this.option = null;
         this.option = option;
         this.value = value;
     }
@@ -30,17 +29,11 @@ public class SlideButton extends Button
     
     @Override
     protected void renderBg(final Minecraft minecraft, final int xm, final int ym) {
-        if (!this.visible) {
-            return;
-        }
+        if (!this.visible) return;
         if (this.sliding) {
             this.value = (xm - (this.x + 4)) / (float)(this.w - 8);
-            if (this.value < 0.0f) {
-                this.value = 0.0f;
-            }
-            if (this.value > 1.0f) {
-                this.value = 1.0f;
-            }
+            if (this.value < 0.0f) this.value = 0.0f;
+            if (this.value > 1.0f) this.value = 1.0f;
             minecraft.options.set(this.option, this.value);
             this.msg = minecraft.options.getMessage(this.option);
         }
@@ -53,12 +46,8 @@ public class SlideButton extends Button
     public boolean clicked(final Minecraft minecraft, final int mx, final int my) {
         if (super.clicked(minecraft, mx, my)) {
             this.value = (mx - (this.x + 4)) / (float)(this.w - 8);
-            if (this.value < 0.0f) {
-                this.value = 0.0f;
-            }
-            if (this.value > 1.0f) {
-                this.value = 1.0f;
-            }
+            if (this.value < 0.0f) this.value = 0.0f;
+            if (this.value > 1.0f) this.value = 1.0f;
             minecraft.options.set(this.option, this.value);
             this.msg = minecraft.options.getMessage(this.option);
             return this.sliding = true;

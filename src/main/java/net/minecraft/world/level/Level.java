@@ -975,7 +975,7 @@ public class Level implements LevelSource
     }
     
     public Vec3 getSkyColor(final Entity source, final float partialTick) {
-        float n = Mth.cos(this.getTimeOfDay(partialTick) * 3.1415927f * 2.0f) * 2.0f + 0.5f;
+        float n = Mth.cos(this.getTimeOfDay(partialTick) * Mth.PI * 2.0f) * 2.0f + 0.5f;
         if (n < 0.0f) {
             n = 0.0f;
         }
@@ -1025,7 +1025,7 @@ public class Level implements LevelSource
     }
     
     public Vec3 getCloudColor(final float partialTick) {
-        float n = Mth.cos(this.getTimeOfDay(partialTick) * 3.1415927f * 2.0f) * 2.0f + 0.5f;
+        float n = Mth.cos(this.getTimeOfDay(partialTick) * Mth.PI * 2.0f) * 2.0f + 0.5f;
         if (n < 0.0f) {
             n = 0.0f;
         }
@@ -1093,7 +1093,7 @@ public class Level implements LevelSource
     }
     
     public float getStarBrightness(final float partialTick) {
-        float n = 1.0f - (Mth.cos(this.getTimeOfDay(partialTick) * 3.1415927f * 2.0f) * 2.0f + 0.75f);
+        float n = 1.0f - (Mth.cos(this.getTimeOfDay(partialTick) * Mth.PI * 2.0f) * 2.0f + 0.75f);
         if (n < 0.0f) {
             n = 0.0f;
         }

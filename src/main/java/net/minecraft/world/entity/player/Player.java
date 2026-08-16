@@ -338,7 +338,7 @@ public abstract class Player extends Mob
             itemEntity.zd = Mth.cos(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * n3;
             itemEntity.yd = -Mth.sin(this.xRot / 180.0f * Mth.PI) * n3 + 0.1f;
             final float n4 = 0.02f;
-            final float n5 = this.random.nextFloat() * 3.1415927f * 2.0f;
+            final float n5 = this.random.nextFloat() * Mth.PI * 2.0f;
             final float n6 = n4 * this.random.nextFloat();
             final ItemEntity itemEntity2 = itemEntity;
             itemEntity2.xd += Math.cos(n5) * n6;

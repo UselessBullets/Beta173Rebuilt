@@ -78,7 +78,7 @@ public class PathfinderMob extends Mob
             final double x = vec3.x - this.x;
             final double y = vec3.z - this.z;
             final double n3 = vec3.y - floor;
-            float n4 = (float)(Math.atan2(y, x) * 180.0 / 3.1415927410125732) - 90.0f - this.yRot;
+            float n4 = (float)(Math.atan2(y, x) * 180.0 / Math.PI) - 90.0f - this.yRot;
             this.yya = this.runSpeed;
             while (n4 < -180.0f) {
                 n4 += 360.0f;
@@ -97,7 +97,7 @@ public class PathfinderMob extends Mob
                 final double x2 = this.attackTarget.x - this.x;
                 final double y2 = this.attackTarget.z - this.z;
                 final float yRot = this.yRot;
-                this.yRot = (float)(Math.atan2(y2, x2) * 180.0 / 3.1415927410125732) - 90.0f;
+                this.yRot = (float)(Math.atan2(y2, x2) * 180.0 / Math.PI) - 90.0f;
                 final float n5 = (yRot - this.yRot + 90.0f) * Mth.PI / 180.0f;
                 this.xxa = -Mth.sin(n5) * this.yya * 1.0f;
                 this.yya = Mth.cos(n5) * this.yya * 1.0f;

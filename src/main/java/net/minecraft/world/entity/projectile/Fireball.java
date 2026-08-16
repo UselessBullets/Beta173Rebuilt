@@ -159,8 +159,8 @@ public class Fireball extends Entity
         this.y += this.yd;
         this.z += this.zd;
         final float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
-        this.yRot = (float)(Math.atan2(this.xd, this.zd) * 180.0 / 3.1415927410125732);
-        this.xRot = (float)(Math.atan2(this.yd, sqrt) * 180.0 / 3.1415927410125732);
+        this.yRot = (float)(Math.atan2(this.xd, this.zd) * 180.0 / Math.PI);
+        this.xRot = (float)(Math.atan2(this.yd, sqrt) * 180.0 / Math.PI);
         while (this.xRot - this.xRotO < -180.0f) {
             this.xRotO -= 360.0f;
         }

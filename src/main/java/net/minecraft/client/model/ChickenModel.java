@@ -60,7 +60,7 @@ public class ChickenModel extends Model
         this.redThing.yRot = this.head.yRot;
         this.body.xRot = 1.5707964f;
         this.leg0.xRot = Mth.cos(time * 0.6662f) * 1.4f * r;
-        this.leg1.xRot = Mth.cos(time * 0.6662f + 3.1415927f) * 1.4f * r;
+        this.leg1.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 1.4f * r;
         this.wing0.zRot = bob;
         this.wing1.zRot = -bob;
     }

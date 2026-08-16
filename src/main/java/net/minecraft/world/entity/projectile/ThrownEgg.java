@@ -105,10 +105,10 @@ public class ThrownEgg extends Entity
         this.yd = y;
         this.zd = z;
         final float sqrt2 = Mth.sqrt(x * x + z * z);
-        final float n = (float)(Math.atan2(x, z) * 180.0 / 3.1415927410125732);
+        final float n = (float)(Math.atan2(x, z) * 180.0 / Math.PI);
         this.yRot = n;
         this.yRotO = n;
-        final float n2 = (float)(Math.atan2(y, sqrt2) * 180.0 / 3.1415927410125732);
+        final float n2 = (float)(Math.atan2(y, sqrt2) * 180.0 / Math.PI);
         this.xRot = n2;
         this.xRotO = n2;
         this.life = 0;
@@ -121,10 +121,10 @@ public class ThrownEgg extends Entity
         this.zd = zd;
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
             final float sqrt = Mth.sqrt(xd * xd + zd * zd);
-            final float n = (float)(Math.atan2(xd, zd) * 180.0 / 3.1415927410125732);
+            final float n = (float)(Math.atan2(xd, zd) * 180.0 / Math.PI);
             this.yRot = n;
             this.yRotO = n;
-            final float n2 = (float)(Math.atan2(yd, sqrt) * 180.0 / 3.1415927410125732);
+            final float n2 = (float)(Math.atan2(yd, sqrt) * 180.0 / Math.PI);
             this.xRot = n2;
             this.xRotO = n2;
         }
@@ -209,8 +209,8 @@ public class ThrownEgg extends Entity
         this.y += this.yd;
         this.z += this.zd;
         final float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
-        this.yRot = (float)(Math.atan2(this.xd, this.zd) * 180.0 / 3.1415927410125732);
-        this.xRot = (float)(Math.atan2(this.yd, sqrt) * 180.0 / 3.1415927410125732);
+        this.yRot = (float)(Math.atan2(this.xd, this.zd) * 180.0 / Math.PI);
+        this.xRot = (float)(Math.atan2(this.yd, sqrt) * 180.0 / Math.PI);
         while (this.xRot - this.xRotO < -180.0f) {
             this.xRotO -= 360.0f;
         }

@@ -789,7 +789,7 @@ public class TileRenderer
                     array[i].yRot(0.0f);
                 }
                 if (n == 3) {
-                    array[i].yRot(3.1415927f);
+                    array[i].yRot(Mth.PI);
                 }
                 if (n == 2) {
                     array[i].yRot(1.5707964f);

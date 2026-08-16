@@ -363,7 +363,7 @@ public class AchievementScreen extends Screen
             }
             this.font.drawShadow(name, x, y, this.statsCounter.canTake(ach) ? (ach.isGolden() ? -128 : -1) : (ach.isGolden() ? 0xff808040 : 0xff808080));
         }
-        
+
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LIGHTING);
         Lighting.turnOff();

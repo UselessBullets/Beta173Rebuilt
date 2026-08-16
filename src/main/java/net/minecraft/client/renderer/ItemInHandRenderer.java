@@ -163,7 +163,7 @@ public class ItemInHandRenderer
             GL11.glPushMatrix();
             final float n3 = 0.8f;
             final float attackAnim = player.getAttackAnim(partialTick);
-            GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim) * 3.1415927f * 2.0f) * 0.2f, -Mth.sin(attackAnim * 3.1415927f) * 0.2f);
+            GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim) * Mth.PI * 2.0f) * 0.2f, -Mth.sin(attackAnim * Mth.PI) * 0.2f);
             float n4 = 1.0f - n2 / 45.0f + 0.1f;
             if (n4 < 0.0f) {
                 n4 = 0.0f;
@@ -171,7 +171,7 @@ public class ItemInHandRenderer
             if (n4 > 1.0f) {
                 n4 = 1.0f;
             }
-            final float n5 = -Mth.cos(n4 * 3.1415927f) * 0.5f + 0.5f;
+            final float n5 = -Mth.cos(n4 * Mth.PI) * 0.5f + 0.5f;
             GL11.glTranslatef(0.0f, 0.0f * n3 - (1.0f - n) * 1.2f - n5 * 0.5f + 0.04f, -0.9f * n3);
             GL11.glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(n5 * -85.0f, 0.0f, 0.0f, 1.0f);
@@ -193,8 +193,8 @@ public class ItemInHandRenderer
                 GL11.glPopMatrix();
             }
             final float attackAnim2 = player.getAttackAnim(partialTick);
-            final float sin = Mth.sin(attackAnim2 * attackAnim2 * 3.1415927f);
-            final float sin2 = Mth.sin(Mth.sqrt(attackAnim2) * 3.1415927f);
+            final float sin = Mth.sin(attackAnim2 * attackAnim2 * Mth.PI);
+            final float sin2 = Mth.sin(Mth.sqrt(attackAnim2) * Mth.PI);
             GL11.glRotatef(-sin * 20.0f, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(-sin2 * 20.0f, 0.0f, 0.0f, 1.0f);
             GL11.glRotatef(-sin2 * 80.0f, 1.0f, 0.0f, 0.0f);
@@ -222,13 +222,13 @@ public class ItemInHandRenderer
             GL11.glPushMatrix();
             final float n11 = 0.8f;
             final float attackAnim3 = player.getAttackAnim(partialTick);
-            GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim3) * 3.1415927f) * 0.4f, Mth.sin(Mth.sqrt(attackAnim3) * 3.1415927f * 2.0f) * 0.2f, -Mth.sin(attackAnim3 * 3.1415927f) * 0.2f);
+            GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim3) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim3) * Mth.PI * 2.0f) * 0.2f, -Mth.sin(attackAnim3 * Mth.PI) * 0.2f);
             GL11.glTranslatef(0.7f * n11, -0.65f * n11 - (1.0f - n) * 0.6f, -0.9f * n11);
             GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             GL11.glEnable(GL_RESCALE_NORMAL);
             final float attackAnim4 = player.getAttackAnim(partialTick);
-            final float sin3 = Mth.sin(attackAnim4 * attackAnim4 * 3.1415927f);
-            final float sin4 = Mth.sin(Mth.sqrt(attackAnim4) * 3.1415927f);
+            final float sin3 = Mth.sin(attackAnim4 * attackAnim4 * Mth.PI);
+            final float sin4 = Mth.sin(Mth.sqrt(attackAnim4) * Mth.PI);
             GL11.glRotatef(-sin3 * 20.0f, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(-sin4 * 20.0f, 0.0f, 0.0f, 1.0f);
             GL11.glRotatef(-sin4 * 80.0f, 1.0f, 0.0f, 0.0f);
@@ -244,13 +244,13 @@ public class ItemInHandRenderer
             GL11.glPushMatrix();
             final float n13 = 0.8f;
             final float attackAnim5 = player.getAttackAnim(partialTick);
-            GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim5) * 3.1415927f) * 0.3f, Mth.sin(Mth.sqrt(attackAnim5) * 3.1415927f * 2.0f) * 0.4f, -Mth.sin(attackAnim5 * 3.1415927f) * 0.4f);
+            GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim5) * Mth.PI) * 0.3f, Mth.sin(Mth.sqrt(attackAnim5) * Mth.PI * 2.0f) * 0.4f, -Mth.sin(attackAnim5 * Mth.PI) * 0.4f);
             GL11.glTranslatef(0.8f * n13, -0.75f * n13 - (1.0f - n) * 0.6f, -0.9f * n13);
             GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             GL11.glEnable(GL_RESCALE_NORMAL);
             final float attackAnim6 = player.getAttackAnim(partialTick);
-            final float sin5 = Mth.sin(attackAnim6 * attackAnim6 * 3.1415927f);
-            GL11.glRotatef(Mth.sin(Mth.sqrt(attackAnim6) * 3.1415927f) * 70.0f, 0.0f, 1.0f, 0.0f);
+            final float sin5 = Mth.sin(attackAnim6 * attackAnim6 * Mth.PI);
+            GL11.glRotatef(Mth.sin(Mth.sqrt(attackAnim6) * Mth.PI) * 70.0f, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(-sin5 * 20.0f, 0.0f, 0.0f, 1.0f);
             GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadHttpTexture(this.mc.player.customTextureUrl, this.mc.player.getTexture()));
             GL11.glTranslatef(-1.0f, 3.6f, 3.5f);

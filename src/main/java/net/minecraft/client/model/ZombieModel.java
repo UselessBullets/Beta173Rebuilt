@@ -11,8 +11,8 @@ public class ZombieModel extends HumanoidModel
     @Override
     public void setupAnim(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
         super.setupAnim(time, r, bob, yRot, xRot, scale);
-        final float sin = Mth.sin(this.attackTime * 3.1415927f);
-        final float sin2 = Mth.sin((1.0f - (1.0f - this.attackTime) * (1.0f - this.attackTime)) * 3.1415927f);
+        final float sin = Mth.sin(this.attackTime * Mth.PI);
+        final float sin2 = Mth.sin((1.0f - (1.0f - this.attackTime) * (1.0f - this.attackTime)) * Mth.PI);
         this.arm0.zRot = 0.0f;
         this.arm1.zRot = 0.0f;
         this.arm0.yRot = -(0.1f - sin * 0.6f);

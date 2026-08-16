@@ -4,6 +4,8 @@
 
 package net.minecraft.client.model;
 
+import util.Mth;
+
 public class BoatModel extends Model
 {
     public Cube[] cubes;
@@ -31,7 +33,7 @@ public class BoatModel extends Model
         this.cubes[0].xRot = 1.5707964f;
         this.cubes[1].yRot = 4.712389f;
         this.cubes[2].yRot = 1.5707964f;
-        this.cubes[3].yRot = 3.1415927f;
+        this.cubes[3].yRot = Mth.PI;
     }
     
     @Override

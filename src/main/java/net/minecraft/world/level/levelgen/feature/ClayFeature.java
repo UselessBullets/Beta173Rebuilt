@@ -37,8 +37,8 @@ public class ClayFeature extends Feature
             final double n9 = n6 + (n7 - n6) * i / this.count;
             final double n10 = n4 + (n5 - n4) * i / this.count;
             final double n11 = random.nextDouble() * this.count / 16.0;
-            final double n12 = (Mth.sin(i * 3.1415927f / this.count) + 1.0f) * n11 + 1.0;
-            final double n13 = (Mth.sin(i * 3.1415927f / this.count) + 1.0f) * n11 + 1.0;
+            final double n12 = (Mth.sin(i * Mth.PI / this.count) + 1.0f) * n11 + 1.0;
+            final double n13 = (Mth.sin(i * Mth.PI / this.count) + 1.0f) * n11 + 1.0;
             final int floor = Mth.floor(n8 - n12 / 2.0);
             final int floor2 = Mth.floor(n8 + n12 / 2.0);
             final int floor3 = Mth.floor(n9 - n13 / 2.0);

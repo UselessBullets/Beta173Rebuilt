@@ -8,6 +8,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import net.minecraft.world.item.Item;
 import net.minecraft.client.Minecraft;
+import util.Mth;
 
 public class ClockTexture extends DynamicTexture
 {
@@ -36,9 +37,9 @@ public class ClockTexture extends DynamicTexture
     public void tick() {
         double n = 0.0;
         if (this.mc.level != null && this.mc.player != null) {
-            n = -this.mc.level.getTimeOfDay(1.0f) * 3.1415927f * 2.0f;
+            n = -this.mc.level.getTimeOfDay(1.0f) * Mth.PI * 2.0f;
             if (this.mc.level.dimension.foggy) {
-                n = Math.random() * 3.1415927410125732 * 2.0;
+                n = Math.random() * Math.PI * 2.0;
             }
         }
         double n2;

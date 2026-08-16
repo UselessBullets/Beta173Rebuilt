@@ -115,10 +115,10 @@ public class FishingHook extends Entity
         this.yd = yd;
         this.zd = zd;
         final float sqrt2 = Mth.sqrt(xd * xd + zd * zd);
-        final float n = (float)(Math.atan2(xd, zd) * 180.0 / 3.1415927410125732);
+        final float n = (float)(Math.atan2(xd, zd) * 180.0 / Math.PI);
         this.yRot = n;
         this.yRotO = n;
-        final float n2 = (float)(Math.atan2(yd, sqrt2) * 180.0 / 3.1415927410125732);
+        final float n2 = (float)(Math.atan2(yd, sqrt2) * 180.0 / Math.PI);
         this.xRot = n2;
         this.xRotO = n2;
         this.life = 0;
@@ -247,8 +247,8 @@ public class FishingHook extends Entity
         }
         this.move(this.xd, this.yd, this.zd);
         final float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
-        this.yRot = (float)(Math.atan2(this.xd, this.zd) * 180.0 / 3.1415927410125732);
-        this.xRot = (float)(Math.atan2(this.yd, sqrt) * 180.0 / 3.1415927410125732);
+        this.yRot = (float)(Math.atan2(this.xd, this.zd) * 180.0 / Math.PI);
+        this.xRot = (float)(Math.atan2(this.yd, sqrt) * 180.0 / Math.PI);
         while (this.xRot - this.xRotO < -180.0f) {
             this.xRotO -= 360.0f;
         }

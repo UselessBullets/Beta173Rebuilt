@@ -104,7 +104,7 @@ public abstract class Mob extends Entity
         this.rotA = (float)(Math.random() + 1.0) * 0.01f;
         this.setPos(this.x, this.y, this.z);
         this.timeOffs = (float)Math.random() * 12398.0f;
-        this.yRot = (float)(Math.random() * 3.1415927410125732 * 2.0);
+        this.yRot = (float)(Math.random() * Math.PI * 2.0);
         this.footSize = 0.5f;
     }
     
@@ -350,7 +350,7 @@ public abstract class Mob extends Entity
                 double n2;
                 double n3;
                 for (n2 = source.x - this.x, n3 = source.z - this.z; n2 * n2 + n3 * n3 < 1.0E-4; n2 = (Math.random() - Math.random()) * 0.01, n3 = (Math.random() - Math.random()) * 0.01) {}
-                this.hurtDir = (float)(Math.atan2(n3, n2) * 180.0 / 3.1415927410125732) - this.yRot;
+                this.hurtDir = (float)(Math.atan2(n3, n2) * 180.0 / Math.PI) - this.yRot;
                 this.knockback(source, dmg, n2, n3);
             }
             else {
@@ -718,8 +718,8 @@ public abstract class Mob extends Entity
             y2 = (e.bb.y0 + e.bb.y1) / 2.0 - (this.y + this.getHeadHeight());
         }
         final double x2 = Mth.sqrt(x * x + y * y);
-        final float b = (float)(Math.atan2(y, x) * 180.0 / 3.1415927410125732) - 90.0f;
-        this.xRot = -this.rotLerp(this.xRot, (float)(-(Math.atan2(y2, x2) * 180.0 / 3.1415927410125732)), xMax);
+        final float b = (float)(Math.atan2(y, x) * 180.0 / Math.PI) - 90.0f;
+        this.xRot = -this.rotLerp(this.xRot, (float)(-(Math.atan2(y2, x2) * 180.0 / Math.PI)), xMax);
         this.yRot = this.rotLerp(this.yRot, b, yMax);
     }
     

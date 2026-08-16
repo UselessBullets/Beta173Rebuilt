@@ -117,7 +117,7 @@ public class Ghast extends FlyingMob implements Enemy
             }
         }
         else {
-            final float n9 = -(float)Math.atan2(this.xd, this.zd) * 180.0f / 3.1415927f;
+            final float n9 = -(float)Math.atan2(this.xd, this.zd) * 180.0f / Mth.PI;
             this.yRot = n9;
             this.yBodyRot = n9;
             if (this.charge > 0) {

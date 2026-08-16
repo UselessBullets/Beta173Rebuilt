@@ -64,7 +64,7 @@ public class Skeleton extends Monster
                 e.shoot(n, n3 + n4, n2, 0.6f, 12.0f);
                 this.attackTime = 30;
             }
-            this.yRot = (float)(Math.atan2(n2, n) * 180.0 / 3.1415927410125732) - 90.0f;
+            this.yRot = (float)(Math.atan2(n2, n) * 180.0 / Math.PI) - 90.0f;
             this.holdGround = true;
         }
     }

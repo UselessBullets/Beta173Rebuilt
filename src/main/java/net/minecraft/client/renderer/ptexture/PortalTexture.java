@@ -40,7 +40,7 @@ public class PortalTexture extends DynamicTexture
                             n5 -= 2.0f;
                         }
                         final float n6 = n4 * n4 + n5 * n5;
-                        n += (Mth.sin((float)Math.atan2(n5, n4) + (i / 32.0f * 3.1415927f * 2.0f - n6 * 10.0f + l * 2) * (l * 2 - 1)) + 1.0f) / 2.0f / (n6 + 1.0f) * 0.5f;
+                        n += (Mth.sin((float)Math.atan2(n5, n4) + (i / 32.0f * Mth.PI * 2.0f - n6 * 10.0f + l * 2) * (l * 2 - 1)) + 1.0f) / 2.0f / (n6 + 1.0f) * 0.5f;
                     }
                     final float n7 = n + random.nextFloat() * 0.1f;
                     final int n8 = (int)(n7 * 100.0f + 155.0f);

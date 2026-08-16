@@ -22,9 +22,9 @@ public class NoteParticle extends Particle
         this.yd *= 0.009999999776482582;
         this.zd *= 0.009999999776482582;
         this.yd += 0.2;
-        this.rCol = Mth.sin(((float)xa + 0.0f) * 3.1415927f * 2.0f) * 0.65f + 0.35f;
-        this.gCol = Mth.sin(((float)xa + 0.33333334f) * 3.1415927f * 2.0f) * 0.65f + 0.35f;
-        this.bCol = Mth.sin(((float)xa + 0.6666667f) * 3.1415927f * 2.0f) * 0.65f + 0.35f;
+        this.rCol = Mth.sin(((float)xa + 0.0f) * Mth.PI * 2.0f) * 0.65f + 0.35f;
+        this.gCol = Mth.sin(((float)xa + 0.33333334f) * Mth.PI * 2.0f) * 0.65f + 0.35f;
+        this.bCol = Mth.sin(((float)xa + 0.6666667f) * Mth.PI * 2.0f) * 0.65f + 0.35f;
         this.size *= 0.75f;
         this.size *= scale;
         this.oSize = this.size;

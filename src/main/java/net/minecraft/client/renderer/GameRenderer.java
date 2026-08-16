@@ -226,9 +226,9 @@ public class GameRenderer
         final float n = -(player.walkDist + (player.walkDist - player.walkDistO) * partialTick);
         final float n2 = player.oBob + (player.bob - player.oBob) * partialTick;
         final float n3 = player.oTilt + (player.tilt - player.oTilt) * partialTick;
-        GL11.glTranslatef(Mth.sin(n * 3.1415927f) * n2 * 0.5f, -Math.abs(Mth.cos(n * 3.1415927f) * n2), 0.0f);
-        GL11.glRotatef(Mth.sin(n * 3.1415927f) * n2 * 3.0f, 0.0f, 0.0f, 1.0f);
-        GL11.glRotatef(Math.abs(Mth.cos(n * 3.1415927f - 0.2f) * n2) * 5.0f, 1.0f, 0.0f, 0.0f);
+        GL11.glTranslatef(Mth.sin(n * Mth.PI) * n2 * 0.5f, -Math.abs(Mth.cos(n * Mth.PI) * n2), 0.0f);
+        GL11.glRotatef(Mth.sin(n * Mth.PI) * n2 * 3.0f, 0.0f, 0.0f, 1.0f);
+        GL11.glRotatef(Math.abs(Mth.cos(n * Mth.PI - 0.2f) * n2) * 5.0f, 1.0f, 0.0f, 0.0f);
         GL11.glRotatef(n3, 1.0f, 0.0f, 0.0f);
     }
     
@@ -262,9 +262,9 @@ public class GameRenderer
             else {
                 final float yRot = cameraTargetPlayer.yRot;
                 final float xRot = cameraTargetPlayer.xRot;
-                final double n5 = -Mth.sin(yRot / 180.0f * 3.1415927f) * Mth.cos(xRot / 180.0f * 3.1415927f) * n2;
-                final double n6 = Mth.cos(yRot / 180.0f * 3.1415927f) * Mth.cos(xRot / 180.0f * 3.1415927f) * n2;
-                final double n7 = -Mth.sin(xRot / 180.0f * 3.1415927f) * n2;
+                final double n5 = -Mth.sin(yRot / 180.0f * Mth.PI) * Mth.cos(xRot / 180.0f * Mth.PI) * n2;
+                final double n6 = Mth.cos(yRot / 180.0f * Mth.PI) * Mth.cos(xRot / 180.0f * Mth.PI) * n2;
+                final double n7 = -Mth.sin(xRot / 180.0f * Mth.PI) * n2;
                 for (int i = 0; i < 8; ++i) {
                     final float n8 = (float)((i & 0x1) * 2 - 1);
                     final float n9 = (float)((i >> 1 & 0x1) * 2 - 1);

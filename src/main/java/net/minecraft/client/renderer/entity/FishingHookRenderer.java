@@ -72,8 +72,8 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook>
             final double n24 = (float)(n15 - n21);
             GL11.glDisable(GL_TEXTURE_2D);
             GL11.glDisable(GL_LIGHTING);
-            instance.begin(3);
-            instance.color(0);
+            instance.begin(GL_LINE_STRIP);
+            instance.color(0x0);
             for (int n25 = 16, i = 0; i <= n25; ++i) {
                 final float n26 = i / (float)n25;
                 instance.vertex(x + n22 * n26, y + n23 * (n26 * n26 + n26) * 0.5 + 0.25, z + n24 * n26);

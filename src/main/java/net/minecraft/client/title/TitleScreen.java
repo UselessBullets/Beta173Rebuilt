@@ -122,7 +122,7 @@ public class TitleScreen extends Screen
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.blit(n + 0, n2 + 0, 0, 0, 155, 44);
         this.blit(n + 155, n2 + 0, 0, 45, 155, 44);
-        instance.color(16777215);
+        instance.color(0xffffff);
         glPushMatrix();
         glTranslatef((float)(this.width / 2 + 90), 70.0f, 0.0f);
         glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);

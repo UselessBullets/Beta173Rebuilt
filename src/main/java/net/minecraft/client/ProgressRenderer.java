@@ -99,7 +99,7 @@ public class ProgressRenderer implements ProgressListener
             GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
             final float n = 32.0f;
             instance.begin();
-            instance.color(4210752);
+            instance.color(0x404040);
             instance.vertexUV(0.0, height, 0.0, 0.0, height / n);
             instance.vertexUV(width, height, 0.0, width / n, height / n);
             instance.vertexUV(width, 0.0, 0.0, width / n, 0.0);
@@ -112,12 +112,12 @@ public class ProgressRenderer implements ProgressListener
                 final int n5 = height / 2 + 16;
                 GL11.glDisable(GL_TEXTURE_2D);
                 instance.begin();
-                instance.color(8421504);
+                instance.color(0x808080);
                 instance.vertex(n4, n5, 0.0);
                 instance.vertex(n4, n5 + n3, 0.0);
                 instance.vertex(n4 + n2, n5 + n3, 0.0);
                 instance.vertex(n4 + n2, n5, 0.0);
-                instance.color(8454016);
+                instance.color(0x80ff80);
                 instance.vertex(n4, n5, 0.0);
                 instance.vertex(n4, n5 + n3, 0.0);
                 instance.vertex(n4 + i, n5 + n3, 0.0);

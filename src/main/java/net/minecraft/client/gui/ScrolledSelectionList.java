@@ -195,7 +195,7 @@ public abstract class ScrolledSelectionList
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         final float n9 = 32.0f;
         instance.begin();
-        instance.color(2105376);
+        instance.color(0x202020);
         instance.vertexUV(this.x0, this.y1, 0.0, this.x0 / n9, (this.y1 + (int)this.yo) / n9);
         instance.vertexUV(this.x1, this.y1, 0.0, this.x1 / n9, (this.y1 + (int)this.yo) / n9);
         instance.vertexUV(this.x1, this.y0, 0.0, this.x1 / n9, (this.y0 + (int)this.yo) / n9);
@@ -217,12 +217,12 @@ public abstract class ScrolledSelectionList
                         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
                         GL11.glDisable(GL_TEXTURE_2D);
                         instance.begin();
-                        instance.color(8421504);
+                        instance.color(0x808080);
                         instance.vertexUV(n11, y2 + h + 2, 0.0, 0.0, 1.0);
                         instance.vertexUV(n12, y2 + h + 2, 0.0, 1.0, 1.0);
                         instance.vertexUV(n12, y2 - 2, 0.0, 1.0, 0.0);
                         instance.vertexUV(n11, y2 - 2, 0.0, 0.0, 0.0);
-                        instance.color(0);
+                        instance.color(0x0);
                         instance.vertexUV(n11 + 1, y2 + h + 1, 0.0, 0.0, 1.0);
                         instance.vertexUV(n12 - 1, y2 + h + 1, 0.0, 1.0, 1.0);
                         instance.vertexUV(n12 - 1, y2 - 1, 0.0, 1.0, 0.0);

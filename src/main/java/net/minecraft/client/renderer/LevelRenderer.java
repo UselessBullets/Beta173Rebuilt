@@ -635,7 +635,7 @@ public class LevelRenderer implements LevelListener
                 g = n8;
                 b = n9;
             }
-            instance.begin(6);
+            instance.begin(GL_TRIANGLE_FAN);
             instance.color(r, g, b, sunriseColor[3]);
             instance.vertex(0.0, 100.0, 0.0);
             final int n10 = 16;
@@ -1082,21 +1082,21 @@ public class LevelRenderer implements LevelListener
     
     private void render(final AABB aabb) {
         final Tesselator instance = Tesselator.instance;
-        instance.begin(3);
+        instance.begin(GL_LINE_STRIP);
         instance.vertex(aabb.x0, aabb.y0, aabb.z0);
         instance.vertex(aabb.x1, aabb.y0, aabb.z0);
         instance.vertex(aabb.x1, aabb.y0, aabb.z1);
         instance.vertex(aabb.x0, aabb.y0, aabb.z1);
         instance.vertex(aabb.x0, aabb.y0, aabb.z0);
         instance.end();
-        instance.begin(3);
+        instance.begin(GL_LINE_STRIP);
         instance.vertex(aabb.x0, aabb.y1, aabb.z0);
         instance.vertex(aabb.x1, aabb.y1, aabb.z0);
         instance.vertex(aabb.x1, aabb.y1, aabb.z1);
         instance.vertex(aabb.x0, aabb.y1, aabb.z1);
         instance.vertex(aabb.x0, aabb.y1, aabb.z0);
         instance.end();
-        instance.begin(1);
+        instance.begin(GL_LINES);
         instance.vertex(aabb.x0, aabb.y0, aabb.z0);
         instance.vertex(aabb.x0, aabb.y1, aabb.z0);
         instance.vertex(aabb.x1, aabb.y0, aabb.z0);

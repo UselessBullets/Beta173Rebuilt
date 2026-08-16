@@ -8,6 +8,8 @@ import net.minecraft.client.renderer.Tesselator;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.Toolkit;
@@ -29,19 +31,19 @@ public class Screen extends GuiComponent
     private Button clickedButton;
     
     public Screen() {
-        this.buttons = new ArrayList();
+        this.buttons = new ArrayList<>();
         this.passEvents = false;
         this.clickedButton = null;
     }
     
     public void render(final int xm, final int ym, final float partialTick) {
         for (int i = 0; i < this.buttons.size(); ++i) {
-            ((Button)this.buttons.get(i)).render(this.minecraft, xm, ym);
+            this.buttons.get(i).render(this.minecraft, xm, ym);
         }
     }
     
     protected void keyPressed(final char eventCharacter, final int eventKey) {
-        if (eventKey == 1) {
+        if (eventKey == Keyboard.KEY_ESCAPE) {
             this.minecraft.setScreen(null);
             this.minecraft.grabMouse();
         }
@@ -49,15 +51,22 @@ public class Screen extends GuiComponent
     
     public static String getClipboard() {
         try {
-            final Transferable contents = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-            if (contents != null && contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-                return (String)contents.getTransferData(DataFlavor.stringFlavor);
+            final Transferable t = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+            if (t != null && t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                return (String)t.getTransferData(DataFlavor.stringFlavor);
             }
         }
-        catch (final Exception ex) {}
+        catch (final Exception ignored) {}
         return null;
     }
-    
+
+    public static void setClipboard(String str) {
+        try {
+            StringSelection ss = new StringSelection(str);
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
+        } catch (Exception ignored) {}
+    }
+
     protected void mouseClicked(final int x, final int y, final int buttonNum) {
         if (buttonNum == 0) {
             for (int i = 0; i < this.buttons.size(); ++i) {
@@ -105,16 +114,20 @@ public class Screen extends GuiComponent
     
     public void mouseEvent() {
         if (Mouse.getEventButtonState()) {
-            this.mouseClicked(Mouse.getEventX() * this.width / this.minecraft.width, this.height - Mouse.getEventY() * this.height / this.minecraft.height - 1, Mouse.getEventButton());
+            int xm = Mouse.getEventX() * this.width / this.minecraft.width;
+            int ym = this.height - Mouse.getEventY() * this.height / this.minecraft.height - 1;
+            this.mouseClicked(xm, ym, Mouse.getEventButton());
         }
         else {
-            this.mouseReleased(Mouse.getEventX() * this.width / this.minecraft.width, this.height - Mouse.getEventY() * this.height / this.minecraft.height - 1, Mouse.getEventButton());
+            int xm = Mouse.getEventX() * this.width / this.minecraft.width;
+            int ym = this.height - Mouse.getEventY() * this.height / this.minecraft.height - 1;
+            this.mouseReleased(xm, ym, Mouse.getEventButton());
         }
     }
     
     public void keyboardEvent() {
         if (Keyboard.getEventKeyState()) {
-            if (Keyboard.getEventKey() == 87) {
+            if (Keyboard.getEventKey() == Keyboard.KEY_F11) {
                 this.minecraft.toggleFullScreen();
                 return;
             }
@@ -144,17 +157,17 @@ public class Screen extends GuiComponent
     public void renderDirtBackground(final int vo) {
         GL11.glDisable(GL_LIGHTING);
         GL11.glDisable(GL_FOG);
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
         GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        final float n = 32.0f;
-        instance.begin();
-        instance.color(4210752);
-        instance.vertexUV(0.0, this.height, 0.0, 0.0, this.height / n + vo);
-        instance.vertexUV(this.width, this.height, 0.0, this.width / n, this.height / n + vo);
-        instance.vertexUV(this.width, 0.0, 0.0, this.width / n, 0 + vo);
-        instance.vertexUV(0.0, 0.0, 0.0, 0.0, 0 + vo);
-        instance.end();
+        final float s = 32.0f;
+        t.begin();
+        t.color(0x404040);
+        t.vertexUV(0.0, this.height, 0.0, 0.0, this.height / s + vo);
+        t.vertexUV(this.width, this.height, 0.0, this.width / s, this.height / s + vo);
+        t.vertexUV(this.width, 0.0, 0.0, this.width / s, 0 + vo);
+        t.vertexUV(0.0, 0.0, 0.0, 0.0, 0 + vo);
+        t.end();
     }
     
     public boolean isPauseScreen() {

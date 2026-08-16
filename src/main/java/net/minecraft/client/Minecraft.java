@@ -347,7 +347,7 @@ public abstract class Minecraft implements Runnable
         glDisable(GL_FOG);
         glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/title/mojang.png"));
         instance.begin();
-        instance.color(16777215);
+        instance.color(0xffffff);
         instance.vertexUV(0.0, this.height, 0.0, 0.0, 0.0);
         instance.vertexUV(this.width, this.height, 0.0, 0.0, 0.0);
         instance.vertexUV(this.width, 0.0, 0.0, 0.0, 0.0);
@@ -356,7 +356,7 @@ public abstract class Minecraft implements Runnable
         final int w = 256;
         final int h = 256;
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        instance.color(16777215);
+        instance.color(0xffffff);
         this.blit((screenSizeCalculator.getWidth() - w) / 2, (screenSizeCalculator.getHeight() - h) / 2, 0, 0, w, h);
         glDisable(GL_LIGHTING);
         glDisable(GL_FOG);
@@ -694,14 +694,14 @@ public abstract class Minecraft implements Runnable
         glLineWidth(1.0f);
         glDisable(GL_TEXTURE_2D);
         final Tesselator instance = Tesselator.instance;
-        instance.begin(7);
+        instance.begin(GL_QUADS);
         final int n2 = (int)(n / 200000L);
-        instance.color(536870912);
+        instance.color(0x20000000);
         instance.vertex(0.0, this.height - n2, 0.0);
         instance.vertex(0.0, this.height, 0.0);
         instance.vertex(Minecraft.frameTimes.length, this.height, 0.0);
         instance.vertex(Minecraft.frameTimes.length, this.height - n2, 0.0);
-        instance.color(538968064);
+        instance.color(0x20200000);
         instance.vertex(0.0, this.height - n2 * 2, 0.0);
         instance.vertex(0.0, this.height - n2, 0.0);
         instance.vertex(Minecraft.frameTimes.length, this.height - n2, 0.0);
@@ -712,29 +712,29 @@ public abstract class Minecraft implements Runnable
             n3 += Minecraft.frameTimes[i];
         }
         final int n4 = (int)(n3 / 200000L / Minecraft.frameTimes.length);
-        instance.begin(7);
-        instance.color(541065216);
+        instance.begin(GL_QUADS);
+        instance.color(0x20400000);
         instance.vertex(0.0, this.height - n4, 0.0);
         instance.vertex(0.0, this.height, 0.0);
         instance.vertex(Minecraft.frameTimes.length, this.height, 0.0);
         instance.vertex(Minecraft.frameTimes.length, this.height - n4, 0.0);
         instance.end();
-        instance.begin(1);
+        instance.begin(GL_LINES);
         for (int j = 0; j < Minecraft.frameTimes.length; ++j) {
             final int n5 = (j - Minecraft.frameTimePos & Minecraft.frameTimes.length - 1) * 255 / Minecraft.frameTimes.length;
             final int n6 = n5 * n5 / 255;
             final int n7 = n6 * n6 / 255;
             if (Minecraft.frameTimes[j] > n) {
-                instance.color(-16777216 + n7 * 65536);
+                instance.color(0xff000000 + n7 * 0x10000);
             }
             else {
-                instance.color(-16777216 + n7 * 256);
+                instance.color(0xff000000 + n7 * 0x100);
             }
             final long n8 = Minecraft.frameTimes[j] / 200000L;
             final long n9 = Minecraft.tickTimes[j] / 200000L;
             instance.vertex(j + 0.5f, this.height - n8 + 0.5f, 0.0);
             instance.vertex(j + 0.5f, this.height + 0.5f, 0.0);
-            instance.color(-16777216 + n7 * 65536 + n7 * 256 + n7 * 1);
+            instance.color(0xff000000 + n7 * 0x10000 + n7 * 0x100 + n7 * 0x1);
             instance.vertex(j + 0.5f, this.height - n8 + 0.5f, 0.0);
             instance.vertex(j + 0.5f, this.height - (n8 - n9) + 0.5f, 0.0);
         }

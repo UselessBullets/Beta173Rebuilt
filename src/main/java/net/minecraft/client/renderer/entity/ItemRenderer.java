@@ -187,7 +187,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
             final Tesselator instance = Tesselator.instance;
             final int c = 255 - n << 16 | n << 8;
             final int c2 = (255 - n) / 4 << 16 | 0x3F00;
-            this.fillRect(instance, x + 2, y + 13, 13, 2, 0);
+            this.fillRect(instance, x + 2, y + 13, 13, 2, 0x0);
             this.fillRect(instance, x + 2, y + 13, 12, 1, c2);
             this.fillRect(instance, x + 2, y + 13, w, 1, c);
             GL11.glEnable(GL_TEXTURE_2D);

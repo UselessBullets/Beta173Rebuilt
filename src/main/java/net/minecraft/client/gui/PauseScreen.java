@@ -81,7 +81,7 @@ public class PauseScreen extends Screen
 
             this.drawString(this.font, "Saving level..", 8, this.height - 16, br << 16 | br << 8 | br);
         }
-        
+
         this.drawCenteredString(this.font, "Game menu", this.width / 2, 40, 0xffffff);
 
         super.render(xm, ym, partialTick);

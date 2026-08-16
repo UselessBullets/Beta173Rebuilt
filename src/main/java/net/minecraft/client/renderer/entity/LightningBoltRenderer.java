@@ -54,7 +54,7 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt>
                         n5 += random2.nextInt(31) - 15;
                         n6 += random2.nextInt(31) - 15;
                     }
-                    instance.begin(5);
+                    instance.begin(GL_TRIANGLE_STRIP);
                     final float n9 = 0.5f;
                     instance.color(0.9f * n9, 0.9f * n9, 1.0f * n9, 0.3f);
                     double n10 = 0.1 + j * 0.2;

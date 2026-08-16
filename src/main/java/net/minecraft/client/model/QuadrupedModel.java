@@ -43,9 +43,9 @@ public class QuadrupedModel extends Model
     
     @Override
     public void setupAnim(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
-        this.head.xRot = xRot / Mth.RADDEG;
-        this.head.yRot = yRot / Mth.RADDEG;
-        this.body.xRot = (Mth.PI / 2f);
+        this.head.xRot = xRot * Mth.DEGRAD;
+        this.head.yRot = yRot * Mth.DEGRAD;
+        this.body.xRot = Mth.HALF_PI;
         this.leg0.xRot = Mth.cos(time * 0.6662f) * 1.4f * r;
         this.leg1.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 1.4f * r;
         this.leg2.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 1.4f * r;

@@ -53,8 +53,8 @@ public class LargeCaveFeature extends LargeFeature
             n4 = n9 + (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0f;
             n3 = n10 + (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0f;
             if (!b && step == n6 && thickness > 1.0f) {
-                this.addTunnel(xOffs, zOffs, blocks, xCave, yCave, zCave, random.nextFloat() * 0.5f + 0.5f, yRot - (Mth.PI / 2f), xRot / 3.0f, step, dist, 1.0);
-                this.addTunnel(xOffs, zOffs, blocks, xCave, yCave, zCave, random.nextFloat() * 0.5f + 0.5f, yRot + (Mth.PI / 2f), xRot / 3.0f, step, dist, 1.0);
+                this.addTunnel(xOffs, zOffs, blocks, xCave, yCave, zCave, random.nextFloat() * 0.5f + 0.5f, yRot - Mth.HALF_PI, xRot / 3.0f, step, dist, 1.0);
+                this.addTunnel(xOffs, zOffs, blocks, xCave, yCave, zCave, random.nextFloat() * 0.5f + 0.5f, yRot + Mth.HALF_PI, xRot / 3.0f, step, dist, 1.0);
                 return;
             }
             if (b || random.nextInt(4) != 0) {

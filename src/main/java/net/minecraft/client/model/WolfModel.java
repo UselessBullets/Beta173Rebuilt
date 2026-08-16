@@ -84,9 +84,9 @@ public class WolfModel extends Model
             this.body.xRot = 0.7853982f;
             this.tail.setPos(-1.0f, 21.0f, 6.0f);
             this.leg0.setPos(-2.5f, 22.0f, 2.0f);
-            this.leg0.xRot = ((Mth.PI / 2f) * 3f);
+            this.leg0.xRot = (Mth.HALF_PI * 3f);
             this.leg1.setPos(0.5f, 22.0f, 2.0f);
-            this.leg1.xRot = ((Mth.PI / 2f) * 3f);
+            this.leg1.xRot = (Mth.HALF_PI * 3f);
             this.leg2.xRot = 5.811947f;
             this.leg2.setPos(-2.49f, 17.0f, -4.0f);
             this.leg3.xRot = 5.811947f;
@@ -94,7 +94,7 @@ public class WolfModel extends Model
         }
         else {
             this.body.setPos(0.0f, 14.0f, 2.0f);
-            this.body.xRot = (Mth.PI / 2f);
+            this.body.xRot = Mth.HALF_PI;
             this.upperBody.setPos(-1.0f, 14.0f, -3.0f);
             this.upperBody.xRot = this.body.xRot;
             this.tail.setPos(-1.0f, 12.0f, 8.0f);
@@ -124,8 +124,8 @@ public class WolfModel extends Model
     @Override
     public void setupAnim(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
         super.setupAnim(time, r, bob, yRot, xRot, scale);
-        this.head.xRot = xRot / Mth.RADDEG;
-        this.head.yRot = yRot / Mth.RADDEG;
+        this.head.xRot = xRot * Mth.DEGRAD;
+        this.head.yRot = yRot * Mth.DEGRAD;
         this.ear1.yRot = this.head.yRot;
         this.ear1.xRot = this.head.xRot;
         this.ear2.yRot = this.head.yRot;

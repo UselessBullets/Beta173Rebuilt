@@ -29,7 +29,7 @@ public class CowModel extends QuadrupedModel
         this.udder = new Cube(52, 0);
         this.udder.addBox(-2.0f, -3.0f, 0.0f, 4, 6, 2, 0.0f); // Udder
         this.udder.setPos(0.0f, 14.0f, 6.0f);
-        this.udder.xRot = (Mth.PI / 2f);
+        this.udder.xRot = Mth.HALF_PI;
 
         this.body = new Cube(18, 4);
         this.body.addBox(-6.0f, -10.0f, -7.0f, 12, 18, 10, 0.0f); // Body

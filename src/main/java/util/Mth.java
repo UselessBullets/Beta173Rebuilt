@@ -7,6 +7,7 @@ package util;
 public class Mth
 {
     public static final float PI = (float) Math.PI; // Useless - Added for the floating point precision PIs in the codebase, afaik one of these *should've* existed but I couldn't find anything other than an LCE def in a non Java represented header file
+    public static final float HALF_PI = (float) (Math.PI / 2); // Useless - Added for the floating point precision Half PIs in the codebase
     public static final float DEGRAD = (float) (Math.PI / 180.0);
     public static final float RADDEG = (float) (180.0 / Math.PI);
     private static float[] sin;

@@ -37,9 +37,9 @@ public class BoatModel extends Model
         this.cubes[4].addBox((float)(-w / 2 + 2), (float)(-n - 1), -1.0f, w - 4, n, 2, 0.0f);
         this.cubes[4].setPos(0.0f, (float)(0 + yOffs), (float)(h / 2 - 1));
 
-        this.cubes[0].xRot = Mth.PI / 2f;
-        this.cubes[1].yRot = Mth.PI / 2f * 3f;
-        this.cubes[2].yRot = Mth.PI / 2f;
+        this.cubes[0].xRot = Mth.HALF_PI;
+        this.cubes[1].yRot = Mth.HALF_PI * 3f;
+        this.cubes[2].yRot = Mth.HALF_PI;
         this.cubes[3].yRot = Mth.PI;
     }
     

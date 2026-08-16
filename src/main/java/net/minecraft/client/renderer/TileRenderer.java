@@ -779,12 +779,12 @@ public class TileRenderer
                 array[i].xRot(-0.69813174f);
             }
             if (n == 6) {
-                array[i].yRot((Mth.PI / 2f));
+                array[i].yRot(Mth.HALF_PI);
             }
             if (n < 5) {
                 final Vec3 vec5 = array[i];
                 vec5.y -= 0.375;
-                array[i].xRot((Mth.PI / 2f));
+                array[i].xRot(Mth.HALF_PI);
                 if (n == 4) {
                     array[i].yRot(0.0f);
                 }
@@ -792,10 +792,10 @@ public class TileRenderer
                     array[i].yRot(Mth.PI);
                 }
                 if (n == 2) {
-                    array[i].yRot((Mth.PI / 2f));
+                    array[i].yRot(Mth.HALF_PI);
                 }
                 if (n == 1) {
-                    array[i].yRot(-(Mth.PI / 2f));
+                    array[i].yRot(-Mth.HALF_PI);
                 }
                 final Vec3 vec6 = array[i];
                 vec6.x += x + 0.5;

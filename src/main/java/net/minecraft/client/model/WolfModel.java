@@ -54,16 +54,16 @@ public class WolfModel extends Model
     public void render(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
         super.render(time, r, bob, yRot, xRot, scale);
         this.setupAnim(time, r, bob, yRot, xRot, scale);
-        this.head.render2(scale);
+        this.head.renderRollable(scale);
         this.body.render(scale);
         this.leg0.render(scale);
         this.leg1.render(scale);
         this.leg2.render(scale);
         this.leg3.render(scale);
-        this.ear1.render2(scale);
-        this.ear2.render2(scale);
-        this.mouth.render2(scale);
-        this.tail.render2(scale);
+        this.ear1.renderRollable(scale);
+        this.ear2.renderRollable(scale);
+        this.mouth.renderRollable(scale);
+        this.tail.renderRollable(scale);
         this.upperBody.render(scale);
     }
     
@@ -84,9 +84,9 @@ public class WolfModel extends Model
             this.body.xRot = 0.7853982f;
             this.tail.setPos(-1.0f, 21.0f, 6.0f);
             this.leg0.setPos(-2.5f, 22.0f, 2.0f);
-            this.leg0.xRot = 4.712389f;
+            this.leg0.xRot = ((Mth.PI / 2f) * 3f);
             this.leg1.setPos(0.5f, 22.0f, 2.0f);
-            this.leg1.xRot = 4.712389f;
+            this.leg1.xRot = ((Mth.PI / 2f) * 3f);
             this.leg2.xRot = 5.811947f;
             this.leg2.setPos(-2.49f, 17.0f, -4.0f);
             this.leg3.xRot = 5.811947f;
@@ -94,7 +94,7 @@ public class WolfModel extends Model
         }
         else {
             this.body.setPos(0.0f, 14.0f, 2.0f);
-            this.body.xRot = 1.5707964f;
+            this.body.xRot = (Mth.PI / 2f);
             this.upperBody.setPos(-1.0f, 14.0f, -3.0f);
             this.upperBody.xRot = this.body.xRot;
             this.tail.setPos(-1.0f, 12.0f, 8.0f);

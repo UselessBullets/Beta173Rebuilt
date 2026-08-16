@@ -19,6 +19,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import java.util.Set;
 import net.minecraft.world.level.chunk.ChunkSource;
 
+// TODO Useless - find better deobf info for this class
 public class ServerChunkCache implements ChunkSource
 {
     private Set<Integer> toDrop;

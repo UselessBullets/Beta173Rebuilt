@@ -15,7 +15,7 @@ public class ChunkPos
     }
     
     public static int hashCode(final int x, final int z) {
-        return ((x < 0) ? Integer.MIN_VALUE : 0) | (x & 0x7FFF) << 16 | ((z < 0) ? 32768 : 0) | (z & 0x7FFF);
+        return ((x < 0) ? Integer.MIN_VALUE : 0) | (x & 0x7FFF) << 16 | ((z < 0) ? 0x8000 : 0) | (z & 0x7FFF);
     }
     
     @Override

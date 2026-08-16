@@ -88,12 +88,12 @@ public class SpiderModel extends Model
         this.leg7.yRot = n3 * 2.0f - n2;
         final float n4 = -(Mth.cos(time * 0.6662f * 2.0f + 0.0f) * 0.4f) * r;
         final float n5 = -(Mth.cos(time * 0.6662f * 2.0f + Mth.PI) * 0.4f) * r;
-        final float n6 = -(Mth.cos(time * 0.6662f * 2.0f + 1.5707964f) * 0.4f) * r;
-        final float n7 = -(Mth.cos(time * 0.6662f * 2.0f + 4.712389f) * 0.4f) * r;
+        final float n6 = -(Mth.cos(time * 0.6662f * 2.0f + (Mth.PI / 2f)) * 0.4f) * r;
+        final float n7 = -(Mth.cos(time * 0.6662f * 2.0f + ((Mth.PI / 2f) * 3f)) * 0.4f) * r;
         final float n8 = Math.abs(Mth.sin(time * 0.6662f + 0.0f) * 0.4f) * r;
         final float n9 = Math.abs(Mth.sin(time * 0.6662f + Mth.PI) * 0.4f) * r;
-        final float n10 = Math.abs(Mth.sin(time * 0.6662f + 1.5707964f) * 0.4f) * r;
-        final float n11 = Math.abs(Mth.sin(time * 0.6662f + 4.712389f) * 0.4f) * r;
+        final float n10 = Math.abs(Mth.sin(time * 0.6662f + (Mth.PI / 2f)) * 0.4f) * r;
+        final float n11 = Math.abs(Mth.sin(time * 0.6662f + ((Mth.PI / 2f) * 3f)) * 0.4f) * r;
         final Cube leg0 = this.leg0;
         leg0.yRot += n4;
         final Cube leg2 = this.leg1;

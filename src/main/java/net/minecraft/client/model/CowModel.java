@@ -4,6 +4,8 @@
 
 package net.minecraft.client.model;
 
+import util.Mth;
+
 public class CowModel extends QuadrupedModel
 {
     Cube udder;
@@ -12,33 +14,35 @@ public class CowModel extends QuadrupedModel
     
     public CowModel() {
         super(12, 0.0f);
-        (this.head = new Cube(0, 0)).addBox(-4.0f, -4.0f, -6.0f, 8, 8, 6, 0.0f);
+        this.head = new Cube(0, 0);
+        this.head.addBox(-4.0f, -4.0f, -6.0f, 8, 8, 6, 0.0f); // Head
         this.head.setPos(0.0f, 4.0f, -8.0f);
-        (this.horn1 = new Cube(22, 0)).addBox(-4.0f, -5.0f, -4.0f, 1, 3, 1, 0.0f);
+
+        this.horn1 = new Cube(22, 0);
+        this.horn1.addBox(-4.0f, -5.0f, -4.0f, 1, 3, 1, 0.0f); // Horn1
         this.horn1.setPos(0.0f, 3.0f, -7.0f);
-        (this.horn2 = new Cube(22, 0)).addBox(3.0f, -5.0f, -4.0f, 1, 3, 1, 0.0f);
+
+        this.horn2 = new Cube(22, 0);
+        this.horn2.addBox(3.0f, -5.0f, -4.0f, 1, 3, 1, 0.0f); // Horn2
         this.horn2.setPos(0.0f, 3.0f, -7.0f);
-        (this.udder = new Cube(52, 0)).addBox(-2.0f, -3.0f, 0.0f, 4, 6, 2, 0.0f);
+
+        this.udder = new Cube(52, 0);
+        this.udder.addBox(-2.0f, -3.0f, 0.0f, 4, 6, 2, 0.0f); // Udder
         this.udder.setPos(0.0f, 14.0f, 6.0f);
-        this.udder.xRot = 1.5707964f;
-        (this.body = new Cube(18, 4)).addBox(-6.0f, -10.0f, -7.0f, 12, 18, 10, 0.0f);
+        this.udder.xRot = (Mth.PI / 2f);
+
+        this.body = new Cube(18, 4);
+        this.body.addBox(-6.0f, -10.0f, -7.0f, 12, 18, 10, 0.0f); // Body
         this.body.setPos(0.0f, 5.0f, 2.0f);
-        final Cube leg0 = this.leg0;
-        --leg0.x;
-        final Cube leg2 = this.leg1;
-        ++leg2.x;
-        final Cube leg3 = this.leg0;
-        leg3.z += 0.0f;
-        final Cube leg4 = this.leg1;
-        leg4.z += 0.0f;
-        final Cube leg5 = this.leg2;
-        --leg5.x;
-        final Cube leg6 = this.leg3;
-        ++leg6.x;
-        final Cube leg7 = this.leg2;
-        --leg7.z;
-        final Cube leg8 = this.leg3;
-        --leg8.z;
+
+        this.leg0.x -= 1;
+        this.leg1.x += 1;
+        this.leg0.z += 0;
+        this.leg1.z += 0;
+        this.leg2.x -= 1;
+        this.leg3.x += 1;
+        this.leg2.z -= 1;
+        this.leg3.z -= 1;
     }
     
     @Override

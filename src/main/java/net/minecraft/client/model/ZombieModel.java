@@ -17,8 +17,8 @@ public class ZombieModel extends HumanoidModel
         this.arm1.zRot = 0.0f;
         this.arm0.yRot = -(0.1f - sin * 0.6f);
         this.arm1.yRot = 0.1f - sin * 0.6f;
-        this.arm0.xRot = -1.5707964f;
-        this.arm1.xRot = -1.5707964f;
+        this.arm0.xRot = -(Mth.PI / 2f);
+        this.arm1.xRot = -(Mth.PI / 2f);
         final Cube arm0 = this.arm0;
         arm0.xRot -= sin * 1.2f - sin2 * 0.4f;
         final Cube arm2 = this.arm1;

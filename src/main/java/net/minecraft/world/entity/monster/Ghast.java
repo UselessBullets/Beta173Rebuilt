@@ -92,7 +92,7 @@ public class Ghast extends FlyingMob implements Enemy
             final double n5 = this.target.x - this.x;
             final double ya = this.target.bb.y0 + this.target.bbHeight / 2.0f - (this.y + this.bbHeight / 2.0f);
             final double n6 = this.target.z - this.z;
-            final float n7 = -(float)Math.atan2(n5, n6) * 180.0f / Mth.PI;
+            final float n7 = -(float)Math.atan2(n5, n6) * Mth.RADDEG;
             this.yRot = n7;
             this.yBodyRot = n7;
             if (this.canSee(this.target)) {
@@ -117,7 +117,7 @@ public class Ghast extends FlyingMob implements Enemy
             }
         }
         else {
-            final float n9 = -(float)Math.atan2(this.xd, this.zd) * 180.0f / Mth.PI;
+            final float n9 = -(float)Math.atan2(this.xd, this.zd) * Mth.RADDEG;
             this.yRot = n9;
             this.yBodyRot = n9;
             if (this.charge > 0) {

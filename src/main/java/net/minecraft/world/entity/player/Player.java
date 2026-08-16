@@ -288,8 +288,8 @@ public abstract class Player extends Mob
         }
         this.inventory.dropAll();
         if (source != null) {
-            this.xd = -Mth.cos((this.hurtDir + this.yRot) * Mth.PI / 180.0f) * 0.1f;
-            this.zd = -Mth.sin((this.hurtDir + this.yRot) * Mth.PI / 180.0f) * 0.1f;
+            this.xd = -Mth.cos((this.hurtDir + this.yRot) * Mth.DEGRAD) * 0.1f;
+            this.zd = -Mth.sin((this.hurtDir + this.yRot) * Mth.DEGRAD) * 0.1f;
         }
         else {
             final double n = 0.0;

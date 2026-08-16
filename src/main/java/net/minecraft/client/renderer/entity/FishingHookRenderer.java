@@ -44,20 +44,20 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook>
         GL11.glDisable(GL_RESCALE_NORMAL);
         GL11.glPopMatrix();
         if (entity.owner != null) {
-            final float n10 = (entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * partialTick) * Mth.PI / 180.0f;
+            final float n10 = (entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * partialTick) * Mth.DEGRAD;
             final double n11 = Mth.sin(n10);
             final double n12 = Mth.cos(n10);
             final float sin = Mth.sin(Mth.sqrt(entity.owner.getAttackAnim(partialTick)) * Mth.PI);
             final Vec3 temp = Vec3.newTemp(-0.5, 0.03, 0.8);
-            temp.xRot(-(entity.owner.xRotO + (entity.owner.xRot - entity.owner.xRotO) * partialTick) * Mth.PI / 180.0f);
-            temp.yRot(-(entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * partialTick) * Mth.PI / 180.0f);
+            temp.xRot(-(entity.owner.xRotO + (entity.owner.xRot - entity.owner.xRotO) * partialTick) * Mth.DEGRAD);
+            temp.yRot(-(entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * partialTick) * Mth.DEGRAD);
             temp.yRot(sin * 0.5f);
             temp.xRot(-sin * 0.7f);
             double n13 = entity.owner.xo + (entity.owner.x - entity.owner.xo) * partialTick + temp.x;
             double n14 = entity.owner.yo + (entity.owner.y - entity.owner.yo) * partialTick + temp.y;
             double n15 = entity.owner.zo + (entity.owner.z - entity.owner.zo) * partialTick + temp.z;
             if (this.entityRenderDispatcher.options.thirdPersonView) {
-                final float n16 = (entity.owner.yBodyRotO + (entity.owner.yBodyRot - entity.owner.yBodyRotO) * partialTick) * Mth.PI / 180.0f;
+                final float n16 = (entity.owner.yBodyRotO + (entity.owner.yBodyRot - entity.owner.yBodyRotO) * partialTick) * Mth.DEGRAD;
                 final double n17 = Mth.sin(n16);
                 final double n18 = Mth.cos(n16);
                 n13 = entity.owner.xo + (entity.owner.x - entity.owner.xo) * partialTick - n18 * 0.35 - n17 * 0.85;

@@ -183,8 +183,8 @@ public class PlayerRenderer extends MobRenderer<Player>
             final double n6 = mob.yCloakO + (mob.yCloak - mob.yCloakO) * partialTick - (mob.yo + (mob.y - mob.yo) * partialTick);
             final double n7 = mob.zCloakO + (mob.zCloak - mob.zCloakO) * partialTick - (mob.zo + (mob.z - mob.zo) * partialTick);
             final float n8 = mob.yBodyRotO + (mob.yBodyRot - mob.yBodyRotO) * partialTick;
-            final double n9 = Mth.sin(n8 * Mth.PI / 180.0f);
-            final double n10 = -Mth.cos(n8 * Mth.PI / 180.0f);
+            final double n9 = Mth.sin(n8 * Mth.DEGRAD);
+            final double n10 = -Mth.cos(n8 * Mth.DEGRAD);
             float n11 = (float)n6 * 10.0f;
             if (n11 < -6.0f) {
                 n11 = -6.0f;

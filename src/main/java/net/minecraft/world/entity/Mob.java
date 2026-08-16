@@ -243,7 +243,7 @@ public abstract class Mob extends Entity
         if (sqrt > 0.05f) {
             n3 = 1.0f;
             n2 = sqrt * 3.0f;
-            n = (float)Math.atan2(y, x) * 180.0f / Mth.PI - 90.0f;
+            n = (float)Math.atan2(y, x) * Mth.RADDEG - 90.0f;
         }
         if (this.attackAnim > 0.0f) {
             n = this.yRot;

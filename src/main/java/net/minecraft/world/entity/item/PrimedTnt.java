@@ -25,9 +25,9 @@ public class PrimedTnt extends Entity
         this(level);
         this.setPos(xo, yo, zo);
         final float n = (float)(Math.random() * Math.PI * 2.0);
-        this.xd = -Mth.sin(n * Mth.PI / 180.0f) * 0.02f;
+        this.xd = -Mth.sin(n * Mth.DEGRAD) * 0.02f;
         this.yd = 0.20000000298023224;
-        this.zd = -Mth.cos(n * Mth.PI / 180.0f) * 0.02f;
+        this.zd = -Mth.cos(n * Mth.DEGRAD) * 0.02f;
         this.life = 80;
         this.xo = xo;
         this.yo = yo;

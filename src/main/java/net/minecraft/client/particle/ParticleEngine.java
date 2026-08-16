@@ -61,11 +61,11 @@ public class ParticleEngine
     }
     
     public void render(final Entity player, final float partialTick) {
-        final float cos = Mth.cos(player.yRot * Mth.PI / 180.0f);
-        final float sin = Mth.sin(player.yRot * Mth.PI / 180.0f);
-        final float xa2 = -sin * Mth.sin(player.xRot * Mth.PI / 180.0f);
-        final float za2 = cos * Mth.sin(player.xRot * Mth.PI / 180.0f);
-        final float cos2 = Mth.cos(player.xRot * Mth.PI / 180.0f);
+        final float cos = Mth.cos(player.yRot * Mth.DEGRAD);
+        final float sin = Mth.sin(player.yRot * Mth.DEGRAD);
+        final float xa2 = -sin * Mth.sin(player.xRot * Mth.DEGRAD);
+        final float za2 = cos * Mth.sin(player.xRot * Mth.DEGRAD);
+        final float cos2 = Mth.cos(player.xRot * Mth.DEGRAD);
         Particle.xOff = player.xOld + (player.x - player.xOld) * partialTick;
         Particle.yOff = player.yOld + (player.y - player.yOld) * partialTick;
         Particle.zOff = player.zOld + (player.z - player.zOld) * partialTick;

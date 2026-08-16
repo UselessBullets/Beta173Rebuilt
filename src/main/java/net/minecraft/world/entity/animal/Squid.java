@@ -140,10 +140,10 @@ public class Squid extends WaterAnimal
                 this.zd = this.tz * this.speed;
             }
             final float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
-            this.yBodyRot += (-(float)Math.atan2(this.xd, this.zd) * 180.0f / Mth.PI - this.yBodyRot) * 0.1f;
+            this.yBodyRot += (-(float)Math.atan2(this.xd, this.zd) * Mth.RADDEG - this.yBodyRot) * 0.1f;
             this.yRot = this.yBodyRot;
             this.zBodyRot += Mth.PI * this.rotateSpeed * 1.5f;
-            this.xBodyRot += (-(float)Math.atan2(sqrt, this.yd) * 180.0f / Mth.PI - this.xBodyRot) * 0.1f;
+            this.xBodyRot += (-(float)Math.atan2(sqrt, this.yd) * Mth.RADDEG - this.xBodyRot) * 0.1f;
         }
         else {
             this.tentacleAngle = Mth.abs(Mth.sin(this.tentacleMovement)) * Mth.PI * 0.25f;

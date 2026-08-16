@@ -98,7 +98,7 @@ public class PathfinderMob extends Mob
                 final double y2 = this.attackTarget.z - this.z;
                 final float yRot = this.yRot;
                 this.yRot = (float)(Math.atan2(y2, x2) * 180.0 / 3.1415927410125732) - 90.0f;
-                final float n5 = (yRot - this.yRot + 90.0f) * 3.1415927f / 180.0f;
+                final float n5 = (yRot - this.yRot + 90.0f) * Mth.PI / 180.0f;
                 this.xxa = -Mth.sin(n5) * this.yya * 1.0f;
                 this.yya = Mth.cos(n5) * this.yya * 1.0f;
             }

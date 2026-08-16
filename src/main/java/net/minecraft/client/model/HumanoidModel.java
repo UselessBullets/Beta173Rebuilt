@@ -69,16 +69,16 @@ public class HumanoidModel extends Model
     
     @Override
     public void setupAnim(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
-        this.head.yRot = yRot / 57.295776f;
-        this.head.xRot = xRot / 57.295776f;
+        this.head.yRot = yRot / Mth.RADDEG;
+        this.head.xRot = xRot / Mth.RADDEG;
         this.hair.yRot = this.head.yRot;
         this.hair.xRot = this.head.xRot;
-        this.arm0.xRot = Mth.cos(time * 0.6662f + 3.1415927f) * 2.0f * r * 0.5f;
+        this.arm0.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 2.0f * r * 0.5f;
         this.arm1.xRot = Mth.cos(time * 0.6662f) * 2.0f * r * 0.5f;
         this.arm0.zRot = 0.0f;
         this.arm1.zRot = 0.0f;
         this.leg0.xRot = Mth.cos(time * 0.6662f) * 1.4f * r;
-        this.leg1.xRot = Mth.cos(time * 0.6662f + 3.1415927f) * 1.4f * r;
+        this.leg1.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 1.4f * r;
         this.leg0.yRot = 0.0f;
         this.leg1.yRot = 0.0f;
         if (this.riding) {
@@ -100,7 +100,7 @@ public class HumanoidModel extends Model
         this.arm0.yRot = 0.0f;
         this.arm1.yRot = 0.0f;
         if (this.attackTime > -9990.0f) {
-            this.body.yRot = Mth.sin(Mth.sqrt(this.attackTime) * 3.1415927f * 2.0f) * 0.2f;
+            this.body.yRot = Mth.sin(Mth.sqrt(this.attackTime) * Mth.PI * 2.0f) * 0.2f;
             this.arm0.z = Mth.sin(this.body.yRot) * 5.0f;
             this.arm0.x = -Mth.cos(this.body.yRot) * 5.0f;
             this.arm1.z = -Mth.sin(this.body.yRot) * 5.0f;
@@ -113,13 +113,13 @@ public class HumanoidModel extends Model
             arm5.xRot += this.body.yRot;
             final float n = 1.0f - this.attackTime;
             final float n2 = n * n;
-            final float sin = Mth.sin((1.0f - n2 * n2) * 3.1415927f);
-            final float n3 = Mth.sin(this.attackTime * 3.1415927f) * -(this.head.xRot - 0.7f) * 0.75f;
+            final float sin = Mth.sin((1.0f - n2 * n2) * Mth.PI);
+            final float n3 = Mth.sin(this.attackTime * Mth.PI) * -(this.head.xRot - 0.7f) * 0.75f;
             final Cube arm6 = this.arm0;
             arm6.xRot -= (float)(sin * 1.2 + n3);
             final Cube arm7 = this.arm0;
             arm7.yRot += this.body.yRot * 2.0f;
-            this.arm0.zRot = Mth.sin(this.attackTime * 3.1415927f) * -0.4f;
+            this.arm0.zRot = Mth.sin(this.attackTime * Mth.PI) * -0.4f;
         }
         if (this.sneaking) {
             this.body.xRot = 0.5f;

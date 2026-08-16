@@ -103,8 +103,8 @@ public class WolfModel extends Model
             this.leg2.setPos(-2.5f, 16.0f, -4.0f);
             this.leg3.setPos(0.5f, 16.0f, -4.0f);
             this.leg0.xRot = Mth.cos(time * 0.6662f) * 1.4f * r;
-            this.leg1.xRot = Mth.cos(time * 0.6662f + 3.1415927f) * 1.4f * r;
-            this.leg2.xRot = Mth.cos(time * 0.6662f + 3.1415927f) * 1.4f * r;
+            this.leg1.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 1.4f * r;
+            this.leg2.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 1.4f * r;
             this.leg3.xRot = Mth.cos(time * 0.6662f) * 1.4f * r;
         }
         final float n = wolf.getHeadRollAngle(partialTick) + wolf.getBodyRollAngle(partialTick, 0.0f);
@@ -124,8 +124,8 @@ public class WolfModel extends Model
     @Override
     public void setupAnim(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
         super.setupAnim(time, r, bob, yRot, xRot, scale);
-        this.head.xRot = xRot / 57.295776f;
-        this.head.yRot = yRot / 57.295776f;
+        this.head.xRot = xRot / Mth.RADDEG;
+        this.head.yRot = yRot / Mth.RADDEG;
         this.ear1.yRot = this.head.yRot;
         this.ear1.xRot = this.head.xRot;
         this.ear2.yRot = this.head.yRot;

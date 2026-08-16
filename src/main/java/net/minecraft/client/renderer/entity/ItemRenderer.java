@@ -39,7 +39,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
         final ItemInstance item = entity.item;
         GL11.glPushMatrix();
         final float n = Mth.sin((entity.age + partialTick) / 10.0f + entity.bobOffs) * 0.1f + 0.1f;
-        final float n2 = ((entity.age + partialTick) / 20.0f + entity.bobOffs) * 57.295776f;
+        final float n2 = ((entity.age + partialTick) / 20.0f + entity.bobOffs) * Mth.RADDEG;
         int n3 = 1;
         if (entity.item.count > 1) {
             n3 = 2;

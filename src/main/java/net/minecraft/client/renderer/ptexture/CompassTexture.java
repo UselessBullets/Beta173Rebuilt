@@ -53,14 +53,14 @@ public class CompassTexture extends DynamicTexture
         double n8 = 0.0;
         if (this.mc.level != null && this.mc.player != null) {
             final Pos sharedSpawnPos = this.mc.level.getSharedSpawnPos();
-            n8 = (this.mc.player.yRot - 90.0f) * 3.141592653589793 / 180.0 - Math.atan2(sharedSpawnPos.z - this.mc.player.z, sharedSpawnPos.x - this.mc.player.x);
+            n8 = (this.mc.player.yRot - 90.0f) * Math.PI / 180.0 - Math.atan2(sharedSpawnPos.z - this.mc.player.z, sharedSpawnPos.x - this.mc.player.x);
             if (this.mc.level.dimension.foggy) {
                 n8 = Math.random() * 3.1415927410125732 * 2.0;
             }
         }
         double n9;
-        for (n9 = n8 - this.rot; n9 < -3.141592653589793; n9 += 6.283185307179586) {}
-        while (n9 >= 3.141592653589793) {
+        for (n9 = n8 - this.rot; n9 < -Math.PI; n9 += 6.283185307179586) {}
+        while (n9 >= Math.PI) {
             n9 -= 6.283185307179586;
         }
         if (n9 < -1.0) {

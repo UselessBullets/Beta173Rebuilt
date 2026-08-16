@@ -77,14 +77,14 @@ public class Arrow extends Entity
         this.pickup = (mob instanceof Player);
         this.setSize(0.5f, 0.5f);
         this.moveTo(mob.x, mob.y + mob.getHeadHeight(), mob.z, mob.yRot, mob.xRot);
-        this.x -= Mth.cos(this.yRot / 180.0f * 3.1415927f) * 0.16f;
+        this.x -= Mth.cos(this.yRot / 180.0f * Mth.PI) * 0.16f;
         this.y -= 0.10000000149011612;
-        this.z -= Mth.sin(this.yRot / 180.0f * 3.1415927f) * 0.16f;
+        this.z -= Mth.sin(this.yRot / 180.0f * Mth.PI) * 0.16f;
         this.setPos(this.x, this.y, this.z);
         this.heightOffset = 0.0f;
-        this.xd = -Mth.sin(this.yRot / 180.0f * 3.1415927f) * Mth.cos(this.xRot / 180.0f * 3.1415927f);
-        this.zd = Mth.cos(this.yRot / 180.0f * 3.1415927f) * Mth.cos(this.xRot / 180.0f * 3.1415927f);
-        this.yd = -Mth.sin(this.xRot / 180.0f * 3.1415927f);
+        this.xd = -Mth.sin(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI);
+        this.zd = Mth.cos(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI);
+        this.yd = -Mth.sin(this.xRot / 180.0f * Mth.PI);
         this.shoot(this.xd, this.yd, this.zd, 1.5f, 1.0f);
     }
     

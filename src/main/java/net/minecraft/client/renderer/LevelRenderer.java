@@ -191,7 +191,7 @@ public class LevelRenderer implements LevelListener
                 final double atan3 = Math.atan2(Math.sqrt(y * y + x2 * x2), x);
                 final double sin2 = Math.sin(atan3);
                 final double cos2 = Math.cos(atan3);
-                final double n9 = random.nextDouble() * 3.141592653589793 * 2.0;
+                final double n9 = random.nextDouble() * Math.PI * 2.0;
                 final double sin3 = Math.sin(n9);
                 final double cos3 = Math.cos(n9);
                 for (int j = 0; j < 4; ++j) {
@@ -641,7 +641,7 @@ public class LevelRenderer implements LevelListener
             final int n10 = 16;
             instance.color(sunriseColor[0], sunriseColor[1], sunriseColor[2], 0.0f);
             for (int i = 0; i <= n10; ++i) {
-                final float n11 = i * 3.1415927f * 2.0f / n10;
+                final float n11 = i * Mth.PI * 2.0f / n10;
                 final float sin = Mth.sin(n11);
                 final float cos = Mth.cos(n11);
                 instance.vertex(sin * 120.0f, cos * 120.0f, -cos * 40.0f * sunriseColor[3]);

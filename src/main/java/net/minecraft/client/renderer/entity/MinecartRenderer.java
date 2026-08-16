@@ -46,7 +46,7 @@ public class MinecartRenderer extends EntityRenderer<Minecart>
             final Vec3 add = posOffs2.add(-posOffs.x, -posOffs.y, -posOffs.z);
             if (add.length() != 0.0) {
                 final Vec3 normalize = add.normalize();
-                rot = (float)(Math.atan2(normalize.z, normalize.x) * 180.0 / 3.141592653589793);
+                rot = (float)(Math.atan2(normalize.z, normalize.x) * 180.0 / Math.PI);
                 n = (float)(Math.atan(normalize.y) * 73.0);
             }
         }

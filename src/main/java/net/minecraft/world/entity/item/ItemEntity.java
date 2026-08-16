@@ -29,7 +29,7 @@ public class ItemEntity extends Entity
         super(level);
         this.age = 0;
         this.health = 5;
-        this.bobOffs = (float)(Math.random() * 3.141592653589793 * 2.0);
+        this.bobOffs = (float)(Math.random() * Math.PI * 2.0);
         this.setSize(0.25f, 0.25f);
         this.heightOffset = this.bbHeight / 2.0f;
         this.setPos(x, y, z);
@@ -49,7 +49,7 @@ public class ItemEntity extends Entity
         super(level);
         this.age = 0;
         this.health = 5;
-        this.bobOffs = (float)(Math.random() * 3.141592653589793 * 2.0);
+        this.bobOffs = (float)(Math.random() * Math.PI * 2.0);
         this.setSize(0.25f, 0.25f);
         this.heightOffset = this.bbHeight / 2.0f;
     }

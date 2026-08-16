@@ -17,14 +17,14 @@ public class SquidModel extends Model
         body.y += 24 + n;
         for (int i = 0; i < this.tentacles.length; ++i) {
             this.tentacles[i] = new Cube(48, 0);
-            final double n2 = i * 3.141592653589793 * 2.0 / this.tentacles.length;
+            final double n2 = i * Math.PI * 2.0 / this.tentacles.length;
             final float x = (float)Math.cos(n2) * 5.0f;
             final float z = (float)Math.sin(n2) * 5.0f;
             this.tentacles[i].addBox(-1.0f, 0.0f, -1.0f, 2, 18, 2);
             this.tentacles[i].x = x;
             this.tentacles[i].z = z;
             this.tentacles[i].y = (float)(31 + n);
-            this.tentacles[i].yRot = (float)(i * 3.141592653589793 * -2.0 / this.tentacles.length + 1.5707963267948966);
+            this.tentacles[i].yRot = (float)(i * Math.PI * -2.0 / this.tentacles.length + 1.5707963267948966);
         }
     }
     

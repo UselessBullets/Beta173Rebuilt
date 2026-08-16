@@ -126,7 +126,7 @@ public class TitleScreen extends Screen
         glPushMatrix();
         glTranslatef((float)(this.width / 2 + 90), 70.0f, 0.0f);
         glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
-        final float n3 = (1.8f - Mth.abs(Mth.sin(System.currentTimeMillis() % 1000L / 1000.0f * 3.1415927f * 2.0f) * 0.1f)) * 100.0f / (this.font.width(this.splash) + 32);
+        final float n3 = (1.8f - Mth.abs(Mth.sin(System.currentTimeMillis() % 1000L / 1000.0f * Mth.PI * 2.0f) * 0.1f)) * 100.0f / (this.font.width(this.splash) + 32);
         glScalef(n3, n3, n3);
         this.drawCenteredString(this.font, this.splash, 0, -8, 0xffff00);
         glPopMatrix();

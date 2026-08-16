@@ -52,8 +52,8 @@ public class ChickenModel extends Model
     
     @Override
     public void setupAnim(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
-        this.head.xRot = -(xRot / 57.295776f);
-        this.head.yRot = yRot / 57.295776f;
+        this.head.xRot = -(xRot / Mth.RADDEG);
+        this.head.yRot = yRot / Mth.RADDEG;
         this.beak.xRot = this.head.xRot;
         this.beak.yRot = this.head.yRot;
         this.redThing.xRot = this.head.xRot;

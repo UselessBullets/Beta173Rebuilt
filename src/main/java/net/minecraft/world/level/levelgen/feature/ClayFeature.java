@@ -25,7 +25,7 @@ public class ClayFeature extends Feature
         if (level.getMaterial(x, y, z) != Material.water) {
             return false;
         }
-        final float n = random.nextFloat() * 3.1415927f;
+        final float n = random.nextFloat() * Mth.PI;
         final double n2 = x + 8 + Mth.sin(n) * this.count / 8.0f;
         final double n3 = x + 8 - Mth.sin(n) * this.count / 8.0f;
         final double n4 = z + 8 + Mth.cos(n) * this.count / 8.0f;

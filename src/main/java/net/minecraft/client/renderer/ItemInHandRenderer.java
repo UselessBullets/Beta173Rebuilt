@@ -163,7 +163,7 @@ public class ItemInHandRenderer
             GL11.glPushMatrix();
             final float n3 = 0.8f;
             final float attackAnim = player.getAttackAnim(partialTick);
-            GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim) * 3.1415927f) * 0.4f, Mth.sin(Mth.sqrt(attackAnim) * 3.1415927f * 2.0f) * 0.2f, -Mth.sin(attackAnim * 3.1415927f) * 0.2f);
+            GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim) * 3.1415927f * 2.0f) * 0.2f, -Mth.sin(attackAnim * 3.1415927f) * 0.2f);
             float n4 = 1.0f - n2 / 45.0f + 0.1f;
             if (n4 < 0.0f) {
                 n4 = 0.0f;

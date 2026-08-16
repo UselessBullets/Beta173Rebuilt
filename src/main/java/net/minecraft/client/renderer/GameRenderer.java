@@ -211,7 +211,7 @@ public class GameRenderer
             return;
         }
         final float n2 = n / cameraTargetPlayer.hurtDuration;
-        final float sin = Mth.sin(n2 * n2 * n2 * n2 * 3.1415927f);
+        final float sin = Mth.sin(n2 * n2 * n2 * n2 * Mth.PI);
         final float hurtDir = cameraTargetPlayer.hurtDir;
         GL11.glRotatef(-hurtDir, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(-sin * 14.0f, 0.0f, 0.0f, 1.0f);

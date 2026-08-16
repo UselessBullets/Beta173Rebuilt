@@ -51,8 +51,8 @@ public class CreeperModel extends Model
     
     @Override
     public void setupAnim(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
-        this.head.yRot = yRot / 57.295776f;
-        this.head.xRot = xRot / 57.295776f;
+        this.head.yRot = yRot / Mth.RADDEG;
+        this.head.xRot = xRot / Mth.RADDEG;
         this.leg0.xRot = Mth.cos(time * 0.6662f) * 1.4f * r;
         this.leg1.xRot = Mth.cos(time * 0.6662f + 3.1415927f) * 1.4f * r;
         this.leg2.xRot = Mth.cos(time * 0.6662f + 3.1415927f) * 1.4f * r;

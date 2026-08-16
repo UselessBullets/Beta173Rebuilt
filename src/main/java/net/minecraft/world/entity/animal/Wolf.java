@@ -214,7 +214,7 @@ public class Wolf extends Animal
             }
             if (this.shakeAnim > 0.4f) {
                 final float n = (float)this.bb.y0;
-                for (int n2 = (int)(Mth.sin((this.shakeAnim - 0.4f) * 3.1415927f) * 7.0f), i = 0; i < n2; ++i) {
+                for (int n2 = (int)(Mth.sin((this.shakeAnim - 0.4f) * Mth.PI) * 7.0f), i = 0; i < n2; ++i) {
                     this.level.addParticle("splash", this.x + (this.random.nextFloat() * 2.0f - 1.0f) * this.bbWidth * 0.5f, n + 0.8f, this.z + (this.random.nextFloat() * 2.0f - 1.0f) * this.bbWidth * 0.5f, this.xd, this.yd, this.zd);
                 }
             }
@@ -237,11 +237,11 @@ public class Wolf extends Animal
         else if (n > 1.0f) {
             n = 1.0f;
         }
-        return Mth.sin(n * 3.1415927f) * Mth.sin(n * 3.1415927f * 11.0f) * 0.15f * 3.1415927f;
+        return Mth.sin(n * Mth.PI) * Mth.sin(n * Mth.PI * 11.0f) * 0.15f * Mth.PI;
     }
     
     public float getHeadRollAngle(final float partialTick) {
-        return (this.interestedAngleO + (this.interestedAngle - this.interestedAngleO) * partialTick) * 0.15f * 3.1415927f;
+        return (this.interestedAngleO + (this.interestedAngle - this.interestedAngleO) * partialTick) * 0.15f * Mth.PI;
     }
     
     @Override
@@ -435,7 +435,7 @@ public class Wolf extends Animal
             return 1.5393804f;
         }
         if (this.isTame()) {
-            return (0.55f - (20 - this.entityData.getInteger(18)) * 0.02f) * 3.1415927f;
+            return (0.55f - (20 - this.entityData.getInteger(18)) * 0.02f) * Mth.PI;
         }
         return 0.62831855f;
     }

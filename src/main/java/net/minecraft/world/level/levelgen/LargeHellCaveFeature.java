@@ -33,7 +33,7 @@ public class LargeHellCaveFeature extends LargeFeature
         final int n6 = random.nextInt(dist / 2) + dist / 4;
         final boolean b2 = random.nextInt(6) == 0;
         while (step < dist) {
-            final double n7 = 1.5 + Mth.sin(step * 3.1415927f / dist) * thickness * 1.0f;
+            final double n7 = 1.5 + Mth.sin(step * Mth.PI / dist) * thickness * 1.0f;
             final double n8 = n7 * yScale;
             final float cos = Mth.cos(xRot);
             final float sin = Mth.sin(xRot);
@@ -154,7 +154,7 @@ public class LargeHellCaveFeature extends LargeFeature
                 n4 += this.random.nextInt(4);
             }
             for (int j = 0; j < n4; ++j) {
-                this.addTunnel(xOffs, zOffs, blocks, n, n2, n3, (this.random.nextFloat() * 2.0f + this.random.nextFloat()) * 2.0f, this.random.nextFloat() * 3.1415927f * 2.0f, (this.random.nextFloat() - 0.5f) * 2.0f / 8.0f, 0, 0, 0.5);
+                this.addTunnel(xOffs, zOffs, blocks, n, n2, n3, (this.random.nextFloat() * 2.0f + this.random.nextFloat()) * 2.0f, this.random.nextFloat() * Mth.PI * 2.0f, (this.random.nextFloat() - 0.5f) * 2.0f / 8.0f, 0, 0, 0.5);
             }
         }
     }

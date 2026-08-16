@@ -964,7 +964,7 @@ public class Level implements LevelSource
     }
     
     public int getSkyDarken(final float partialTick) {
-        float n = 1.0f - (Mth.cos(this.getTimeOfDay(partialTick) * 3.1415927f * 2.0f) * 2.0f + 0.5f);
+        float n = 1.0f - (Mth.cos(this.getTimeOfDay(partialTick) * Mth.PI * 2.0f) * 2.0f + 0.5f);
         if (n < 0.0f) {
             n = 0.0f;
         }

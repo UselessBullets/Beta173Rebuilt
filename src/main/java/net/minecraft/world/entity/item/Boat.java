@@ -221,8 +221,8 @@ public class Boat extends Entity
         this.move(this.xd, this.yd, this.zd);
         final double sqrt = Math.sqrt(this.xd * this.xd + this.zd * this.zd);
         if (sqrt > 0.15) {
-            final double cos = Math.cos(this.yRot * 3.141592653589793 / 180.0);
-            final double sin = Math.sin(this.yRot * 3.141592653589793 / 180.0);
+            final double cos = Math.cos(this.yRot * Math.PI / 180.0);
+            final double sin = Math.sin(this.yRot * Math.PI / 180.0);
             for (int n5 = 0; n5 < 1.0 + sqrt * 60.0; ++n5) {
                 final double n6 = this.random.nextFloat() * 2.0f - 1.0f;
                 final double n7 = (this.random.nextInt(2) * 2 - 1) * 0.7;
@@ -255,7 +255,7 @@ public class Boat extends Entity
         final double x2 = this.xo - this.x;
         final double y2 = this.zo - this.z;
         if (x2 * x2 + y2 * y2 > 0.001) {
-            n8 = (float)(Math.atan2(y2, x2) * 180.0 / 3.141592653589793);
+            n8 = (float)(Math.atan2(y2, x2) * 180.0 / Math.PI);
         }
         double n9;
         for (n9 = n8 - this.yRot; n9 >= 180.0; n9 -= 360.0) {}
@@ -296,7 +296,7 @@ public class Boat extends Entity
         if (this.rider == null) {
             return;
         }
-        this.rider.setPos(this.x + Math.cos(this.yRot * 3.141592653589793 / 180.0) * 0.4, this.y + this.getRideHeight() + this.rider.getRidingHeight(), this.z + Math.sin(this.yRot * 3.141592653589793 / 180.0) * 0.4);
+        this.rider.setPos(this.x + Math.cos(this.yRot * Math.PI / 180.0) * 0.4, this.y + this.getRideHeight() + this.rider.getRidingHeight(), this.z + Math.sin(this.yRot * Math.PI / 180.0) * 0.4);
     }
     
     @Override

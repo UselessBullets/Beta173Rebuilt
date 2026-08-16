@@ -118,9 +118,9 @@ public class Squid extends WaterAnimal
             }
         }
         if (this.isInWater()) {
-            if (this.tentacleMovement < 3.1415927f) {
-                final float n = this.tentacleMovement / 3.1415927f;
-                this.tentacleAngle = Mth.sin(n * n * 3.1415927f) * 3.1415927f * 0.25f;
+            if (this.tentacleMovement < Mth.PI) {
+                final float n = this.tentacleMovement / Mth.PI;
+                this.tentacleAngle = Mth.sin(n * n * Mth.PI) * Mth.PI * 0.25f;
                 if (n > 0.75) {
                     this.speed = 1.0f;
                     this.rotateSpeed = 1.0f;
@@ -140,13 +140,13 @@ public class Squid extends WaterAnimal
                 this.zd = this.tz * this.speed;
             }
             final float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
-            this.yBodyRot += (-(float)Math.atan2(this.xd, this.zd) * 180.0f / 3.1415927f - this.yBodyRot) * 0.1f;
+            this.yBodyRot += (-(float)Math.atan2(this.xd, this.zd) * 180.0f / Mth.PI - this.yBodyRot) * 0.1f;
             this.yRot = this.yBodyRot;
-            this.zBodyRot += 3.1415927f * this.rotateSpeed * 1.5f;
-            this.xBodyRot += (-(float)Math.atan2(sqrt, this.yd) * 180.0f / 3.1415927f - this.xBodyRot) * 0.1f;
+            this.zBodyRot += Mth.PI * this.rotateSpeed * 1.5f;
+            this.xBodyRot += (-(float)Math.atan2(sqrt, this.yd) * 180.0f / Mth.PI - this.xBodyRot) * 0.1f;
         }
         else {
-            this.tentacleAngle = Mth.abs(Mth.sin(this.tentacleMovement)) * 3.1415927f * 0.25f;
+            this.tentacleAngle = Mth.abs(Mth.sin(this.tentacleMovement)) * Mth.PI * 0.25f;
             if (!this.interpolateOnly) {
                 this.xd = 0.0;
                 this.yd -= 0.08;
@@ -165,7 +165,7 @@ public class Squid extends WaterAnimal
     @Override
     protected void updateAi() {
         if (this.random.nextInt(50) == 0 || !this.wasInWater || (this.tx == 0.0f && this.ty == 0.0f && this.tz == 0.0f)) {
-            final float n = this.random.nextFloat() * 3.1415927f * 2.0f;
+            final float n = this.random.nextFloat() * Mth.PI * 2.0f;
             this.tx = Mth.cos(n) * 0.2f;
             this.ty = -0.1f + this.random.nextFloat() * 0.2f;
             this.tz = Mth.sin(n) * 0.2f;

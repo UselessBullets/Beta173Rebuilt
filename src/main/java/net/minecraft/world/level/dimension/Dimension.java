@@ -67,16 +67,16 @@ public abstract class Dimension
             --n;
         }
         final float n2 = n;
-        return n2 + (1.0f - (float)((Math.cos(n * 3.141592653589793) + 1.0) / 2.0) - n2) / 3.0f;
+        return n2 + (1.0f - (float)((Math.cos(n * Math.PI) + 1.0) / 2.0) - n2) / 3.0f;
     }
     
     public float[] getSunriseColor(final float td, final float partialTick) {
         final float n = 0.4f;
-        final float n2 = Mth.cos(td * 3.1415927f * 2.0f) - 0.0f;
+        final float n2 = Mth.cos(td * Mth.PI * 2.0f) - 0.0f;
         final float n3 = -0.0f;
         if (n2 >= n3 - n && n2 <= n3 + n) {
             final float n4 = (n2 - n3) / n * 0.5f + 0.5f;
-            final float n5 = 1.0f - (1.0f - Mth.sin(n4 * 3.1415927f)) * 0.99f;
+            final float n5 = 1.0f - (1.0f - Mth.sin(n4 * Mth.PI)) * 0.99f;
             final float n6 = n5 * n5;
             this.sunriseCol[0] = n4 * 0.3f + 0.7f;
             this.sunriseCol[1] = n4 * n4 * 0.7f + 0.2f;
@@ -88,7 +88,7 @@ public abstract class Dimension
     }
     
     public Vec3 getFogColor(final float td, final float partialTick) {
-        float n = Mth.cos(td * 3.1415927f * 2.0f) * 2.0f + 0.5f;
+        float n = Mth.cos(td * Mth.PI * 2.0f) * 2.0f + 0.5f;
         if (n < 0.0f) {
             n = 0.0f;
         }

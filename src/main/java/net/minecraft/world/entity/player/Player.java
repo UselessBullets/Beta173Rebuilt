@@ -288,8 +288,8 @@ public abstract class Player extends Mob
         }
         this.inventory.dropAll();
         if (source != null) {
-            this.xd = -Mth.cos((this.hurtDir + this.yRot) * 3.1415927f / 180.0f) * 0.1f;
-            this.zd = -Mth.sin((this.hurtDir + this.yRot) * 3.1415927f / 180.0f) * 0.1f;
+            this.xd = -Mth.cos((this.hurtDir + this.yRot) * Mth.PI / 180.0f) * 0.1f;
+            this.zd = -Mth.sin((this.hurtDir + this.yRot) * Mth.PI / 180.0f) * 0.1f;
         }
         else {
             final double n = 0.0;
@@ -327,16 +327,16 @@ public abstract class Player extends Mob
         itemEntity.throwTime = 40;
         if (randomly) {
             final float n = this.random.nextFloat() * 0.5f;
-            final float n2 = this.random.nextFloat() * 3.1415927f * 2.0f;
+            final float n2 = this.random.nextFloat() * Mth.PI * 2.0f;
             itemEntity.xd = -Mth.sin(n2) * n;
             itemEntity.zd = Mth.cos(n2) * n;
             itemEntity.yd = 0.20000000298023224;
         }
         else {
             final float n3 = 0.3f;
-            itemEntity.xd = -Mth.sin(this.yRot / 180.0f * 3.1415927f) * Mth.cos(this.xRot / 180.0f * 3.1415927f) * n3;
-            itemEntity.zd = Mth.cos(this.yRot / 180.0f * 3.1415927f) * Mth.cos(this.xRot / 180.0f * 3.1415927f) * n3;
-            itemEntity.yd = -Mth.sin(this.xRot / 180.0f * 3.1415927f) * n3 + 0.1f;
+            itemEntity.xd = -Mth.sin(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * n3;
+            itemEntity.zd = Mth.cos(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * n3;
+            itemEntity.yd = -Mth.sin(this.xRot / 180.0f * Mth.PI) * n3 + 0.1f;
             final float n4 = 0.02f;
             final float n5 = this.random.nextFloat() * 3.1415927f * 2.0f;
             final float n6 = n4 * this.random.nextFloat();

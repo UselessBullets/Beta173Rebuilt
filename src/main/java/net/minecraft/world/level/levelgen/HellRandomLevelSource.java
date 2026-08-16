@@ -211,7 +211,7 @@ public class HellRandomLevelSource implements ChunkSource
         int n4 = 0;
         final double[] array = new double[ySize];
         for (int i = 0; i < ySize; ++i) {
-            array[i] = Math.cos(i * 3.141592653589793 * 6.0 / ySize) * 2.0;
+            array[i] = Math.cos(i * Math.PI * 6.0 / ySize) * 2.0;
             double n5 = i;
             if (i > ySize / 2) {
                 n5 = ySize - 1 - i;

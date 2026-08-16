@@ -289,7 +289,7 @@ public class AchievementScreen extends Screen
                     glColor4f(br, br, br, 1.0f);
                 }
                 else if (this.statsCounter.canTake(ach)) {
-                    final float br = (Math.sin(System.currentTimeMillis() % 600L / 600.0 * 3.141592653589793 * 2.0) < 0.6) ? 0.6f : 0.8f;
+                    final float br = (Math.sin(System.currentTimeMillis() % 600L / 600.0 * Math.PI * 2.0) < 0.6) ? 0.6f : 0.8f;
                     glColor4f(br, br, br, 1.0f);
                 }
                 else {

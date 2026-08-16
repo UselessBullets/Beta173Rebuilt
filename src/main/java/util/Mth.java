@@ -6,14 +6,18 @@ package util;
 
 public class Mth
 {
+    public static final float PI = (float) Math.PI; // Useless - Added for the floating point precision PIs in the codebase, afaik one of these *should've* existed but I couldn't find anything other than an LCE def in a non Java represented header file
+    public static final float DEGRAD = (float) (Math.PI / 180.0);
+    public static final float RADDEG = (float) (180.0 / Math.PI);
     private static float[] sin;
+    private static final float sinScale = (float) (0xFFFF / (Math.PI * 2));
     
     public static final float sin(final float i) {
-        return Mth.sin[(int)(i * 10430.378f) & 0xFFFF];
+        return Mth.sin[(int)(i * sinScale) & 0xFFFF];
     }
     
     public static final float cos(final float i) {
-        return Mth.sin[(int)(i * 10430.378f + 16384.0f) & 0xFFFF];
+        return Mth.sin[(int)(i * sinScale + 65536.0f / 4f) & 0xFFFF];
     }
     
     public static final float sqrt(final float x) {
@@ -62,7 +66,7 @@ public class Mth
     static {
         Mth.sin = new float[65536];
         for (int i = 0; i < 65536; ++i) {
-            Mth.sin[i] = (float)Math.sin(i * 3.141592653589793 * 2.0 / 65536.0);
+            Mth.sin[i] = (float)Math.sin(i * Math.PI * 2.0 / 65536.0);
         }
     }
 }

@@ -42,8 +42,8 @@ public class ClockTexture extends DynamicTexture
             }
         }
         double n2;
-        for (n2 = n - this.rot; n2 < -3.141592653589793; n2 += 6.283185307179586) {}
-        while (n2 >= 3.141592653589793) {
+        for (n2 = n - this.rot; n2 < -Math.PI; n2 += 6.283185307179586) {}
+        while (n2 >= Math.PI) {
             n2 -= 6.283185307179586;
         }
         if (n2 < -1.0) {

@@ -160,15 +160,15 @@ public class Options
         }
     }
     
-    public void toggle(final Option option, final int n) {
+    public void toggle(final Option option, final int dir) {
         if (option == Option.INVERT_MOUSE) {
             this.invertYMouse = !this.invertYMouse;
         }
         if (option == Option.RENDER_DISTANCE) {
-            this.viewDistance = (this.viewDistance + n & 0x3);
+            this.viewDistance = (this.viewDistance + dir & 0x3);
         }
         if (option == Option.GUI_SCALE) {
-            this.guiScale = (this.guiScale + n & 0x3);
+            this.guiScale = (this.guiScale + dir & 0x3);
         }
         if (option == Option.VIEW_BOBBING) {
             this.bobView = !this.bobView;
@@ -182,10 +182,10 @@ public class Options
             this.minecraft.textures.reloadAll();
         }
         if (option == Option.FRAMERATE_LIMIT) {
-            this.limitFramerate = (this.limitFramerate + n + 3) % 3;
+            this.limitFramerate = (this.limitFramerate + dir + 3) % 3;
         }
         if (option == Option.DIFFICULTY) {
-            this.difficulty = (this.difficulty + n & 0x3);
+            this.difficulty = (this.difficulty + dir & 0x3);
         }
         if (option == Option.GRAPHICS) {
             this.fancyGraphics = !this.fancyGraphics;

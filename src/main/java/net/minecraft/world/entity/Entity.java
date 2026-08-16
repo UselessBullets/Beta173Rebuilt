@@ -567,8 +567,8 @@ public abstract class Entity
         final float n = speed / sqrt;
         xa *= n;
         za *= n;
-        final float sin = Mth.sin(this.yRot * 3.1415927f / 180.0f);
-        final float cos = Mth.cos(this.yRot * 3.1415927f / 180.0f);
+        final float sin = Mth.sin(this.yRot * Mth.PI / 180.0f);
+        final float cos = Mth.cos(this.yRot * Mth.PI / 180.0f);
         this.xd += xa * cos - za * sin;
         this.zd += za * cos + xa * sin;
     }

@@ -31,7 +31,7 @@ public class LavaSideTexture extends DynamicTexture
         for (int i = 0; i < 16; ++i) {
             for (int j = 0; j < 16; ++j) {
                 float n = 0.0f;
-                final int n2 = (int)(Mth.sin(j * 3.1415927f * 2.0f / 16.0f) * 1.2f);
+                final int n2 = (int)(Mth.sin(j * Mth.PI * 2.0f / 16.0f) * 1.2f);
                 final int n3 = (int)(Mth.sin(i * 3.1415927f * 2.0f / 16.0f) * 1.2f);
                 for (int k = i - 1; k <= i + 1; ++k) {
                     for (int l = j - 1; l <= j + 1; ++l) {

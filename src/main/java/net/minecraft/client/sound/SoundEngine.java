@@ -129,8 +129,8 @@ public class SoundEngine
         final double n2 = player.xo + (player.x - player.xo) * partialTick;
         final double n3 = player.yo + (player.y - player.yo) * partialTick;
         final double n4 = player.zo + (player.z - player.zo) * partialTick;
-        final float cos = Mth.cos(-n * 0.017453292f - 3.1415927f);
-        final float lookX = -Mth.sin(-n * 0.017453292f - 3.1415927f);
+        final float cos = Mth.cos(-n * Mth.DEGRAD - Mth.PI);
+        final float lookX = -Mth.sin(-n * Mth.DEGRAD - Mth.PI);
         final float lookY = 0.0f;
         final float lookZ = -cos;
         final float upX = 0.0f;

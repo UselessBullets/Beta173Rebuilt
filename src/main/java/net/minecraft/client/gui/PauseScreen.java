@@ -25,15 +25,16 @@ public class PauseScreen extends Screen
     public void init() {
         this.saveStep = 0;
         this.buttons.clear();
-        final int n = -16;
-        this.buttons.add(new Button(1, this.width / 2 - 100, this.height / 4 + 120 + n, "Save and quit to title"));
+        final int yo = -16;
+        this.buttons.add(new Button(1, this.width / 2 - 100, this.height / 4 + 24 * 5 + yo, "Save and quit to title"));
         if (this.minecraft.isClientSide()) {
             this.buttons.get(0).msg = "Disconnect";
         }
-        this.buttons.add(new Button(4, this.width / 2 - 100, this.height / 4 + 24 + n, "Back to game"));
-        this.buttons.add(new Button(0, this.width / 2 - 100, this.height / 4 + 96 + n, "Options..."));
-        this.buttons.add(new Button(5, this.width / 2 - 100, this.height / 4 + 48 + n, 98, 20, I18n.get("gui.achievements")));
-        this.buttons.add(new Button(6, this.width / 2 + 2, this.height / 4 + 48 + n, 98, 20, I18n.get("gui.stats")));
+
+        this.buttons.add(new Button(4, this.width / 2 - 100, this.height / 4 + 24 * 1 + yo, "Back to game"));
+        this.buttons.add(new Button(0, this.width / 2 - 100, this.height / 4 + 24 * 4 + yo, "Options..."));
+        this.buttons.add(new Button(5, this.width / 2 - 100, this.height / 4 + 24 * 2 + yo, 98, 20, I18n.get("gui.achievements")));
+        this.buttons.add(new Button(6, this.width / 2 + 2, this.height / 4 + 24 * 2 + yo, 98, 20, I18n.get("gui.stats")));
     }
     
     @Override
@@ -46,6 +47,7 @@ public class PauseScreen extends Screen
             if (this.minecraft.isClientSide()) {
                 this.minecraft.level.disconnect();
             }
+
             this.minecraft.setLevel(null);
             this.minecraft.setScreen(new TitleScreen());
         }
@@ -70,11 +72,18 @@ public class PauseScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.renderBackground();
-        if (!this.minecraft.level.pauseSave(this.saveStep++) || this.visibleTime < 20) {
-            final int n = (int)(255.0f * (Mth.sin((this.visibleTime % 10 + partialTick) / 10.0f * 3.1415927f * 2.0f) * 0.2f + 0.8f));
-            this.drawString(this.font, "Saving level..", 8, this.height - 16, n << 16 | n << 8 | n);
+
+        boolean isSaving = !this.minecraft.level.pauseSave(this.saveStep++);
+        if (isSaving || this.visibleTime < 20) {
+            float col = (this.visibleTime % 10 + partialTick) / 10.0f;
+            col = Mth.sin(col * Mth.PI * 2.0f) * 0.2f + 0.8f;
+            final int br = (int)(255.0f * col);
+
+            this.drawString(this.font, "Saving level..", 8, this.height - 16, br << 16 | br << 8 | br);
         }
+        
         this.drawCenteredString(this.font, "Game menu", this.width / 2, 40, 0xffffff);
+
         super.render(xm, ym, partialTick);
     }
 }

@@ -243,7 +243,7 @@ public abstract class Mob extends Entity
         if (sqrt > 0.05f) {
             n3 = 1.0f;
             n2 = sqrt * 3.0f;
-            n = (float)Math.atan2(y, x) * 180.0f / 3.1415927f - 90.0f;
+            n = (float)Math.atan2(y, x) * 180.0f / Mth.PI - 90.0f;
         }
         if (this.attackAnim > 0.0f) {
             n = this.yRot;
@@ -780,17 +780,17 @@ public abstract class Mob extends Entity
     
     public Vec3 getViewVector(final float partialTick) {
         if (partialTick == 1.0f) {
-            final float cos = Mth.cos(-this.yRot * 0.017453292f - 3.1415927f);
-            final float sin = Mth.sin(-this.yRot * 0.017453292f - 3.1415927f);
-            final float n = -Mth.cos(-this.xRot * 0.017453292f);
-            return Vec3.newTemp(sin * n, Mth.sin(-this.xRot * 0.017453292f), cos * n);
+            final float cos = Mth.cos(-this.yRot * Mth.DEGRAD - Mth.PI);
+            final float sin = Mth.sin(-this.yRot * Mth.DEGRAD - Mth.PI);
+            final float n = -Mth.cos(-this.xRot * Mth.DEGRAD);
+            return Vec3.newTemp(sin * n, Mth.sin(-this.xRot * Mth.DEGRAD), cos * n);
         }
         final float n2 = this.xRotO + (this.xRot - this.xRotO) * partialTick;
         final float n3 = this.yRotO + (this.yRot - this.yRotO) * partialTick;
-        final float cos2 = Mth.cos(-n3 * 0.017453292f - 3.1415927f);
-        final float sin2 = Mth.sin(-n3 * 0.017453292f - 3.1415927f);
-        final float n4 = -Mth.cos(-n2 * 0.017453292f);
-        return Vec3.newTemp(sin2 * n4, Mth.sin(-n2 * 0.017453292f), cos2 * n4);
+        final float cos2 = Mth.cos(-n3 * Mth.DEGRAD - Mth.PI);
+        final float sin2 = Mth.sin(-n3 * Mth.DEGRAD - Mth.PI);
+        final float n4 = -Mth.cos(-n2 * Mth.DEGRAD);
+        return Vec3.newTemp(sin2 * n4, Mth.sin(-n2 * Mth.DEGRAD), cos2 * n4);
     }
     
     public HitResult pick(final double range, final float partialTick) {

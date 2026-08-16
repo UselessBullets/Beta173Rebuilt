@@ -438,7 +438,7 @@ public class Minecart extends Entity implements Container
         final double x2 = this.xo - this.x;
         final double y2 = this.zo - this.z;
         if (x2 * x2 + y2 * y2 > 0.001) {
-            this.yRot = (float)(Math.atan2(y2, x2) * 180.0 / 3.141592653589793);
+            this.yRot = (float)(Math.atan2(y2, x2) * 180.0 / Math.PI);
             if (this.flipped) {
                 this.yRot += 180.0f;
             }

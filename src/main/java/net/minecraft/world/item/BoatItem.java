@@ -25,10 +25,10 @@ public class BoatItem extends Item
         final float n2 = player.xRotO + (player.xRot - player.xRotO) * n;
         final float n3 = player.yRotO + (player.yRot - player.yRotO) * n;
         final Vec3 temp = Vec3.newTemp(player.xo + (player.x - player.xo) * n, player.yo + (player.y - player.yo) * n + 1.62 - player.heightOffset, player.zo + (player.z - player.zo) * n);
-        final float cos = Mth.cos(-n3 * 0.017453292f - 3.1415927f);
-        final float sin = Mth.sin(-n3 * 0.017453292f - 3.1415927f);
-        final float n4 = -Mth.cos(-n2 * 0.017453292f);
-        final float sin2 = Mth.sin(-n2 * 0.017453292f);
+        final float cos = Mth.cos(-n3 * Mth.DEGRAD - Mth.PI);
+        final float sin = Mth.sin(-n3 * Mth.DEGRAD - Mth.PI);
+        final float n4 = -Mth.cos(-n2 * Mth.DEGRAD);
+        final float sin2 = Mth.sin(-n2 * Mth.DEGRAD);
         final float n5 = sin * n4;
         final float n6 = sin2;
         final float n7 = cos * n4;

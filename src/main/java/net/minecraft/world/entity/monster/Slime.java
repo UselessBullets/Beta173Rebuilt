@@ -66,7 +66,7 @@ public class Slime extends Mob implements Enemy
         if (this.onGround && !onGround) {
             final int size = this.getSize();
             for (int i = 0; i < size * 8; ++i) {
-                final float n = this.random.nextFloat() * 3.1415927f * 2.0f;
+                final float n = this.random.nextFloat() * Mth.PI * 2.0f;
                 final float n2 = this.random.nextFloat() * 0.5f + 0.5f;
                 this.level.addParticle("slime", this.x + Mth.sin(n) * size * 0.5f * n2, this.bb.y0, this.z + Mth.cos(n) * size * 0.5f * n2, 0.0, 0.0, 0.0);
             }

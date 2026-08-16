@@ -21,7 +21,7 @@ public class OreFeature extends Feature
     
     @Override
     public boolean place(final Level level, final Random random, final int x, final int y, final int z) {
-        final float n = random.nextFloat() * 3.1415927f;
+        final float n = random.nextFloat() * Mth.PI;
         final double n2 = x + 8 + Mth.sin(n) * this.count / 8.0f;
         final double n3 = x + 8 - Mth.sin(n) * this.count / 8.0f;
         final double n4 = z + 8 + Mth.cos(n) * this.count / 8.0f;
@@ -33,8 +33,8 @@ public class OreFeature extends Feature
             final double n9 = n6 + (n7 - n6) * i / this.count;
             final double n10 = n4 + (n5 - n4) * i / this.count;
             final double n11 = random.nextDouble() * this.count / 16.0;
-            final double n12 = (Mth.sin(i * 3.1415927f / this.count) + 1.0f) * n11 + 1.0;
-            final double n13 = (Mth.sin(i * 3.1415927f / this.count) + 1.0f) * n11 + 1.0;
+            final double n12 = (Mth.sin(i * Mth.PI / this.count) + 1.0f) * n11 + 1.0;
+            final double n13 = (Mth.sin(i * Mth.PI / this.count) + 1.0f) * n11 + 1.0;
             final int floor = Mth.floor(n8 - n12 / 2.0);
             final int floor2 = Mth.floor(n9 - n13 / 2.0);
             final int floor3 = Mth.floor(n10 - n12 / 2.0);

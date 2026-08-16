@@ -7,6 +7,7 @@ package net.minecraft.client.model;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.client.MemoryTracker;
 import org.lwjgl.opengl.GL11;
+import util.Mth;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -108,13 +109,13 @@ public class Cube
             glPushMatrix();
             glTranslatef(this.x * scale, this.y * scale, this.z * scale);
             if (this.zRot != 0.0f) {
-                glRotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
+                glRotatef(this.zRot * Mth.RADDEG, 0.0f, 0.0f, 1.0f);
             }
             if (this.yRot != 0.0f) {
-                glRotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
+                glRotatef(this.yRot * Mth.RADDEG, 0.0f, 1.0f, 0.0f);
             }
             if (this.xRot != 0.0f) {
-                glRotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
+                glRotatef(this.xRot * Mth.RADDEG, 1.0f, 0.0f, 0.0f);
             }
             glCallList(this.list);
             glPopMatrix();
@@ -142,13 +143,13 @@ public class Cube
         glPushMatrix();
         glTranslatef(this.x * scale, this.y * scale, this.z * scale);
         if (this.yRot != 0.0f) {
-            glRotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
+            glRotatef(this.yRot * Mth.RADDEG, 0.0f, 1.0f, 0.0f);
         }
         if (this.xRot != 0.0f) {
-            glRotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
+            glRotatef(this.xRot * Mth.RADDEG, 1.0f, 0.0f, 0.0f);
         }
         if (this.zRot != 0.0f) {
-            glRotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
+            glRotatef(this.zRot * Mth.RADDEG, 0.0f, 0.0f, 1.0f);
         }
         glCallList(this.list);
         glPopMatrix();
@@ -167,13 +168,13 @@ public class Cube
         if (this.xRot != 0.0f || this.yRot != 0.0f || this.zRot != 0.0f) {
             glTranslatef(this.x * scale, this.y * scale, this.z * scale);
             if (this.zRot != 0.0f) {
-                glRotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
+                glRotatef(this.zRot * Mth.RADDEG, 0.0f, 0.0f, 1.0f);
             }
             if (this.yRot != 0.0f) {
-                glRotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
+                glRotatef(this.yRot * Mth.RADDEG, 0.0f, 1.0f, 0.0f);
             }
             if (this.xRot != 0.0f) {
-                glRotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
+                glRotatef(this.xRot * Mth.RADDEG, 1.0f, 0.0f, 0.0f);
             }
         }
         else if (this.x != 0.0f || this.y != 0.0f || this.z != 0.0f) {

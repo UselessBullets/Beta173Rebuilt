@@ -28,15 +28,15 @@ public class LavaParticle extends Particle
     }
     
     @Override
-    public float getBrightness(final float partialTick) {
+    public float getBrightness(final float a) {
         return 1.0f;
     }
     
     @Override
-    public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
-        final float s = (this.age + partialTick) / this.lifetime;
+    public void render(final Tesselator t, final float a, final float xa, final float ya, final float za, final float xa2, final float za2) {
+        final float s = (this.age + a) / this.lifetime;
         this.size = this.oSize * (1.0f - s * s);
-        super.render(t, partialTick, xa, ya, za, xa2, za2);
+        super.render(t, a, xa, ya, za, xa2, za2);
     }
     
     @Override

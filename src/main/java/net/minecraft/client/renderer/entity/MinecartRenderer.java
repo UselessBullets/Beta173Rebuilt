@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.client.renderer.TileRenderer;
@@ -23,14 +22,14 @@ public class MinecartRenderer extends EntityRenderer<Minecart>
         this.model = new MinecartModel();
     }
     
-    public void render(final Minecart entity, double x, double y, double z, float rot, final float partialTick) {
+    public void render(final Minecart entity, double x, double y, double z, float rot, final float a) {
         GL11.glPushMatrix();
-        final double x2 = entity.xOld + (entity.x - entity.xOld) * partialTick;
-        final double y2 = entity.yOld + (entity.y - entity.yOld) * partialTick;
-        final double z2 = entity.zOld + (entity.z - entity.zOld) * partialTick;
+        final double x2 = entity.xOld + (entity.x - entity.xOld) * a;
+        final double y2 = entity.yOld + (entity.y - entity.yOld) * a;
+        final double z2 = entity.zOld + (entity.z - entity.zOld) * a;
         final double offs = 0.3f;
         final Vec3 pos = entity.getPos(x2, y2, z2);
-        float n = entity.xRotO + (entity.xRot - entity.xRotO) * partialTick;
+        float n = entity.xRotO + (entity.xRot - entity.xRotO) * a;
         if (pos != null) {
             Vec3 posOffs = entity.getPosOffs(x2, y2, z2, offs);
             Vec3 posOffs2 = entity.getPosOffs(x2, y2, z2, -offs);
@@ -53,8 +52,8 @@ public class MinecartRenderer extends EntityRenderer<Minecart>
         GL11.glTranslatef((float)x, (float)y, (float)z);
         GL11.glRotatef(180.0f - rot, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(-n, 0.0f, 0.0f, 1.0f);
-        final float i = entity.hurtTime - partialTick;
-        float n2 = entity.damage - partialTick;
+        final float i = entity.hurtTime - a;
+        float n2 = entity.damage - a;
         if (n2 < 0.0f) {
             n2 = 0.0f;
         }
@@ -68,10 +67,10 @@ public class MinecartRenderer extends EntityRenderer<Minecart>
             GL11.glTranslatef(0.0f, 0.3125f, 0.0f);
             GL11.glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
             if (entity.type == 1) {
-                new TileRenderer().renderTile(Tile.chest, 0, entity.getBrightness(partialTick));
+                new TileRenderer().renderTile(Tile.chest, 0, entity.getBrightness(a));
             }
             else if (entity.type == 2) {
-                new TileRenderer().renderTile(Tile.furnace, 0, entity.getBrightness(partialTick));
+                new TileRenderer().renderTile(Tile.furnace, 0, entity.getBrightness(a));
             }
             GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
             GL11.glTranslatef(0.0f, -0.3125f, 0.0f);

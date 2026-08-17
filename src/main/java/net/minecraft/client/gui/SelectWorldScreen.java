@@ -158,12 +158,12 @@ public class SelectWorldScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
-        this.worldSelectionList.render(xm, ym, partialTick);
+    public void render(final int xm, final int ym, final float a) {
+        this.worldSelectionList.render(xm, ym, a);
 
         this.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xffffff);
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
 
     class WorldSelectionList extends ScrolledSelectionList

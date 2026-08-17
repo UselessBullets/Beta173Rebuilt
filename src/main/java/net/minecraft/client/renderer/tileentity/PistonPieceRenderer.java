@@ -4,8 +4,6 @@
 
 package net.minecraft.client.renderer.tileentity;
 
-import net.minecraft.world.level.tile.entity.TileEntity;
-import net.minecraft.world.level.LevelSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.tile.PistonBaseTile;
 import net.minecraft.client.Minecraft;
@@ -22,9 +20,9 @@ public class PistonPieceRenderer extends TileEntityRenderer<PistonPieceEntity>
 {
     private TileRenderer tileRenderer;
     
-    public void render(final PistonPieceEntity entity, final double x, final double y, final double z, final float partialTick) {
+    public void render(final PistonPieceEntity entity, final double x, final double y, final double z, final float a) {
         final Tile tile = Tile.tiles[entity.getId()];
-        if (tile != null && entity.getProgress(partialTick) < 1.0f) {
+        if (tile != null && entity.getProgress(a) < 1.0f) {
             final Tesselator instance = Tesselator.instance;
             this.bindTexture("/terrain.png");
             Lighting.turnOff();
@@ -38,14 +36,14 @@ public class PistonPieceRenderer extends TileEntityRenderer<PistonPieceEntity>
                 GL11.glShadeModel(GL_FLAT);
             }
             instance.begin();
-            instance.offset((float)x - entity.x + entity.getXOff(partialTick), (float)y - entity.y + entity.getYOff(partialTick), (float)z - entity.z + entity.getZOff(partialTick));
+            instance.offset((float)x - entity.x + entity.getXOff(a), (float)y - entity.y + entity.getYOff(a), (float)z - entity.z + entity.getZOff(a));
             instance.color(1, 1, 1);
-            if (tile == Tile.pistonExtension && entity.getProgress(partialTick) < 0.5f) {
+            if (tile == Tile.pistonExtension && entity.getProgress(a) < 0.5f) {
                 this.tileRenderer.tesselatePistonArmNoCulling(tile, entity.x, entity.y, entity.z, false);
             }
             else if (entity.isSourcePiston() && !entity.isExtending()) {
                 Tile.pistonExtension.setOverrideTopTexture(((PistonBaseTile)tile).getPlatformTexture());
-                this.tileRenderer.tesselatePistonArmNoCulling(Tile.pistonExtension, entity.x, entity.y, entity.z, entity.getProgress(partialTick) < 0.5f);
+                this.tileRenderer.tesselatePistonArmNoCulling(Tile.pistonExtension, entity.x, entity.y, entity.z, entity.getProgress(a) < 0.5f);
                 Tile.pistonExtension.clearOverrideTopTexture();
                 instance.offset((float)x - entity.x, (float)y - entity.y, (float)z - entity.z);
                 this.tileRenderer.tesselatePistonBaseForceExtended(tile, entity.x, entity.y, entity.z);

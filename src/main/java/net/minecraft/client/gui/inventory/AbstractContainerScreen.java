@@ -35,12 +35,12 @@ public abstract class AbstractContainerScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
         final int xo = (this.width - this.imageWidth) / 2;
         final int yo = (this.height - this.imageHeight) / 2;
 
-        this.renderBg(partialTick);
+        this.renderBg(a);
 
         glPushMatrix();
         glRotatef(120.0f, 1.0f, 0.0f, 0.0f);
@@ -101,7 +101,7 @@ public abstract class AbstractContainerScreen extends Screen
 
         glPopMatrix();
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
         glEnable(GL_LIGHTING);
         glEnable(GL_DEPTH_TEST);
     }
@@ -109,7 +109,7 @@ public abstract class AbstractContainerScreen extends Screen
     protected void renderLabels() {
     }
     
-    protected abstract void renderBg(final float partialTick);
+    protected abstract void renderBg(final float a);
     
     private void renderSlot(final Slot slot) {
         final int x = slot.x;

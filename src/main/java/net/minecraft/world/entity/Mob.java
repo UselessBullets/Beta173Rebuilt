@@ -758,19 +758,19 @@ public abstract class Mob extends Entity
         this.hurt(null, 4);
     }
     
-    public float getAttackAnim(final float partialTick) {
+    public float getAttackAnim(final float a) {
         float n = this.attackAnim - this.oAttackAnim;
         if (n < 0.0f) {
             ++n;
         }
-        return this.oAttackAnim + n * partialTick;
+        return this.oAttackAnim + n * a;
     }
     
-    public Vec3 getPos(final float partialTick) {
-        if (partialTick == 1.0f) {
+    public Vec3 getPos(final float a) {
+        if (a == 1.0f) {
             return Vec3.newTemp(this.x, this.y, this.z);
         }
-        return Vec3.newTemp(this.xo + (this.x - this.xo) * partialTick, this.yo + (this.y - this.yo) * partialTick, this.zo + (this.z - this.zo) * partialTick);
+        return Vec3.newTemp(this.xo + (this.x - this.xo) * a, this.yo + (this.y - this.yo) * a, this.zo + (this.z - this.zo) * a);
     }
     
     @Override
@@ -778,24 +778,24 @@ public abstract class Mob extends Entity
         return this.getViewVector(1.0f);
     }
     
-    public Vec3 getViewVector(final float partialTick) {
-        if (partialTick == 1.0f) {
+    public Vec3 getViewVector(final float a) {
+        if (a == 1.0f) {
             final float cos = Mth.cos(-this.yRot * Mth.DEGRAD - Mth.PI);
             final float sin = Mth.sin(-this.yRot * Mth.DEGRAD - Mth.PI);
             final float n = -Mth.cos(-this.xRot * Mth.DEGRAD);
             return Vec3.newTemp(sin * n, Mth.sin(-this.xRot * Mth.DEGRAD), cos * n);
         }
-        final float n2 = this.xRotO + (this.xRot - this.xRotO) * partialTick;
-        final float n3 = this.yRotO + (this.yRot - this.yRotO) * partialTick;
+        final float n2 = this.xRotO + (this.xRot - this.xRotO) * a;
+        final float n3 = this.yRotO + (this.yRot - this.yRotO) * a;
         final float cos2 = Mth.cos(-n3 * Mth.DEGRAD - Mth.PI);
         final float sin2 = Mth.sin(-n3 * Mth.DEGRAD - Mth.PI);
         final float n4 = -Mth.cos(-n2 * Mth.DEGRAD);
         return Vec3.newTemp(sin2 * n4, Mth.sin(-n2 * Mth.DEGRAD), cos2 * n4);
     }
     
-    public HitResult pick(final double range, final float partialTick) {
-        final Vec3 pos = this.getPos(partialTick);
-        final Vec3 viewVector = this.getViewVector(partialTick);
+    public HitResult pick(final double range, final float a) {
+        final Vec3 pos = this.getPos(a);
+        final Vec3 viewVector = this.getViewVector(a);
         return this.level.clip(pos, pos.add(viewVector.x * range, viewVector.y * range, viewVector.z * range));
     }
     

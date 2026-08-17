@@ -29,17 +29,17 @@ public class TakeAnimationParticle extends Particle
     }
     
     @Override
-    public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
-        float time = (this.life + partialTick) / this.lifeTime;
+    public void render(final Tesselator t, final float a, final float xa, final float ya, final float za, final float xa2, final float za2) {
+        float time = (this.life + a) / this.lifeTime;
         time = time * time;
 
         final double xo = this.item.x;
         final double yo = this.item.y;
         final double zo = this.item.z;
 
-        final double xt = this.target.xOld + (this.target.x - this.target.xOld) * partialTick;
-        final double yt = this.target.yOld + (this.target.y - this.target.yOld) * partialTick + this.yOffs;
-        final double zt = this.target.zOld + (this.target.z - this.target.zOld) * partialTick;
+        final double xt = this.target.xOld + (this.target.x - this.target.xOld) * a;
+        final double yt = this.target.yOld + (this.target.y - this.target.yOld) * a + this.yOffs;
+        final double zt = this.target.zOld + (this.target.z - this.target.zOld) * a;
 
         double xx = xo + (xt - xo) * time;
         double yy = yo + (yt - yo) * time;
@@ -51,7 +51,7 @@ public class TakeAnimationParticle extends Particle
         zz -= TakeAnimationParticle.zOff;
 
         GL11.glColor4f(br, br, br, 1.0f);
-        EntityRenderDispatcher.instance.render(this.item, (float)xx, (float)yy, (float)zz, this.item.yRot, partialTick);
+        EntityRenderDispatcher.instance.render(this.item, (float)xx, (float)yy, (float)zz, this.item.yRot, a);
     }
     
     @Override

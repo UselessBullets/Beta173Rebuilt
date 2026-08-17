@@ -26,8 +26,8 @@ public class FootstepParticle extends Particle
     }
     
     @Override
-    public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
-        float time = (this.life + partialTick) / this.lifeTime;
+    public void render(final Tesselator t, final float a, final float xa, final float ya, final float za, final float xa2, final float za2) {
+        float time = (this.life + a) / this.lifeTime;
         time = time * time;
 
         float alpha = 2.0f - time * 2.0f;

@@ -47,7 +47,7 @@ public class GameMode
     public void stopDestroyBlock() {
     }
     
-    public void render(final float partialTick) {
+    public void render(final float a) {
     }
     
     public float getPickRange() {

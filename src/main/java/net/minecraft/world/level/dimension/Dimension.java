@@ -58,8 +58,8 @@ public abstract class Dimension
         return this.level.getTopTile(x, z) == Tile.sand.id;
     }
     
-    public float getTimeOfDay(final long time, final float partialTick) {
-        float n = ((int)(time % 24000L) + partialTick) / 24000.0f - 0.25f;
+    public float getTimeOfDay(final long time, final float a) {
+        float n = ((int)(time % 24000L) + a) / 24000.0f - 0.25f;
         if (n < 0.0f) {
             ++n;
         }
@@ -70,7 +70,7 @@ public abstract class Dimension
         return n2 + (1.0f - (float)((Math.cos(n * Math.PI) + 1.0) / 2.0) - n2) / 3.0f;
     }
     
-    public float[] getSunriseColor(final float td, final float partialTick) {
+    public float[] getSunriseColor(final float td, final float a) {
         final float n = 0.4f;
         final float n2 = Mth.cos(td * Mth.PI * 2.0f) - 0.0f;
         final float n3 = -0.0f;
@@ -87,7 +87,7 @@ public abstract class Dimension
         return null;
     }
     
-    public Vec3 getFogColor(final float td, final float partialTick) {
+    public Vec3 getFogColor(final float td, final float a) {
         float n = Mth.cos(td * Mth.PI * 2.0f) * 2.0f + 0.5f;
         if (n < 0.0f) {
             n = 0.0f;

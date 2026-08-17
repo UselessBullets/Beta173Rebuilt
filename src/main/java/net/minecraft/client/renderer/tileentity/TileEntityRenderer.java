@@ -13,7 +13,7 @@ public abstract class TileEntityRenderer<T extends TileEntity>
 {
     protected TileEntityRenderDispatcher tileEntityRenderDispatcher;
     
-    public abstract void render(final T entity, final double x, final double y, final double z, final float partialTick);
+    public abstract void render(final T entity, final double x, final double y, final double z, final float a);
     
     protected void bindTexture(final String resourceName) {
         final Textures textures = this.tileEntityRenderDispatcher.textures;

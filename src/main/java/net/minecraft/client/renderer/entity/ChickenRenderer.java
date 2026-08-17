@@ -4,9 +4,7 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import util.Mth;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.client.model.Model;
 
@@ -16,11 +14,11 @@ public class ChickenRenderer extends MobRenderer<Chicken>
         super(model, shadow);
     }
     
-    public void render(final Chicken entity, final double x, final double y, final double z, final float rot, final float partialTick) {
-        super.render(entity, x, y, z, rot, partialTick);
+    public void render(final Chicken entity, final double x, final double y, final double z, final float rot, final float a) {
+        super.render(entity, x, y, z, rot, a);
     }
     
-    protected float getBob(final Chicken mob, final float partialTick) {
-        return (Mth.sin(mob.oFlap + (mob.flap - mob.oFlap) * partialTick) + 1.0f) * (mob.oFlapSpeed + (mob.flapSpeed - mob.oFlapSpeed) * partialTick);
+    protected float getBob(final Chicken mob, final float a) {
+        return (Mth.sin(mob.oFlap + (mob.flap - mob.oFlap) * a) + 1.0f) * (mob.oFlapSpeed + (mob.flapSpeed - mob.oFlapSpeed) * a);
     }
 }

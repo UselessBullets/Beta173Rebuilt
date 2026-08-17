@@ -4,9 +4,7 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import org.lwjgl.opengl.GL11;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.client.model.Model;
 
@@ -16,13 +14,13 @@ public class SquidRenderer extends MobRenderer<Squid>
         super(model, shadow);
     }
     
-    public void render(final Squid entity, final double x, final double y, final double z, final float rot, final float partialTick) {
-        super.render(entity, x, y, z, rot, partialTick);
+    public void render(final Squid entity, final double x, final double y, final double z, final float rot, final float a) {
+        super.render(entity, x, y, z, rot, a);
     }
     
-    protected void setupRotations(final Squid mob, final float bob, final float bodyRot, final float partialTick) {
-        final float n = mob.xBodyRotO + (mob.xBodyRot - mob.xBodyRotO) * partialTick;
-        final float n2 = mob.zBodyRotO + (mob.zBodyRot - mob.zBodyRotO) * partialTick;
+    protected void setupRotations(final Squid mob, final float bob, final float bodyRot, final float a) {
+        final float n = mob.xBodyRotO + (mob.xBodyRot - mob.xBodyRotO) * a;
+        final float n2 = mob.zBodyRotO + (mob.zBodyRot - mob.zBodyRotO) * a;
         GL11.glTranslatef(0.0f, 0.5f, 0.0f);
         GL11.glRotatef(180.0f - bodyRot, 0.0f, 1.0f, 0.0f);
         GL11.glRotatef(n, 1.0f, 0.0f, 0.0f);
@@ -30,10 +28,10 @@ public class SquidRenderer extends MobRenderer<Squid>
         GL11.glTranslatef(0.0f, -1.2f, 0.0f);
     }
     
-    protected void scale(final Squid mob, final float partialTick) {
+    protected void scale(final Squid mob, final float a) {
     }
     
-    protected float getBob(final Squid mob, final float partialTick) {
-        return mob.oldTentacleAngle + (mob.tentacleAngle - mob.oldTentacleAngle) * partialTick;
+    protected float getBob(final Squid mob, final float a) {
+        return mob.oldTentacleAngle + (mob.tentacleAngle - mob.oldTentacleAngle) * a;
     }
 }

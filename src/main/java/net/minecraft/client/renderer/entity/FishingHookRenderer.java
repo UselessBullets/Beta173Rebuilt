@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
@@ -16,7 +15,7 @@ import static org.lwjgl.opengl.GL12.*;
 
 public class FishingHookRenderer extends EntityRenderer<FishingHook>
 {
-    public void render(final FishingHook entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final FishingHook entity, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
         GL11.glEnable(GL_RESCALE_NORMAL);
@@ -44,29 +43,29 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook>
         GL11.glDisable(GL_RESCALE_NORMAL);
         GL11.glPopMatrix();
         if (entity.owner != null) {
-            final float n10 = (entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * partialTick) * Mth.DEGRAD;
+            final float n10 = (entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * a) * Mth.DEGRAD;
             final double n11 = Mth.sin(n10);
             final double n12 = Mth.cos(n10);
-            final float sin = Mth.sin(Mth.sqrt(entity.owner.getAttackAnim(partialTick)) * Mth.PI);
+            final float sin = Mth.sin(Mth.sqrt(entity.owner.getAttackAnim(a)) * Mth.PI);
             final Vec3 temp = Vec3.newTemp(-0.5, 0.03, 0.8);
-            temp.xRot(-(entity.owner.xRotO + (entity.owner.xRot - entity.owner.xRotO) * partialTick) * Mth.DEGRAD);
-            temp.yRot(-(entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * partialTick) * Mth.DEGRAD);
+            temp.xRot(-(entity.owner.xRotO + (entity.owner.xRot - entity.owner.xRotO) * a) * Mth.DEGRAD);
+            temp.yRot(-(entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * a) * Mth.DEGRAD);
             temp.yRot(sin * 0.5f);
             temp.xRot(-sin * 0.7f);
-            double n13 = entity.owner.xo + (entity.owner.x - entity.owner.xo) * partialTick + temp.x;
-            double n14 = entity.owner.yo + (entity.owner.y - entity.owner.yo) * partialTick + temp.y;
-            double n15 = entity.owner.zo + (entity.owner.z - entity.owner.zo) * partialTick + temp.z;
+            double n13 = entity.owner.xo + (entity.owner.x - entity.owner.xo) * a + temp.x;
+            double n14 = entity.owner.yo + (entity.owner.y - entity.owner.yo) * a + temp.y;
+            double n15 = entity.owner.zo + (entity.owner.z - entity.owner.zo) * a + temp.z;
             if (this.entityRenderDispatcher.options.thirdPersonView) {
-                final float n16 = (entity.owner.yBodyRotO + (entity.owner.yBodyRot - entity.owner.yBodyRotO) * partialTick) * Mth.DEGRAD;
+                final float n16 = (entity.owner.yBodyRotO + (entity.owner.yBodyRot - entity.owner.yBodyRotO) * a) * Mth.DEGRAD;
                 final double n17 = Mth.sin(n16);
                 final double n18 = Mth.cos(n16);
-                n13 = entity.owner.xo + (entity.owner.x - entity.owner.xo) * partialTick - n18 * 0.35 - n17 * 0.85;
-                n14 = entity.owner.yo + (entity.owner.y - entity.owner.yo) * partialTick - 0.45;
-                n15 = entity.owner.zo + (entity.owner.z - entity.owner.zo) * partialTick - n17 * 0.35 + n18 * 0.85;
+                n13 = entity.owner.xo + (entity.owner.x - entity.owner.xo) * a - n18 * 0.35 - n17 * 0.85;
+                n14 = entity.owner.yo + (entity.owner.y - entity.owner.yo) * a - 0.45;
+                n15 = entity.owner.zo + (entity.owner.z - entity.owner.zo) * a - n17 * 0.35 + n18 * 0.85;
             }
-            final double n19 = entity.xo + (entity.x - entity.xo) * partialTick;
-            final double n20 = entity.yo + (entity.y - entity.yo) * partialTick + 0.25;
-            final double n21 = entity.zo + (entity.z - entity.zo) * partialTick;
+            final double n19 = entity.xo + (entity.x - entity.xo) * a;
+            final double n20 = entity.yo + (entity.y - entity.yo) * a + 0.25;
+            final double n21 = entity.zo + (entity.z - entity.zo) * a;
             final double n22 = (float)(n13 - n19);
             final double n23 = (float)(n14 - n20);
             final double n24 = (float)(n15 - n21);

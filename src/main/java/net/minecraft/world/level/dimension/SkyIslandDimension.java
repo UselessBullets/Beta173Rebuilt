@@ -25,17 +25,17 @@ public class SkyIslandDimension extends Dimension
     }
     
     @Override
-    public float getTimeOfDay(final long time, final float partialTick) {
+    public float getTimeOfDay(final long time, final float a) {
         return 0.0f;
     }
     
     @Override
-    public float[] getSunriseColor(final float td, final float partialTick) {
+    public float[] getSunriseColor(final float td, final float a) {
         return null;
     }
     
     @Override
-    public Vec3 getFogColor(final float td, final float partialTick) {
+    public Vec3 getFogColor(final float td, final float a) {
         final int n = 8421536;
         float n2 = Mth.cos(td * Mth.PI * 2.0f) * 2.0f + 0.5f;
         if (n2 < 0.0f) {

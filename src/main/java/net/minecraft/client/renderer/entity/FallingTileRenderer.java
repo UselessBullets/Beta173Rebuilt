@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import util.Mth;
 import net.minecraft.world.level.tile.Tile;
@@ -23,7 +22,7 @@ public class FallingTileRenderer extends EntityRenderer<FallingTile>
         this.shadowRadius = 0.5f;
     }
     
-    public void render(final FallingTile entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final FallingTile entity, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
         this.bindTexture("/terrain.png");

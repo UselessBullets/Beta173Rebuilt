@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import com.mojang.nbt.CompoundTag;
 import java.util.Iterator;
 import net.minecraft.world.phys.AABB;
-import java.util.Collection;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.Facing;
@@ -57,32 +56,32 @@ public class PistonPieceEntity extends TileEntity
         return this.isSourcePiston;
     }
     
-    public float getProgress(float partialTick) {
-        if (partialTick > 1.0f) {
-            partialTick = 1.0f;
+    public float getProgress(float a) {
+        if (a > 1.0f) {
+            a = 1.0f;
         }
-        return this.progressO + (this.progress - this.progressO) * partialTick;
+        return this.progressO + (this.progress - this.progressO) * a;
     }
     
-    public float getXOff(final float partialTick) {
+    public float getXOff(final float a) {
         if (this.extending) {
-            return (this.getProgress(partialTick) - 1.0f) * Facing.STEP_X[this.facing];
+            return (this.getProgress(a) - 1.0f) * Facing.STEP_X[this.facing];
         }
-        return (1.0f - this.getProgress(partialTick)) * Facing.STEP_X[this.facing];
+        return (1.0f - this.getProgress(a)) * Facing.STEP_X[this.facing];
     }
     
-    public float getYOff(final float partialTick) {
+    public float getYOff(final float a) {
         if (this.extending) {
-            return (this.getProgress(partialTick) - 1.0f) * Facing.STEP_Y[this.facing];
+            return (this.getProgress(a) - 1.0f) * Facing.STEP_Y[this.facing];
         }
-        return (1.0f - this.getProgress(partialTick)) * Facing.STEP_Y[this.facing];
+        return (1.0f - this.getProgress(a)) * Facing.STEP_Y[this.facing];
     }
     
-    public float getZOff(final float partialTick) {
+    public float getZOff(final float a) {
         if (this.extending) {
-            return (this.getProgress(partialTick) - 1.0f) * Facing.STEP_Z[this.facing];
+            return (this.getProgress(a) - 1.0f) * Facing.STEP_Z[this.facing];
         }
-        return (1.0f - this.getProgress(partialTick)) * Facing.STEP_Z[this.facing];
+        return (1.0f - this.getProgress(a)) * Facing.STEP_Z[this.facing];
     }
     
     private void moveCollidedEntities(float progress, final float amount) {

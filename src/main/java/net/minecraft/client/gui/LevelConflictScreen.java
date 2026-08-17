@@ -28,7 +28,7 @@ public class LevelConflictScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
 
         this.drawCenteredString(this.font, "Level save conflict", this.width / 2, this.height / 4 - 60 + 20, 0xffffff);
@@ -39,6 +39,6 @@ public class LevelConflictScreen extends Screen
 
         this.drawString(this.font, "To prevent level corruption, the current game has quit.", this.width / 2 - 140, this.height / 4 - 60 + 60 + 9 * 5, 0xa0a0a0);
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
 }

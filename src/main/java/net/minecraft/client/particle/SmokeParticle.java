@@ -36,13 +36,13 @@ public class SmokeParticle extends Particle
     }
     
     @Override
-    public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
-        float l = (this.age + partialTick) / this.lifetime * 32.0f;
+    public void render(final Tesselator t, final float a, final float xa, final float ya, final float za, final float xa2, final float za2) {
+        float l = (this.age + a) / this.lifetime * 32.0f;
         if (l < 0.0f) l = 0.0f;
         if (l > 1.0f) l = 1.0f;
 
         this.size = this.oSize * l;
-        super.render(t, partialTick, xa, ya, za, xa2, za2);
+        super.render(t, a, xa, ya, za, xa2, za2);
     }
     
     @Override

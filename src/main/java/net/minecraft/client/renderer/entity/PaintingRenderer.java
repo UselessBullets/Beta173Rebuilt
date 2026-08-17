@@ -20,7 +20,7 @@ public class PaintingRenderer extends EntityRenderer<Painting>
         this.random = new Random();
     }
     
-    public void render(final Painting entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final Painting entity, final double x, final double y, final double z, final float rot, final float a) {
         this.random.setSeed(187L);
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);

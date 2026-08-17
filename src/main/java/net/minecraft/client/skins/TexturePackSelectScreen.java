@@ -110,8 +110,8 @@ public class TexturePackSelectScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
-        this.packList.render(xm, ym, partialTick);
+    public void render(final int xm, final int ym, final float a) {
+        this.packList.render(xm, ym, a);
         if (this.updateIn <= 0) {
             this.minecraft.skins.updateList();
             this.updateIn += 20;
@@ -119,7 +119,7 @@ public class TexturePackSelectScreen extends Screen
         final Language instance = Language.getInstance();
         this.drawCenteredString(this.font, instance.getElement("texturePack.title"), this.width / 2, 16, 0xffffff);
         this.drawCenteredString(this.font, instance.getElement("texturePack.folderInfo"), this.width / 2 - 77, this.height - 26, 0x808080);
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
     
     @Override

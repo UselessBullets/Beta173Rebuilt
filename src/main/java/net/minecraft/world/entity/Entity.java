@@ -573,7 +573,7 @@ public abstract class Entity
         this.zd += za * cos + xa * sin;
     }
     
-    public float getBrightness(final float partialTick) {
+    public float getBrightness(final float a) {
         final int floor = Mth.floor(this.x);
         final int floor2 = Mth.floor(this.y - this.heightOffset + (this.bb.y1 - this.bb.y0) * 0.66);
         final int floor3 = Mth.floor(this.z);

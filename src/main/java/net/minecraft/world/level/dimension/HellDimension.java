@@ -22,7 +22,7 @@ public class HellDimension extends Dimension
     }
     
     @Override
-    public Vec3 getFogColor(final float td, final float partialTick) {
+    public Vec3 getFogColor(final float td, final float a) {
         return Vec3.newTemp(0.2f, 0.029999999329447746, 0.029999999329447746);
     }
     
@@ -47,7 +47,7 @@ public class HellDimension extends Dimension
     }
     
     @Override
-    public float getTimeOfDay(final long time, final float partialTick) {
+    public float getTimeOfDay(final long time, final float a) {
         return 0.5f;
     }
     

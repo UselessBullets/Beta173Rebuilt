@@ -5,8 +5,6 @@
 package net.minecraft.client.gui.inventory;
 
 import org.lwjgl.opengl.GL11;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.player.Inventory;
@@ -30,7 +28,7 @@ public class CraftingScreen extends AbstractContainerScreen
     }
     
     @Override
-    protected void renderBg(final float partialTick) {
+    protected void renderBg(final float a) {
         final int tex = this.minecraft.textures.loadTexture("/gui/crafting.png");
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.textures.bind(tex);

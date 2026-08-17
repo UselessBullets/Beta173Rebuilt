@@ -20,7 +20,7 @@ import java.util.Map;
 public class TileEntityRenderDispatcher
 {
     private Map<Class<? extends TileEntity>, TileEntityRenderer<? extends TileEntity>> renderers;
-    public static TileEntityRenderDispatcher instance;
+    public static TileEntityRenderDispatcher instance = new TileEntityRenderDispatcher();
     private Font font;
     public static double xOff;
     public static double yOff;
@@ -64,32 +64,32 @@ public class TileEntityRenderDispatcher
         return this.getRenderer(e.getClass());
     }
     
-    public void prepare(final Level level, final Textures textures, final Font font, final Mob player, final float partialTick) {
+    public void prepare(final Level level, final Textures textures, final Font font, final Mob player, final float a) {
         if (this.level != level) {
             this.setLevel(level);
         }
         this.textures = textures;
         this.player = player;
         this.font = font;
-        this.playerRotY = player.yRotO + (player.yRot - player.yRotO) * partialTick;
-        this.playerRotX = player.xRotO + (player.xRot - player.xRotO) * partialTick;
-        this.xPlayer = player.xOld + (player.x - player.xOld) * partialTick;
-        this.yPlayer = player.yOld + (player.y - player.yOld) * partialTick;
-        this.zPlayer = player.zOld + (player.z - player.zOld) * partialTick;
+        this.playerRotY = player.yRotO + (player.yRot - player.yRotO) * a;
+        this.playerRotX = player.xRotO + (player.xRot - player.xRotO) * a;
+        this.xPlayer = player.xOld + (player.x - player.xOld) * a;
+        this.yPlayer = player.yOld + (player.y - player.yOld) * a;
+        this.zPlayer = player.zOld + (player.z - player.zOld) * a;
     }
     
-    public void render(final TileEntity e, final float partialTick) {
+    public void render(final TileEntity e, final float a) {
         if (e.distanceToSqr(this.xPlayer, this.yPlayer, this.zPlayer) < 4096.0) {
             final float brightness = this.level.getBrightness(e.x, e.y, e.z);
             GL11.glColor3f(brightness, brightness, brightness);
-            this.render(e, e.x - TileEntityRenderDispatcher.xOff, e.y - TileEntityRenderDispatcher.yOff, e.z - TileEntityRenderDispatcher.zOff, partialTick);
+            this.render(e, e.x - TileEntityRenderDispatcher.xOff, e.y - TileEntityRenderDispatcher.yOff, e.z - TileEntityRenderDispatcher.zOff, a);
         }
     }
     
-    public void render(final TileEntity e, final double x, final double y, final double z, final float partialTick) {
+    public void render(final TileEntity e, final double x, final double y, final double z, final float a) {
         final TileEntityRenderer<TileEntity> renderer = this.getRenderer(e);
         if (renderer != null) {
-            renderer.render(e, x, y, z, partialTick);
+            renderer.render(e, x, y, z, a);
         }
     }
     
@@ -105,8 +105,5 @@ public class TileEntityRenderDispatcher
     public Font getFont() {
         return this.font;
     }
-    
-    static {
-        TileEntityRenderDispatcher.instance = new TileEntityRenderDispatcher();
-    }
+
 }

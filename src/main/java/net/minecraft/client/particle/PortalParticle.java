@@ -38,18 +38,18 @@ public class PortalParticle extends Particle
     }
     
     @Override
-    public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
-        float s = (this.age + partialTick) / this.lifetime;
+    public void render(final Tesselator t, final float a, final float xa, final float ya, final float za, final float xa2, final float za2) {
+        float s = (this.age + a) / this.lifetime;
         s = 1 - s;
         s = s * s;
         s = 1 - s;
         this.size = this.oSize * s;
-        super.render(t, partialTick, xa, ya, za, xa2, za2);
+        super.render(t, a, xa, ya, za, xa2, za2);
     }
     
     @Override
-    public float getBrightness(final float partialTick) {
-        final float br = super.getBrightness(partialTick);
+    public float getBrightness(final float a) {
+        final float br = super.getBrightness(a);
         float pos = this.age / (float)this.lifetime;
         pos = pos * pos;
         pos = pos * pos;

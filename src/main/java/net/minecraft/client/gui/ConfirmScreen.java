@@ -34,12 +34,12 @@ public class ConfirmScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
 
         this.drawCenteredString(this.font, this.title1, this.width / 2, 70, 0xffffff);
         this.drawCenteredString(this.font, this.title2, this.width / 2, 90, 0xffffff);
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
 }

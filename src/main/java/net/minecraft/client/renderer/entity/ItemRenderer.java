@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.client.renderer.Textures;
 import net.minecraft.client.gui.Font;
 import net.minecraft.world.item.ItemInstance;
@@ -34,12 +33,12 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
         this.shadowStrength = 0.75f;
     }
     
-    public void render(final ItemEntity entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final ItemEntity entity, final double x, final double y, final double z, final float rot, final float a) {
         this.random.setSeed(187L);
         final ItemInstance item = entity.item;
         GL11.glPushMatrix();
-        final float n = Mth.sin((entity.age + partialTick) / 10.0f + entity.bobOffs) * 0.1f + 0.1f;
-        final float n2 = ((entity.age + partialTick) / 20.0f + entity.bobOffs) * Mth.RADDEG;
+        final float n = Mth.sin((entity.age + a) / 10.0f + entity.bobOffs) * 0.1f + 0.1f;
+        final float n2 = ((entity.age + a) / 20.0f + entity.bobOffs) * Mth.RADDEG;
         int n3 = 1;
         if (entity.item.count > 1) {
             n3 = 2;
@@ -65,7 +64,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
                 if (i > 0) {
                     GL11.glTranslatef((this.random.nextFloat() * 2.0f - 1.0f) * 0.2f / n4, (this.random.nextFloat() * 2.0f - 1.0f) * 0.2f / n4, (this.random.nextFloat() * 2.0f - 1.0f) * 0.2f / n4);
                 }
-                this.tileRenderer.renderTile(Tile.tiles[item.id], item.getAuxValue(), entity.getBrightness(partialTick));
+                this.tileRenderer.renderTile(Tile.tiles[item.id], item.getAuxValue(), entity.getBrightness(a));
                 GL11.glPopMatrix();
             }
         }
@@ -91,7 +90,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
                 final float n12 = (color >> 16 & 0xFF) / 255.0f;
                 final float n13 = (color >> 8 & 0xFF) / 255.0f;
                 final float n14 = (color & 0xFF) / 255.0f;
-                final float brightness = entity.getBrightness(partialTick);
+                final float brightness = entity.getBrightness(a);
                 GL11.glColor4f(n12 * brightness, n13 * brightness, n14 * brightness, 1.0f);
             }
             for (int j = 0; j < n3; ++j) {

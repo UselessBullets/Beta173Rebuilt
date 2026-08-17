@@ -91,7 +91,7 @@ public class WolfModel extends Model
     }
     
     @Override
-    public void prepareMobModel(final Mob mob, final float time, final float r, final float partialTick) {
+    public void prepareMobModel(final Mob mob, final float time, final float r, final float a) {
         final Wolf wolf = (Wolf)mob;
 
         if (wolf.isAngry()) {
@@ -140,18 +140,18 @@ public class WolfModel extends Model
             this.leg2.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 1.4f * r;
             this.leg3.xRot = Mth.cos(time * 0.6662f) * 1.4f * r;
         }
-        final float angle = wolf.getHeadRollAngle(partialTick) + wolf.getBodyRollAngle(partialTick, 0.0f);
+        final float angle = wolf.getHeadRollAngle(a) + wolf.getBodyRollAngle(a, 0.0f);
         this.head.zRot = angle;
         this.ear1.zRot = angle;
         this.ear2.zRot = angle;
         this.mouth.zRot = angle;
 
-        this.upperBody.zRot = wolf.getBodyRollAngle(partialTick, -0.08f);
-        this.body.zRot = wolf.getBodyRollAngle(partialTick, -0.16f);
-        this.tail.zRot = wolf.getBodyRollAngle(partialTick, -0.2f);
+        this.upperBody.zRot = wolf.getBodyRollAngle(a, -0.08f);
+        this.body.zRot = wolf.getBodyRollAngle(a, -0.16f);
+        this.tail.zRot = wolf.getBodyRollAngle(a, -0.2f);
 
         if (wolf.isWet()) {
-            final float brightness = wolf.getBrightness(partialTick) * wolf.getWetShade(partialTick);
+            final float brightness = wolf.getBrightness(a) * wolf.getWetShade(a);
             GL11.glColor3f(brightness, brightness, brightness);
         }
     }

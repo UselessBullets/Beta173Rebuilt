@@ -4,7 +4,6 @@
 
 package net.minecraft.client.title;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
@@ -113,7 +112,7 @@ public class TitleScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
         final Tesselator instance = Tesselator.instance;
         final int n = this.width / 2 - 274 / 2;
@@ -133,7 +132,7 @@ public class TitleScreen extends Screen
         this.drawString(this.font, Minecraft.VERSION_STRING, 2, 2, 0x505050);
         final String s = "Copyright Mojang AB. Do not distribute.";
         this.drawString(this.font, s, this.width - this.font.width(s) - 2, this.height - 10, 0xffffff);
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
     
     static {

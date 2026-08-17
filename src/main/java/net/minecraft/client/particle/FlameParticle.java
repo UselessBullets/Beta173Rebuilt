@@ -29,18 +29,18 @@ public class FlameParticle extends Particle
     }
     
     @Override
-    public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
-        final float s = (this.age + partialTick) / this.lifetime;
+    public void render(final Tesselator t, final float a, final float xa, final float ya, final float za, final float xa2, final float za2) {
+        final float s = (this.age + a) / this.lifetime;
         this.size = this.oSize * (1.0f - s * s * 0.5f);
-        super.render(t, partialTick, xa, ya, za, xa2, za2);
+        super.render(t, a, xa, ya, za, xa2, za2);
     }
     
     @Override
-    public float getBrightness(final float partialTick) {
-        float l = (this.age + partialTick) / this.lifetime;
+    public float getBrightness(final float a) {
+        float l = (this.age + a) / this.lifetime;
         if (l < 0.0f) l = 0.0f;
         if (l > 1.0f) l = 1.0f;
-        float br = super.getBrightness(partialTick);
+        float br = super.getBrightness(a);
 
         return br * l + (1.0f - l);
     }

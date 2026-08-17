@@ -543,9 +543,9 @@ public abstract class Minecraft implements Runnable
                         this.stop();
                     }
                     if (this.pause && this.level != null) {
-                        final float partialTick = this.timer.partialTick;
+                        final float a = this.timer.a;
                         this.timer.advanceTime();
-                        this.timer.partialTick = partialTick;
+                        this.timer.a = a;
                     }
                     else {
                         this.timer.advanceTime();
@@ -564,7 +564,7 @@ public abstract class Minecraft implements Runnable
                     final long tickTime = System.nanoTime() - nanoTime;
                     this.checkGlError("Pre render");
                     TileRenderer.fancy = this.options.fancyGraphics;
-                    this.soundEngine.update(this.player, this.timer.partialTick);
+                    this.soundEngine.update(this.player, this.timer.a);
                     glEnable(GL_TEXTURE_2D);
                     if (this.level != null) {
                         this.level.updateLights();
@@ -577,9 +577,9 @@ public abstract class Minecraft implements Runnable
                     }
                     if (!this.noRender) {
                         if (this.gameMode != null) {
-                            this.gameMode.render(this.timer.partialTick);
+                            this.gameMode.render(this.timer.a);
                         }
-                        this.gameRenderer.render(this.timer.partialTick);
+                        this.gameRenderer.render(this.timer.a);
                     }
                     if (!Display.isActive()) {
                         if (this.fullscreen) {

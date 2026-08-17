@@ -25,17 +25,17 @@ public class BreakingItemParticle extends Particle
     }
     
     @Override
-    public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
+    public void render(final Tesselator t, final float a, final float xa, final float ya, final float za, final float xa2, final float za2) {
         final float u0 = (this.tex % 16 + this.uo / 4.0f) / 16.0f;
         final float u1 = u0 + 0.999f / 16.0f / 4;
         final float v0 = (this.tex / 16 + this.vo / 4.0f) / 16.0f;
         final float v1 = v0 + 0.999f / 16.0f / 4;
         final float r = 0.1f * this.size;
 
-        final float x = (float)(this.xo + (this.x - this.xo) * partialTick - BreakingItemParticle.xOff);
-        final float y = (float)(this.yo + (this.y - this.yo) * partialTick - BreakingItemParticle.yOff);
-        final float z = (float)(this.zo + (this.z - this.zo) * partialTick - BreakingItemParticle.zOff);
-        final float br = this.getBrightness(partialTick);
+        final float x = (float)(this.xo + (this.x - this.xo) * a - BreakingItemParticle.xOff);
+        final float y = (float)(this.yo + (this.y - this.yo) * a - BreakingItemParticle.yOff);
+        final float z = (float)(this.zo + (this.z - this.zo) * a - BreakingItemParticle.zOff);
+        final float br = this.getBrightness(a);
         t.color(br * this.rCol, br * this.gCol, br * this.bCol);
 
         t.vertexUV(x - xa * r - xa2 * r, y - ya * r, z - za * r - za2 * r, u0, v1);

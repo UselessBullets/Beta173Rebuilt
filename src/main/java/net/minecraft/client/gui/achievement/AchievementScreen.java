@@ -86,7 +86,7 @@ public class AchievementScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         if (Mouse.isButtonDown(0)) {
             final int xo = (this.width - this.imageWidth) / 2;
             final int yo = (this.height - this.imageHeight) / 2;
@@ -118,7 +118,7 @@ public class AchievementScreen extends Screen
 
         this.renderBackground();
 
-        this.renderBg(xm, ym, partialTick);
+        this.renderBg(xm, ym, a);
 
         glDisable(GL_LIGHTING);
         glDisable(GL_DEPTH_TEST);
@@ -150,9 +150,9 @@ public class AchievementScreen extends Screen
         this.font.draw("Achievements", (this.width - this.imageWidth) / 2 + 15, (this.height - this.imageHeight) / 2 + 5, 0x404040);
     }
     
-    protected void renderBg(final int xm, final int ym, final float partialTick) {
-        int xScroll = Mth.floor(this.xScrollO + (this.xScrollP - this.xScrollO) * partialTick);
-        int yScroll = Mth.floor(this.yScrollO + (this.yScrollP - this.yScrollO) * partialTick);
+    protected void renderBg(final int xm, final int ym, final float a) {
+        int xScroll = Mth.floor(this.xScrollO + (this.xScrollP - this.xScrollO) * a);
+        int yScroll = Mth.floor(this.yScrollO + (this.yScrollP - this.yScrollO) * a);
 
         if (xScroll < AchievementScreen.xMin) xScroll = AchievementScreen.xMin;
         if (yScroll < AchievementScreen.yMin) yScroll = AchievementScreen.yMin;
@@ -325,7 +325,7 @@ public class AchievementScreen extends Screen
 
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_TEXTURE_2D);
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
 
         if (hoveredAchievement != null) {
             final Achievement ach = hoveredAchievement;

@@ -65,12 +65,12 @@ public class PauseScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
 
         boolean isSaving = !this.minecraft.level.pauseSave(this.saveStep++);
         if (isSaving || this.visibleTime < 20) {
-            float col = (this.visibleTime % 10 + partialTick) / 10.0f;
+            float col = (this.visibleTime % 10 + a) / 10.0f;
             col = Mth.sin(col * Mth.PI * 2.0f) * 0.2f + 0.8f;
             final int br = (int)(255.0f * col);
 
@@ -79,6 +79,6 @@ public class PauseScreen extends Screen
 
         this.drawCenteredString(this.font, "Game menu", this.width / 2, 40, 0xffffff);
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
 }

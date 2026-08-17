@@ -121,7 +121,7 @@ public abstract class ScrolledSelectionList
         }
     }
     
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
 
         final int itemCount = this.getNumberOfItems();

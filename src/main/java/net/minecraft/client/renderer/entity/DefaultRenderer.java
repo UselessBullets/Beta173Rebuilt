@@ -10,7 +10,7 @@ import net.minecraft.world.entity.Entity;
 public class DefaultRenderer extends EntityRenderer<Entity>
 {
     @Override
-    public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
         EntityRenderer.render(entity.bb, x - entity.xOld, y - entity.yOld, z - entity.zOld);
         GL11.glPopMatrix();

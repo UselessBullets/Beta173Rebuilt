@@ -11,7 +11,6 @@ import net.minecraft.network.packet.UseItemPacket;
 import net.minecraft.network.packet.SetCarriedItemPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.tile.Tile;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.PlayerActionPacket;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.entity.player.Player;
@@ -129,13 +128,13 @@ public class MultiPlayerGameMode extends GameMode
     }
     
     @Override
-    public void render(final float partialTick) {
+    public void render(final float a) {
         if (this.destroyProgress <= 0.0f) {
             this.minecraft.gui.progress = 0.0f;
             this.minecraft.levelRenderer.destroyProgress = 0.0f;
         }
         else {
-            final float dp = this.oDestroyProgress + (this.destroyProgress - this.oDestroyProgress) * partialTick;
+            final float dp = this.oDestroyProgress + (this.destroyProgress - this.oDestroyProgress) * a;
             this.minecraft.gui.progress = dp;
             this.minecraft.levelRenderer.destroyProgress = dp;
         }

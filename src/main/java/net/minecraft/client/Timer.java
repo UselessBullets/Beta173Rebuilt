@@ -9,18 +9,15 @@ public class Timer
     public float ticksPerSecond;
     private double lastTime;
     public int ticks;
-    public float partialTick;
-    public float timeScale;
-    public float passedTime;
+    public float a;
+    public float timeScale = 1.0f;
+    public float passedTime = 0.0f;
     private long lastMs;
     private long lastMsSysTime;
     private long passedMs;
-    private double adjustTime;
+    private double adjustTime = 1.0;
     
     public Timer(final float ticksPerSecond) {
-        this.timeScale = 1.0f;
-        this.passedTime = 0.0f;
-        this.adjustTime = 1.0;
         this.ticksPerSecond = ticksPerSecond;
         this.lastMs = System.currentTimeMillis();
         this.lastMsSysTime = System.nanoTime() / 1000000L;
@@ -63,6 +60,6 @@ public class Timer
         if (this.ticks > 10) {
             this.ticks = 10;
         }
-        this.partialTick = this.passedTime;
+        this.a = this.passedTime;
     }
 }

@@ -118,17 +118,17 @@ public class SoundEngine
         }
     }
     
-    public void update(final Mob player, final float partialTick) {
+    public void update(final Mob player, final float a) {
         if (!SoundEngine.loaded || this.options.sound == 0.0f) {
             return;
         }
         if (player == null) {
             return;
         }
-        final float n = player.yRotO + (player.yRot - player.yRotO) * partialTick;
-        final double n2 = player.xo + (player.x - player.xo) * partialTick;
-        final double n3 = player.yo + (player.y - player.yo) * partialTick;
-        final double n4 = player.zo + (player.z - player.zo) * partialTick;
+        final float n = player.yRotO + (player.yRot - player.yRotO) * a;
+        final double n2 = player.xo + (player.x - player.xo) * a;
+        final double n3 = player.yo + (player.y - player.yo) * a;
+        final double n4 = player.zo + (player.z - player.zo) * a;
         final float cos = Mth.cos(-n * Mth.DEGRAD - Mth.PI);
         final float lookX = -Mth.sin(-n * Mth.DEGRAD - Mth.PI);
         final float lookY = 0.0f;

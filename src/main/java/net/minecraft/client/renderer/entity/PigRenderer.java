@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.client.model.Model;
 
@@ -15,7 +14,7 @@ public class PigRenderer extends MobRenderer<Pig>
         this.setArmor(armor);
     }
     
-    protected boolean prepareArmor(final Pig mob, final int layer, final float partialTick) {
+    protected boolean prepareArmor(final Pig mob, final int layer, final float a) {
         this.bindTexture("/mob/saddle.png");
         return layer == 0 && mob.hasSaddle();
     }

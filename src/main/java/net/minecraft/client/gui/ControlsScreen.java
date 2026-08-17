@@ -66,7 +66,7 @@ public class ControlsScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
         this.drawCenteredString(this.font, this.tile, this.width / 2, 20, 0xffffff);
 
@@ -75,6 +75,6 @@ public class ControlsScreen extends Screen
             this.drawString(this.font, this.options.getKeyDesciption(i), leftPos + i % 2 * ROW_WIDTH + BUTTON_WIDTH + 6, this.height / 6 + 24 * (i >> 1) + 7, 0xffffffff);
         }
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
 }

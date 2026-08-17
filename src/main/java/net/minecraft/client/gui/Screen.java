@@ -30,7 +30,7 @@ public class Screen extends GuiComponent
     public GuiParticles particles;
     private Button clickedButton = null;
 
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         for (int i = 0; i < this.buttons.size(); ++i) {
             this.buttons.get(i).render(this.minecraft, xm, ym);
         }

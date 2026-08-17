@@ -284,30 +284,30 @@ public class LevelRenderer implements LevelListener
         this.noEntityRenderFrames = 2;
     }
     
-    public void renderEntities(final Vec3 cam, final Culler culler, final float partialTick) {
+    public void renderEntities(final Vec3 cam, final Culler culler, final float a) {
         if (this.noEntityRenderFrames > 0) {
             --this.noEntityRenderFrames;
             return;
         }
-        TileEntityRenderDispatcher.instance.prepare(this.level, this.textures, this.mc.font, this.mc.cameraTargetPlayer, partialTick);
-        EntityRenderDispatcher.instance.prepare(this.level, this.textures, this.mc.font, this.mc.cameraTargetPlayer, this.mc.options, partialTick);
+        TileEntityRenderDispatcher.instance.prepare(this.level, this.textures, this.mc.font, this.mc.cameraTargetPlayer, a);
+        EntityRenderDispatcher.instance.prepare(this.level, this.textures, this.mc.font, this.mc.cameraTargetPlayer, this.mc.options, a);
         this.totalEntities = 0;
         this.renderedEntities = 0;
         this.culledEntities = 0;
         final Mob cameraTargetPlayer = this.mc.cameraTargetPlayer;
-        EntityRenderDispatcher.xOff = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * partialTick;
-        EntityRenderDispatcher.yOff = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * partialTick;
-        EntityRenderDispatcher.zOff = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * partialTick;
-        TileEntityRenderDispatcher.xOff = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * partialTick;
-        TileEntityRenderDispatcher.yOff = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * partialTick;
-        TileEntityRenderDispatcher.zOff = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * partialTick;
+        EntityRenderDispatcher.xOff = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * a;
+        EntityRenderDispatcher.yOff = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * a;
+        EntityRenderDispatcher.zOff = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * a;
+        TileEntityRenderDispatcher.xOff = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * a;
+        TileEntityRenderDispatcher.yOff = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * a;
+        TileEntityRenderDispatcher.zOff = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * a;
         final List<Entity> allEntities = this.level.getAllEntities();
         this.totalEntities = allEntities.size();
         for (int i = 0; i < this.level.globalEntities.size(); ++i) {
             final Entity entity = this.level.globalEntities.get(i);
             ++this.renderedEntities;
             if (entity.shouldRender(cam)) {
-                EntityRenderDispatcher.instance.render(entity, partialTick);
+                EntityRenderDispatcher.instance.render(entity, a);
             }
         }
         for (int j = 0; j < allEntities.size(); ++j) {
@@ -323,13 +323,13 @@ public class LevelRenderer implements LevelListener
                     }
                     if (this.level.hasChunkAt(Mth.floor(entity2.x), floor, Mth.floor(entity2.z))) {
                         ++this.renderedEntities;
-                        EntityRenderDispatcher.instance.render(entity2, partialTick);
+                        EntityRenderDispatcher.instance.render(entity2, a);
                     }
                 }
             }
         }
         for (int k = 0; k < this.renderableTileEntities.size(); ++k) {
-            TileEntityRenderDispatcher.instance.render((TileEntity)this.renderableTileEntities.get(k), partialTick);
+            TileEntityRenderDispatcher.instance.render((TileEntity)this.renderableTileEntities.get(k), a);
         }
     }
     
@@ -991,7 +991,7 @@ public class LevelRenderer implements LevelListener
         return size2 == n3 + n6;
     }
     
-    public void renderHit(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float partialTick) {
+    public void renderHit(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float a) {
         final Tesselator instance = Tesselator.instance;
         glEnable(GL_BLEND);
         glEnable(GL_ALPHA_TEST);
@@ -1008,9 +1008,9 @@ public class LevelRenderer implements LevelListener
                 glDisable(GL_ALPHA_TEST);
                 glPolygonOffset(-3.0f, -3.0f);
                 glEnable(32823);
-                final double n = player.xOld + (player.x - player.xOld) * partialTick;
-                final double n2 = player.yOld + (player.y - player.yOld) * partialTick;
-                final double n3 = player.zOld + (player.z - player.zOld) * partialTick;
+                final double n = player.xOld + (player.x - player.xOld) * a;
+                final double n2 = player.yOld + (player.y - player.yOld) * a;
+                final double n3 = player.zOld + (player.z - player.zOld) * a;
                 if (rock == null) {
                     rock = Tile.rock;
                 }
@@ -1060,7 +1060,7 @@ public class LevelRenderer implements LevelListener
         glDisable(GL_ALPHA_TEST);
     }
     
-    public void renderHitOutline(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float partialTick) {
+    public void renderHitOutline(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float a) {
         if (mode == 0 && h.type == HitResult.Type.TILE) {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1072,7 +1072,7 @@ public class LevelRenderer implements LevelListener
             final int tile = this.level.getTile(h.x, h.y, h.z);
             if (tile > 0) {
                 Tile.tiles[tile].updateShape(this.level, h.x, h.y, h.z);
-                this.render(Tile.tiles[tile].getTileAABB(this.level, h.x, h.y, h.z).grow(n, n, n).cloneMove(-(player.xOld + (player.x - player.xOld) * partialTick), -(player.yOld + (player.y - player.yOld) * partialTick), -(player.zOld + (player.z - player.zOld) * partialTick)));
+                this.render(Tile.tiles[tile].getTileAABB(this.level, h.x, h.y, h.z).grow(n, n, n).cloneMove(-(player.xOld + (player.x - player.xOld) * a), -(player.yOld + (player.y - player.yOld) * a), -(player.zOld + (player.z - player.zOld) * a)));
             }
             glDepthMask(true);
             glEnable(GL_TEXTURE_2D);
@@ -1148,7 +1148,7 @@ public class LevelRenderer implements LevelListener
         this.setDirty(x0 - 1, y0 - 1, z0 - 1, x1 + 1, y1 + 1, z1 + 1);
     }
     
-    public void cull(final Culler culler, final float partialTick) {
+    public void cull(final Culler culler, final float a) {
         for (int i = 0; i < this.chunks.length; ++i) {
             if (!this.chunks[i].isEmpty() && (!this.chunks[i].visible || (i + this.cullstep & 0xF) == 0x0)) {
                 this.chunks[i].cull(culler);

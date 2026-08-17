@@ -6,7 +6,6 @@ package net.minecraft.client.renderer.entity;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Tesselator;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.client.Minecraft;
 import util.Mth;
 import org.lwjgl.opengl.GL11;
@@ -30,10 +29,10 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
         this.armor = armor;
     }
     
-    public void render(final T entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final T entity, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
         GL11.glDisable(GL_CULL_FACE);
-        this.model.attackTime = this.getAttackAnim(entity, partialTick);
+        this.model.attackTime = this.getAttackAnim(entity, a);
         if (this.armor != null) {
             this.armor.attackTime = this.model.attackTime;
         }
@@ -42,36 +41,36 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
             this.armor.riding = this.model.riding;
         }
         try {
-            final float bodyRot = entity.yBodyRotO + (entity.yBodyRot - entity.yBodyRotO) * partialTick;
-            final float n = entity.yRotO + (entity.yRot - entity.yRotO) * partialTick;
-            final float n2 = entity.xRotO + (entity.xRot - entity.xRotO) * partialTick;
+            final float bodyRot = entity.yBodyRotO + (entity.yBodyRot - entity.yBodyRotO) * a;
+            final float n = entity.yRotO + (entity.yRot - entity.yRotO) * a;
+            final float n2 = entity.xRotO + (entity.xRot - entity.xRotO) * a;
             this.setupPosition(entity, x, y, z);
-            final float bob = this.getBob(entity, partialTick);
-            this.setupRotations(entity, bob, bodyRot, partialTick);
+            final float bob = this.getBob(entity, a);
+            this.setupRotations(entity, bob, bodyRot, a);
             final float n3 = 0.0625f;
             GL11.glEnable(GL_RESCALE_NORMAL);
             GL11.glScalef(-1.0f, -1.0f, 1.0f);
-            this.scale(entity, partialTick);
+            this.scale(entity, a);
             GL11.glTranslatef(0.0f, -24.0f * n3 - 0.0078125f, 0.0f);
-            float r = entity.walkAnimSpeedO + (entity.walkAnimSpeed - entity.walkAnimSpeedO) * partialTick;
-            final float time = entity.walkAnimPos - entity.walkAnimSpeed * (1.0f - partialTick);
+            float r = entity.walkAnimSpeedO + (entity.walkAnimSpeed - entity.walkAnimSpeedO) * a;
+            final float time = entity.walkAnimPos - entity.walkAnimSpeed * (1.0f - a);
             if (r > 1.0f) {
                 r = 1.0f;
             }
             this.bindTexture(entity.customTextureUrl, entity.getTexture());
             GL11.glEnable(GL_ALPHA_TEST);
-            this.model.prepareMobModel(entity, time, r, partialTick);
+            this.model.prepareMobModel(entity, time, r, a);
             this.model.render(time, r, bob, n - bodyRot, n2, n3);
             for (int i = 0; i < 4; ++i) {
-                if (this.prepareArmor(entity, i, partialTick)) {
+                if (this.prepareArmor(entity, i, a)) {
                     this.armor.render(time, r, bob, n - bodyRot, n2, n3);
                     GL11.glDisable(GL_BLEND);
                     GL11.glEnable(GL_ALPHA_TEST);
                 }
             }
-            this.additionalRendering(entity, partialTick);
-            final float brightness = entity.getBrightness(partialTick);
-            final int overlayColor = this.getOverlayColor(entity, brightness, partialTick);
+            this.additionalRendering(entity, a);
+            final float brightness = entity.getBrightness(a);
+            final int overlayColor = this.getOverlayColor(entity, brightness, a);
             if ((overlayColor >> 24 & 0xFF) > 0 || entity.hurtTime > 0 || entity.deathTime > 0) {
                 GL11.glDisable(GL_TEXTURE_2D);
                 GL11.glDisable(GL_ALPHA_TEST);
@@ -82,7 +81,7 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
                     GL11.glColor4f(brightness, 0.0f, 0.0f, 0.4f);
                     this.model.render(time, r, bob, n - bodyRot, n2, n3);
                     for (int j = 0; j < 4; ++j) {
-                        if (this.prepareArmorOverlay(entity, j, partialTick)) {
+                        if (this.prepareArmorOverlay(entity, j, a)) {
                             GL11.glColor4f(brightness, 0.0f, 0.0f, 0.4f);
                             this.armor.render(time, r, bob, n - bodyRot, n2, n3);
                         }
@@ -96,7 +95,7 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
                     GL11.glColor4f(n4, n5, n6, n7);
                     this.model.render(time, r, bob, n - bodyRot, n2, n3);
                     for (int k = 0; k < 4; ++k) {
-                        if (this.prepareArmorOverlay(entity, k, partialTick)) {
+                        if (this.prepareArmorOverlay(entity, k, a)) {
                             GL11.glColor4f(n4, n5, n6, n7);
                             this.armor.render(time, r, bob, n - bodyRot, n2, n3);
                         }
@@ -121,10 +120,10 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
         GL11.glTranslatef((float)x, (float)y, (float)z);
     }
     
-    protected void setupRotations(final T mob, final float bob, final float bodyRot, final float partialTick) {
+    protected void setupRotations(final T mob, final float bob, final float bodyRot, final float a) {
         GL11.glRotatef(180.0f - bodyRot, 0.0f, 1.0f, 0.0f);
         if (mob.deathTime > 0) {
-            float sqrt = Mth.sqrt((mob.deathTime + partialTick - 1.0f) / 20.0f * 1.6f);
+            float sqrt = Mth.sqrt((mob.deathTime + a - 1.0f) / 20.0f * 1.6f);
             if (sqrt > 1.0f) {
                 sqrt = 1.0f;
             }
@@ -132,22 +131,22 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
         }
     }
     
-    protected float getAttackAnim(final T mob, final float partialTick) {
-        return mob.getAttackAnim(partialTick);
+    protected float getAttackAnim(final T mob, final float a) {
+        return mob.getAttackAnim(a);
     }
     
-    protected float getBob(final T mob, final float partialTick) {
-        return mob.tickCount + partialTick;
+    protected float getBob(final T mob, final float a) {
+        return mob.tickCount + a;
     }
     
-    protected void additionalRendering(final T mob, final float partialTick) {
+    protected void additionalRendering(final T mob, final float a) {
     }
     
-    protected boolean prepareArmorOverlay(final T mob, final int layer, final float partialTick) {
-        return this.prepareArmor(mob, layer, partialTick);
+    protected boolean prepareArmorOverlay(final T mob, final int layer, final float a) {
+        return this.prepareArmor(mob, layer, a);
     }
     
-    protected boolean prepareArmor(final T mob, final int layer, final float partialTick) {
+    protected boolean prepareArmor(final T mob, final int layer, final float a) {
         return false;
     }
     
@@ -155,11 +154,11 @@ public class MobRenderer<T extends Mob> extends EntityRenderer<T>
         return 90.0f;
     }
     
-    protected int getOverlayColor(final T mob, final float br, final float partialTick) {
+    protected int getOverlayColor(final T mob, final float br, final float a) {
         return 0;
     }
     
-    protected void scale(final T mob, final float partialTick) {
+    protected void scale(final T mob, final float a) {
     }
     
     protected void renderName(final T mob, final double x, final double y, final double z) {

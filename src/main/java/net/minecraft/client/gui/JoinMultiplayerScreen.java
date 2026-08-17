@@ -103,7 +103,7 @@ public class JoinMultiplayerScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         final Language language = Language.getInstance();
 
         this.renderBackground();
@@ -115,6 +115,6 @@ public class JoinMultiplayerScreen extends Screen
 
         this.ipEdit.render();
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
 }

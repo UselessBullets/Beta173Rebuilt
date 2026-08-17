@@ -966,19 +966,19 @@ public class Level implements LevelSource
         return this.boxes;
     }
     
-    public int getSkyDarken(final float partialTick) {
-        float n = 1.0f - (Mth.cos(this.getTimeOfDay(partialTick) * Mth.PI * 2.0f) * 2.0f + 0.5f);
+    public int getSkyDarken(final float a) {
+        float n = 1.0f - (Mth.cos(this.getTimeOfDay(a) * Mth.PI * 2.0f) * 2.0f + 0.5f);
         if (n < 0.0f) {
             n = 0.0f;
         }
         if (n > 1.0f) {
             n = 1.0f;
         }
-        return (int)((1.0f - (float)((float)((1.0f - n) * (1.0 - this.getRainLevel(partialTick) * 5.0f / 16.0)) * (1.0 - this.getThunderLevel(partialTick) * 5.0f / 16.0))) * 11.0f);
+        return (int)((1.0f - (float)((float)((1.0f - n) * (1.0 - this.getRainLevel(a) * 5.0f / 16.0)) * (1.0 - this.getThunderLevel(a) * 5.0f / 16.0))) * 11.0f);
     }
     
-    public Vec3 getSkyColor(final Entity source, final float partialTick) {
-        float n = Mth.cos(this.getTimeOfDay(partialTick) * Mth.PI * 2.0f) * 2.0f + 0.5f;
+    public Vec3 getSkyColor(final Entity source, final float a) {
+        float n = Mth.cos(this.getTimeOfDay(a) * Mth.PI * 2.0f) * 2.0f + 0.5f;
         if (n < 0.0f) {
             n = 0.0f;
         }
@@ -994,7 +994,7 @@ public class Level implements LevelSource
         float n5 = n2 * n;
         float n6 = n3 * n;
         float n7 = n4 * n;
-        final float rainLevel = this.getRainLevel(partialTick);
+        final float rainLevel = this.getRainLevel(a);
         if (rainLevel > 0.0f) {
             final float n8 = (n5 * 0.3f + n6 * 0.59f + n7 * 0.11f) * 0.6f;
             final float n9 = 1.0f - rainLevel * 0.75f;
@@ -1002,7 +1002,7 @@ public class Level implements LevelSource
             n6 = n6 * n9 + n8 * (1.0f - n9);
             n7 = n7 * n9 + n8 * (1.0f - n9);
         }
-        final float thunderLevel = this.getThunderLevel(partialTick);
+        final float thunderLevel = this.getThunderLevel(a);
         if (thunderLevel > 0.0f) {
             final float n10 = (n5 * 0.3f + n6 * 0.59f + n7 * 0.11f) * 0.2f;
             final float n11 = 1.0f - thunderLevel * 0.75f;
@@ -1011,7 +1011,7 @@ public class Level implements LevelSource
             n7 = n7 * n11 + n10 * (1.0f - n11);
         }
         if (this.lightningBoltTime > 0) {
-            float n12 = this.lightningBoltTime - partialTick;
+            float n12 = this.lightningBoltTime - a;
             if (n12 > 1.0f) {
                 n12 = 1.0f;
             }
@@ -1023,12 +1023,12 @@ public class Level implements LevelSource
         return Vec3.newTemp(n5, n6, n7);
     }
     
-    public float getTimeOfDay(final float partialTick) {
-        return this.dimension.getTimeOfDay(this.levelData.getTime(), partialTick);
+    public float getTimeOfDay(final float a) {
+        return this.dimension.getTimeOfDay(this.levelData.getTime(), a);
     }
     
-    public Vec3 getCloudColor(final float partialTick) {
-        float n = Mth.cos(this.getTimeOfDay(partialTick) * Mth.PI * 2.0f) * 2.0f + 0.5f;
+    public Vec3 getCloudColor(final float a) {
+        float n = Mth.cos(this.getTimeOfDay(a) * Mth.PI * 2.0f) * 2.0f + 0.5f;
         if (n < 0.0f) {
             n = 0.0f;
         }
@@ -1038,7 +1038,7 @@ public class Level implements LevelSource
         float n2 = (this.cloudColor >> 16 & 0xFFL) / 255.0f;
         float n3 = (this.cloudColor >> 8 & 0xFFL) / 255.0f;
         float n4 = (this.cloudColor & 0xFFL) / 255.0f;
-        final float rainLevel = this.getRainLevel(partialTick);
+        final float rainLevel = this.getRainLevel(a);
         if (rainLevel > 0.0f) {
             final float n5 = (n2 * 0.3f + n3 * 0.59f + n4 * 0.11f) * 0.6f;
             final float n6 = 1.0f - rainLevel * 0.95f;
@@ -1049,7 +1049,7 @@ public class Level implements LevelSource
         float n7 = n2 * (n * 0.9f + 0.1f);
         float n8 = n3 * (n * 0.9f + 0.1f);
         float n9 = n4 * (n * 0.85f + 0.15f);
-        final float thunderLevel = this.getThunderLevel(partialTick);
+        final float thunderLevel = this.getThunderLevel(a);
         if (thunderLevel > 0.0f) {
             final float n10 = (n7 * 0.3f + n8 * 0.59f + n9 * 0.11f) * 0.2f;
             final float n11 = 1.0f - thunderLevel * 0.95f;
@@ -1060,8 +1060,8 @@ public class Level implements LevelSource
         return Vec3.newTemp(n7, n8, n9);
     }
     
-    public Vec3 getFogColor(final float partialTick) {
-        return this.dimension.getFogColor(this.getTimeOfDay(partialTick), partialTick);
+    public Vec3 getFogColor(final float a) {
+        return this.dimension.getFogColor(this.getTimeOfDay(a), a);
     }
     
     public int getTopSolidBlock(int x, int z) {
@@ -1080,7 +1080,7 @@ public class Level implements LevelSource
         return -1;
     }
 
-    public int f(int x, int z) { // TODO find proper name
+    public int f(int x, int z) { // TODO Useless - find proper name
         final LevelChunk chunk = this.getChunkAt(x, z);
         int i = 127;
         x &= 0xF;
@@ -1095,8 +1095,8 @@ public class Level implements LevelSource
         return -1;
     }
     
-    public float getStarBrightness(final float partialTick) {
-        float n = 1.0f - (Mth.cos(this.getTimeOfDay(partialTick) * Mth.PI * 2.0f) * 2.0f + 0.75f);
+    public float getStarBrightness(final float a) {
+        float n = 1.0f - (Mth.cos(this.getTimeOfDay(a) * Mth.PI * 2.0f) * 2.0f + 0.75f);
         if (n < 0.0f) {
             n = 0.0f;
         }
@@ -2254,12 +2254,12 @@ public class Level implements LevelSource
         return false;
     }
     
-    public float getThunderLevel(final float partialTick) {
-        return (this.oThunderLevel + (this.thunderLevel - this.oThunderLevel) * partialTick) * this.getRainLevel(partialTick);
+    public float getThunderLevel(final float a) {
+        return (this.oThunderLevel + (this.thunderLevel - this.oThunderLevel) * a) * this.getRainLevel(a);
     }
     
-    public float getRainLevel(final float partialTick) {
-        return this.oRainLevel + (this.rainLevel - this.oRainLevel) * partialTick;
+    public float getRainLevel(final float a) {
+        return this.oRainLevel + (this.rainLevel - this.oRainLevel) * a;
     }
     
     public void setRainLevel(final float rainLevel) {

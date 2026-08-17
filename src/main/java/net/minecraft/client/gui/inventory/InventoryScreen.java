@@ -5,14 +5,11 @@
 package net.minecraft.client.gui.inventory;
 
 import net.minecraft.client.gui.achievement.StatsScreen;
-import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.achievement.AchievementScreen;
 import net.minecraft.client.gui.Button;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.Lighting;
 import org.lwjgl.opengl.GL11;
-import net.minecraft.stats.Stat;
 import net.minecraft.stats.Achievements;
 import net.minecraft.world.entity.player.Player;
 
@@ -42,14 +39,14 @@ public class InventoryScreen extends AbstractContainerScreen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
-        super.render(xm, ym, partialTick);
+    public void render(final int xm, final int ym, final float a) {
+        super.render(xm, ym, a);
         this.xMouse = (float)xm;
         this.yMouse = (float)ym;
     }
     
     @Override
-    protected void renderBg(final float partialTick) {
+    protected void renderBg(final float a) {
         final int tex = this.minecraft.textures.loadTexture("/gui/inventory.png");
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.textures.bind(tex);

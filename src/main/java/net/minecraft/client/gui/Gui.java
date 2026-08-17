@@ -44,7 +44,7 @@ public class Gui extends GuiComponent
         this.minecraft = minecraft;
     }
     
-    public void render(final float partialTick, final boolean mouseFree, final int xMouse, final int yMouse) {
+    public void render(final float a, final boolean mouseFree, final int xMouse, final int yMouse) {
         final ScreenSizeCalculator ssc = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
         final int screenWidth = ssc.getWidth();
         final int screenHeight = ssc.getHeight();
@@ -57,7 +57,7 @@ public class Gui extends GuiComponent
         glEnable(GL_BLEND);
 
         if (Minecraft.useFancyGraphics()) {
-            this.renderVignette(this.minecraft.player.getBrightness(partialTick), screenWidth, screenHeight);
+            this.renderVignette(this.minecraft.player.getBrightness(a), screenWidth, screenHeight);
         }
 
         final ItemInstance headGear = this.minecraft.player.inventory.getArmor(3);
@@ -65,7 +65,7 @@ public class Gui extends GuiComponent
             this.renderPumpkin(screenWidth, screenHeight);
         }
 
-        final float pt = this.minecraft.player.oPortalTime + (this.minecraft.player.portalTime - this.minecraft.player.oPortalTime) * partialTick;
+        final float pt = this.minecraft.player.oPortalTime + (this.minecraft.player.portalTime - this.minecraft.player.oPortalTime) * a;
         if (pt > 0.0f) {
             this.renderTp(pt, screenWidth, screenHeight);
         }
@@ -149,7 +149,7 @@ public class Gui extends GuiComponent
         for (int i = 0; i < 9; ++i) {
             final int x = screenWidth / 2 - 9 * 10 + i * 20 + 2;
             final int y = screenHeight - 16 - 3;
-            this.renderSlot(i, x, y, partialTick);
+            this.renderSlot(i, x, y, a);
         }
         Lighting.turnOff();
         glDisable(GL_RESCALE_NORMAL);
@@ -199,7 +199,7 @@ public class Gui extends GuiComponent
 
         // Jukebox CD message
         if (this.overlayMessageTime > 0) {
-            final float t = this.overlayMessageTime - partialTick;
+            final float t = this.overlayMessageTime - a;
             int alpha = (int)(t * 256.0f / 20.0f);
             if (alpha > 255) alpha = 255;
             if (alpha > 0) {
@@ -336,11 +336,11 @@ public class Gui extends GuiComponent
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
     
-    private void renderSlot(final int slot, final int x, final int y, final float partialTick) {
+    private void renderSlot(final int slot, final int x, final int y, final float a) {
         final ItemInstance item = this.minecraft.player.inventory.items[slot];
         if (item == null) return;
 
-        final float pop = item.popTime - partialTick;
+        final float pop = item.popTime - a;
         if (pop > 0.0f) {
             glPushMatrix();
             final float squeeze = 1.0f + pop / 5.0f;

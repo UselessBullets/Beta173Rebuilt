@@ -123,7 +123,7 @@ public class EntityRenderDispatcher
         return this.getRenderer(entity.getClass());
     }
     
-    public void prepare(final Level level, final Textures textures, final Font font, final Mob player, final Options options, final float partialTick) {
+    public void prepare(final Level level, final Textures textures, final Font font, final Mob player, final Options options, final float a) {
         this.level = level;
         this.textures = textures;
         this.options = options;
@@ -136,29 +136,29 @@ public class EntityRenderDispatcher
             }
         }
         else {
-            this.playerRotY = player.yRotO + (player.yRot - player.yRotO) * partialTick;
-            this.playerRotX = player.xRotO + (player.xRot - player.xRotO) * partialTick;
+            this.playerRotY = player.yRotO + (player.yRot - player.yRotO) * a;
+            this.playerRotX = player.xRotO + (player.xRot - player.xRotO) * a;
         }
-        this.xPlayer = player.xOld + (player.x - player.xOld) * partialTick;
-        this.yPlayer = player.yOld + (player.y - player.yOld) * partialTick;
-        this.zPlayer = player.zOld + (player.z - player.zOld) * partialTick;
+        this.xPlayer = player.xOld + (player.x - player.xOld) * a;
+        this.yPlayer = player.yOld + (player.y - player.yOld) * a;
+        this.zPlayer = player.zOld + (player.z - player.zOld) * a;
     }
     
-    public void render(final Entity entity, final float partialTick) {
-        final double n = entity.xOld + (entity.x - entity.xOld) * partialTick;
-        final double n2 = entity.yOld + (entity.y - entity.yOld) * partialTick;
-        final double n3 = entity.zOld + (entity.z - entity.zOld) * partialTick;
-        final float rot = entity.yRotO + (entity.yRot - entity.yRotO) * partialTick;
-        final float brightness = entity.getBrightness(partialTick);
+    public void render(final Entity entity, final float a) {
+        final double n = entity.xOld + (entity.x - entity.xOld) * a;
+        final double n2 = entity.yOld + (entity.y - entity.yOld) * a;
+        final double n3 = entity.zOld + (entity.z - entity.zOld) * a;
+        final float rot = entity.yRotO + (entity.yRot - entity.yRotO) * a;
+        final float brightness = entity.getBrightness(a);
         GL11.glColor3f(brightness, brightness, brightness);
-        this.render(entity, n - EntityRenderDispatcher.xOff, n2 - EntityRenderDispatcher.yOff, n3 - EntityRenderDispatcher.zOff, rot, partialTick);
+        this.render(entity, n - EntityRenderDispatcher.xOff, n2 - EntityRenderDispatcher.yOff, n3 - EntityRenderDispatcher.zOff, rot, a);
     }
     
-    public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float a) {
         final EntityRenderer<Entity> renderer = this.getRenderer(entity);
         if (renderer != null) {
-            renderer.render(entity, x, y, z, rot, partialTick);
-            renderer.postRender(entity, x, y, z, rot, partialTick);
+            renderer.render(entity, x, y, z, rot, a);
+            renderer.postRender(entity, x, y, z, rot, a);
         }
     }
     

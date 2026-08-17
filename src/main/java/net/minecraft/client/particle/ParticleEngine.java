@@ -56,7 +56,7 @@ public class ParticleEngine
         }
     }
     
-    public void render(final Entity player, final float partialTick) {
+    public void render(final Entity player, final float a) {
         final float xa = Mth.cos(player.yRot * Mth.DEGRAD);
         final float za = Mth.sin(player.yRot * Mth.DEGRAD);
 
@@ -64,9 +64,9 @@ public class ParticleEngine
         final float za2 = xa * Mth.sin(player.xRot * Mth.DEGRAD);
         final float ya = Mth.cos(player.xRot * Mth.DEGRAD);
 
-        Particle.xOff = player.xOld + (player.x - player.xOld) * partialTick;
-        Particle.yOff = player.yOld + (player.y - player.yOld) * partialTick;
-        Particle.zOff = player.zOld + (player.z - player.zOld) * partialTick;
+        Particle.xOff = player.xOld + (player.x - player.xOld) * a;
+        Particle.yOff = player.yOld + (player.y - player.yOld) * a;
+        Particle.zOff = player.zOld + (player.z - player.zOld) * a;
         for (int tt = 0; tt < ENTITY_PARTICLE_TEXTURE; ++tt) { // Useless - Beta 1.7.3 loops only on the first 3 layers to avoid running the entity particles here, so that constant is used as the bound for this loop
             if (this.particles[tt].size() != 0) {
                 int tex = 0;
@@ -79,21 +79,21 @@ public class ParticleEngine
                 t.begin();
                 for (int i = 0; i < this.particles[tt].size(); ++i) {
                     Particle p = this.particles[tt].get(i);
-                    p.render(t, partialTick, xa, ya, za, xa2, za2);
+                    p.render(t, a, xa, ya, za, xa2, za2);
                 }
                 t.end();
             }
         }
     }
     
-    public void renderLit(final Entity player, final float partialTick) {
+    public void renderLit(final Entity player, final float a) {
         final int tt = 3;
         if (this.particles[tt].size() == 0) return;
 
         final Tesselator t = Tesselator.instance;
         for (int i = 0; i < this.particles[tt].size(); ++i) {
             Particle p = this.particles[tt].get(i);
-            p.render(t, partialTick, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+            p.render(t, a, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         }
     }
     

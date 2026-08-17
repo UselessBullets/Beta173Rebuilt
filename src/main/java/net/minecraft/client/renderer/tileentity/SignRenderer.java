@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.tileentity;
 
-import net.minecraft.world.level.tile.entity.TileEntity;
 import net.minecraft.client.gui.Font;
 import net.minecraft.world.level.tile.Tile;
 import org.lwjgl.opengl.GL11;
@@ -19,7 +18,7 @@ public class SignRenderer extends TileEntityRenderer<SignTileEntity>
         this.signModel = new SignModel();
     }
     
-    public void render(final SignTileEntity entity, final double x, final double y, final double z, final float partialTick) {
+    public void render(final SignTileEntity entity, final double x, final double y, final double z, final float a) {
         final Tile tile = entity.getTile();
         GL11.glPushMatrix();
         final float n = 0.6666667f;

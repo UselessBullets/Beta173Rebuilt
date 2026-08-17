@@ -41,7 +41,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class GameRenderer
 {
-    public static boolean anaglyph3d;
+    public static boolean anaglyph3d = false;
     public static int anaglyphPass;
     private Minecraft mc;
     private float renderDistance;
@@ -133,7 +133,7 @@ public class GameRenderer
         this.tickRain();
     }
     
-    public void pick(final float partialTick) {
+    public void pick(final float a) {
         if (this.mc.cameraTargetPlayer == null) {
             return;
         }
@@ -141,9 +141,9 @@ public class GameRenderer
             return;
         }
         final double range = this.mc.gameMode.getPickRange();
-        this.mc.hitResult = this.mc.cameraTargetPlayer.pick(range, partialTick);
+        this.mc.hitResult = this.mc.cameraTargetPlayer.pick(range, a);
         double distanceTo = range;
-        final Vec3 pos = this.mc.cameraTargetPlayer.getPos(partialTick);
+        final Vec3 pos = this.mc.cameraTargetPlayer.getPos(a);
         if (this.mc.hitResult != null) {
             distanceTo = this.mc.hitResult.pos.distanceTo(pos);
         }
@@ -157,7 +157,7 @@ public class GameRenderer
             }
             n = distanceTo;
         }
-        final Vec3 viewVector = this.mc.cameraTargetPlayer.getViewVector(partialTick);
+        final Vec3 viewVector = this.mc.cameraTargetPlayer.getViewVector(a);
         final Vec3 add = pos.add(viewVector.x * n, viewVector.y * n, viewVector.z * n);
         this.hovered = null;
         final float n2 = 1.0f;
@@ -189,23 +189,23 @@ public class GameRenderer
         }
     }
     
-    private float getFov(final float partialTick) {
+    private float getFov(final float a) {
         final Mob cameraTargetPlayer = this.mc.cameraTargetPlayer;
         float n = 70.0f;
         if (cameraTargetPlayer.isUnderLiquid(Material.water)) {
             n = 60.0f;
         }
         if (cameraTargetPlayer.health <= 0) {
-            n /= (1.0f - 500.0f / (cameraTargetPlayer.deathTime + partialTick + 500.0f)) * 2.0f + 1.0f;
+            n /= (1.0f - 500.0f / (cameraTargetPlayer.deathTime + a + 500.0f)) * 2.0f + 1.0f;
         }
-        return n + this.fovOffsetO + (this.fovOffset - this.fovOffsetO) * partialTick;
+        return n + this.fovOffsetO + (this.fovOffset - this.fovOffsetO) * a;
     }
     
-    private void bobHurt(final float partialTick) {
+    private void bobHurt(final float a) {
         final Mob cameraTargetPlayer = this.mc.cameraTargetPlayer;
-        final float n = cameraTargetPlayer.hurtTime - partialTick;
+        final float n = cameraTargetPlayer.hurtTime - a;
         if (cameraTargetPlayer.health <= 0) {
-            GL11.glRotatef(40.0f - 8000.0f / (cameraTargetPlayer.deathTime + partialTick + 200.0f), 0.0f, 0.0f, 1.0f);
+            GL11.glRotatef(40.0f - 8000.0f / (cameraTargetPlayer.deathTime + a + 200.0f), 0.0f, 0.0f, 1.0f);
         }
         if (n < 0.0f) {
             return;
@@ -218,27 +218,27 @@ public class GameRenderer
         GL11.glRotatef(hurtDir, 0.0f, 1.0f, 0.0f);
     }
     
-    private void bobView(final float partialTick) {
+    private void bobView(final float a) {
         if (!(this.mc.cameraTargetPlayer instanceof Player)) {
             return;
         }
         final Player player = (Player)this.mc.cameraTargetPlayer;
-        final float n = -(player.walkDist + (player.walkDist - player.walkDistO) * partialTick);
-        final float n2 = player.oBob + (player.bob - player.oBob) * partialTick;
-        final float n3 = player.oTilt + (player.tilt - player.oTilt) * partialTick;
+        final float n = -(player.walkDist + (player.walkDist - player.walkDistO) * a);
+        final float n2 = player.oBob + (player.bob - player.oBob) * a;
+        final float n3 = player.oTilt + (player.tilt - player.oTilt) * a;
         GL11.glTranslatef(Mth.sin(n * Mth.PI) * n2 * 0.5f, -Math.abs(Mth.cos(n * Mth.PI) * n2), 0.0f);
         GL11.glRotatef(Mth.sin(n * Mth.PI) * n2 * 3.0f, 0.0f, 0.0f, 1.0f);
         GL11.glRotatef(Math.abs(Mth.cos(n * Mth.PI - 0.2f) * n2) * 5.0f, 1.0f, 0.0f, 0.0f);
         GL11.glRotatef(n3, 1.0f, 0.0f, 0.0f);
     }
     
-    private void moveCameraToPlayer(final float partialTick) {
+    private void moveCameraToPlayer(final float a) {
         final Mob cameraTargetPlayer = this.mc.cameraTargetPlayer;
         float n = cameraTargetPlayer.heightOffset - 1.62f;
-        final double x = cameraTargetPlayer.xo + (cameraTargetPlayer.x - cameraTargetPlayer.xo) * partialTick;
-        final double y = cameraTargetPlayer.yo + (cameraTargetPlayer.y - cameraTargetPlayer.yo) * partialTick - n;
-        final double z = cameraTargetPlayer.zo + (cameraTargetPlayer.z - cameraTargetPlayer.zo) * partialTick;
-        GL11.glRotatef(this.cameraRollO + (this.cameraRoll - this.cameraRollO) * partialTick, 0.0f, 0.0f, 1.0f);
+        final double x = cameraTargetPlayer.xo + (cameraTargetPlayer.x - cameraTargetPlayer.xo) * a;
+        final double y = cameraTargetPlayer.yo + (cameraTargetPlayer.y - cameraTargetPlayer.yo) * a - n;
+        final double z = cameraTargetPlayer.zo + (cameraTargetPlayer.z - cameraTargetPlayer.zo) * a;
+        GL11.glRotatef(this.cameraRollO + (this.cameraRoll - this.cameraRollO) * a, 0.0f, 0.0f, 1.0f);
         if (cameraTargetPlayer.isSleeping()) {
             ++n;
             GL11.glTranslatef(0.0f, 0.3f, 0.0f);
@@ -246,15 +246,15 @@ public class GameRenderer
                 if (this.mc.level.getTile(Mth.floor(cameraTargetPlayer.x), Mth.floor(cameraTargetPlayer.y), Mth.floor(cameraTargetPlayer.z)) == Tile.bed.id) {
                     GL11.glRotatef((float)((this.mc.level.getData(Mth.floor(cameraTargetPlayer.x), Mth.floor(cameraTargetPlayer.y), Mth.floor(cameraTargetPlayer.z)) & 0x3) * 90), 0.0f, 1.0f, 0.0f);
                 }
-                GL11.glRotatef(cameraTargetPlayer.yRotO + (cameraTargetPlayer.yRot - cameraTargetPlayer.yRotO) * partialTick + 180.0f, 0.0f, -1.0f, 0.0f);
-                GL11.glRotatef(cameraTargetPlayer.xRotO + (cameraTargetPlayer.xRot - cameraTargetPlayer.xRotO) * partialTick, -1.0f, 0.0f, 0.0f);
+                GL11.glRotatef(cameraTargetPlayer.yRotO + (cameraTargetPlayer.yRot - cameraTargetPlayer.yRotO) * a + 180.0f, 0.0f, -1.0f, 0.0f);
+                GL11.glRotatef(cameraTargetPlayer.xRotO + (cameraTargetPlayer.xRot - cameraTargetPlayer.xRotO) * a, -1.0f, 0.0f, 0.0f);
             }
         }
         else if (this.mc.options.thirdPersonView) {
-            double n2 = this.thirdDistanceO + (this.thirdDistance - this.thirdDistanceO) * partialTick;
+            double n2 = this.thirdDistanceO + (this.thirdDistance - this.thirdDistanceO) * a;
             if (this.mc.options.fixedCamera) {
-                final float n3 = this.thirdRotationO + (this.thirdRotation - this.thirdRotationO) * partialTick;
-                final float n4 = this.thirdTiltO + (this.thirdTilt - this.thirdTiltO) * partialTick;
+                final float n3 = this.thirdRotationO + (this.thirdRotation - this.thirdRotationO) * a;
+                final float n4 = this.thirdTiltO + (this.thirdTilt - this.thirdTiltO) * a;
                 GL11.glTranslatef(0.0f, 0.0f, (float)(-n2));
                 GL11.glRotatef(n4, 1.0f, 0.0f, 0.0f);
                 GL11.glRotatef(n3, 0.0f, 1.0f, 0.0f);
@@ -291,14 +291,14 @@ public class GameRenderer
             GL11.glTranslatef(0.0f, 0.0f, -0.1f);
         }
         if (!this.mc.options.fixedCamera) {
-            GL11.glRotatef(cameraTargetPlayer.xRotO + (cameraTargetPlayer.xRot - cameraTargetPlayer.xRotO) * partialTick, 1.0f, 0.0f, 0.0f);
-            GL11.glRotatef(cameraTargetPlayer.yRotO + (cameraTargetPlayer.yRot - cameraTargetPlayer.yRotO) * partialTick + 180.0f, 0.0f, 1.0f, 0.0f);
+            GL11.glRotatef(cameraTargetPlayer.xRotO + (cameraTargetPlayer.xRot - cameraTargetPlayer.xRotO) * a, 1.0f, 0.0f, 0.0f);
+            GL11.glRotatef(cameraTargetPlayer.yRotO + (cameraTargetPlayer.yRot - cameraTargetPlayer.yRotO) * a + 180.0f, 0.0f, 1.0f, 0.0f);
         }
         GL11.glTranslatef(0.0f, n, 0.0f);
-        this.isInClouds = this.mc.levelRenderer.isInCloud(cameraTargetPlayer.xo + (cameraTargetPlayer.x - cameraTargetPlayer.xo) * partialTick, cameraTargetPlayer.yo + (cameraTargetPlayer.y - cameraTargetPlayer.yo) * partialTick - n, cameraTargetPlayer.zo + (cameraTargetPlayer.z - cameraTargetPlayer.zo) * partialTick, partialTick);
+        this.isInClouds = this.mc.levelRenderer.isInCloud(cameraTargetPlayer.xo + (cameraTargetPlayer.x - cameraTargetPlayer.xo) * a, cameraTargetPlayer.yo + (cameraTargetPlayer.y - cameraTargetPlayer.yo) * a - n, cameraTargetPlayer.zo + (cameraTargetPlayer.z - cameraTargetPlayer.zo) * a, a);
     }
     
-    private void setupCamera(final float partialTick, final int eye) {
+    private void setupCamera(final float a, final int eye) {
         this.renderDistance = (float)(256 >> this.mc.options.viewDistance);
         GL11.glMatrixMode(GL_PROJECTION);
         GL11.glLoadIdentity();
@@ -309,55 +309,55 @@ public class GameRenderer
         if (this.zoom != 1.0) {
             GL11.glTranslatef((float)this.zoom_x, (float)(-this.zoom_y), 0.0f);
             GL11.glScaled(this.zoom, this.zoom, 1.0);
-            GLU.gluPerspective(this.getFov(partialTick), this.mc.width / (float)this.mc.height, 0.05f, this.renderDistance * 2.0f);
+            GLU.gluPerspective(this.getFov(a), this.mc.width / (float)this.mc.height, 0.05f, this.renderDistance * 2.0f);
         }
         else {
-            GLU.gluPerspective(this.getFov(partialTick), this.mc.width / (float)this.mc.height, 0.05f, this.renderDistance * 2.0f);
+            GLU.gluPerspective(this.getFov(a), this.mc.width / (float)this.mc.height, 0.05f, this.renderDistance * 2.0f);
         }
         GL11.glMatrixMode(GL_MODELVIEW);
         GL11.glLoadIdentity();
         if (this.mc.options.anaglyph3d) {
             GL11.glTranslatef((eye * 2 - 1) * 0.1f, 0.0f, 0.0f);
         }
-        this.bobHurt(partialTick);
+        this.bobHurt(a);
         if (this.mc.options.bobView) {
-            this.bobView(partialTick);
+            this.bobView(a);
         }
-        final float n2 = this.mc.player.oPortalTime + (this.mc.player.portalTime - this.mc.player.oPortalTime) * partialTick;
+        final float n2 = this.mc.player.oPortalTime + (this.mc.player.portalTime - this.mc.player.oPortalTime) * a;
         if (n2 > 0.0f) {
             final float n3 = 5.0f / (n2 * n2 + 5.0f) - n2 * 0.04f;
             final float n4 = n3 * n3;
-            GL11.glRotatef((this.tick + partialTick) * 20.0f, 0.0f, 1.0f, 1.0f);
+            GL11.glRotatef((this.tick + a) * 20.0f, 0.0f, 1.0f, 1.0f);
             GL11.glScalef(1.0f / n4, 1.0f, 1.0f);
-            GL11.glRotatef(-(this.tick + partialTick) * 20.0f, 0.0f, 1.0f, 1.0f);
+            GL11.glRotatef(-(this.tick + a) * 20.0f, 0.0f, 1.0f, 1.0f);
         }
-        this.moveCameraToPlayer(partialTick);
+        this.moveCameraToPlayer(a);
     }
     
-    private void renderItemInHand(final float partialTick, final int eye) {
+    private void renderItemInHand(final float a, final int eye) {
         GL11.glLoadIdentity();
         if (this.mc.options.anaglyph3d) {
             GL11.glTranslatef((eye * 2 - 1) * 0.1f, 0.0f, 0.0f);
         }
         GL11.glPushMatrix();
-        this.bobHurt(partialTick);
+        this.bobHurt(a);
         if (this.mc.options.bobView) {
-            this.bobView(partialTick);
+            this.bobView(a);
         }
         if (!this.mc.options.thirdPersonView && !this.mc.cameraTargetPlayer.isSleeping() && !this.mc.options.hideGui) {
-            this.itemInHandRenderer.render(partialTick);
+            this.itemInHandRenderer.render(a);
         }
         GL11.glPopMatrix();
         if (!this.mc.options.thirdPersonView && !this.mc.cameraTargetPlayer.isSleeping()) {
-            this.itemInHandRenderer.renderScreenEffect(partialTick);
-            this.bobHurt(partialTick);
+            this.itemInHandRenderer.renderScreenEffect(a);
+            this.bobHurt(a);
         }
         if (this.mc.options.bobView) {
-            this.bobView(partialTick);
+            this.bobView(a);
         }
     }
     
-    public void render(final float partialTick) {
+    public void render(final float a) {
         if (!Display.isActive()) {
             if (System.currentTimeMillis() - this.lastActiveTime > 500L) {
                 this.mc.pauseGame();
@@ -400,10 +400,10 @@ public class GameRenderer
         }
         if (this.mc.level != null) {
             if (this.mc.options.limitFramerate == 0) {
-                this.renderLevel(partialTick, 0L);
+                this.renderLevel(a, 0L);
             }
             else {
-                this.renderLevel(partialTick, this.lastNsTime + 1000000000 / n6);
+                this.renderLevel(a, this.lastNsTime + 1000000000 / n6);
             }
             if (this.mc.options.limitFramerate == 2) {
                 final long millis = (this.lastNsTime + 1000000000 / n6 - System.nanoTime()) / 1000000L;
@@ -418,7 +418,7 @@ public class GameRenderer
             }
             this.lastNsTime = System.nanoTime();
             if (!this.mc.options.hideGui || this.mc.screen != null) {
-                this.mc.gui.render(partialTick, this.mc.screen != null, n4, n5);
+                this.mc.gui.render(a, this.mc.screen != null, n4, n5);
             }
         }
         else {
@@ -446,26 +446,26 @@ public class GameRenderer
         }
         if (this.mc.screen != null) {
             GL11.glClear(GL_DEPTH_BUFFER_BIT);
-            this.mc.screen.render(n4, n5, partialTick);
+            this.mc.screen.render(n4, n5, a);
             if (this.mc.screen != null && this.mc.screen.particles != null) {
-                this.mc.screen.particles.render(partialTick);
+                this.mc.screen.particles.render(a);
             }
         }
     }
     
-    public void renderLevel(final float partialTick, final long until) {
+    public void renderLevel(final float a, final long until) {
         GL11.glEnable(GL_CULL_FACE);
         GL11.glEnable(GL_DEPTH_TEST);
         if (this.mc.cameraTargetPlayer == null) {
             this.mc.cameraTargetPlayer = this.mc.player;
         }
-        this.pick(partialTick);
+        this.pick(a);
         final Mob cameraTargetPlayer = this.mc.cameraTargetPlayer;
         final LevelRenderer levelRenderer = this.mc.levelRenderer;
         final ParticleEngine particleEngine = this.mc.particleEngine;
-        final double xOff = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * partialTick;
-        final double yOff = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * partialTick;
-        final double zOff = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * partialTick;
+        final double xOff = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * a;
+        final double yOff = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * a;
+        final double zOff = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * a;
         final ChunkSource chunkSource = this.mc.level.getChunkSource();
         if (chunkSource instanceof ChunkCache) {
             ((ChunkCache)chunkSource).centerOn(Mth.floor((float)(int)xOff) >> 4, Mth.floor((float)(int)zOff) >> 4);
@@ -481,23 +481,23 @@ public class GameRenderer
                 }
             }
             GL11.glViewport(0, 0, this.mc.width, this.mc.height);
-            this.setupClearColor(partialTick);
+            this.setupClearColor(a);
             GL11.glClear(16640);
             GL11.glEnable(GL_CULL_FACE);
-            this.setupCamera(partialTick, i);
+            this.setupCamera(a, i);
             Frustum.getFrustum();
             if (this.mc.options.viewDistance < 2) {
-                this.setupFog(-1, partialTick);
-                levelRenderer.renderSky(partialTick);
+                this.setupFog(-1, a);
+                levelRenderer.renderSky(a);
             }
             GL11.glEnable(GL_FOG);
-            this.setupFog(1, partialTick);
+            this.setupFog(1, a);
             if (this.mc.options.ambientOcclusion) {
                 GL11.glShadeModel(GL_SMOOTH);
             }
             final FrustumCuller frustumCuller = new FrustumCuller();
             frustumCuller.prepare(xOff, yOff, zOff);
-            this.mc.levelRenderer.cull(frustumCuller, partialTick);
+            this.mc.levelRenderer.cull(frustumCuller, a);
             if (i == 0) {
                 while (!this.mc.levelRenderer.updateDirtyChunks(cameraTargetPlayer, false)) {
                     if (until == 0L) {
@@ -512,27 +512,27 @@ public class GameRenderer
                     }
                 }
             }
-            this.setupFog(0, partialTick);
+            this.setupFog(0, a);
             GL11.glEnable(GL_FOG);
             GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             Lighting.turnOff();
-            levelRenderer.render(cameraTargetPlayer, 0, partialTick);
+            levelRenderer.render(cameraTargetPlayer, 0, a);
             GL11.glShadeModel(GL_FLAT);
             Lighting.turnOn();
-            levelRenderer.renderEntities(cameraTargetPlayer.getPos(partialTick), frustumCuller, partialTick);
-            particleEngine.renderLit(cameraTargetPlayer, partialTick);
+            levelRenderer.renderEntities(cameraTargetPlayer.getPos(a), frustumCuller, a);
+            particleEngine.renderLit(cameraTargetPlayer, a);
             Lighting.turnOff();
-            this.setupFog(0, partialTick);
-            particleEngine.render(cameraTargetPlayer, partialTick);
+            this.setupFog(0, a);
+            particleEngine.render(cameraTargetPlayer, a);
             if (this.mc.hitResult != null && cameraTargetPlayer.isUnderLiquid(Material.water) && cameraTargetPlayer instanceof Player) {
                 final Player player = (Player)cameraTargetPlayer;
                 GL11.glDisable(GL_ALPHA_TEST);
-                levelRenderer.renderHit(player, this.mc.hitResult, 0, player.inventory.getSelected(), partialTick);
-                levelRenderer.renderHitOutline(player, this.mc.hitResult, 0, player.inventory.getSelected(), partialTick);
+                levelRenderer.renderHit(player, this.mc.hitResult, 0, player.inventory.getSelected(), a);
+                levelRenderer.renderHitOutline(player, this.mc.hitResult, 0, player.inventory.getSelected(), a);
                 GL11.glEnable(GL_ALPHA_TEST);
             }
             GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            this.setupFog(0, partialTick);
+            this.setupFog(0, a);
             GL11.glEnable(GL_BLEND);
             GL11.glDisable(GL_CULL_FACE);
             GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
@@ -541,7 +541,7 @@ public class GameRenderer
                     GL11.glShadeModel(GL_SMOOTH);
                 }
                 GL11.glColorMask(false, false, false, false);
-                final int render = levelRenderer.render(cameraTargetPlayer, 1, partialTick);
+                final int render = levelRenderer.render(cameraTargetPlayer, 1, a);
                 if (this.mc.options.anaglyph3d) {
                     if (GameRenderer.anaglyphPass == 0) {
                         GL11.glColorMask(false, true, true, true);
@@ -554,12 +554,12 @@ public class GameRenderer
                     GL11.glColorMask(true, true, true, true);
                 }
                 if (render > 0) {
-                    levelRenderer.renderSameAsLast(1, partialTick);
+                    levelRenderer.renderSameAsLast(1, a);
                 }
                 GL11.glShadeModel(GL_FLAT);
             }
             else {
-                levelRenderer.render(cameraTargetPlayer, 1, partialTick);
+                levelRenderer.render(cameraTargetPlayer, 1, a);
             }
             GL11.glDepthMask(true);
             GL11.glEnable(GL_CULL_FACE);
@@ -567,21 +567,21 @@ public class GameRenderer
             if (this.zoom == 1.0 && cameraTargetPlayer instanceof Player && this.mc.hitResult != null && !cameraTargetPlayer.isUnderLiquid(Material.water)) {
                 final Player player2 = (Player)cameraTargetPlayer;
                 GL11.glDisable(GL_ALPHA_TEST);
-                levelRenderer.renderHit(player2, this.mc.hitResult, 0, player2.inventory.getSelected(), partialTick);
-                levelRenderer.renderHitOutline(player2, this.mc.hitResult, 0, player2.inventory.getSelected(), partialTick);
+                levelRenderer.renderHit(player2, this.mc.hitResult, 0, player2.inventory.getSelected(), a);
+                levelRenderer.renderHitOutline(player2, this.mc.hitResult, 0, player2.inventory.getSelected(), a);
                 GL11.glEnable(GL_ALPHA_TEST);
             }
-            this.renderSnowAndRain(partialTick);
+            this.renderSnowAndRain(a);
             GL11.glDisable(GL_FOG);
             if (this.hovered != null) {}
-            this.setupFog(0, partialTick);
+            this.setupFog(0, a);
             GL11.glEnable(GL_FOG);
-            levelRenderer.renderClouds(partialTick);
+            levelRenderer.renderClouds(a);
             GL11.glDisable(GL_FOG);
-            this.setupFog(1, partialTick);
+            this.setupFog(1, a);
             if (this.zoom == 1.0) {
                 GL11.glClear(GL_DEPTH_BUFFER_BIT);
-                this.renderItemInHand(partialTick, i);
+                this.renderItemInHand(a, i);
             }
             if (!this.mc.options.anaglyph3d) {
                 return;
@@ -643,8 +643,8 @@ public class GameRenderer
         }
     }
     
-    protected void renderSnowAndRain(final float partialTick) {
-        final float rainLevel = this.mc.level.getRainLevel(partialTick);
+    protected void renderSnowAndRain(final float a) {
+        final float rainLevel = this.mc.level.getRainLevel(a);
         if (rainLevel <= 0.0f) {
             return;
         }
@@ -660,9 +660,9 @@ public class GameRenderer
         GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         GL11.glAlphaFunc(516, 0.01f);
         GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/environment/snow.png"));
-        final double n = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * partialTick;
-        final double v = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * partialTick;
-        final double n2 = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * partialTick;
+        final double n = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * a;
+        final double v = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * a;
+        final double n2 = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * a;
         final int floor4 = Mth.floor(v);
         int n3 = 5;
         if (this.mc.options.fancyGraphics) {
@@ -692,8 +692,8 @@ public class GameRenderer
                     final float n7 = 1.0f;
                     if (n5 != n6) {
                         this.random.setSeed(i * i * 3121 + i * 45238971 + j * j * 418711 + j * 13761);
-                        final float n8 = this.tick + partialTick;
-                        final float n9 = ((this.tick & 0x1FF) + partialTick) / 512.0f;
+                        final float n8 = this.tick + a;
+                        final float n9 = ((this.tick & 0x1FF) + a) / 512.0f;
                         final float n10 = this.random.nextFloat() + n8 * 0.01f * (float)this.random.nextGaussian();
                         final float n11 = this.random.nextFloat() + n8 * (float)this.random.nextGaussian() * 0.001f;
                         final double n12 = i + 0.5f - cameraTargetPlayer.x;
@@ -737,7 +737,7 @@ public class GameRenderer
                     final float n18 = 1.0f;
                     if (n16 != n17) {
                         this.random.setSeed(k * k * 3121 + k * 45238971 + l * l * 418711 + l * 13761);
-                        final float n19 = ((this.tick + k * k * 3121 + k * 45238971 + l * l * 418711 + l * 13761 & 0x1F) + partialTick) / 32.0f * (3.0f + this.random.nextFloat());
+                        final float n19 = ((this.tick + k * k * 3121 + k * 45238971 + l * l * 418711 + l * 13761 & 0x1F) + a) / 32.0f * (3.0f + this.random.nextFloat());
                         final double n20 = k + 0.5f - cameraTargetPlayer.x;
                         final double n21 = l + 0.5f - cameraTargetPlayer.z;
                         final float n22 = Mth.sqrt(n20 * n20 + n21 * n21) / n3;
@@ -775,22 +775,22 @@ public class GameRenderer
         GL11.glTranslatef(0.0f, 0.0f, -2000.0f);
     }
     
-    private void setupClearColor(final float partialTick) {
+    private void setupClearColor(final float a) {
         final Level level = this.mc.level;
         final Mob cameraTargetPlayer = this.mc.cameraTargetPlayer;
         final float n = 1.0f - (float)Math.pow(1.0f / (4 - this.mc.options.viewDistance), 0.25);
-        final Vec3 skyColor = level.getSkyColor(this.mc.cameraTargetPlayer, partialTick);
+        final Vec3 skyColor = level.getSkyColor(this.mc.cameraTargetPlayer, a);
         final float n2 = (float)skyColor.x;
         final float n3 = (float)skyColor.y;
         final float n4 = (float)skyColor.z;
-        final Vec3 fogColor = level.getFogColor(partialTick);
+        final Vec3 fogColor = level.getFogColor(a);
         this.fr = (float)fogColor.x;
         this.fg = (float)fogColor.y;
         this.fb = (float)fogColor.z;
         this.fr += (n2 - this.fr) * n;
         this.fg += (n3 - this.fg) * n;
         this.fb += (n4 - this.fb) * n;
-        final float rainLevel = level.getRainLevel(partialTick);
+        final float rainLevel = level.getRainLevel(a);
         if (rainLevel > 0.0f) {
             final float n5 = 1.0f - rainLevel * 0.5f;
             final float n6 = 1.0f - rainLevel * 0.4f;
@@ -798,7 +798,7 @@ public class GameRenderer
             this.fg *= n5;
             this.fb *= n6;
         }
-        final float thunderLevel = level.getThunderLevel(partialTick);
+        final float thunderLevel = level.getThunderLevel(a);
         if (thunderLevel > 0.0f) {
             final float n7 = 1.0f - thunderLevel * 0.5f;
             this.fr *= n7;
@@ -806,7 +806,7 @@ public class GameRenderer
             this.fb *= n7;
         }
         if (this.isInClouds) {
-            final Vec3 cloudColor = level.getCloudColor(partialTick);
+            final Vec3 cloudColor = level.getCloudColor(a);
             this.fr = (float)cloudColor.x;
             this.fg = (float)cloudColor.y;
             this.fb = (float)cloudColor.z;
@@ -821,7 +821,7 @@ public class GameRenderer
             this.fg = 0.1f;
             this.fb = 0.0f;
         }
-        final float n8 = this.fogBrO + (this.fogBr - this.fogBrO) * partialTick;
+        final float n8 = this.fogBrO + (this.fogBr - this.fogBrO) * a;
         this.fr *= n8;
         this.fg *= n8;
         this.fb *= n8;
@@ -881,8 +881,5 @@ public class GameRenderer
         this.lb.flip();
         return this.lb;
     }
-    
-    static {
-        GameRenderer.anaglyph3d = false;
-    }
+
 }

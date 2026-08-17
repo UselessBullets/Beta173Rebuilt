@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.TileRenderer;
 import net.minecraft.world.level.tile.Tile;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.HumanoidModel;
 
 public class HumanoidMobRenderer<T extends Mob> extends MobRenderer<T>
@@ -23,7 +22,7 @@ public class HumanoidMobRenderer<T extends Mob> extends MobRenderer<T>
     }
     
     @Override
-    protected void additionalRendering(final Mob mob, final float partialTick) {
+    protected void additionalRendering(final Mob mob, final float a) {
         final ItemInstance carriedItem = mob.getCarriedItem();
         if (carriedItem != null) {
             GL11.glPushMatrix();

@@ -141,13 +141,13 @@ public class ItemInHandRenderer
         GL11.glPopMatrix();
     }
     
-    public void render(final float partialTick) {
-        final float n = this.oHeight + (this.height - this.oHeight) * partialTick;
+    public void render(final float a) {
+        final float n = this.oHeight + (this.height - this.oHeight) * a;
         final LocalPlayer player = this.mc.player;
-        final float n2 = player.xRotO + (player.xRot - player.xRotO) * partialTick;
+        final float n2 = player.xRotO + (player.xRot - player.xRotO) * a;
         GL11.glPushMatrix();
         GL11.glRotatef(n2, 1.0f, 0.0f, 0.0f);
-        GL11.glRotatef(player.yRotO + (player.yRot - player.yRotO) * partialTick, 0.0f, 1.0f, 0.0f);
+        GL11.glRotatef(player.yRotO + (player.yRot - player.yRotO) * a, 0.0f, 1.0f, 0.0f);
         Lighting.turnOn();
         GL11.glPopMatrix();
         final ItemInstance selectedItem = this.selectedItem;
@@ -162,7 +162,7 @@ public class ItemInHandRenderer
         if (selectedItem != null && selectedItem.id == Item.map.id) {
             GL11.glPushMatrix();
             final float n3 = 0.8f;
-            final float attackAnim = player.getAttackAnim(partialTick);
+            final float attackAnim = player.getAttackAnim(a);
             GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim) * Mth.PI * 2.0f) * 0.2f, -Mth.sin(attackAnim * Mth.PI) * 0.2f);
             float n4 = 1.0f - n2 / 45.0f + 0.1f;
             if (n4 < 0.0f) {
@@ -192,7 +192,7 @@ public class ItemInHandRenderer
                 playerRenderer.renderHand();
                 GL11.glPopMatrix();
             }
-            final float attackAnim2 = player.getAttackAnim(partialTick);
+            final float attackAnim2 = player.getAttackAnim(a);
             final float sin = Mth.sin(attackAnim2 * attackAnim2 * Mth.PI);
             final float sin2 = Mth.sin(Mth.sqrt(attackAnim2) * Mth.PI);
             GL11.glRotatef(-sin * 20.0f, 0.0f, 1.0f, 0.0f);
@@ -221,12 +221,12 @@ public class ItemInHandRenderer
         else if (selectedItem != null) {
             GL11.glPushMatrix();
             final float n11 = 0.8f;
-            final float attackAnim3 = player.getAttackAnim(partialTick);
+            final float attackAnim3 = player.getAttackAnim(a);
             GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim3) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim3) * Mth.PI * 2.0f) * 0.2f, -Mth.sin(attackAnim3 * Mth.PI) * 0.2f);
             GL11.glTranslatef(0.7f * n11, -0.65f * n11 - (1.0f - n) * 0.6f, -0.9f * n11);
             GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             GL11.glEnable(GL_RESCALE_NORMAL);
-            final float attackAnim4 = player.getAttackAnim(partialTick);
+            final float attackAnim4 = player.getAttackAnim(a);
             final float sin3 = Mth.sin(attackAnim4 * attackAnim4 * Mth.PI);
             final float sin4 = Mth.sin(Mth.sqrt(attackAnim4) * Mth.PI);
             GL11.glRotatef(-sin3 * 20.0f, 0.0f, 1.0f, 0.0f);
@@ -243,12 +243,12 @@ public class ItemInHandRenderer
         else {
             GL11.glPushMatrix();
             final float n13 = 0.8f;
-            final float attackAnim5 = player.getAttackAnim(partialTick);
+            final float attackAnim5 = player.getAttackAnim(a);
             GL11.glTranslatef(-Mth.sin(Mth.sqrt(attackAnim5) * Mth.PI) * 0.3f, Mth.sin(Mth.sqrt(attackAnim5) * Mth.PI * 2.0f) * 0.4f, -Mth.sin(attackAnim5 * Mth.PI) * 0.4f);
             GL11.glTranslatef(0.8f * n13, -0.75f * n13 - (1.0f - n) * 0.6f, -0.9f * n13);
             GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             GL11.glEnable(GL_RESCALE_NORMAL);
-            final float attackAnim6 = player.getAttackAnim(partialTick);
+            final float attackAnim6 = player.getAttackAnim(a);
             final float sin5 = Mth.sin(attackAnim6 * attackAnim6 * Mth.PI);
             GL11.glRotatef(Mth.sin(Mth.sqrt(attackAnim6) * Mth.PI) * 70.0f, 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(-sin5 * 20.0f, 0.0f, 0.0f, 1.0f);
@@ -270,11 +270,11 @@ public class ItemInHandRenderer
         Lighting.turnOff();
     }
     
-    public void renderScreenEffect(final float partialTick) {
+    public void renderScreenEffect(final float a) {
         GL11.glDisable(GL_ALPHA_TEST);
         if (this.mc.player.isOnFire()) {
             GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
-            this.renderFire(partialTick);
+            this.renderFire(a);
         }
         if (this.mc.player.isInWall()) {
             final int floor = Mth.floor(this.mc.player.x);
@@ -283,7 +283,7 @@ public class ItemInHandRenderer
             GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             int n = this.mc.level.getTile(floor, floor2, floor3);
             if (this.mc.level.isSolidBlockingTile(floor, floor2, floor3)) {
-                this.renderTex(partialTick, Tile.tiles[n].getTexture(2));
+                this.renderTex(a, Tile.tiles[n].getTexture(2));
             }
             else {
                 for (int i = 0; i < 8; ++i) {
@@ -299,19 +299,19 @@ public class ItemInHandRenderer
                 }
             }
             if (Tile.tiles[n] != null) {
-                this.renderTex(partialTick, Tile.tiles[n].getTexture(2));
+                this.renderTex(a, Tile.tiles[n].getTexture(2));
             }
         }
         if (this.mc.player.isUnderLiquid(Material.water)) {
             GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/misc/water.png"));
-            this.renderWater(partialTick);
+            this.renderWater(a);
         }
         GL11.glEnable(GL_ALPHA_TEST);
     }
     
-    private void renderTex(final float partialTick, final int tex) {
+    private void renderTex(final float a, final int tex) {
         final Tesselator instance = Tesselator.instance;
-        this.mc.player.getBrightness(partialTick);
+        this.mc.player.getBrightness(a);
         final float n = 0.1f;
         GL11.glColor4f(n, n, n, 0.5f);
         GL11.glPushMatrix();
@@ -335,9 +335,9 @@ public class ItemInHandRenderer
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
     
-    private void renderWater(final float partialTick) {
+    private void renderWater(final float a) {
         final Tesselator instance = Tesselator.instance;
-        final float brightness = this.mc.player.getBrightness(partialTick);
+        final float brightness = this.mc.player.getBrightness(a);
         GL11.glColor4f(brightness, brightness, brightness, 0.5f);
         GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -361,7 +361,7 @@ public class ItemInHandRenderer
         GL11.glDisable(GL_BLEND);
     }
     
-    private void renderFire(final float partialTick) {
+    private void renderFire(final float a) {
         final Tesselator instance = Tesselator.instance;
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
         GL11.glEnable(GL_BLEND);

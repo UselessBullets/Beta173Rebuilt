@@ -5,7 +5,6 @@
 package net.minecraft.client.gui.inventory;
 
 import org.lwjgl.opengl.GL11;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerMenu;
 import net.minecraft.world.Container;
 
@@ -36,7 +35,7 @@ public class ContainerScreen extends AbstractContainerScreen
     }
     
     @Override
-    protected void renderBg(final float partialTick) {
+    protected void renderBg(final float a) {
         final int tex = this.minecraft.textures.loadTexture("/gui/container.png");
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.textures.bind(tex);

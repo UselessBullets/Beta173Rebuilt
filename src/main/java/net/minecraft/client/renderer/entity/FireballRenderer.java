@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.world.item.Item;
 import org.lwjgl.opengl.GL11;
@@ -14,7 +13,7 @@ import static org.lwjgl.opengl.GL12.*;
 
 public class FireballRenderer extends EntityRenderer<Fireball>
 {
-    public void render(final Fireball entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final Fireball entity, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
         GL11.glEnable(GL_RESCALE_NORMAL);

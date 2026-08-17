@@ -73,7 +73,7 @@ public class ConnectScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
         final Language language = Language.getInstance();
 
@@ -86,6 +86,6 @@ public class ConnectScreen extends Screen
             this.drawCenteredString(this.font, this.connection.message, this.width / 2, this.height / 2 - 10, 0xffffff);
         }
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
 }

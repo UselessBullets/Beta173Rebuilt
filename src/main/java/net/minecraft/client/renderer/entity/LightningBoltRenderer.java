@@ -13,7 +13,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class LightningBoltRenderer extends EntityRenderer<LightningBolt>
 {
-    public void render(final LightningBolt entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final LightningBolt entity, final double x, final double y, final double z, final float rot, final float a) {
         final Tesselator instance = Tesselator.instance;
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_LIGHTING);

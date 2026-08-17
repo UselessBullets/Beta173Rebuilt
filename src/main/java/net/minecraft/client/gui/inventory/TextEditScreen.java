@@ -73,7 +73,7 @@ public class TextEditScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
 
         this.drawCenteredString(this.font, this.title, this.width / 2, 40, 0xffffff);
@@ -109,7 +109,7 @@ public class TextEditScreen extends Screen
 
         GL11.glPopMatrix();
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
 
 }

@@ -34,7 +34,7 @@ public abstract class EntityRenderer<T extends Entity>
         this.shadowStrength = 1.0f;
     }
     
-    public abstract void render(final T entity, final double x, final double y, final double z, final float rot, final float partialTick);
+    public abstract void render(final T entity, final double x, final double y, final double z, final float rot, final float a);
     
     protected void bindTexture(final String resourceName) {
         final Textures textures = this.entityRenderDispatcher.textures;
@@ -51,7 +51,7 @@ public abstract class EntityRenderer<T extends Entity>
         return false;
     }
     
-    private void renderFlame(final Entity e, final double x, final double y, final double z, final float partialTick) {
+    private void renderFlame(final Entity e, final double x, final double y, final double z, final float a) {
         GL11.glDisable(GL_LIGHTING);
         final int tex = Tile.fire.tex;
         final int n = (tex & 0xF) << 4;
@@ -113,7 +113,7 @@ public abstract class EntityRenderer<T extends Entity>
         GL11.glEnable(GL_LIGHTING);
     }
     
-    private void renderShadow(final Entity e, final double x, final double y, final double z, final float pow, final float partialTick) {
+    private void renderShadow(final Entity e, final double x, final double y, final double z, final float pow, final float a) {
         GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         final Textures textures = this.entityRenderDispatcher.textures;
@@ -121,9 +121,9 @@ public abstract class EntityRenderer<T extends Entity>
         final Level level = this.getLevel();
         GL11.glDepthMask(false);
         final float shadowRadius = this.shadowRadius;
-        final double n = e.xOld + (e.x - e.xOld) * partialTick;
-        final double v = e.yOld + (e.y - e.yOld) * partialTick + e.getShadowHeightOffs();
-        final double n2 = e.zOld + (e.z - e.zOld) * partialTick;
+        final double n = e.xOld + (e.x - e.xOld) * a;
+        final double v = e.yOld + (e.y - e.yOld) * a + e.getShadowHeightOffs();
+        final double n2 = e.zOld + (e.z - e.zOld) * a;
         final int floor = Mth.floor(n - shadowRadius);
         final int floor2 = Mth.floor(n + shadowRadius);
         final int floor3 = Mth.floor(v - shadowRadius);
@@ -258,15 +258,15 @@ public abstract class EntityRenderer<T extends Entity>
         this.entityRenderDispatcher = entityRenderDispatcher;
     }
     
-    public void postRender(final Entity entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void postRender(final Entity entity, final double x, final double y, final double z, final float rot, final float a) {
         if (this.entityRenderDispatcher.options.fancyGraphics && this.shadowRadius > 0.0f) {
             final float pow = (float)((1.0 - this.entityRenderDispatcher.distanceToSqr(entity.x, entity.y, entity.z) / 256.0) * this.shadowStrength);
             if (pow > 0.0f) {
-                this.renderShadow(entity, x, y, z, pow, partialTick);
+                this.renderShadow(entity, x, y, z, pow, a);
             }
         }
         if (entity.isOnFire()) {
-            this.renderFlame(entity, x, y, z, partialTick);
+            this.renderFlame(entity, x, y, z, a);
         }
     }
     

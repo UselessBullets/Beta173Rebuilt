@@ -17,6 +17,6 @@ public abstract class Model
     public void setupAnim(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
     }
     
-    public void prepareMobModel(final Mob mob, final float time, final float r, final float partialTick) {
+    public void prepareMobModel(final Mob mob, final float time, final float r, final float a) {
     }
 }

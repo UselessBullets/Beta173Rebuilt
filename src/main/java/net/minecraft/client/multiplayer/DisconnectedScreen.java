@@ -50,12 +50,12 @@ public class DisconnectedScreen extends Screen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
+    public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
 
         this.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 50, 0xffffff);
         this.drawCenteredString(this.font, this.reason, this.width / 2, this.height / 2 - 10, 0xffffff);
 
-        super.render(xm, ym, partialTick);
+        super.render(xm, ym, a);
     }
 }

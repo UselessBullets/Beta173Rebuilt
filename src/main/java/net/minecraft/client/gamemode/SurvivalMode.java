@@ -103,15 +103,15 @@ public class SurvivalMode extends GameMode
     }
     
     @Override
-    public void render(final float partialTick) {
+    public void render(final float a) {
         if (this.destroyProgress <= 0.0f) {
             this.minecraft.gui.progress = 0.0f;
             this.minecraft.levelRenderer.destroyProgress = 0.0f;
         }
         else {
-            final float n = this.oDestroyProgress + (this.destroyProgress - this.oDestroyProgress) * partialTick;
-            this.minecraft.gui.progress = n;
-            this.minecraft.levelRenderer.destroyProgress = n;
+            final float dp = this.oDestroyProgress + (this.destroyProgress - this.oDestroyProgress) * a;
+            this.minecraft.gui.progress = dp;
+            this.minecraft.levelRenderer.destroyProgress = dp;
         }
     }
     

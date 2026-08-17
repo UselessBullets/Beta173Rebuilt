@@ -225,12 +225,12 @@ public class Wolf extends Animal
         return this.isWet;
     }
     
-    public float getWetShade(final float partialTick) {
-        return 0.75f + (this.shakeAnimO + (this.shakeAnim - this.shakeAnimO) * partialTick) / 2.0f * 0.25f;
+    public float getWetShade(final float a) {
+        return 0.75f + (this.shakeAnimO + (this.shakeAnim - this.shakeAnimO) * a) / 2.0f * 0.25f;
     }
     
-    public float getBodyRollAngle(final float partialTick, final float offset) {
-        float n = (this.shakeAnimO + (this.shakeAnim - this.shakeAnimO) * partialTick + offset) / 1.8f;
+    public float getBodyRollAngle(final float a, final float offset) {
+        float n = (this.shakeAnimO + (this.shakeAnim - this.shakeAnimO) * a + offset) / 1.8f;
         if (n < 0.0f) {
             n = 0.0f;
         }
@@ -240,8 +240,8 @@ public class Wolf extends Animal
         return Mth.sin(n * Mth.PI) * Mth.sin(n * Mth.PI * 11.0f) * 0.15f * Mth.PI;
     }
     
-    public float getHeadRollAngle(final float partialTick) {
-        return (this.interestedAngleO + (this.interestedAngle - this.interestedAngleO) * partialTick) * 0.15f * Mth.PI;
+    public float getHeadRollAngle(final float a) {
+        return (this.interestedAngleO + (this.interestedAngle - this.interestedAngleO) * a) * 0.15f * Mth.PI;
     }
     
     @Override

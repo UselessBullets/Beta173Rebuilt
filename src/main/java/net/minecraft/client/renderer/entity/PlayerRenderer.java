@@ -10,15 +10,12 @@ import net.minecraft.world.level.tile.Tile;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Tesselator;
 import org.lwjgl.opengl.GL11;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.HumanoidModel;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -37,7 +34,7 @@ public class PlayerRenderer extends MobRenderer<Player>
         this.armorParts2 = new HumanoidModel(0.5f);
     }
     
-    protected boolean prepareArmor(final Player mob, final int layer, final float partialTick) {
+    protected boolean prepareArmor(final Player mob, final int layer, final float a) {
         final ItemInstance armor = mob.inventory.getArmor(3 - layer);
         if (armor != null) {
             final Item item = armor.getItem();
@@ -58,7 +55,7 @@ public class PlayerRenderer extends MobRenderer<Player>
         return false;
     }
     
-    public void render(final Player entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final Player entity, final double x, final double y, final double z, final float rot, final float a) {
         final ItemInstance selected = entity.inventory.getSelected();
         final HumanoidModel armorParts1 = this.armorParts1;
         final HumanoidModel armorParts2 = this.armorParts2;
@@ -79,7 +76,7 @@ public class PlayerRenderer extends MobRenderer<Player>
         if (entity.isSneaking() && !(entity instanceof LocalPlayer)) {
             y2 -= 0.125;
         }
-        super.render(entity, x, y2, z, rot, partialTick);
+        super.render(entity, x, y2, z, rot, a);
         final HumanoidModel armorParts5 = this.armorParts1;
         final HumanoidModel armorParts6 = this.armorParts2;
         final HumanoidModel humanoidModel3 = this.humanoidModel;
@@ -145,7 +142,7 @@ public class PlayerRenderer extends MobRenderer<Player>
     }
 
     @Override
-    protected void additionalRendering(final Player mob, final float partialTick) {
+    protected void additionalRendering(final Player mob, final float a) {
         final ItemInstance armor = mob.inventory.getArmor(3);
         if (armor != null && armor.getItem().id < 256) {
             GL11.glPushMatrix();
@@ -161,8 +158,8 @@ public class PlayerRenderer extends MobRenderer<Player>
         }
         if (mob.name.equals("deadmau5") && this.bindTexture(mob.customTextureUrl, null)) {
             for (int i = 0; i < 2; ++i) {
-                final float n2 = mob.yRotO + (mob.yRot - mob.yRotO) * partialTick - (mob.yBodyRotO + (mob.yBodyRot - mob.yBodyRotO) * partialTick);
-                final float n3 = mob.xRotO + (mob.xRot - mob.xRotO) * partialTick;
+                final float n2 = mob.yRotO + (mob.yRot - mob.yRotO) * a - (mob.yBodyRotO + (mob.yBodyRot - mob.yBodyRotO) * a);
+                final float n3 = mob.xRotO + (mob.xRot - mob.xRotO) * a;
                 GL11.glPushMatrix();
                 GL11.glRotatef(n2, 0.0f, 1.0f, 0.0f);
                 GL11.glRotatef(n3, 1.0f, 0.0f, 0.0f);
@@ -179,10 +176,10 @@ public class PlayerRenderer extends MobRenderer<Player>
         if (this.bindTexture(mob.cloakTexture, null)) {
             GL11.glPushMatrix();
             GL11.glTranslatef(0.0f, 0.0f, 0.125f);
-            final double n5 = mob.xCloakO + (mob.xCloak - mob.xCloakO) * partialTick - (mob.xo + (mob.x - mob.xo) * partialTick);
-            final double n6 = mob.yCloakO + (mob.yCloak - mob.yCloakO) * partialTick - (mob.yo + (mob.y - mob.yo) * partialTick);
-            final double n7 = mob.zCloakO + (mob.zCloak - mob.zCloakO) * partialTick - (mob.zo + (mob.z - mob.zo) * partialTick);
-            final float n8 = mob.yBodyRotO + (mob.yBodyRot - mob.yBodyRotO) * partialTick;
+            final double n5 = mob.xCloakO + (mob.xCloak - mob.xCloakO) * a - (mob.xo + (mob.x - mob.xo) * a);
+            final double n6 = mob.yCloakO + (mob.yCloak - mob.yCloakO) * a - (mob.yo + (mob.y - mob.yo) * a);
+            final double n7 = mob.zCloakO + (mob.zCloak - mob.zCloakO) * a - (mob.zo + (mob.z - mob.zo) * a);
+            final float n8 = mob.yBodyRotO + (mob.yBodyRot - mob.yBodyRotO) * a;
             final double n9 = Mth.sin(n8 * Mth.DEGRAD);
             final double n10 = -Mth.cos(n8 * Mth.DEGRAD);
             float n11 = (float)n6 * 10.0f;
@@ -197,7 +194,7 @@ public class PlayerRenderer extends MobRenderer<Player>
             if (n12 < 0.0f) {
                 n12 = 0.0f;
             }
-            float n14 = n11 + Mth.sin((mob.walkDistO + (mob.walkDist - mob.walkDistO) * partialTick) * 6.0f) * 32.0f * (mob.oBob + (mob.bob - mob.oBob) * partialTick);
+            float n14 = n11 + Mth.sin((mob.walkDistO + (mob.walkDist - mob.walkDistO) * a) * 6.0f) * 32.0f * (mob.oBob + (mob.bob - mob.oBob) * a);
             if (mob.isSneaking()) {
                 n14 += 25.0f;
             }
@@ -249,7 +246,7 @@ public class PlayerRenderer extends MobRenderer<Player>
     }
 
     @Override
-    protected void scale(final Player mob, final float partialTick) {
+    protected void scale(final Player mob, final float a) {
         final float n = 0.9375f;
         GL11.glScalef(n, n, n);
     }
@@ -269,14 +266,14 @@ public class PlayerRenderer extends MobRenderer<Player>
         }
     }
     
-    protected void setupRotations(final Player mob, final float bob, final float bodyRot, final float partialTick) {
+    protected void setupRotations(final Player mob, final float bob, final float bodyRot, final float a) {
         if (mob.isAlive() && mob.isSleeping()) {
             GL11.glRotatef(mob.getSleepRotation(), 0.0f, 1.0f, 0.0f);
             GL11.glRotatef(this.getFlipDegrees(mob), 0.0f, 0.0f, 1.0f);
             GL11.glRotatef(270.0f, 0.0f, 1.0f, 0.0f);
         }
         else {
-            super.setupRotations(mob, bob, bodyRot, partialTick);
+            super.setupRotations(mob, bob, bodyRot, a);
         }
     }
     

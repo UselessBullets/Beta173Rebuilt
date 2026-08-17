@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
 import org.lwjgl.opengl.GL11;
@@ -14,15 +13,15 @@ import static org.lwjgl.opengl.GL12.*;
 
 public class ArrowRenderer extends EntityRenderer<Arrow>
 {
-    public void render(final Arrow entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final Arrow entity, final double x, final double y, final double z, final float rot, final float a) {
         if (entity.yRotO == 0.0f && entity.xRotO == 0.0f) {
             return;
         }
         this.bindTexture("/item/arrows.png");
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
-        GL11.glRotatef(entity.yRotO + (entity.yRot - entity.yRotO) * partialTick - 90.0f, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(entity.xRotO + (entity.xRot - entity.xRotO) * partialTick, 0.0f, 0.0f, 1.0f);
+        GL11.glRotatef(entity.yRotO + (entity.yRot - entity.yRotO) * a - 90.0f, 0.0f, 1.0f, 0.0f);
+        GL11.glRotatef(entity.xRotO + (entity.xRot - entity.xRotO) * a, 0.0f, 0.0f, 1.0f);
         final Tesselator instance = Tesselator.instance;
         final int n = 0;
         final float n2 = 0.0f;
@@ -35,7 +34,7 @@ public class ArrowRenderer extends EntityRenderer<Arrow>
         final float n9 = (10 + n * 10) / 32.0f;
         final float n10 = 0.05625f;
         GL11.glEnable(GL_RESCALE_NORMAL);
-        final float n11 = entity.shakeTime - partialTick;
+        final float n11 = entity.shakeTime - a;
         if (n11 > 0.0f) {
             GL11.glRotatef(-Mth.sin(n11 * 3.0f) * n11, 0.0f, 0.0f, 1.0f);
         }

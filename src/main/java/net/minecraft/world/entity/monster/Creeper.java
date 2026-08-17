@@ -135,8 +135,8 @@ public class Creeper extends Monster
         return this.entityData.getByte(17) == 1;
     }
     
-    public float getSwelling(final float partialTick) {
-        return (this.oldSwell + (this.swell - this.oldSwell) * partialTick) / 28.0f;
+    public float getSwelling(final float a) {
+        return (this.oldSwell + (this.swell - this.oldSwell) * a) / 28.0f;
     }
     
     @Override

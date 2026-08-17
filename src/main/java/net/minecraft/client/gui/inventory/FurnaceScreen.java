@@ -5,7 +5,6 @@
 package net.minecraft.client.gui.inventory;
 
 import org.lwjgl.opengl.GL11;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.FurnaceMenu;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.tile.entity.FurnaceTileEntity;
@@ -26,7 +25,7 @@ public class FurnaceScreen extends AbstractContainerScreen
     }
     
     @Override
-    protected void renderBg(final float partialTick) {
+    protected void renderBg(final float a) {
         final int tex = this.minecraft.textures.loadTexture("/gui/furnace.png");
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.textures.bind(tex);

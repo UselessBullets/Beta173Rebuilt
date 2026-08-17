@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Mob;
 import org.lwjgl.opengl.GL11;
 import util.Mth;
 import net.minecraft.world.entity.monster.Creeper;
@@ -22,8 +21,8 @@ public class CreeperRenderer extends MobRenderer<Creeper>
         this.armorModel = new CreeperModel(2.0f);
     }
     
-    protected void scale(final Creeper mob, final float partialTick) {
-        float swelling = mob.getSwelling(partialTick);
+    protected void scale(final Creeper mob, final float a) {
+        float swelling = mob.getSwelling(a);
         final float n = 1.0f + Mth.sin(swelling * 100.0f) * swelling * 0.01f;
         if (swelling < 0.0f) {
             swelling = 0.0f;
@@ -37,8 +36,8 @@ public class CreeperRenderer extends MobRenderer<Creeper>
         GL11.glScalef(n4, (1.0f + n3 * 0.1f) / n, n4);
     }
     
-    protected int getOverlayColor(final Creeper mob, final float br, final float partialTick) {
-        final float swelling = mob.getSwelling(partialTick);
+    protected int getOverlayColor(final Creeper mob, final float br, final float a) {
+        final float swelling = mob.getSwelling(a);
         if ((int)(swelling * 10.0f) % 2 == 0) {
             return 0;
         }
@@ -52,10 +51,10 @@ public class CreeperRenderer extends MobRenderer<Creeper>
         return n << 24 | 255 << 16 | 255 << 8 | 0xFF;
     }
     
-    protected boolean prepareArmor(final Creeper mob, final int layer, final float partialTick) {
+    protected boolean prepareArmor(final Creeper mob, final int layer, final float a) {
         if (mob.isPowered()) {
             if (layer == 1) {
-                final float n = mob.tickCount + partialTick;
+                final float n = mob.tickCount + a;
                 this.bindTexture("/armor/power.png");
                 GL11.glMatrixMode(5890);
                 GL11.glLoadIdentity();
@@ -80,7 +79,7 @@ public class CreeperRenderer extends MobRenderer<Creeper>
         return false;
     }
     
-    protected boolean prepareArmorOverlay(final Creeper mob, final int layer, final float partialTick) {
+    protected boolean prepareArmorOverlay(final Creeper mob, final int layer, final float a) {
         return false;
     }
 }

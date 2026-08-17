@@ -29,8 +29,8 @@ public class WaterDropParticle extends Particle
     }
     
     @Override
-    public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
-        super.render(t, partialTick, xa, ya, za, xa2, za2);
+    public void render(final Tesselator t, final float a, final float xa, final float ya, final float za, final float xa2, final float za2) {
+        super.render(t, a, xa, ya, za, xa2, za2);
     }
     
     @Override

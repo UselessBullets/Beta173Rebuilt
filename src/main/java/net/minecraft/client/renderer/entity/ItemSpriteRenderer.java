@@ -19,7 +19,7 @@ public class ItemSpriteRenderer extends EntityRenderer<Entity>
     }
     
     @Override
-    public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
         GL11.glEnable(GL_RESCALE_NORMAL);

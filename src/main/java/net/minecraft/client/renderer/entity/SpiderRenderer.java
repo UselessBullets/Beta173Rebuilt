@@ -4,10 +4,8 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Mob;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.monster.Spider;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.SpiderModel;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -23,7 +21,7 @@ public class SpiderRenderer extends MobRenderer<Spider>
         return 180.0f;
     }
     
-    protected boolean prepareArmor(final Spider mob, final int layer, final float partialTick) {
+    protected boolean prepareArmor(final Spider mob, final int layer, final float a) {
         if (layer != 0) {
             return false;
         }

@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.world.entity.Entity;
 import util.Mth;
 import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.item.Boat;
@@ -20,12 +19,12 @@ public class BoatRenderer extends EntityRenderer<Boat>
         this.model = new BoatModel();
     }
     
-    public void render(final Boat entity, final double x, final double y, final double z, final float rot, final float partialTick) {
+    public void render(final Boat entity, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
         GL11.glRotatef(180.0f - rot, 0.0f, 1.0f, 0.0f);
-        final float i = entity.hurtTime - partialTick;
-        float n = entity.damage - partialTick;
+        final float i = entity.hurtTime - a;
+        float n = entity.damage - a;
         if (n < 0.0f) {
             n = 0.0f;
         }

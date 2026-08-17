@@ -42,8 +42,8 @@ public class InBedChatScreen extends ChatScreen
     }
     
     @Override
-    public void render(final int xm, final int ym, final float partialTick) {
-        super.render(xm, ym, partialTick);
+    public void render(final int xm, final int ym, final float a) {
+        super.render(xm, ym, a);
     }
     
     @Override

@@ -21,17 +21,10 @@ public class FrustrumData
     public static final int C = 2; // The Z value of the plane's normal
     public static final int D = 3; // The distance the plane is from the origin
 
-    public float[][] m_Frustum;
-    public float[] proj;
-    public float[] modl;
-    public float[] clip;
-    
-    public FrustrumData() {
-        this.m_Frustum = new float[16][16];
-        this.proj = new float[16];
-        this.modl = new float[16];
-        this.clip = new float[16];
-    }
+    public float[][] m_Frustum = new float[16][16];
+    public float[] proj = new float[16];
+    public float[] modl = new float[16];
+    public float[] clip = new float[16];
 
     boolean pointInFrustum(float x, float y, float z) // Useless - In b1.2 leak & LCE Leak
     {

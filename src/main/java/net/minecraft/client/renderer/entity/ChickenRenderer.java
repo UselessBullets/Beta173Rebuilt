@@ -14,13 +14,13 @@ public class ChickenRenderer extends MobRenderer<Chicken>
         super(model, shadow);
     }
     
-    public void render(final Chicken entity, final double x, final double y, final double z, final float rot, final float a) {
-        super.render(entity, x, y, z, rot, a);
+    public void render(final Chicken chicken, final double x, final double y, final double z, final float rot, final float a) {
+        super.render(chicken, x, y, z, rot, a);
     }
     
-    protected float getBob(final Chicken mob, final float a) {
-        float flap = mob.oFlap + (mob.flap - mob.oFlap) * a;
-        float flapSpeed = mob.oFlapSpeed + (mob.flapSpeed - mob.oFlapSpeed) * a;
+    protected float getBob(final Chicken chicken, final float a) {
+        float flap = chicken.oFlap + (chicken.flap - chicken.oFlap) * a;
+        float flapSpeed = chicken.oFlapSpeed + (chicken.flapSpeed - chicken.oFlapSpeed) * a;
 
         return (Mth.sin(flap) + 1.0f) * flapSpeed;
     }

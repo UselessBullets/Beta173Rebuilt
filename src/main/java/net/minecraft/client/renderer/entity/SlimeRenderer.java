@@ -19,12 +19,14 @@ public class SlimeRenderer extends MobRenderer<Slime>
         this.slimeArmor = armor;
     }
     
-    protected boolean prepareArmor(final Slime mob, final int layer, final float a) {
+    protected boolean prepareArmor(final Slime slime, final int layer, final float a) {
         if (layer == 0) {
             this.setArmor(this.slimeArmor);
-            GL11.glEnable(2977);
+
+            GL11.glEnable(GL_NORMALIZE);
             GL11.glEnable(GL_BLEND);
             GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
             return true;
         }
         if (layer == 1) {
@@ -34,10 +36,10 @@ public class SlimeRenderer extends MobRenderer<Slime>
         return false;
     }
     
-    protected void scale(final Slime mob, final float a) {
-        final int size = mob.getSize();
-        final float n = 1.0f / ((mob.oSquish + (mob.squish - mob.oSquish) * a) / (size * 0.5f + 1.0f) + 1.0f);
-        final float n2 = (float)size;
-        GL11.glScalef(n * n2, 1.0f / n * n2, n * n2);
+    protected void scale(final Slime slime, final float a) {
+        final int size = slime.getSize();
+        final float ss = (slime.oSquish + (slime.squish - slime.oSquish) * a) / (size * 0.5f + 1.0f);
+        final float w = 1.0f / (ss + 1.0f);
+        GL11.glScalef(w * (float) size, 1.0f / w * (float) size, w * (float) size);
     }
 }

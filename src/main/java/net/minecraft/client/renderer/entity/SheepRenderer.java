@@ -15,11 +15,11 @@ public class SheepRenderer extends MobRenderer<Sheep>
         this.setArmor(armor);
     }
     
-    protected boolean prepareArmor(final Sheep mob, final int layer, final float a) {
-        if (layer == 0 && !mob.isSheared()) {
+    protected boolean prepareArmor(final Sheep sheep, final int layer, final float a) {
+        if (layer == 0 && !sheep.isSheared()) {
             this.bindTexture("/mob/sheep_fur.png");
-            final float brightness = mob.getBrightness(a);
-            final int color = mob.getColor();
+            final float brightness = sheep.getBrightness(a);
+            final int color = sheep.getColor();
             GL11.glColor3f(brightness * Sheep.COLOR[color][0], brightness * Sheep.COLOR[color][1], brightness * Sheep.COLOR[color][2]);
             return true;
         }

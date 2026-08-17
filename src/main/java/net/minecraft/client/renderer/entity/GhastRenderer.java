@@ -14,8 +14,8 @@ public class GhastRenderer extends MobRenderer<Ghast>
         super(new GhastModel(), 0.5f);
     }
     
-    protected void scale(final Ghast mob, final float a) {
-        float ss = (mob.oCharge + (mob.charge - mob.oCharge) * a) / 20.0f;
+    protected void scale(final Ghast ghast, final float a) {
+        float ss = (ghast.oCharge + (ghast.charge - ghast.oCharge) * a) / 20.0f;
         if (ss < 0.0f) ss = 0.0f;
         ss = 1.0f / (ss * ss * ss * ss * ss * 2.0f + 1.0f);
         final float s = (8.0f + ss) / 2.0f;

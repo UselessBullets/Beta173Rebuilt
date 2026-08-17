@@ -18,17 +18,17 @@ public class BoatRenderer extends EntityRenderer<Boat>
         this.shadowRadius = 0.5f;
     }
     
-    public void render(final Boat entity, final double x, final double y, final double z, final float rot, final float a) {
+    public void render(final Boat boat, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
 
         GL11.glTranslatef((float)x, (float)y, (float)z);
 
         GL11.glRotatef(180.0f - rot, 0.0f, 1.0f, 0.0f);
-        final float hurt = entity.hurtTime - a;
-        float dmg = entity.damage - a;
+        final float hurt = boat.hurtTime - a;
+        float dmg = boat.damage - a;
         if (dmg < 0.0f) dmg = 0.0f;
         if (hurt > 0.0f) {
-            GL11.glRotatef(Mth.sin(hurt) * hurt * dmg / 10.0f * entity.hurtDir, 1.0f, 0.0f, 0.0f);
+            GL11.glRotatef(Mth.sin(hurt) * hurt * dmg / 10.0f * boat.hurtDir, 1.0f, 0.0f, 0.0f);
         }
 
         this.bindTexture("/terrain.png");

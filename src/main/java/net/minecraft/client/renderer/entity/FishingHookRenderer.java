@@ -14,7 +14,7 @@ import static org.lwjgl.opengl.GL12.*;
 
 public class FishingHookRenderer extends EntityRenderer<FishingHook>
 {
-    public void render(final FishingHook entity, final double x, final double y, final double z, final float rot, final float a) {
+    public void render(final FishingHook fishingHook, final double x, final double y, final double z, final float rot, final float a) {
         glPushMatrix();
 
         glTranslatef((float)x, (float)y, (float)z);
@@ -47,34 +47,34 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook>
         glDisable(GL_RESCALE_NORMAL);
         glPopMatrix();
 
-        if (entity.owner != null) {
-            float rr = (entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * a) * Mth.DEGRAD;
+        if (fishingHook.owner != null) {
+            float rr = (fishingHook.owner.yRotO + (fishingHook.owner.yRot - fishingHook.owner.yRotO) * a) * Mth.DEGRAD;
             double ss = Mth.sin(rr);
             double cc = Mth.cos(rr);
-            final float swing = Mth.sin(Mth.sqrt(entity.owner.getAttackAnim(a)) * Mth.PI);
+            final float swing = Mth.sin(Mth.sqrt(fishingHook.owner.getAttackAnim(a)) * Mth.PI);
 
             final Vec3 vv = Vec3.newTemp(-0.5, 0.03, 0.8);
-            vv.xRot(-(entity.owner.xRotO + (entity.owner.xRot - entity.owner.xRotO) * a) * Mth.DEGRAD);
-            vv.yRot(-(entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * a) * Mth.DEGRAD);
+            vv.xRot(-(fishingHook.owner.xRotO + (fishingHook.owner.xRot - fishingHook.owner.xRotO) * a) * Mth.DEGRAD);
+            vv.yRot(-(fishingHook.owner.yRotO + (fishingHook.owner.yRot - fishingHook.owner.yRotO) * a) * Mth.DEGRAD);
             vv.yRot(swing * 0.5f);
             vv.xRot(-swing * 0.7f);
 
-            double xp = entity.owner.xo + (entity.owner.x - entity.owner.xo) * a + vv.x;
-            double yp = entity.owner.yo + (entity.owner.y - entity.owner.yo) * a + vv.y;
-            double zp = entity.owner.zo + (entity.owner.z - entity.owner.zo) * a + vv.z;
+            double xp = fishingHook.owner.xo + (fishingHook.owner.x - fishingHook.owner.xo) * a + vv.x;
+            double yp = fishingHook.owner.yo + (fishingHook.owner.y - fishingHook.owner.yo) * a + vv.y;
+            double zp = fishingHook.owner.zo + (fishingHook.owner.z - fishingHook.owner.zo) * a + vv.z;
 
             if (this.entityRenderDispatcher.options.thirdPersonView) {
-                rr = (entity.owner.yBodyRotO + (entity.owner.yBodyRot - entity.owner.yBodyRotO) * a) * Mth.DEGRAD;
+                rr = (fishingHook.owner.yBodyRotO + (fishingHook.owner.yBodyRot - fishingHook.owner.yBodyRotO) * a) * Mth.DEGRAD;
                 ss = Mth.sin(rr);
                 cc = Mth.cos(rr);
-                xp = entity.owner.xo + (entity.owner.x - entity.owner.xo) * a - cc * 0.35 - ss * 0.85;
-                yp = entity.owner.yo + (entity.owner.y - entity.owner.yo) * a - 0.45;
-                zp = entity.owner.zo + (entity.owner.z - entity.owner.zo) * a - ss * 0.35 + cc * 0.85;
+                xp = fishingHook.owner.xo + (fishingHook.owner.x - fishingHook.owner.xo) * a - cc * 0.35 - ss * 0.85;
+                yp = fishingHook.owner.yo + (fishingHook.owner.y - fishingHook.owner.yo) * a - 0.45;
+                zp = fishingHook.owner.zo + (fishingHook.owner.z - fishingHook.owner.zo) * a - ss * 0.35 + cc * 0.85;
             }
 
-            final double xh = entity.xo + (entity.x - entity.xo) * a;
-            final double yh = entity.yo + (entity.y - entity.yo) * a + 0.25;
-            final double zh = entity.zo + (entity.z - entity.zo) * a;
+            final double xh = fishingHook.xo + (fishingHook.x - fishingHook.xo) * a;
+            final double yh = fishingHook.yo + (fishingHook.y - fishingHook.yo) * a + 0.25;
+            final double zh = fishingHook.zo + (fishingHook.z - fishingHook.zo) * a;
 
             final double xa = (float)(xp - xh);
             final double ya = (float)(yp - yh);

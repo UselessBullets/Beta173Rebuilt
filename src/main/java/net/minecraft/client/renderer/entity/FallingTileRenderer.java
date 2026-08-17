@@ -21,16 +21,16 @@ public class FallingTileRenderer extends EntityRenderer<FallingTile>
         this.shadowRadius = 0.5f;
     }
     
-    public void render(final FallingTile entity, final double x, final double y, final double z, final float rot, final float a) {
+    public void render(final FallingTile fallingTile, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
 
         this.bindTexture("/terrain.png");
-        final Tile tt = Tile.tiles[entity.tile];
+        final Tile tt = Tile.tiles[fallingTile.tile];
 
-        final Level level = entity.getLevel();
+        final Level level = fallingTile.getLevel();
         GL11.glDisable(GL_LIGHTING);
-        this.tileRenderer.renderBlock(tt, level, Mth.floor(entity.x), Mth.floor(entity.y), Mth.floor(entity.z));
+        this.tileRenderer.renderBlock(tt, level, Mth.floor(fallingTile.x), Mth.floor(fallingTile.y), Mth.floor(fallingTile.z));
         GL11.glEnable(GL_LIGHTING);
         GL11.glPopMatrix();
     }

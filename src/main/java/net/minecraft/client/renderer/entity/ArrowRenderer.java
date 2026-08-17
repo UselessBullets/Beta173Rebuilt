@@ -13,15 +13,15 @@ import static org.lwjgl.opengl.GL12.*;
 
 public class ArrowRenderer extends EntityRenderer<Arrow>
 {
-    public void render(final Arrow entity, final double x, final double y, final double z, final float rot, final float a) {
-        if (entity.yRotO == 0.0f && entity.xRotO == 0.0f) return;
+    public void render(final Arrow arrow, final double x, final double y, final double z, final float rot, final float a) {
+        if (arrow.yRotO == 0.0f && arrow.xRotO == 0.0f) return;
         this.bindTexture("/item/arrows.png");
 
         GL11.glPushMatrix();
 
         GL11.glTranslatef((float)x, (float)y, (float)z);
-        GL11.glRotatef(entity.yRotO + (entity.yRot - entity.yRotO) * a - 90.0f, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(entity.xRotO + (entity.xRot - entity.xRotO) * a, 0.0f, 0.0f, 1.0f);
+        GL11.glRotatef(arrow.yRotO + (arrow.yRot - arrow.yRotO) * a - 90.0f, 0.0f, 1.0f, 0.0f);
+        GL11.glRotatef(arrow.xRotO + (arrow.xRot - arrow.xRotO) * a, 0.0f, 0.0f, 1.0f);
 
         final Tesselator t = Tesselator.instance;
         final int type = 0;
@@ -37,7 +37,7 @@ public class ArrowRenderer extends EntityRenderer<Arrow>
         final float v12 = (10 + type * 10) / 32.0f;
         final float ss = 0.05625f;
         GL11.glEnable(GL_RESCALE_NORMAL);
-        final float shake = entity.shakeTime - a;
+        final float shake = arrow.shakeTime - a;
         if (shake > 0.0f) {
             float pow = -Mth.sin(shake * 3.0f) * shake;
             GL11.glRotatef(pow, 0.0f, 0.0f, 1.0f);

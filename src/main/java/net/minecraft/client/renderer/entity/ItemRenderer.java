@@ -32,18 +32,18 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
         this.shadowStrength = 0.75f;
     }
     
-    public void render(final ItemEntity entity, final double x, final double y, final double z, final float rot, final float a) {
+    public void render(final ItemEntity itemEntity, final double x, final double y, final double z, final float rot, final float a) {
         this.random.setSeed(187L);
-        final ItemInstance item = entity.item;
+        final ItemInstance item = itemEntity.item;
 
         glPushMatrix();
-        final float bob = Mth.sin((entity.age + a) / 10.0f + entity.bobOffs) * 0.1f + 0.1f;
-        final float spin = ((entity.age + a) / 20.0f + entity.bobOffs) * Mth.RADDEG;
+        final float bob = Mth.sin((itemEntity.age + a) / 10.0f + itemEntity.bobOffs) * 0.1f + 0.1f;
+        final float spin = ((itemEntity.age + a) / 20.0f + itemEntity.bobOffs) * Mth.RADDEG;
 
         int count = 1;
-        if (entity.item.count > 1) count = 2;
-        if (entity.item.count > 5) count = 3;
-        if (entity.item.count > 20) count = 4;
+        if (itemEntity.item.count > 1) count = 2;
+        if (itemEntity.item.count > 5) count = 3;
+        if (itemEntity.item.count > 20) count = 4;
 
         glTranslatef((float)x, (float)y + bob, (float)z);
         glEnable(GL_RESCALE_NORMAL);
@@ -66,7 +66,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
                     float zo = (this.random.nextFloat() * 2.0f - 1.0f) * 0.2f / s;
                     glTranslatef(xo, yo, zo);
                 }
-                this.tileRenderer.renderTile(Tile.tiles[item.id], item.getAuxValue(), entity.getBrightness(a));
+                this.tileRenderer.renderTile(Tile.tiles[item.id], item.getAuxValue(), itemEntity.getBrightness(a));
                 glPopMatrix();
             }
         }
@@ -95,7 +95,7 @@ public class ItemRenderer extends EntityRenderer<ItemEntity>
                 final float red = (col >> 16 & 0xFF) / 255.0f;
                 final float g = (col >> 8 & 0xFF) / 255.0f;
                 final float b = (col & 0xFF) / 255.0f;
-                final float br = entity.getBrightness(a);
+                final float br = itemEntity.getBrightness(a);
 
                 glColor4f(red * br, g * br, b * br, 1.0f);
             }

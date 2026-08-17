@@ -13,82 +13,78 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class LightningBoltRenderer extends EntityRenderer<LightningBolt>
 {
-    public void render(final LightningBolt entity, final double x, final double y, final double z, final float rot, final float a) {
-        final Tesselator instance = Tesselator.instance;
+    public void render(final LightningBolt lightningBolt, final double x, final double y, final double z, final float rot, final float a) {
+        final Tesselator t = Tesselator.instance;
+
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_LIGHTING);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        final double[] array = new double[8];
-        final double[] array2 = new double[8];
-        double n = 0.0;
-        double n2 = 0.0;
-        final Random random = new Random(entity.seed);
-        for (int i = 7; i >= 0; --i) {
-            array[i] = n;
-            array2[i] = n2;
-            n += random.nextInt(11) - 5;
-            n2 += random.nextInt(11) - 5;
+
+        final double[] xOffs = new double[8];
+        final double[] zOffs = new double[8];
+        double xOff = 0.0;
+        double zOff = 0.0;
+        {
+            final Random random = new Random(lightningBolt.seed);
+            for (int i = 7; i >= 0; --i) {
+                xOffs[i] = xOff;
+                zOffs[i] = zOff;
+                xOff += random.nextInt(11) - 5;
+                zOff += random.nextInt(11) - 5;
+            }
         }
-        for (int j = 0; j < 4; ++j) {
-            final Random random2 = new Random(entity.seed);
-            for (int k = 0; k < 3; ++k) {
-                int n3 = 7;
-                int n4 = 0;
-                if (k > 0) {
-                    n3 = 7 - k;
-                }
-                if (k > 0) {
-                    n4 = n3 - 2;
-                }
-                double n5 = array[n3] - n;
-                double n6 = array2[n3] - n2;
-                for (int l = n3; l >= n4; --l) {
-                    final double n7 = n5;
-                    final double n8 = n6;
-                    if (k == 0) {
-                        n5 += random2.nextInt(11) - 5;
-                        n6 += random2.nextInt(11) - 5;
+
+        for (int r = 0; r < 4; ++r) {
+            final Random random = new Random(lightningBolt.seed);
+            for (int p = 0; p < 3; ++p) {
+                int hs = 7;
+                int ht = 0;
+                if (p > 0) hs = 7 - p;
+                if (p > 0) ht = hs - 2;
+                double xo0 = xOffs[hs] - xOff;
+                double zo0 = zOffs[hs] - zOff;
+                for (int h = hs; h >= ht; --h) {
+                    final double xo1 = xo0;
+                    final double zo1 = zo0;
+                    if (p == 0) {
+                        xo0 += random.nextInt(11) - 5;
+                        zo0 += random.nextInt(11) - 5;
                     }
                     else {
-                        n5 += random2.nextInt(31) - 15;
-                        n6 += random2.nextInt(31) - 15;
+                        xo0 += random.nextInt(31) - 15;
+                        zo0 += random.nextInt(31) - 15;
                     }
-                    instance.begin(GL_TRIANGLE_STRIP);
-                    final float n9 = 0.5f;
-                    instance.color(0.9f * n9, 0.9f * n9, 1.0f * n9, 0.3f);
-                    double n10 = 0.1 + j * 0.2;
-                    if (k == 0) {
-                        n10 *= l * 0.1 + 1.0;
+
+                    t.begin(GL_TRIANGLE_STRIP);
+                    final float br = 0.5f;
+                    t.color(0.9f * br, 0.9f * br, 1.0f * br, 0.3f);
+
+                    double rr1 = 0.1 + r * 0.2;
+                    if (p == 0) rr1 *= h * 0.1 + 1.0;
+
+                    double rr2 = 0.1 + r * 0.2;
+                    if (p == 0) rr2 *= (h - 1) * 0.1 + 1.0;
+
+                    for (int i = 0; i < 5; ++i) {
+                        double xx1 = x + 0.5 - rr1;
+                        double zz1 = z + 0.5 - rr1;
+                        if (i == 1 || i == 2) xx1 += rr1 * 2.0;
+                        if (i == 2 || i == 3) zz1 += rr1 * 2.0;
+
+                        double xx2 = x + 0.5 - rr2;
+                        double zz2 = z + 0.5 - rr2;
+                        if (i == 1 || i == 2) xx2 += rr2 * 2.0;
+                        if (i == 2 || i == 3) zz2 += rr2 * 2.0;
+
+                        t.vertex(xx2 + xo0, y + h * 16, zz2 + zo0);
+                        t.vertex(xx1 + xo1, y + (h + 1) * 16, zz1 + zo1);
                     }
-                    double n11 = 0.1 + j * 0.2;
-                    if (k == 0) {
-                        n11 *= (l - 1) * 0.1 + 1.0;
-                    }
-                    for (int n12 = 0; n12 < 5; ++n12) {
-                        double n13 = x + 0.5 - n10;
-                        double n14 = z + 0.5 - n10;
-                        if (n12 == 1 || n12 == 2) {
-                            n13 += n10 * 2.0;
-                        }
-                        if (n12 == 2 || n12 == 3) {
-                            n14 += n10 * 2.0;
-                        }
-                        double n15 = x + 0.5 - n11;
-                        double n16 = z + 0.5 - n11;
-                        if (n12 == 1 || n12 == 2) {
-                            n15 += n11 * 2.0;
-                        }
-                        if (n12 == 2 || n12 == 3) {
-                            n16 += n11 * 2.0;
-                        }
-                        instance.vertex(n15 + n5, y + l * 16, n16 + n6);
-                        instance.vertex(n13 + n7, y + (l + 1) * 16, n14 + n8);
-                    }
-                    instance.end();
+                    t.end();
                 }
             }
         }
+
         glDisable(GL_BLEND);
         glEnable(GL_LIGHTING);
         glEnable(GL_TEXTURE_2D);

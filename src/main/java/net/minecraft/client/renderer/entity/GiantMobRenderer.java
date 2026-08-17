@@ -17,7 +17,7 @@ public class GiantMobRenderer extends MobRenderer<Giant>
         this.scale = scale;
     }
     
-    protected void scale(final Giant mob, final float a) {
+    protected void scale(final Giant giant, final float a) {
         GL11.glScalef(this.scale, this.scale, this.scale);
     }
 }

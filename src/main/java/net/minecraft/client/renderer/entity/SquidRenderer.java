@@ -14,24 +14,25 @@ public class SquidRenderer extends MobRenderer<Squid>
         super(model, shadow);
     }
     
-    public void render(final Squid entity, final double x, final double y, final double z, final float rot, final float a) {
-        super.render(entity, x, y, z, rot, a);
+    public void render(final Squid squid, final double x, final double y, final double z, final float rot, final float a) {
+        super.render(squid, x, y, z, rot, a);
     }
     
-    protected void setupRotations(final Squid mob, final float bob, final float bodyRot, final float a) {
-        final float n = mob.xBodyRotO + (mob.xBodyRot - mob.xBodyRotO) * a;
-        final float n2 = mob.zBodyRotO + (mob.zBodyRot - mob.zBodyRotO) * a;
+    protected void setupRotations(final Squid squid, final float bob, final float bodyRot, final float a) {
+        final float bodyXRot = squid.xBodyRotO + (squid.xBodyRot - squid.xBodyRotO) * a;
+        final float bodyZRot = squid.zBodyRotO + (squid.zBodyRot - squid.zBodyRotO) * a;
+
         GL11.glTranslatef(0.0f, 0.5f, 0.0f);
         GL11.glRotatef(180.0f - bodyRot, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(n, 1.0f, 0.0f, 0.0f);
-        GL11.glRotatef(n2, 0.0f, 1.0f, 0.0f);
+        GL11.glRotatef(bodyXRot, 1.0f, 0.0f, 0.0f);
+        GL11.glRotatef(bodyZRot, 0.0f, 1.0f, 0.0f);
         GL11.glTranslatef(0.0f, -1.2f, 0.0f);
     }
     
-    protected void scale(final Squid mob, final float a) {
+    protected void scale(final Squid squid, final float a) {
     }
     
-    protected float getBob(final Squid mob, final float a) {
-        return mob.oldTentacleAngle + (mob.tentacleAngle - mob.oldTentacleAngle) * a;
+    protected float getBob(final Squid squid, final float a) {
+        return squid.oldTentacleAngle + (squid.tentacleAngle - squid.oldTentacleAngle) * a;
     }
 }

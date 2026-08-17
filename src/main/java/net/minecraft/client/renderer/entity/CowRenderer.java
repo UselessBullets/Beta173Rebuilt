@@ -13,7 +13,7 @@ public class CowRenderer extends MobRenderer<Cow>
         super(model, shadow);
     }
     
-    public void render(final Cow entity, final double x, final double y, final double z, final float rot, final float a) {
-        super.render(entity, x, y, z, rot, a);
+    public void render(final Cow cow, final double x, final double y, final double z, final float rot, final float a) {
+        super.render(cow, x, y, z, rot, a);
     }
 }

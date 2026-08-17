@@ -22,11 +22,14 @@ import net.minecraft.world.entity.Entity;
 
 public class Minecart extends Entity implements Container
 {
-    private ItemInstance[] items;
-    public int damage;
-    public int hurtTime;
-    public int hurtDir;
-    private boolean flipped;
+    public static final int RIDEABLE = 0;
+    public static final int CHEST = 1;
+    public static final int FURNACE = 2;
+    private ItemInstance[] items = new ItemInstance[36];
+    public int damage = 0;
+    public int hurtTime = 0;
+    public int hurtDir = 1;
+    private boolean flipped = false;
     public int type;
     public int fuel;
     public double xPush;
@@ -44,11 +47,6 @@ public class Minecart extends Entity implements Container
     
     public Minecart(final Level level) {
         super(level);
-        this.items = new ItemInstance[36];
-        this.damage = 0;
-        this.hurtTime = 0;
-        this.hurtDir = 1;
-        this.flipped = false;
         this.blocksBuilding = true;
         this.setSize(0.98f, 0.7f);
         this.heightOffset = this.bbHeight / 2.0f;

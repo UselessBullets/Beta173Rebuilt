@@ -17,23 +17,19 @@ public class SpiderRenderer extends MobRenderer<Spider>
         this.setArmor(new SpiderModel());
     }
     
-    protected float getFlipDegrees(final Spider mob) {
+    protected float getFlipDegrees(final Spider spider) {
         return 180.0f;
     }
     
-    protected boolean prepareArmor(final Spider mob, final int layer, final float a) {
-        if (layer != 0) {
-            return false;
-        }
-        if (layer != 0) {
-            return false;
-        }
+    protected boolean prepareArmor(final Spider spider, final int layer, final float a) {
+        if (layer != 0) return false;
         this.bindTexture("/mob/spider_eyes.png");
-        final float n = (1.0f - mob.getBrightness(1.0f)) * 0.5f;
+
+        final float br = (1.0f - spider.getBrightness(1.0f)) * 0.5f;
         GL11.glEnable(GL_BLEND);
         GL11.glDisable(GL_ALPHA_TEST);
         GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, n);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, br);
         return true;
     }
 }

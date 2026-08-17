@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.TileRenderer;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Tesselator;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.Item;
@@ -22,32 +21,33 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class PlayerRenderer extends MobRenderer<Player>
 {
-    private HumanoidModel humanoidModel;
-    private HumanoidModel armorParts1;
-    private HumanoidModel armorParts2;
-    private static final String[] MATERIAL_NAMES;
+    private final HumanoidModel humanoidModel = (HumanoidModel)this.model;
+    private final HumanoidModel armorParts1 = new HumanoidModel(1.0f);
+    private final HumanoidModel armorParts2 = new HumanoidModel(0.5f);
+    private static final String[] MATERIAL_NAMES = new String[] { "cloth", "chain", "iron", "diamond", "gold" };
     
     public PlayerRenderer() {
         super(new HumanoidModel(0.0f), 0.5f);
-        this.humanoidModel = (HumanoidModel)this.model;
-        this.armorParts1 = new HumanoidModel(1.0f);
-        this.armorParts2 = new HumanoidModel(0.5f);
     }
     
-    protected boolean prepareArmor(final Player mob, final int layer, final float a) {
-        final ItemInstance armor = mob.inventory.getArmor(3 - layer);
-        if (armor != null) {
-            final Item item = armor.getItem();
+    protected boolean prepareArmor(final Player player, final int layer, final float a) {
+        final ItemInstance itemInstance = player.inventory.getArmor(3 - layer);
+        if (itemInstance != null) {
+            final Item item = itemInstance.getItem();
             if (item instanceof ArmorItem) {
-                this.bindTexture("/armor/" + PlayerRenderer.MATERIAL_NAMES[((ArmorItem)item).materialIcon] + "_" + ((layer == 2) ? 2 : 1) + ".png");
+                ArmorItem armorItem = (ArmorItem)item;
+                this.bindTexture("/armor/" + PlayerRenderer.MATERIAL_NAMES[armorItem.materialIcon] + "_" + ((layer == 2) ? 2 : 1) + ".png");
+
                 final HumanoidModel armor2 = (layer == 2) ? this.armorParts2 : this.armorParts1;
-                armor2.head.visible = (layer == 0);
-                armor2.hair.visible = (layer == 0);
-                armor2.body.visible = (layer == 1 || layer == 2);
-                armor2.arm0.visible = (layer == 1);
-                armor2.arm1.visible = (layer == 1);
-                armor2.leg0.visible = (layer == 2 || layer == 3);
-                armor2.leg1.visible = (layer == 2 || layer == 3);
+
+                armor2.head.visible = layer == 0;
+                armor2.hair.visible = layer == 0;
+                armor2.body.visible = layer == 1 || layer == 2;
+                armor2.arm0.visible = layer == 1;
+                armor2.arm1.visible = layer == 1;
+                armor2.leg0.visible = layer == 2 || layer == 3;
+                armor2.leg1.visible = layer == 2 || layer == 3;
+
                 this.setArmor(armor2);
                 return true;
             }
@@ -55,229 +55,224 @@ public class PlayerRenderer extends MobRenderer<Player>
         return false;
     }
     
-    public void render(final Player entity, final double x, final double y, final double z, final float rot, final float a) {
-        final ItemInstance selected = entity.inventory.getSelected();
-        final HumanoidModel armorParts1 = this.armorParts1;
-        final HumanoidModel armorParts2 = this.armorParts2;
-        final HumanoidModel humanoidModel = this.humanoidModel;
-        final boolean holdingRightHand;
-        final boolean b = holdingRightHand = (((selected != null) ? 1 : 0) != 0);
-        humanoidModel.holdingRightHand = b;
-        armorParts2.holdingRightHand = b;
-        armorParts1.holdingRightHand = holdingRightHand;
-        final HumanoidModel armorParts3 = this.armorParts1;
-        final HumanoidModel armorParts4 = this.armorParts2;
-        final HumanoidModel humanoidModel2 = this.humanoidModel;
-        final boolean sneaking = entity.isSneaking();
-        humanoidModel2.sneaking = sneaking;
-        armorParts4.sneaking = sneaking;
-        armorParts3.sneaking = sneaking;
-        double y2 = y - entity.heightOffset;
-        if (entity.isSneaking() && !(entity instanceof LocalPlayer)) {
-            y2 -= 0.125;
+    public void render(final Player player, final double x, final double y, final double z, final float rot, final float a) {
+        final ItemInstance item = player.inventory.getSelected();
+
+        this.armorParts1.holdingRightHand = this.armorParts2.holdingRightHand = this.humanoidModel.holdingRightHand = (((item != null) ? 1 : 0) != 0);
+        this.armorParts1.sneaking = this.armorParts2.sneaking = this.humanoidModel.sneaking = player.isSneaking();
+
+        double yp = y - player.heightOffset;
+        if (player.isSneaking() && !(player instanceof LocalPlayer)) {
+            yp -= 2 / 16.0f;
         }
-        super.render(entity, x, y2, z, rot, a);
-        final HumanoidModel armorParts5 = this.armorParts1;
-        final HumanoidModel armorParts6 = this.armorParts2;
-        final HumanoidModel humanoidModel3 = this.humanoidModel;
-        final boolean sneaking2 = false;
-        humanoidModel3.sneaking = sneaking2;
-        armorParts6.sneaking = sneaking2;
-        armorParts5.sneaking = sneaking2;
-        final HumanoidModel armorParts7 = this.armorParts1;
-        final HumanoidModel armorParts8 = this.armorParts2;
-        final HumanoidModel humanoidModel4 = this.humanoidModel;
-        final boolean holdingRightHand2 = false;
-        humanoidModel4.holdingRightHand = holdingRightHand2;
-        armorParts8.holdingRightHand = holdingRightHand2;
-        armorParts7.holdingRightHand = holdingRightHand2;
+
+        super.render(player, x, yp, z, rot, a);
+
+        this.armorParts1.sneaking = this.armorParts2.sneaking = this.humanoidModel.sneaking = false;
+        this.armorParts1.holdingRightHand = this.armorParts2.holdingRightHand = this.humanoidModel.holdingRightHand = false;
     }
     
-    protected void renderName(final Player mob, final double x, final double y, final double z) {
-        if (Minecraft.renderNames() && mob != this.entityRenderDispatcher.player) {
-            final float n = 0.016666668f * 1.6f;
-            if (mob.distanceTo(this.entityRenderDispatcher.player) < (mob.isSneaking() ? 32.0f : 64.0f)) {
-                final String name = mob.name;
-                if (!mob.isSneaking()) {
-                    if (mob.isSleeping()) {
-                        this.renderNameTag(mob, name, x, y - 1.5, z, 64);
+    protected void renderName(final Player player, final double x, final double y, final double z) {
+        if (Minecraft.renderNames() && player != this.entityRenderDispatcher.player) {
+            float size = 1.6f;
+            float s = 1 / 60.0f * size;
+            double dist = player.distanceTo(this.entityRenderDispatcher.player);
+
+            float maxDist = player.isSneaking() ? 32.0f : 64.0f;
+
+            if (dist < maxDist) {
+                final String msg = player.name;
+
+                if (player.isSneaking()) {
+                    final Font font = this.getFont();
+                    glPushMatrix();
+                    glTranslatef((float)x + 0.0f, (float)y + 2.3f, (float)z);
+                    glNormal3f(0.0f, 1.0f, 0.0f);
+
+                    glRotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+                    glRotatef(this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+
+                    glScalef(-s, -s, s);
+                    glDisable(GL_LIGHTING);
+
+                    glTranslatef(0.0f, 0.25f / s, 0.0f);
+                    glDepthMask(false);
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                    final Tesselator t = Tesselator.instance;
+
+                    glDisable(GL_TEXTURE_2D);
+                    t.begin();
+                    final int w = font.width(msg) / 2;
+                    t.color(0.0f, 0.0f, 0.0f, 0.25f);
+                    t.vertex(-w - 1, -1.0, 0.0);
+                    t.vertex(-w - 1, +8.0, 0.0);
+                    t.vertex(+w + 1, +8.0, 0.0);
+                    t.vertex(+w + 1, -1.0, 0.0);
+                    t.end();
+                    glEnable(GL_TEXTURE_2D);
+                    glDepthMask(true);
+                    font.draw(msg, -font.width(msg) / 2, 0, 0x20ffffff);
+                    glEnable(GL_LIGHTING);
+                    glDisable(GL_BLEND);
+                    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                    glPopMatrix();
+                } else {
+                    if (player.isSleeping()) {
+                        this.renderNameTag(player, msg, x, y - 1.5, z, 64);
                     }
                     else {
-                        this.renderNameTag(mob, name, x, y, z, 64);
+                        this.renderNameTag(player, msg, x, y, z, 64);
                     }
                 }
-                else {
-                    final Font font = this.getFont();
-                    GL11.glPushMatrix();
-                    GL11.glTranslatef((float)x + 0.0f, (float)y + 2.3f, (float)z);
-                    GL11.glNormal3f(0.0f, 1.0f, 0.0f);
-                    GL11.glRotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-                    GL11.glRotatef(this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
-                    GL11.glScalef(-n, -n, n);
-                    GL11.glDisable(GL_LIGHTING);
-                    GL11.glTranslatef(0.0f, 0.25f / n, 0.0f);
-                    GL11.glDepthMask(false);
-                    GL11.glEnable(GL_BLEND);
-                    GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                    final Tesselator instance = Tesselator.instance;
-                    GL11.glDisable(GL_TEXTURE_2D);
-                    instance.begin();
-                    final int n2 = font.width(name) / 2;
-                    instance.color(0.0f, 0.0f, 0.0f, 0.25f);
-                    instance.vertex(-n2 - 1, -1.0, 0.0);
-                    instance.vertex(-n2 - 1, 8.0, 0.0);
-                    instance.vertex(n2 + 1, 8.0, 0.0);
-                    instance.vertex(n2 + 1, -1.0, 0.0);
-                    instance.end();
-                    GL11.glEnable(GL_TEXTURE_2D);
-                    GL11.glDepthMask(true);
-                    font.draw(name, -font.width(name) / 2, 0, 0x20ffffff);
-                    GL11.glEnable(GL_LIGHTING);
-                    GL11.glDisable(GL_BLEND);
-                    GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-                    GL11.glPopMatrix();
-                }
             }
         }
     }
 
     @Override
-    protected void additionalRendering(final Player mob, final float a) {
-        final ItemInstance armor = mob.inventory.getArmor(3);
-        if (armor != null && armor.getItem().id < 256) {
-            GL11.glPushMatrix();
-            this.humanoidModel.head.translateTo(0.0625f);
-            if (TileRenderer.canRender(Tile.tiles[armor.id].getRenderShape())) {
-                final float n = 0.625f;
-                GL11.glTranslatef(0.0f, -0.25f, 0.0f);
-                GL11.glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-                GL11.glScalef(n, -n, n);
-            }
-            this.entityRenderDispatcher.itemInHandRenderer.renderItem(mob, armor);
-            GL11.glPopMatrix();
-        }
-        if (mob.name.equals("deadmau5") && this.bindTexture(mob.customTextureUrl, null)) {
-            for (int i = 0; i < 2; ++i) {
-                final float n2 = mob.yRotO + (mob.yRot - mob.yRotO) * a - (mob.yBodyRotO + (mob.yBodyRot - mob.yBodyRotO) * a);
-                final float n3 = mob.xRotO + (mob.xRot - mob.xRotO) * a;
-                GL11.glPushMatrix();
-                GL11.glRotatef(n2, 0.0f, 1.0f, 0.0f);
-                GL11.glRotatef(n3, 1.0f, 0.0f, 0.0f);
-                GL11.glTranslatef(0.375f * (i * 2 - 1), 0.0f, 0.0f);
-                GL11.glTranslatef(0.0f, -0.375f, 0.0f);
-                GL11.glRotatef(-n3, 1.0f, 0.0f, 0.0f);
-                GL11.glRotatef(-n2, 0.0f, 1.0f, 0.0f);
-                final float n4 = 1.3333334f;
-                GL11.glScalef(n4, n4, n4);
-                this.humanoidModel.renderEars(0.0625f);
-                GL11.glPopMatrix();
-            }
-        }
-        if (this.bindTexture(mob.cloakTexture, null)) {
-            GL11.glPushMatrix();
-            GL11.glTranslatef(0.0f, 0.0f, 0.125f);
-            final double n5 = mob.xCloakO + (mob.xCloak - mob.xCloakO) * a - (mob.xo + (mob.x - mob.xo) * a);
-            final double n6 = mob.yCloakO + (mob.yCloak - mob.yCloakO) * a - (mob.yo + (mob.y - mob.yo) * a);
-            final double n7 = mob.zCloakO + (mob.zCloak - mob.zCloakO) * a - (mob.zo + (mob.z - mob.zo) * a);
-            final float n8 = mob.yBodyRotO + (mob.yBodyRot - mob.yBodyRotO) * a;
-            final double n9 = Mth.sin(n8 * Mth.DEGRAD);
-            final double n10 = -Mth.cos(n8 * Mth.DEGRAD);
-            float n11 = (float)n6 * 10.0f;
-            if (n11 < -6.0f) {
-                n11 = -6.0f;
-            }
-            if (n11 > 32.0f) {
-                n11 = 32.0f;
-            }
-            float n12 = (float)(n5 * n9 + n7 * n10) * 100.0f;
-            final float n13 = (float)(n5 * n10 - n7 * n9) * 100.0f;
-            if (n12 < 0.0f) {
-                n12 = 0.0f;
-            }
-            float n14 = n11 + Mth.sin((mob.walkDistO + (mob.walkDist - mob.walkDistO) * a) * 6.0f) * 32.0f * (mob.oBob + (mob.bob - mob.oBob) * a);
-            if (mob.isSneaking()) {
-                n14 += 25.0f;
-            }
-            GL11.glRotatef(6.0f + n12 / 2.0f + n14, 1.0f, 0.0f, 0.0f);
-            GL11.glRotatef(n13 / 2.0f, 0.0f, 0.0f, 1.0f);
-            GL11.glRotatef(-n13 / 2.0f, 0.0f, 1.0f, 0.0f);
-            GL11.glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-            this.humanoidModel.renderCloak(0.0625f);
-            GL11.glPopMatrix();
-        }
-        ItemInstance selected = mob.inventory.getSelected();
-        if (selected != null) {
-            GL11.glPushMatrix();
-            this.humanoidModel.arm0.translateTo(0.0625f);
-            GL11.glTranslatef(-0.0625f, 0.4375f, 0.0625f);
-            if (mob.fishing != null) {
-                selected = new ItemInstance(Item.stick);
-            }
-            if (selected.id < 256 && TileRenderer.canRender(Tile.tiles[selected.id].getRenderShape())) {
-                final float n15 = 0.5f;
-                GL11.glTranslatef(0.0f, 0.1875f, -0.3125f);
-                final float n16 = n15 * 0.75f;
-                GL11.glRotatef(20.0f, 1.0f, 0.0f, 0.0f);
-                GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
-                GL11.glScalef(n16, -n16, n16);
-            }
-            else if (Item.items[selected.id].isHandEquipped()) {
-                final float n17 = 0.625f;
-                if (Item.items[selected.id].isMirroredArt()) {
-                    GL11.glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
-                    GL11.glTranslatef(0.0f, -0.125f, 0.0f);
+    protected void additionalRendering(final Player player, final float a) {
+        final ItemInstance headGear = player.inventory.getArmor(3);
+        if (headGear != null) {
+            if (headGear.getItem().id < Tile.TILE_NUM_COUNT) {
+                glPushMatrix();
+                this.humanoidModel.head.translateTo(1 / 16.0f);
+                if (TileRenderer.canRender(Tile.tiles[headGear.id].getRenderShape())) {
+                    final float s = 10 / 16.0f;
+                    glTranslatef(0 / 16.0f, -4 / 16.0f, 0 / 16.0f);
+                    glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+                    glScalef(s, -s, s);
                 }
-                GL11.glTranslatef(0.0f, 0.1875f, 0.0f);
-                GL11.glScalef(n17, -n17, n17);
-                GL11.glRotatef(-100.0f, 1.0f, 0.0f, 0.0f);
-                GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
+                this.entityRenderDispatcher.itemInHandRenderer.renderItem(player, headGear);
+                glPopMatrix();
+            }
+        }
+        if (player.name.equals("deadmau5") && this.bindTexture(player.customTextureUrl, null)) {
+            for (int i = 0; i < 2; ++i) {
+                final float yr = player.yRotO + (player.yRot - player.yRotO) * a - (player.yBodyRotO + (player.yBodyRot - player.yBodyRotO) * a);
+                final float xr = player.xRotO + (player.xRot - player.xRotO) * a;
+                glPushMatrix();
+                glRotatef(yr, 0.0f, 1.0f, 0.0f);
+                glRotatef(xr, 1.0f, 0.0f, 0.0f);
+                glTranslatef((6 / 16.0f) * (i * 2 - 1), 0.0f, 0.0f);
+                glTranslatef(0.0f, -6 / 16.0f, 0.0f);
+                glRotatef(-xr, 1.0f, 0.0f, 0.0f);
+                glRotatef(-yr, 0.0f, 1.0f, 0.0f);
+
+                final float s = 8 / 6.0f;
+                glScalef(s, s, s);
+                this.humanoidModel.renderEars(1 / 16.0f);
+                glPopMatrix();
+            }
+        }
+
+        if (this.bindTexture(player.cloakTexture, null)) {
+            glPushMatrix();
+            glTranslatef(0.0f, 0.0f, 2 / 16.0f);
+
+            final double xd = player.xCloakO + (player.xCloak - player.xCloakO) * a - (player.xo + (player.x - player.xo) * a);
+            final double yd = player.yCloakO + (player.yCloak - player.yCloakO) * a - (player.yo + (player.y - player.yo) * a);
+            final double zd = player.zCloakO + (player.zCloak - player.zCloakO) * a - (player.zo + (player.z - player.zo) * a);
+
+            final float yr = player.yBodyRotO + (player.yBodyRot - player.yBodyRotO) * a;
+
+            final double xa = Mth.sin(yr * Mth.DEGRAD);
+            final double za = -Mth.cos(yr * Mth.DEGRAD);
+
+            float flap = (float)yd * 10.0f;
+            if (flap < -6.0f) flap = -6.0f;
+            if (flap > 32.0f) flap = 32.0f;
+            float lean = (float)(xd * xa + zd * za) * 100.0f;
+            final float lean2 = (float)(xd * za - zd * xa) * 100.0f;
+            if (lean < 0.0f) lean = 0.0f;
+
+            float pow = (player.oBob + (player.bob - player.oBob) * a);
+
+            flap += Mth.sin((player.walkDistO + (player.walkDist - player.walkDistO) * a) * 6.0f) * 32.0f * pow;
+            if (player.isSneaking()) flap += 25.0f;
+
+            float xRot = 6.0f + lean / 2.0f + flap;
+
+            glRotatef(xRot, 1.0f, 0.0f, 0.0f);
+            glRotatef(lean2 / 2.0f, 0.0f, 0.0f, 1.0f);
+            glRotatef(-lean2 / 2.0f, 0.0f, 1.0f, 0.0f);
+            glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+            this.humanoidModel.renderCloak(1 / 16.0f);
+            glPopMatrix();
+        }
+
+        ItemInstance item = player.inventory.getSelected();
+        if (item != null) {
+            glPushMatrix();
+            this.humanoidModel.arm0.translateTo(1 / 16.0f);
+            glTranslatef(-1 / 16.0f, 7 / 16.0f, 1 / 16.0f);
+
+            if (player.fishing != null) {
+                item = new ItemInstance(Item.stick);
+            }
+
+            if (item.id < Tile.TILE_NUM_COUNT && TileRenderer.canRender(Tile.tiles[item.id].getRenderShape())) {
+                float s = 8 / 16.0f;
+                glTranslatef(0 / 16.0f, 3 / 16.0f, -5 / 16.0f);
+                s *= 0.75f;
+                glRotatef(20.0f, 1.0f, 0.0f, 0.0f);
+                glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
+                glScalef(s, -s, s);
+            }
+            else if (Item.items[item.id].isHandEquipped()) {
+                final float s = 10 / 16.0f;
+                if (Item.items[item.id].isMirroredArt()) {
+                    glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
+                    glTranslatef(0.0f, -2 / 16.0f, 0.0f);
+                }
+                glTranslatef(0.0f, 3 / 16.0f, 0.0f);
+                glScalef(s, -s, s);
+                glRotatef(-100.0f, 1.0f, 0.0f, 0.0f);
+                glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             }
             else {
-                final float n18 = 0.375f;
-                GL11.glTranslatef(0.25f, 0.1875f, -0.1875f);
-                GL11.glScalef(n18, n18, n18);
-                GL11.glRotatef(60.0f, 0.0f, 0.0f, 1.0f);
-                GL11.glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-                GL11.glRotatef(20.0f, 0.0f, 0.0f, 1.0f);
+                final float s = 6 / 16.0f;
+                glTranslatef(4 / 16.0f, 3 / 16.0f, -3 / 16.0f);
+                glScalef(s, s, s);
+                glRotatef(60.0f, 0.0f, 0.0f, 1.0f);
+                glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+                glRotatef(20.0f, 0.0f, 0.0f, 1.0f);
             }
-            this.entityRenderDispatcher.itemInHandRenderer.renderItem(mob, selected);
-            GL11.glPopMatrix();
+
+            this.entityRenderDispatcher.itemInHandRenderer.renderItem(player, item);
+            glPopMatrix();
         }
     }
 
     @Override
-    protected void scale(final Player mob, final float a) {
-        final float n = 0.9375f;
-        GL11.glScalef(n, n, n);
+    protected void scale(final Player player, final float a) {
+        final float s = 15 / 16.0f;
+        glScalef(s, s, s);
     }
     
     public void renderHand() {
         this.humanoidModel.attackTime = 0.0f;
-        this.humanoidModel.setupAnim(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f);
-        this.humanoidModel.arm0.render(0.0625f);
+        this.humanoidModel.setupAnim(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1 / 16.0f);
+        this.humanoidModel.arm0.render(1 / 16.0f);
     }
     
-    protected void setupPosition(final Player mob, final double x, final double y, final double z) {
-        if (mob.isAlive() && mob.isSleeping()) {
-            super.setupPosition(mob, x + mob.bedOffsetX, y + mob.bedOffsetY, z + mob.bedOffsetZ);
+    protected void setupPosition(final Player player, final double x, final double y, final double z) {
+        if (player.isAlive() && player.isSleeping()) {
+            super.setupPosition(player, x + player.bedOffsetX, y + player.bedOffsetY, z + player.bedOffsetZ);
         }
         else {
-            super.setupPosition(mob, x, y, z);
+            super.setupPosition(player, x, y, z);
         }
     }
     
-    protected void setupRotations(final Player mob, final float bob, final float bodyRot, final float a) {
-        if (mob.isAlive() && mob.isSleeping()) {
-            GL11.glRotatef(mob.getSleepRotation(), 0.0f, 1.0f, 0.0f);
-            GL11.glRotatef(this.getFlipDegrees(mob), 0.0f, 0.0f, 1.0f);
-            GL11.glRotatef(270.0f, 0.0f, 1.0f, 0.0f);
+    protected void setupRotations(final Player player, final float bob, final float bodyRot, final float a) {
+        if (player.isAlive() && player.isSleeping()) {
+            glRotatef(player.getSleepRotation(), 0.0f, 1.0f, 0.0f);
+            glRotatef(this.getFlipDegrees(player), 0.0f, 0.0f, 1.0f);
+            glRotatef(270.0f, 0.0f, 1.0f, 0.0f);
         }
         else {
-            super.setupRotations(mob, bob, bodyRot, a);
+            super.setupRotations(player, bob, bodyRot, a);
         }
     }
-    
-    static {
-        MATERIAL_NAMES = new String[] { "cloth", "chain", "iron", "diamond", "gold" };
-    }
+
 }

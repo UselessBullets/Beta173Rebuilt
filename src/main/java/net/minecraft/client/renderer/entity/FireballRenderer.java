@@ -13,7 +13,7 @@ import static org.lwjgl.opengl.GL12.*;
 
 public class FireballRenderer extends EntityRenderer<Fireball>
 {
-    public void render(final Fireball entity, final double x, final double y, final double z, final float rot, final float a) {
+    public void render(final Fireball fireball, final double x, final double y, final double z, final float rot, final float a) {
         glPushMatrix();
 
         glTranslatef((float)x, (float)y, (float)z);

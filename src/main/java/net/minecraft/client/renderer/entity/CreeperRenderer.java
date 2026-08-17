@@ -20,8 +20,8 @@ public class CreeperRenderer extends MobRenderer<Creeper>
         super(new CreeperModel(), 0.5f);
     }
     
-    protected void scale(final Creeper mob, final float a) {
-        float g = mob.getSwelling(a);
+    protected void scale(final Creeper creeper, final float a) {
+        float g = creeper.getSwelling(a);
 
         final float wobble = 1.0f + Mth.sin(g * 100.0f) * g * 0.01f;
         if (g < 0.0f) g = 0.0f;
@@ -33,8 +33,8 @@ public class CreeperRenderer extends MobRenderer<Creeper>
         GL11.glScalef(s, hs, s);
     }
     
-    protected int getOverlayColor(final Creeper mob, final float br, final float a) {
-        final float step = mob.getSwelling(a);
+    protected int getOverlayColor(final Creeper creeper, final float br, final float a) {
+        final float step = creeper.getSwelling(a);
 
         if ((int)(step * 10.0f) % 2 == 0) return 0;
 
@@ -49,10 +49,10 @@ public class CreeperRenderer extends MobRenderer<Creeper>
         return (_a << 24) | (r << 16) | (g << 8) | b;
     }
     
-    protected boolean prepareArmor(final Creeper mob, final int layer, final float a) {
-        if (mob.isPowered()) {
+    protected boolean prepareArmor(final Creeper creeper, final int layer, final float a) {
+        if (creeper.isPowered()) {
             if (layer == 1) {
-                final float time = mob.tickCount + a;
+                final float time = creeper.tickCount + a;
                 this.bindTexture("/armor/power.png");
                 GL11.glMatrixMode(GL_TEXTURE);
                 GL11.glLoadIdentity();

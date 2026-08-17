@@ -13,14 +13,14 @@ public class WolfRenderer extends MobRenderer<Wolf>
         super(model, shadow);
     }
     
-    public void render(final Wolf entity, final double x, final double y, final double z, final float rot, final float a) {
-        super.render(entity, x, y, z, rot, a);
+    public void render(final Wolf wolf, final double x, final double y, final double z, final float rot, final float a) {
+        super.render(wolf, x, y, z, rot, a);
     }
     
-    protected float getBob(final Wolf mob, final float a) {
-        return mob.getTailAngle();
+    protected float getBob(final Wolf wolf, final float a) {
+        return wolf.getTailAngle();
     }
     
-    protected void scale(final Wolf mob, final float a) {
+    protected void scale(final Wolf wolf, final float a) {
     }
 }

@@ -14,8 +14,8 @@ public class PigRenderer extends MobRenderer<Pig>
         this.setArmor(armor);
     }
     
-    protected boolean prepareArmor(final Pig mob, final int layer, final float a) {
+    protected boolean prepareArmor(final Pig pig, final int layer, final float a) {
         this.bindTexture("/mob/saddle.png");
-        return layer == 0 && mob.hasSaddle();
+        return layer == 0 && pig.hasSaddle();
     }
 }

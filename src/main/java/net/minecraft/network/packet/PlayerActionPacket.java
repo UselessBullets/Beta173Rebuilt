@@ -10,6 +10,12 @@ import java.io.IOException;
 
 public class PlayerActionPacket extends Packet
 {
+    public static final int START_DESTROY_BLOCK = 0;
+    public static final int ABORT_DESTROY_BLOCK = 1;
+    public static final int STOP_DESTROY_BLOCK = 2;
+    public static final int GET_UPDATED_BLOCK = 3;
+    public static final int DROP_ITEM = 4;
+
     public int x;
     public int y;
     public int z;

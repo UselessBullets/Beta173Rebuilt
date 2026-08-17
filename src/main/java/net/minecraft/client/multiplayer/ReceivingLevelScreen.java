@@ -12,10 +12,9 @@ import net.minecraft.client.gui.Screen;
 public class ReceivingLevelScreen extends Screen
 {
     private ClientConnection connection;
-    private int tickCount;
+    private int tickCount = 0;
     
     public ReceivingLevelScreen(final ClientConnection connection) {
-        this.tickCount = 0;
         this.connection = connection;
     }
     
@@ -46,7 +45,11 @@ public class ReceivingLevelScreen extends Screen
     @Override
     public void render(final int xm, final int ym, final float partialTick) {
         this.renderDirtBackground(0);
-        this.drawCenteredString(this.font, Language.getInstance().getElement("multiplayer.downloadingTerrain"), this.width / 2, this.height / 2 - 50, 0xffffff);
+
+        Language language = Language.getInstance();
+
+        this.drawCenteredString(this.font, language.getElement("multiplayer.downloadingTerrain"), this.width / 2, this.height / 2 - 50, 0xffffff);
+        
         super.render(xm, ym, partialTick);
     }
 }

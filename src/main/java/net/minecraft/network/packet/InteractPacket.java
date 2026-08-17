@@ -10,6 +10,9 @@ import java.io.IOException;
 
 public class InteractPacket extends Packet
 {
+    public static final int INTERACT = 0;
+    public static final int ATTACK = 1;
+
     public int source;
     public int target;
     public int action;

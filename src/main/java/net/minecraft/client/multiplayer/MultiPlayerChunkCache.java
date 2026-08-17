@@ -44,20 +44,25 @@ public class MultiPlayerChunkCache implements ChunkSource
     }
     
     public LevelChunk create(final int x, final int z) {
-        final ChunkPos chunkPos = new ChunkPos(x, z);
-        final LevelChunk levelChunk = new LevelChunk(this.level, new byte[32768], x, z);
-        Arrays.fill(levelChunk.skyLight.data, (byte)(-1));
-        this.loadedChunks.put(chunkPos, levelChunk);
-        levelChunk.loaded = true;
-        return levelChunk;
+        final ChunkPos pos = new ChunkPos(x, z);
+
+        final LevelChunk chunk = new LevelChunk(this.level, new byte[32768], x, z);
+        Arrays.fill(chunk.skyLight.data, (byte)255);
+
+        this.loadedChunks.put(pos, chunk);
+        chunk.loaded = true;
+        return chunk;
     }
     
     public LevelChunk getChunk(final int x, final int z) {
-        final LevelChunk levelChunk = this.loadedChunks.get(new ChunkPos(x, z));
-        if (levelChunk == null) {
+        ChunkPos pos = new ChunkPos(x, z);
+
+        final LevelChunk chunk = this.loadedChunks.get(pos);
+        if (chunk == null) {
             return this.empty;
+        } else {
+            return chunk;
         }
-        return levelChunk;
     }
     
     public boolean save(final boolean force, final ProgressListener progressListener) {

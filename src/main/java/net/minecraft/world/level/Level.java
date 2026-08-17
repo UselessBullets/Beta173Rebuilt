@@ -42,6 +42,9 @@ import java.util.List;
 
 public class Level implements LevelSource
 {
+    public static final int minBuildHeight = 0;		// Useless - In LCE leak and are convient
+    public static final int maxBuildHeight = 128;   // Useless - In LCE leak and are convient
+
     public boolean instaTick;
     private List<LightUpdate> lightUpdates;
     public List<Entity> entities;

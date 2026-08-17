@@ -52,28 +52,29 @@ public class MultiPlayerGameMode extends GameMode
     
     @Override
     public boolean destroyBlock(final int x, final int y, final int z, final int face) {
-        final int tile = this.minecraft.level.getTile(x, y, z);
-        final boolean destroyBlock = super.destroyBlock(x, y, z, face);
-        final ItemInstance selectedItem = this.minecraft.player.getSelectedItem();
-        if (selectedItem != null) {
-            selectedItem.mineBlock(tile, x, y, z, this.minecraft.player);
-            if (selectedItem.count == 0) {
-                selectedItem.snap(this.minecraft.player);
+        final int oldTile = this.minecraft.level.getTile(x, y, z);
+
+        final boolean changed = super.destroyBlock(x, y, z, face);
+
+        final ItemInstance item = this.minecraft.player.getSelectedItem();
+        if (item != null) {
+            item.mineBlock(oldTile, x, y, z, this.minecraft.player);
+            if (item.count == 0) {
+                item.snap(this.minecraft.player);
                 this.minecraft.player.removeSelectedItem();
             }
         }
-        return destroyBlock;
+
+        return changed;
     }
     
     @Override
     public void startDestroyBlock(final int x, final int y, final int z, final int face) {
         if (!this.isDestroying || x != this.xDestroyBlock || y != this.yDestroyBlock || z != this.zDestroyBlock) {
-            this.connection.send(new PlayerActionPacket(0, x, y, z, face));
-            final int tile = this.minecraft.level.getTile(x, y, z);
-            if (tile > 0 && this.destroyProgress == 0.0f) {
-                Tile.tiles[tile].attack(this.minecraft.level, x, y, z, this.minecraft.player);
-            }
-            if (tile > 0 && Tile.tiles[tile].getDestroyProgress(this.minecraft.player) >= 1.0f) {
+            this.connection.send(new PlayerActionPacket(PlayerActionPacket.START_DESTROY_BLOCK, x, y, z, face));
+            final int t = this.minecraft.level.getTile(x, y, z);
+            if (t > 0 && this.destroyProgress == 0.0f) Tile.tiles[t].attack(this.minecraft.level, x, y, z, this.minecraft.player);
+            if (t > 0 && Tile.tiles[t].getDestroyProgress(this.minecraft.player) >= 1.0f) {
                 this.destroyBlock(x, y, z, face);
             }
             else {
@@ -96,29 +97,34 @@ public class MultiPlayerGameMode extends GameMode
     
     @Override
     public void continueDestroyBlock(final int x, final int y, final int z, final int face) {
-        if (!this.isDestroying) {
-            return;
-        }
+        if (!this.isDestroying) return;
         this.ensureHasSentCarriedItem();
+
         if (this.destroyDelay > 0) {
             --this.destroyDelay;
             return;
         }
+
         if (x == this.xDestroyBlock && y == this.yDestroyBlock && z == this.zDestroyBlock) {
-            final int tile = this.minecraft.level.getTile(x, y, z);
-            if (tile == 0) {
+            final int t = this.minecraft.level.getTile(x, y, z);
+            if (t == 0) {
                 this.isDestroying = false;
                 return;
             }
-            final Tile tile2 = Tile.tiles[tile];
-            this.destroyProgress += tile2.getDestroyProgress(this.minecraft.player);
-            if (this.destroyTicks % 4.0f == 0.0f && tile2 != null) {
-                this.minecraft.soundEngine.play(tile2.soundType.getStepSound(), x + 0.5f, y + 0.5f, z + 0.5f, (tile2.soundType.getVolume() + 1.0f) / 8.0f, tile2.soundType.getPitch() * 0.5f);
+            final Tile tile = Tile.tiles[t];
+
+            this.destroyProgress += tile.getDestroyProgress(this.minecraft.player);
+            if (this.destroyTicks % 4.0f == 0.0f) {
+                if (tile != null) {
+                    this.minecraft.soundEngine.play(tile.soundType.getStepSound(), x + 0.5f, y + 0.5f, z + 0.5f, (tile.soundType.getVolume() + 1.0f) / 8.0f, tile.soundType.getPitch() * 0.5f);
+                }
             }
+
             ++this.destroyTicks;
-            if (this.destroyProgress >= 1.0f) {
+
+            if (this.destroyProgress >= 1) {
                 this.isDestroying = false;
-                this.connection.send(new PlayerActionPacket(2, x, y, z, face));
+                this.connection.send(new PlayerActionPacket(PlayerActionPacket.STOP_DESTROY_BLOCK, x, y, z, face));
                 this.destroyBlock(x, y, z, face);
                 this.destroyProgress = 0.0f;
                 this.oDestroyProgress = 0.0f;
@@ -138,9 +144,9 @@ public class MultiPlayerGameMode extends GameMode
             this.minecraft.levelRenderer.destroyProgress = 0.0f;
         }
         else {
-            final float n = this.oDestroyProgress + (this.destroyProgress - this.oDestroyProgress) * partialTick;
-            this.minecraft.gui.progress = n;
-            this.minecraft.levelRenderer.destroyProgress = n;
+            final float dp = this.oDestroyProgress + (this.destroyProgress - this.oDestroyProgress) * partialTick;
+            this.minecraft.gui.progress = dp;
+            this.minecraft.levelRenderer.destroyProgress = dp;
         }
     }
     
@@ -162,9 +168,9 @@ public class MultiPlayerGameMode extends GameMode
     }
     
     private void ensureHasSentCarriedItem() {
-        final int selected = this.minecraft.player.inventory.selected;
-        if (selected != this.carriedItem) {
-            this.carriedItem = selected;
+        final int newItem = this.minecraft.player.inventory.selected;
+        if (newItem != this.carriedItem) {
+            this.carriedItem = newItem;
             this.connection.send(new SetCarriedItemPacket(this.carriedItem));
         }
     }
@@ -191,29 +197,30 @@ public class MultiPlayerGameMode extends GameMode
     @Override
     public void attack(final Player player, final Entity entity) {
         this.ensureHasSentCarriedItem();
-        this.connection.send(new InteractPacket(player.entityId, entity.entityId, 1));
+        this.connection.send(new InteractPacket(player.entityId, entity.entityId, InteractPacket.ATTACK));
         player.attack(entity);
     }
     
     @Override
     public void interact(final Player player, final Entity entity) {
         this.ensureHasSentCarriedItem();
-        this.connection.send(new InteractPacket(player.entityId, entity.entityId, 0));
+        this.connection.send(new InteractPacket(player.entityId, entity.entityId, InteractPacket.INTERACT));
         player.interact(entity);
     }
     
     @Override
     public ItemInstance handleInventoryMouseClick(final int containerId, final int slotNum, final int buttonNum, final boolean quickKeyHeld, final Player player) {
-        final short backup = player.containerMenu.backup(player.inventory);
-        final ItemInstance handleInventoryMouseClick = super.handleInventoryMouseClick(containerId, slotNum, buttonNum, quickKeyHeld, player);
-        this.connection.send(new ContainerClickPacket(containerId, slotNum, buttonNum, quickKeyHeld, handleInventoryMouseClick, backup));
-        return handleInventoryMouseClick;
+        final short changeUid = player.containerMenu.backup(player.inventory);
+
+        final ItemInstance clicked = super.handleInventoryMouseClick(containerId, slotNum, buttonNum, quickKeyHeld, player);
+        this.connection.send(new ContainerClickPacket(containerId, slotNum, buttonNum, quickKeyHeld, clicked, changeUid));
+
+        return clicked;
     }
     
     @Override
     public void handleCloseInventory(final int containerId, final Player player) {
         if (containerId == -9999) {
-            return;
         }
     }
 }

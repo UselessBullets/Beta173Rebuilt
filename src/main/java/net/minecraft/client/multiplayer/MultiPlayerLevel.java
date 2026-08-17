@@ -24,14 +24,14 @@ public class MultiPlayerLevel extends Level
     private LinkedList<ResetInfo> updatesToReset;
     private ClientConnection connection;
     private MultiPlayerChunkCache chunkCache;
-    private IntHashMap entitiesById;
+    private IntHashMap<Entity> entitiesById;
     private Set<Entity> forced;
     private Set<Entity> reEntries;
     
     public MultiPlayerLevel(final ClientConnection connection, final long seed, final int dimension) {
         super(new MockedLevelStorage(), "MpServer", Dimension.getNew(dimension), seed);
         this.updatesToReset = new LinkedList<>();
-        this.entitiesById = new IntHashMap();
+        this.entitiesById = new IntHashMap<>();
         this.forced = new HashSet<>();
         this.reEntries = new HashSet<>();
         this.connection = connection;
@@ -42,43 +42,48 @@ public class MultiPlayerLevel extends Level
     @Override
     public void tick() {
         this.setTime(this.getTime() + 1L);
-        final int skyDarken = this.getSkyDarken(1.0f);
-        if (skyDarken != this.skyDarken) {
-            this.skyDarken = skyDarken;
+        final int newDark = this.getSkyDarken(1.0f);
+        if (newDark != this.skyDarken) {
+            this.skyDarken = newDark;
             for (int i = 0; i < this.listeners.size(); ++i) {
-                ((LevelListener)this.listeners.get(i)).skyColorChanged();
+                this.listeners.get(i).skyColorChanged();
             }
         }
-        for (int n = 0; n < 10 && !this.reEntries.isEmpty(); ++n) {
+
+        for (int i = 0; i < 10 && !this.reEntries.isEmpty(); ++i) {
             final Entity e = this.reEntries.iterator().next();
-            if (!this.entities.contains(e)) {
-                this.addEntity(e);
-            }
+            if (!this.entities.contains(e)) this.addEntity(e);
         }
+
         this.connection.tick();
-        for (int j = 0; j < this.updatesToReset.size(); ++j) {
-            final ResetInfo multiPlayerLevel_ResetInfo2;
-            final ResetInfo multiPlayerLevel_ResetInfo = multiPlayerLevel_ResetInfo2 = this.updatesToReset.get(j);
-            if (--multiPlayerLevel_ResetInfo2.ticks == 0) {
-                super.setTileAndDataNoUpdate(multiPlayerLevel_ResetInfo.x, multiPlayerLevel_ResetInfo.y, multiPlayerLevel_ResetInfo.z, multiPlayerLevel_ResetInfo.tile, multiPlayerLevel_ResetInfo.data);
-                super.sendTileUpdated(multiPlayerLevel_ResetInfo.x, multiPlayerLevel_ResetInfo.y, multiPlayerLevel_ResetInfo.z);
-                this.updatesToReset.remove(j--);
+        for (int i = 0; i < this.updatesToReset.size(); ++i) {
+            final ResetInfo r = this.updatesToReset.get(i);
+            if (--r.ticks == 0) {
+                super.setTileAndDataNoUpdate(r.x, r.y, r.z, r.tile, r.data);
+                super.sendTileUpdated(r.x, r.y, r.z);
+
+                this.updatesToReset.remove(i);
+
+                i--;
             }
         }
     }
     
     public void clearResetRegion(final int x0, final int y0, final int z0, final int x1, final int y1, final int z1) {
         for (int i = 0; i < this.updatesToReset.size(); ++i) {
-            final ResetInfo multiPlayerLevel_ResetInfo = this.updatesToReset.get(i);
-            if (multiPlayerLevel_ResetInfo.x >= x0 && multiPlayerLevel_ResetInfo.y >= y0 && multiPlayerLevel_ResetInfo.z >= z0 && multiPlayerLevel_ResetInfo.x <= x1 && multiPlayerLevel_ResetInfo.y <= y1 && multiPlayerLevel_ResetInfo.z <= z1) {
-                this.updatesToReset.remove(i--);
+            final ResetInfo r = this.updatesToReset.get(i);
+            if (r.x >= x0 && r.y >= y0 && r.z >= z0 && r.x <= x1 && r.y <= y1 && r.z <= z1) {
+                this.updatesToReset.remove(i);
+                i--;
             }
         }
     }
     
     @Override
     protected ChunkSource createChunkSource() {
-        return this.chunkCache = new MultiPlayerChunkCache(this);
+        this.chunkCache = new MultiPlayerChunkCache(this);
+
+        return this.chunkCache;
     }
     
     @Override
@@ -107,18 +112,20 @@ public class MultiPlayerLevel extends Level
             this.chunkCache.drop(x, z);
         }
         if (!visible) {
-            this.setTilesDirty(x * 16, 0, z * 16, x * 16 + 15, 128, z * 16 + 15);
+            this.setTilesDirty(x * 16, 0, z * 16, x * 16 + 15, Level.maxBuildHeight, z * 16 + 15);
         }
     }
     
     @Override
     public boolean addEntity(final Entity e) {
-        final boolean addEntity = super.addEntity(e);
+        final boolean ok = super.addEntity(e);
         this.forced.add(e);
-        if (!addEntity) {
+
+        if (!ok) {
             this.reEntries.add(e);
         }
-        return addEntity;
+
+        return ok;
     }
     
     @Override
@@ -144,10 +151,11 @@ public class MultiPlayerLevel extends Level
     }
     
     public void putEntity(final int id, final Entity e) {
-        final Entity entity = this.getEntity(id);
-        if (entity != null) {
-            this.removeEntity(entity);
+        final Entity old = this.getEntity(id);
+        if (old != null) {
+            this.removeEntity(old);
         }
+
         this.forced.add(e);
         e.entityId = id;
         if (!this.addEntity(e)) {
@@ -157,7 +165,7 @@ public class MultiPlayerLevel extends Level
     }
     
     public Entity getEntity(final int id) {
-        return (Entity)this.entitiesById.get(id);
+        return this.entitiesById.get(id);
     }
     
     public Entity removeEntity(final int id) {
@@ -171,10 +179,11 @@ public class MultiPlayerLevel extends Level
     
     @Override
     public boolean setDataNoUpdate(final int x, final int y, final int z, final int data) {
-        final int tile = this.getTile(x, y, z);
-        final int data2 = this.getData(x, y, z);
+        final int t = this.getTile(x, y, z);
+        final int d = this.getData(x, y, z);
+
         if (super.setDataNoUpdate(x, y, z, data)) {
-            this.updatesToReset.add(new ResetInfo(this, x, y, z, tile, data2));
+            this.updatesToReset.add(new ResetInfo(x, y, z, t, d));
             return true;
         }
         return false;
@@ -182,10 +191,11 @@ public class MultiPlayerLevel extends Level
     
     @Override
     public boolean setTileAndDataNoUpdate(final int x, final int y, final int z, final int tile, final int data) {
-        final int tile2 = this.getTile(x, y, z);
-        final int data2 = this.getData(x, y, z);
+        final int t = this.getTile(x, y, z);
+        final int d = this.getData(x, y, z);
+
         if (super.setTileAndDataNoUpdate(x, y, z, tile, data)) {
-            this.updatesToReset.add(new ResetInfo(this, x, y, z, tile2, data2));
+            this.updatesToReset.add(new ResetInfo(x, y, z, t, d));
             return true;
         }
         return false;
@@ -193,10 +203,11 @@ public class MultiPlayerLevel extends Level
     
     @Override
     public boolean setTileNoUpdate(final int x, final int y, final int z, final int tile) {
-        final int tile2 = this.getTile(x, y, z);
-        final int data = this.getData(x, y, z);
+        final int t = this.getTile(x, y, z);
+        final int d = this.getData(x, y, z);
+
         if (super.setTileNoUpdate(x, y, z, tile)) {
-            this.updatesToReset.add(new ResetInfo(this, x, y, z, tile2, data));
+            this.updatesToReset.add(new ResetInfo(x, y, z, t, d));
             return true;
         }
         return false;
@@ -204,6 +215,7 @@ public class MultiPlayerLevel extends Level
     
     public boolean doSetTileAndData(final int x, final int y, final int z, final int tile, final int data) {
         this.clearResetRegion(x, y, z, x, y, z);
+
         if (super.setTileAndDataNoUpdate(x, y, z, tile, data)) {
             this.tileUpdated(x, y, z, tile);
             return true;
@@ -218,38 +230,31 @@ public class MultiPlayerLevel extends Level
     
     @Override
     protected void tickWeather() {
-        if (this.dimension.hasCeiling) {
-            return;
-        }
+        if (this.dimension.hasCeiling) return;
+
         if (this.lightningTime > 0) {
             --this.lightningTime;
         }
+
         this.oRainLevel = this.rainLevel;
         if (this.levelData.isRaining()) {
-            this.rainLevel += (float)0.01;
+            this.rainLevel += 0.01f;
         }
         else {
-            this.rainLevel -= (float)0.01;
+            this.rainLevel -= 0.01f;
         }
-        if (this.rainLevel < 0.0f) {
-            this.rainLevel = 0.0f;
-        }
-        if (this.rainLevel > 1.0f) {
-            this.rainLevel = 1.0f;
-        }
+        if (this.rainLevel < 0.0f) this.rainLevel = 0.0f;
+        if (this.rainLevel > 1.0f) this.rainLevel = 1.0f;
+
         this.oThunderLevel = this.thunderLevel;
         if (this.levelData.isThundering()) {
-            this.thunderLevel += (float)0.01;
+            this.thunderLevel += 0.01f;
         }
         else {
-            this.thunderLevel -= (float)0.01;
+            this.thunderLevel -= 0.01f;
         }
-        if (this.thunderLevel < 0.0f) {
-            this.thunderLevel = 0.0f;
-        }
-        if (this.thunderLevel > 1.0f) {
-            this.thunderLevel = 1.0f;
-        }
+        if (this.thunderLevel < 0.0f) this.thunderLevel = 0.0f;
+        if (this.thunderLevel > 1.0f) this.thunderLevel = 1.0f;
     }
 
     static class ResetInfo
@@ -260,10 +265,8 @@ public class MultiPlayerLevel extends Level
         int ticks;
         int tile;
         int data;
-        final /* synthetic */ MultiPlayerLevel mpLevel;
 
-        public ResetInfo(final MultiPlayerLevel mpLevel, final int x, final int y, final int z, final int tile, final int data) {
-            this.mpLevel = mpLevel;
+        public ResetInfo(final int x, final int y, final int z, final int tile, final int data) {
             this.x = x;
             this.y = y;
             this.z = z;

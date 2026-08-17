@@ -8,20 +8,12 @@ import net.minecraft.world.entity.player.Player;
 
 public class Input
 {
-    public float xa;
-    public float ya;
-    public boolean wasJumping;
-    public boolean jumping;
-    public boolean sneaking;
-    
-    public Input() {
-        this.xa = 0.0f;
-        this.ya = 0.0f;
-        this.wasJumping = false;
-        this.jumping = false;
-        this.sneaking = false;
-    }
-    
+    public float xa = 0.0f;
+    public float ya = 0.0f;
+    public boolean wasJumping = false;
+    public boolean jumping = false;
+    public boolean sneaking = false;
+
     public void tick(final Player player) {
     }
     

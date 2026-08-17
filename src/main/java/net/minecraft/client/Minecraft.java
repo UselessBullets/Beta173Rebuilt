@@ -47,7 +47,6 @@ import net.minecraft.client.renderer.ptexture.WaterSideTexture;
 import net.minecraft.client.renderer.ptexture.ClockTexture;
 import net.minecraft.client.renderer.ptexture.CompassTexture;
 import net.minecraft.client.renderer.ptexture.PortalTexture;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Controllers;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.input.Keyboard;
@@ -1348,7 +1347,7 @@ public abstract class Minecraft implements Runnable
         return "P: " + this.particleEngine.countParticles() + ". T: " + this.level.gatherStats();
     }
     
-    public void respawnPlayer(final boolean boolean1, final int integer) {
+    public void respawnPlayer(final boolean boolean1 /*TODO Useless - find name for boolean*/, final int dimension) {
         if (!this.level.isClientSide && !this.level.dimension.mayRespawn()) {
             this.toggleDimension();
         }
@@ -1381,7 +1380,7 @@ public abstract class Minecraft implements Runnable
         }
         this.cameraTargetPlayer = null;
         this.player = (LocalPlayer)this.gameMode.createPlayer(this.level);
-        this.player.dimension = integer;
+        this.player.dimension = dimension;
         this.cameraTargetPlayer = this.player;
         this.player.resetPos();
         if (b) {

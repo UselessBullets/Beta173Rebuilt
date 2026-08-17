@@ -9,37 +9,31 @@ import net.minecraft.client.Options;
 
 public class KeyboardInput extends Input
 {
-    private boolean[] keys;
+    public static final int KEY_UP = 0;
+    public static final int KEY_DOWN = 1;
+    public static final int KEY_LEFT = 2;
+    public static final int KEY_RIGHT = 3;
+    public static final int KEY_JUMP = 4;
+    public static final int KEY_SNEAK = 5;
+    private boolean[] keys = new boolean[10];
     private Options options;
     
     public KeyboardInput(final Options options) {
-        this.keys = new boolean[10];
         this.options = options;
     }
     
     @Override
     public void setKey(final int eventKey, final boolean eventKeyState) {
-        int n = -1;
-        if (eventKey == this.options.keyUp.key) {
-            n = 0;
-        }
-        if (eventKey == this.options.keyDown.key) {
-            n = 1;
-        }
-        if (eventKey == this.options.keyLeft.key) {
-            n = 2;
-        }
-        if (eventKey == this.options.keyRight.key) {
-            n = 3;
-        }
-        if (eventKey == this.options.keyJump.key) {
-            n = 4;
-        }
-        if (eventKey == this.options.keySneak.key) {
-            n = 5;
-        }
-        if (n >= 0) {
-            this.keys[n] = eventKeyState;
+        int id = -1;
+        if (eventKey == this.options.keyUp.key) id = KEY_UP;
+        if (eventKey == this.options.keyDown.key) id = KEY_DOWN;
+        if (eventKey == this.options.keyLeft.key) id = KEY_LEFT;
+        if (eventKey == this.options.keyRight.key) id = KEY_RIGHT;
+        if (eventKey == this.options.keyJump.key) id = KEY_JUMP;
+        if (eventKey == this.options.keySneak.key) id = KEY_SNEAK;
+
+        if (id >= 0) {
+            this.keys[id] = eventKeyState;
         }
     }
     
@@ -54,20 +48,14 @@ public class KeyboardInput extends Input
     public void tick(final Player player) {
         this.xa = 0.0f;
         this.ya = 0.0f;
-        if (this.keys[0]) {
-            ++this.ya;
-        }
-        if (this.keys[1]) {
-            --this.ya;
-        }
-        if (this.keys[2]) {
-            ++this.xa;
-        }
-        if (this.keys[3]) {
-            --this.xa;
-        }
-        this.jumping = this.keys[4];
-        this.sneaking = this.keys[5];
+
+        if (this.keys[KEY_UP]) ++this.ya;
+        if (this.keys[KEY_DOWN]) --this.ya;
+        if (this.keys[KEY_LEFT]) ++this.xa;
+        if (this.keys[KEY_RIGHT]) --this.xa;
+
+        this.jumping = this.keys[KEY_JUMP];
+        this.sneaking = this.keys[KEY_SNEAK];
         if (this.sneaking) {
             this.xa *= (float)0.3;
             this.ya *= (float)0.3;

@@ -555,6 +555,17 @@ public abstract class Player extends Mob
     }
     
     public abstract void animateRespawn();
+
+    protected static void animateRespawn(Player player, Level level) { // Useless - this seems like it should have existed given comment out java code inside of the LCE leaked codebase
+        for (int i = 0; i < 45; i++)
+        {
+            float angle = i * Mth.PI * 4.0f / 25.0f;
+            float xo = Mth.cos(angle) * 0.7f;
+            float zo = Mth.sin(angle) * 0.7f;
+
+            level.addParticle("portal", player.x + xo, player.y - player.heightOffset + 1.62f - i * .05f, player.z + zo, 0, 0, 0);
+        }
+    }
     
     public void handleCollectItem(final ItemInstance carried) {
     }

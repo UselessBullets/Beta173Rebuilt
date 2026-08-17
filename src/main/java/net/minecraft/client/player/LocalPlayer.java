@@ -32,15 +32,12 @@ public class LocalPlayer extends Player
 {
     public Input input;
     protected Minecraft minecraft;
-    private SmoothFloat smoothFlyX;
-    private SmoothFloat smoothFlyY;
-    private SmoothFloat smoothFlyZ;
+    private SmoothFloat smoothFlyX = new SmoothFloat();
+    private SmoothFloat smoothFlyY = new SmoothFloat();
+    private SmoothFloat smoothFlyZ = new SmoothFloat();
     
     public LocalPlayer(final Minecraft minecraft, final Level level, final User user, final int dimension) {
         super(level);
-        this.smoothFlyX = new SmoothFloat();
-        this.smoothFlyY = new SmoothFloat();
-        this.smoothFlyZ = new SmoothFloat();
         this.minecraft = minecraft;
         this.dimension = dimension;
         if (user != null && user.name != null && user.name.length() > 0) {
@@ -68,16 +65,15 @@ public class LocalPlayer extends Player
         }
         this.oPortalTime = this.portalTime;
         if (this.isInsidePortal) {
-            if (!this.level.isClientSide && this.riding != null) {
-                this.ride(null);
+            if (!this.level.isClientSide) {
+                if (this.riding != null) this.ride(null);
             }
-            if (this.minecraft.screen != null) {
-                this.minecraft.setScreen(null);
-            }
+            if (this.minecraft.screen != null) this.minecraft.setScreen(null);
+
             if (this.portalTime == 0.0f) {
                 this.minecraft.soundEngine.playUI("portal.trigger", 1.0f, this.random.nextFloat() * 0.4f + 0.8f);
             }
-            this.portalTime += 0.0125f;
+            this.portalTime += 1 / 80.0f;
             if (this.portalTime >= 1.0f) {
                 this.portalTime = 1.0f;
                 if (!this.level.isClientSide) {
@@ -89,24 +85,20 @@ public class LocalPlayer extends Player
             this.isInsidePortal = false;
         }
         else {
-            if (this.portalTime > 0.0f) {
-                this.portalTime -= 0.05f;
-            }
-            if (this.portalTime < 0.0f) {
-                this.portalTime = 0.0f;
-            }
+            if (this.portalTime > 0.0f) this.portalTime -= 1 / 20.0f;
+            if (this.portalTime < 0.0f) this.portalTime = 0.0f;
         }
-        if (this.changingDimensionDelay > 0) {
-            --this.changingDimensionDelay;
-        }
+        if (this.changingDimensionDelay > 0) --this.changingDimensionDelay;
+
         this.input.tick(this);
-        if (this.input.sneaking && this.ySlideOffset < 0.2f) {
-            this.ySlideOffset = 0.2f;
+        if (this.input.sneaking) {
+            if (this.ySlideOffset < 0.2f) this.ySlideOffset = 0.2f;
         }
         this.checkInTile(this.x - this.bbWidth * 0.35, this.bb.y0 + 0.5, this.z + this.bbWidth * 0.35);
         this.checkInTile(this.x - this.bbWidth * 0.35, this.bb.y0 + 0.5, this.z - this.bbWidth * 0.35);
         this.checkInTile(this.x + this.bbWidth * 0.35, this.bb.y0 + 0.5, this.z - this.bbWidth * 0.35);
         this.checkInTile(this.x + this.bbWidth * 0.35, this.bb.y0 + 0.5, this.z + this.bbWidth * 0.35);
+
         super.aiStep();
     }
     
@@ -178,21 +170,19 @@ public class LocalPlayer extends Player
     }
     
     public void hurtTo(final int newHealth) {
-        final int n = this.health - newHealth;
-        if (n <= 0) {
+        final int dmg = this.health - newHealth;
+        if (dmg <= 0) {
             this.health = newHealth;
-            if (n < 0) {
+            if (dmg < 0) {
                 this.invulnerableTime = this.invulnerableDuration / 2;
             }
         }
         else {
-            this.lastHurt = n;
+            this.lastHurt = dmg;
             this.lastHealth = this.health;
             this.invulnerableTime = this.invulnerableDuration;
-            this.actuallyHurt(n);
-            final int n2 = 10;
-            this.hurtDuration = n2;
-            this.hurtTime = n2;
+            this.actuallyHurt(dmg);
+            this.hurtTime = this.hurtDuration = 10;
         }
     }
     
@@ -203,6 +193,7 @@ public class LocalPlayer extends Player
     
     @Override
     public void animateRespawn() {
+//        Player.animateRespawn(this, this.level); // Useless - As far as I can tell this was commented out in the source codebase from the java code left in the LCE leak
     }
     
     @Override
@@ -212,14 +203,13 @@ public class LocalPlayer extends Player
     
     @Override
     public void awardStat(final Stat stat, final int count) {
-        if (stat == null) {
-            return;
-        }
+        if (stat == null) return;
+
         if (stat.isAchievement()) {
-            final Achievement achievement = (Achievement)stat;
-            if (achievement.requires == null || this.minecraft.stats.hasTaken(achievement.requires)) {
-                if (!this.minecraft.stats.hasTaken(achievement)) {
-                    this.minecraft.achievementPopup.popup(achievement);
+            final Achievement ach = (Achievement)stat;
+            if (ach.requires == null || this.minecraft.stats.hasTaken(ach.requires)) {
+                if (!this.minecraft.stats.hasTaken(ach)) {
+                    this.minecraft.achievementPopup.popup(ach);
                 }
                 this.minecraft.stats.award(stat, count);
             }
@@ -235,46 +225,42 @@ public class LocalPlayer extends Player
     
     @Override
     protected boolean checkInTile(final double x, final double y, final double z) {
-        final int floor = Mth.floor(x);
-        final int floor2 = Mth.floor(y);
-        final int floor3 = Mth.floor(z);
-        final double n = x - floor;
-        final double n2 = z - floor3;
-        if (this.isSolidBlock(floor, floor2, floor3) || this.isSolidBlock(floor, floor2 + 1, floor3)) {
-            final boolean b = !this.isSolidBlock(floor - 1, floor2, floor3) && !this.isSolidBlock(floor - 1, floor2 + 1, floor3);
-            final boolean b2 = !this.isSolidBlock(floor + 1, floor2, floor3) && !this.isSolidBlock(floor + 1, floor2 + 1, floor3);
-            final boolean b3 = !this.isSolidBlock(floor, floor2, floor3 - 1) && !this.isSolidBlock(floor, floor2 + 1, floor3 - 1);
-            final boolean b4 = !this.isSolidBlock(floor, floor2, floor3 + 1) && !this.isSolidBlock(floor, floor2 + 1, floor3 + 1);
-            int n3 = -1;
-            double n4 = 9999.0;
-            if (b && n < n4) {
-                n4 = n;
-                n3 = 0;
+        final int xTile = Mth.floor(x);
+        final int yTile = Mth.floor(y);
+        final int zTile = Mth.floor(z);
+
+        final double xd = x - xTile;
+        final double zd = z - zTile;
+
+        if (this.isSolidBlock(xTile, yTile, zTile) || this.isSolidBlock(xTile, yTile + 1, zTile)) {
+            final boolean west = !this.isSolidBlock(xTile - 1, yTile, zTile) && !this.isSolidBlock(xTile - 1, yTile + 1, zTile);
+            final boolean east = !this.isSolidBlock(xTile + 1, yTile, zTile) && !this.isSolidBlock(xTile + 1, yTile + 1, zTile);
+            final boolean north = !this.isSolidBlock(xTile, yTile, zTile - 1) && !this.isSolidBlock(xTile, yTile + 1, zTile - 1);
+            final boolean south = !this.isSolidBlock(xTile, yTile, zTile + 1) && !this.isSolidBlock(xTile, yTile + 1, zTile + 1);
+
+            int dir = -1;
+            double closest = 9999.0;
+            if (west && xd < closest) {
+                closest = xd;
+                dir = 0;
             }
-            if (b2 && 1.0 - n < n4) {
-                n4 = 1.0 - n;
-                n3 = 1;
+            if (east && 1.0 - xd < closest) {
+                closest = 1.0 - xd;
+                dir = 1;
             }
-            if (b3 && n2 < n4) {
-                n4 = n2;
-                n3 = 4;
+            if (north && zd < closest) {
+                closest = zd;
+                dir = 4;
             }
-            if (b4 && 1.0 - n2 < n4) {
-                n3 = 5;
+            if (south && 1.0 - zd < closest) {
+                dir = 5;
             }
-            final float n5 = 0.1f;
-            if (n3 == 0) {
-                this.xd = -n5;
-            }
-            if (n3 == 1) {
-                this.xd = n5;
-            }
-            if (n3 == 4) {
-                this.zd = -n5;
-            }
-            if (n3 == 5) {
-                this.zd = n5;
-            }
+
+            final float speed = 0.1f;
+            if (dir == 0) this.xd = -speed;
+            if (dir == 1) this.xd = speed;
+            if (dir == 4) this.zd = -speed;
+            if (dir == 5) this.zd = speed;
         }
         return false;
     }

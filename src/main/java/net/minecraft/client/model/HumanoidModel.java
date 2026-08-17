@@ -35,39 +35,39 @@ public class HumanoidModel extends Model
         this.sneaking = false;
 
         this.cloak = new Cube(0, 0);
-        this.cloak.addBox(-5.0f, 0.0f, -1.0f, 10, 16, 1, g);
+        this.cloak.addBox(-5.0f, 0.0f, -1.0f, 10, 16, 1, g); // Cloak
 
         this.ear = new Cube(24, 0);
-        this.ear.addBox(-3.0f, -6.0f, -1.0f, 6, 6, 1, g);
+        this.ear.addBox(-3.0f, -6.0f, -1.0f, 6, 6, 1, g); // Ear
 
         this.head = new Cube(0, 0);
-        this.head.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, g);
+        this.head.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, g); // Head
         this.head.setPos(0.0f, 0.0f + yOffset, 0.0f);
 
         this.hair = new Cube(32, 0);
-        this.hair.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, g + 0.5f);
+        this.hair.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, g + 0.5f); // Head
         this.hair.setPos(0.0f, 0.0f + yOffset, 0.0f);
 
         this.body = new Cube(16, 16);
-        this.body.addBox(-4.0f, 0.0f, -2.0f, 8, 12, 4, g);
+        this.body.addBox(-4.0f, 0.0f, -2.0f, 8, 12, 4, g); // Body
         this.body.setPos(0.0f, 0.0f + yOffset, 0.0f);
 
         this.arm0 = new Cube(40, 16);
-        this.arm0.addBox(-3.0f, -2.0f, -2.0f, 4, 12, 4, g);
+        this.arm0.addBox(-3.0f, -2.0f, -2.0f, 4, 12, 4, g); // Arm0
         this.arm0.setPos(-5.0f, 2.0f + yOffset, 0.0f);
 
         this.arm1 = new Cube(40, 16);
         this.arm1.mirror = true;
-        this.arm1.addBox(-1.0f, -2.0f, -2.0f, 4, 12, 4, g);
+        this.arm1.addBox(-1.0f, -2.0f, -2.0f, 4, 12, 4, g); // Arm1
         this.arm1.setPos(5.0f, 2.0f + yOffset, 0.0f);
 
         this.leg0 = new Cube(0, 16);
-        this.leg0.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, g);
+        this.leg0.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, g); // Leg0
         this.leg0.setPos(-2.0f, 12.0f + yOffset, 0.0f);
 
         this.leg1 = new Cube(0, 16);
         this.leg1.mirror = true;
-        this.leg1.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, g);
+        this.leg1.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, g); // Leg1
         this.leg1.setPos(2.0f, 12.0f + yOffset, 0.0f);
     }
     

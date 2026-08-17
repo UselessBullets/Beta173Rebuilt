@@ -22,38 +22,61 @@ public class WolfModel extends Model
     Cube mouth;
     Cube tail;
     Cube upperBody;
+    private static final int legSize = 8;
     
     public WolfModel() {
         final float g = 0.0f;
-        final float n = 13.5f;
-        (this.head = new Cube(0, 0)).addBox(-3.0f, -3.0f, -2.0f, 6, 6, 4, g);
-        this.head.setPos(-1.0f, n, -7.0f);
-        (this.body = new Cube(18, 14)).addBox(-4.0f, -2.0f, -3.0f, 6, 9, 6, g);
-        this.body.setPos(0.0f, 14.0f, 2.0f);
-        (this.upperBody = new Cube(21, 0)).addBox(-4.0f, -3.0f, -3.0f, 8, 6, 7, g);
-        this.upperBody.setPos(-1.0f, 14.0f, 2.0f);
-        (this.leg0 = new Cube(0, 18)).addBox(-1.0f, 0.0f, -1.0f, 2, 8, 2, g);
-        this.leg0.setPos(-2.5f, 16.0f, 7.0f);
-        (this.leg1 = new Cube(0, 18)).addBox(-1.0f, 0.0f, -1.0f, 2, 8, 2, g);
-        this.leg1.setPos(0.5f, 16.0f, 7.0f);
-        (this.leg2 = new Cube(0, 18)).addBox(-1.0f, 0.0f, -1.0f, 2, 8, 2, g);
-        this.leg2.setPos(-2.5f, 16.0f, -4.0f);
-        (this.leg3 = new Cube(0, 18)).addBox(-1.0f, 0.0f, -1.0f, 2, 8, 2, g);
-        this.leg3.setPos(0.5f, 16.0f, -4.0f);
-        (this.tail = new Cube(9, 18)).addBox(-1.0f, 0.0f, -1.0f, 2, 8, 2, g);
-        this.tail.setPos(-1.0f, 12.0f, 8.0f);
-        (this.ear1 = new Cube(16, 14)).addBox(-3.0f, -5.0f, 0.0f, 2, 2, 1, g);
-        this.ear1.setPos(-1.0f, n, -7.0f);
-        (this.ear2 = new Cube(16, 14)).addBox(1.0f, -5.0f, 0.0f, 2, 2, 1, g);
-        this.ear2.setPos(-1.0f, n, -7.0f);
-        (this.mouth = new Cube(0, 10)).addBox(-2.0f, 0.0f, -5.0f, 3, 3, 4, g);
-        this.mouth.setPos(-0.5f, n, -7.0f);
+        final float headHeight = 12 + 9.5f - legSize;
+        this.head = new Cube(0, 0);
+        this.head.addBox(-3.0f, -3.0f, -2.0f, 6, 6, 4, g); // Head
+        this.head.setPos(-1.0f, headHeight, -7.0f);
+
+        this.body = new Cube(18, 14);
+        this.body.addBox(-4.0f, -2.0f, -3.0f, 6, 9, 6, g); // Body
+        this.body.setPos(0.0f, 11 + 11 - legSize, 2.0f);
+
+        this.upperBody = new Cube(21, 0);
+        this.upperBody.addBox(-4.0f, -3.0f, -3.0f, 8, 6, 7, g); // Body
+        this.upperBody.setPos(-1.0f, 11 + 11 - legSize, 2.0f);
+
+        this.leg0 = new Cube(0, 18);
+        this.leg0.addBox(-1.0f, 0.0f, -1.0f, 2, legSize, 2, g); // Leg0
+        this.leg0.setPos(-2.5f, 18 + 6 - legSize, 7.0f);
+
+        this.leg1 = new Cube(0, 18);
+        this.leg1.addBox(-1.0f, 0.0f, -1.0f, 2, legSize, 2, g); // Leg1
+        this.leg1.setPos(0.5f, 18 + 6 - legSize, 7.0f);
+
+        this.leg2 = new Cube(0, 18);
+        this.leg2.addBox(-1.0f, 0.0f, -1.0f, 2, legSize, 2, g); // Leg2
+        this.leg2.setPos(-2.5f, 18 + 6 - legSize, -4.0f);
+
+        this.leg3 = new Cube(0, 18);
+        this.leg3.addBox(-1.0f, 0.0f, -1.0f, 2, legSize, 2, g); // Leg3
+        this.leg3.setPos(0.5f, 18 + 6 - legSize, -4.0f);
+
+        this.tail = new Cube(9, 18);
+        this.tail.addBox(-1.0f, 0.0f, -1.0f, 2, 8, 2, g);
+        this.tail.setPos(-1.0f, 2 + 18 - legSize, 8.0f);
+
+        this.ear1 = new Cube(16, 14);
+        this.ear1.addBox(-3.0f, -5.0f, 0.0f, 2, 2, 1, g);
+        this.ear1.setPos(-1.0f, headHeight, -7.0f);
+
+        this.ear2 = new Cube(16, 14);
+        this.ear2.addBox(1.0f, -5.0f, 0.0f, 2, 2, 1, g);
+        this.ear2.setPos(-1.0f, headHeight, -7.0f);
+
+        this.mouth = new Cube(0, 10);
+        this.mouth.addBox(-2.0f, 0.0f, -5.0f, 3, 3, 4, g);
+        this.mouth.setPos(-0.5f, headHeight, -7.0f);
     }
     
     @Override
     public void render(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
         super.render(time, r, bob, yRot, xRot, scale);
         this.setupAnim(time, r, bob, yRot, xRot, scale);
+
         this.head.renderRollable(scale);
         this.body.render(scale);
         this.leg0.render(scale);
@@ -70,54 +93,66 @@ public class WolfModel extends Model
     @Override
     public void prepareMobModel(final Mob mob, final float time, final float r, final float partialTick) {
         final Wolf wolf = (Wolf)mob;
+
         if (wolf.isAngry()) {
             this.tail.yRot = 0.0f;
         }
         else {
             this.tail.yRot = Mth.cos(time * 0.6662f) * 1.4f * r;
         }
+
         if (wolf.isSitting()) {
             this.upperBody.setPos(-1.0f, 16.0f, -3.0f);
-            this.upperBody.xRot = 1.2566371f;
-            this.upperBody.yRot = 0.0f;
-            this.body.setPos(0.0f, 18.0f, 0.0f);
-            this.body.xRot = 0.7853982f;
-            this.tail.setPos(-1.0f, 21.0f, 6.0f);
-            this.leg0.setPos(-2.5f, 22.0f, 2.0f);
-            this.leg0.xRot = (Mth.HALF_PI * 3f);
-            this.leg1.setPos(0.5f, 22.0f, 2.0f);
-            this.leg1.xRot = (Mth.HALF_PI * 3f);
-            this.leg2.xRot = 5.811947f;
-            this.leg2.setPos(-2.49f, 17.0f, -4.0f);
-            this.leg3.xRot = 5.811947f;
-            this.leg3.setPos(0.51f, 17.0f, -4.0f);
+            this.upperBody.xRot = 0.4f * Mth.PI;
+            this.upperBody.yRot = 0.0f * Mth.PI;
+
+            this.body.setPos(0.0f, 11 + 15 - legSize, 0.0f);
+            this.body.xRot = 0.25f * Mth.PI;
+
+            this.tail.setPos(-1.0f, 11 + 18 - legSize, 6.0f);
+
+            this.leg0.setPos(-2.5f, 18 + 12 - legSize, 2.0f);
+            this.leg0.xRot = 1.5f * Mth.PI;
+            this.leg1.setPos(0.5f, 18 + 12 - legSize, 2.0f);
+            this.leg1.xRot = 1.5f * Mth.PI;
+
+            this.leg2.xRot = 1.85f * Mth.PI;
+            this.leg2.setPos(-2.49f, 18 + 7.0f - legSize, -4.0f);
+            this.leg3.xRot = 1.85f * Mth.PI;
+            this.leg3.setPos(0.51f, 18 + 7.0f - legSize, -4.0f);
         }
         else {
-            this.body.setPos(0.0f, 14.0f, 2.0f);
+            this.body.setPos(0.0f, 11 + 11 - legSize, 2.0f);
             this.body.xRot = Mth.HALF_PI;
-            this.upperBody.setPos(-1.0f, 14.0f, -3.0f);
+
+            this.upperBody.setPos(-1.0f, 11 + 11.0f - legSize, -3.0f);
             this.upperBody.xRot = this.body.xRot;
-            this.tail.setPos(-1.0f, 12.0f, 8.0f);
-            this.leg0.setPos(-2.5f, 16.0f, 7.0f);
-            this.leg1.setPos(0.5f, 16.0f, 7.0f);
-            this.leg2.setPos(-2.5f, 16.0f, -4.0f);
-            this.leg3.setPos(0.5f, 16.0f, -4.0f);
+
+            this.tail.setPos(-1.0f, 2 + 18 - legSize, 8.0f);
+
+            this.leg0.setPos(-2.5f, 18 + 6 - legSize, 7.0f);
+            this.leg1.setPos(0.5f, 18 + 6 - legSize, 7.0f);
+            this.leg2.setPos(-2.5f, 18 + 6 - legSize, -4.0f);
+            this.leg3.setPos(0.5f, 18 + 6 - legSize, -4.0f);
+
             this.leg0.xRot = Mth.cos(time * 0.6662f) * 1.4f * r;
             this.leg1.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 1.4f * r;
             this.leg2.xRot = Mth.cos(time * 0.6662f + Mth.PI) * 1.4f * r;
             this.leg3.xRot = Mth.cos(time * 0.6662f) * 1.4f * r;
         }
-        final float n = wolf.getHeadRollAngle(partialTick) + wolf.getBodyRollAngle(partialTick, 0.0f);
-        this.head.zRot = n;
-        this.ear1.zRot = n;
-        this.ear2.zRot = n;
-        this.mouth.zRot = n;
+        final float angle = wolf.getHeadRollAngle(partialTick) + wolf.getBodyRollAngle(partialTick, 0.0f);
+        this.head.zRot = angle;
+        this.ear1.zRot = angle;
+        this.ear2.zRot = angle;
+        this.mouth.zRot = angle;
+
         this.upperBody.zRot = wolf.getBodyRollAngle(partialTick, -0.08f);
         this.body.zRot = wolf.getBodyRollAngle(partialTick, -0.16f);
         this.tail.zRot = wolf.getBodyRollAngle(partialTick, -0.2f);
+
         if (wolf.isWet()) {
-            final float n2 = wolf.getBrightness(partialTick) * wolf.getWetShade(partialTick);
-            GL11.glColor3f(n2, n2, n2);
+            final float brightness = wolf.getBrightness(partialTick) * wolf.getWetShade(partialTick);
+            GL11.glColor3f(brightness, brightness, brightness);
         }
     }
     

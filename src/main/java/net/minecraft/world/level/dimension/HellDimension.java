@@ -23,7 +23,7 @@ public class HellDimension extends Dimension
     
     @Override
     public Vec3 getFogColor(final float td, final float partialTick) {
-        return Vec3.newTemp(0.20000000298023224, 0.029999999329447746, 0.029999999329447746);
+        return Vec3.newTemp(0.2f, 0.029999999329447746, 0.029999999329447746);
     }
     
     @Override

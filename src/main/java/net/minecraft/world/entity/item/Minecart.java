@@ -92,7 +92,7 @@ public class Minecart extends Entity implements Container
     
     @Override
     public double getRideHeight() {
-        return this.bbHeight * 0.0 - 0.30000001192092896;
+        return this.bbHeight * 0.0 - 0.3f;
     }
     
     @Override
@@ -336,21 +336,21 @@ public class Minecart extends Entity implements Container
                         this.xPush /= n14;
                         this.zPush /= n14;
                         final double n15 = 0.04;
-                        this.xd *= 0.800000011920929;
+                        this.xd *= 0.8f;
                         this.yd *= 0.0;
-                        this.zd *= 0.800000011920929;
+                        this.zd *= 0.8f;
                         this.xd += this.xPush * n15;
                         this.zd += this.zPush * n15;
                     }
                     else {
-                        this.xd *= 0.8999999761581421;
+                        this.xd *= 0.90f;
                         this.yd *= 0.0;
-                        this.zd *= 0.8999999761581421;
+                        this.zd *= 0.90f;
                     }
                 }
-                this.xd *= 0.9599999785423279;
+                this.xd *= 0.96f;
                 this.yd *= 0.0;
-                this.zd *= 0.9599999785423279;
+                this.zd *= 0.96f;
             }
             final Vec3 pos2 = this.getPos(this.x, this.y, this.z);
             if (pos2 != null && pos != null) {
@@ -453,7 +453,7 @@ public class Minecart extends Entity implements Container
             this.flipped = !this.flipped;
         }
         this.setRot(this.yRot, this.xRot);
-        final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.20000000298023224, 0.0, 0.20000000298023224));
+        final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.2f, 0.0, 0.2f));
         if (entities != null && entities.size() > 0) {
             for (int i = 0; i < entities.size(); ++i) {
                 final Entity entity = entities.get(i);
@@ -637,8 +637,8 @@ public class Minecart extends Entity implements Container
             }
             final double n7 = n4 * n6;
             final double n8 = n5 * n6;
-            final double n9 = n7 * 0.10000000149011612;
-            final double n10 = n8 * 0.10000000149011612;
+            final double n9 = n7 * 0.1f;
+            final double n10 = n8 * 0.1f;
             final double n11 = n9 * (1.0f - this.pushthrough);
             final double n12 = n10 * (1.0f - this.pushthrough);
             final double n13 = n11 * 0.5;
@@ -651,27 +651,27 @@ public class Minecart extends Entity implements Container
                 final double n16 = e.xd + this.xd;
                 final double n17 = e.zd + this.zd;
                 if (((Minecart)e).type == 2 && this.type != 2) {
-                    this.xd *= 0.20000000298023224;
-                    this.zd *= 0.20000000298023224;
+                    this.xd *= 0.2f;
+                    this.zd *= 0.2f;
                     this.push(e.xd - n13, 0.0, e.zd - n14);
-                    e.xd *= 0.699999988079071;
-                    e.zd *= 0.699999988079071;
+                    e.xd *= 0.7f;
+                    e.zd *= 0.7f;
                 }
                 else if (((Minecart)e).type != 2 && this.type == 2) {
-                    e.xd *= 0.20000000298023224;
-                    e.zd *= 0.20000000298023224;
+                    e.xd *= 0.2f;
+                    e.zd *= 0.2f;
                     e.push(this.xd + n13, 0.0, this.zd + n14);
-                    this.xd *= 0.699999988079071;
-                    this.zd *= 0.699999988079071;
+                    this.xd *= 0.7f;
+                    this.zd *= 0.7f;
                 }
                 else {
                     final double n18 = n16 / 2.0;
                     final double n19 = n17 / 2.0;
-                    this.xd *= 0.20000000298023224;
-                    this.zd *= 0.20000000298023224;
+                    this.xd *= 0.2f;
+                    this.zd *= 0.2f;
                     this.push(n18 - n13, 0.0, n19 - n14);
-                    e.xd *= 0.20000000298023224;
-                    e.zd *= 0.20000000298023224;
+                    e.xd *= 0.2f;
+                    e.zd *= 0.2f;
                     e.push(n18 + n13, 0.0, n19 + n14);
                 }
             }

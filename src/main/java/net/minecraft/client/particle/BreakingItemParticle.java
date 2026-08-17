@@ -11,13 +11,10 @@ import net.minecraft.world.level.Level;
 
 public class BreakingItemParticle extends Particle
 {
-    public BreakingItemParticle(final Level level, final double x, final double y, final double z, final Item irem) {
+    public BreakingItemParticle(final Level level, final double x, final double y, final double z, final Item item) {
         super(level, x, y, z, 0.0, 0.0, 0.0);
-        this.tex = irem.getIcon(0);
-        final float rCol = 1.0f;
-        this.bCol = rCol;
-        this.gCol = rCol;
-        this.rCol = rCol;
+        this.tex = item.getIcon(0);
+        this.rCol = this.gCol = this.bCol = 1.0f;
         this.gravity = Tile.snow.gravity;
         this.size /= 2.0f;
     }
@@ -29,19 +26,21 @@ public class BreakingItemParticle extends Particle
     
     @Override
     public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
-        final float n = (this.tex % 16 + this.uo / 4.0f) / 16.0f;
-        final float n2 = n + 0.015609375f;
-        final float n3 = (this.tex / 16 + this.vo / 4.0f) / 16.0f;
-        final float n4 = n3 + 0.015609375f;
-        final float n5 = 0.1f * this.size;
-        final float n6 = (float)(this.xo + (this.x - this.xo) * partialTick - BreakingItemParticle.xOff);
-        final float n7 = (float)(this.yo + (this.y - this.yo) * partialTick - BreakingItemParticle.yOff);
-        final float n8 = (float)(this.zo + (this.z - this.zo) * partialTick - BreakingItemParticle.zOff);
-        final float brightness = this.getBrightness(partialTick);
-        t.color(brightness * this.rCol, brightness * this.gCol, brightness * this.bCol);
-        t.vertexUV(n6 - xa * n5 - xa2 * n5, n7 - ya * n5, n8 - za * n5 - za2 * n5, n, n4);
-        t.vertexUV(n6 - xa * n5 + xa2 * n5, n7 + ya * n5, n8 - za * n5 + za2 * n5, n, n3);
-        t.vertexUV(n6 + xa * n5 + xa2 * n5, n7 + ya * n5, n8 + za * n5 + za2 * n5, n2, n3);
-        t.vertexUV(n6 + xa * n5 - xa2 * n5, n7 - ya * n5, n8 + za * n5 - za2 * n5, n2, n4);
+        final float u0 = (this.tex % 16 + this.uo / 4.0f) / 16.0f;
+        final float u1 = u0 + 0.999f / 16.0f / 4;
+        final float v0 = (this.tex / 16 + this.vo / 4.0f) / 16.0f;
+        final float v1 = v0 + 0.999f / 16.0f / 4;
+        final float r = 0.1f * this.size;
+
+        final float x = (float)(this.xo + (this.x - this.xo) * partialTick - BreakingItemParticle.xOff);
+        final float y = (float)(this.yo + (this.y - this.yo) * partialTick - BreakingItemParticle.yOff);
+        final float z = (float)(this.zo + (this.z - this.zo) * partialTick - BreakingItemParticle.zOff);
+        final float br = this.getBrightness(partialTick);
+        t.color(br * this.rCol, br * this.gCol, br * this.bCol);
+
+        t.vertexUV(x - xa * r - xa2 * r, y - ya * r, z - za * r - za2 * r, u0, v1);
+        t.vertexUV(x - xa * r + xa2 * r, y + ya * r, z - za * r + za2 * r, u0, v0);
+        t.vertexUV(x + xa * r + xa2 * r, y + ya * r, z + za * r + za2 * r, u1, v0);
+        t.vertexUV(x + xa * r - xa2 * r, y - ya * r, z + za * r - za2 * r, u1, v1);
     }
 }

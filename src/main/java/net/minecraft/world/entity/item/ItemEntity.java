@@ -35,9 +35,9 @@ public class ItemEntity extends Entity
         this.setPos(x, y, z);
         this.item = item;
         this.yRot = (float)(Math.random() * 360.0);
-        this.xd = (float)(Math.random() * 0.20000000298023224 - 0.10000000149011612);
-        this.yd = 0.20000000298023224;
-        this.zd = (float)(Math.random() * 0.20000000298023224 - 0.10000000149011612);
+        this.xd = (float)(Math.random() * 0.2f - 0.1f);
+        this.yd = 0.2f;
+        this.zd = (float)(Math.random() * 0.2f - 0.1f);
     }
     
     @Override
@@ -69,7 +69,7 @@ public class ItemEntity extends Entity
         this.zo = this.z;
         this.yd -= 0.03999999910593033;
         if (this.level.getMaterial(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z)) == Material.lava) {
-            this.yd = 0.20000000298023224;
+            this.yd = 0.2f;
             this.xd = (this.random.nextFloat() - this.random.nextFloat()) * 0.2f;
             this.zd = (this.random.nextFloat() - this.random.nextFloat()) * 0.2f;
             this.level.playSound(this, "random.fizz", 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
@@ -85,7 +85,7 @@ public class ItemEntity extends Entity
             }
         }
         this.xd *= n;
-        this.yd *= 0.9800000190734863;
+        this.yd *= 0.98f;
         this.zd *= n;
         if (this.onGround) {
             this.yd *= -0.5;

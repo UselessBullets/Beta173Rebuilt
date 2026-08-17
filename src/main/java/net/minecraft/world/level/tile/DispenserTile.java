@@ -134,20 +134,20 @@ public class DispenserTile extends EntityTile
         else {
             if (removeRandomItem.id == Item.arrow.id) {
                 final Arrow e = new Arrow(level, n3, y2, n4);
-                e.shoot(n, 0.10000000149011612, n2, 1.1f, 6.0f);
+                e.shoot(n, 0.1f, n2, 1.1f, 6.0f);
                 e.pickup = true;
                 level.addEntity(e);
                 level.levelEvent(1002, x, y, z, 0);
             }
             else if (removeRandomItem.id == Item.egg.id) {
                 final ThrownEgg e2 = new ThrownEgg(level, n3, y2, n4);
-                e2.shoot(n, 0.10000000149011612, n2, 1.1f, 6.0f);
+                e2.shoot(n, 0.1f, n2, 1.1f, 6.0f);
                 level.addEntity(e2);
                 level.levelEvent(1002, x, y, z, 0);
             }
             else if (removeRandomItem.id == Item.snowBall.id) {
                 final Snowball e3 = new Snowball(level, n3, y2, n4);
-                e3.shoot(n, 0.10000000149011612, n2, 1.1f, 6.0f);
+                e3.shoot(n, 0.1f, n2, 1.1f, 6.0f);
                 level.addEntity(e3);
                 level.levelEvent(1002, x, y, z, 0);
             }
@@ -155,7 +155,7 @@ public class DispenserTile extends EntityTile
                 final ItemEntity e4 = new ItemEntity(level, n3, y2 - 0.3, n4, removeRandomItem);
                 final double n5 = random.nextDouble() * 0.1 + 0.2;
                 e4.xd = n * n5;
-                e4.yd = 0.20000000298023224;
+                e4.yd = 0.2f;
                 e4.zd = n2 * n5;
                 final ItemEntity itemEntity = e4;
                 itemEntity.xd += random.nextGaussian() * 0.007499999832361937 * 6.0;

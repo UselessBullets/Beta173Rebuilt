@@ -62,9 +62,9 @@ public class FallingTile extends Entity
         ++this.time;
         this.yd -= 0.03999999910593033;
         this.move(this.xd, this.yd, this.zd);
-        this.xd *= 0.9800000190734863;
-        this.yd *= 0.9800000190734863;
-        this.zd *= 0.9800000190734863;
+        this.xd *= 0.98f;
+        this.yd *= 0.98f;
+        this.zd *= 0.98f;
         final int floor = Mth.floor(this.x);
         final int floor2 = Mth.floor(this.y);
         final int floor3 = Mth.floor(this.z);
@@ -72,8 +72,8 @@ public class FallingTile extends Entity
             this.level.setTile(floor, floor2, floor3, 0);
         }
         if (this.onGround) {
-            this.xd *= 0.699999988079071;
-            this.zd *= 0.699999988079071;
+            this.xd *= 0.7f;
+            this.zd *= 0.7f;
             this.yd *= -0.5;
             this.remove();
             if (!this.level.mayPlace(this.tile, floor, floor2, floor3, true, 1) || SandTile.isFree(this.level, floor, floor2 - 1, floor3) || !this.level.setTile(floor, floor2, floor3, this.tile)) {

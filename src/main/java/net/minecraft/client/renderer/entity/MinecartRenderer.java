@@ -28,7 +28,7 @@ public class MinecartRenderer extends EntityRenderer<Minecart>
         final double x2 = entity.xOld + (entity.x - entity.xOld) * partialTick;
         final double y2 = entity.yOld + (entity.y - entity.yOld) * partialTick;
         final double z2 = entity.zOld + (entity.z - entity.zOld) * partialTick;
-        final double offs = 0.30000001192092896;
+        final double offs = 0.3f;
         final Vec3 pos = entity.getPos(x2, y2, z2);
         float n = entity.xRotO + (entity.xRot - entity.xRotO) * partialTick;
         if (pos != null) {

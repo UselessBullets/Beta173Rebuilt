@@ -13,48 +13,42 @@ import net.minecraft.world.entity.Entity;
 public class Particle extends Entity
 {
     protected int tex;
-    protected float uo;
-    protected float vo;
-    protected int age;
-    protected int lifetime;
+    protected float uo, vo;
+    protected int age = 0;
+    protected int lifetime = 0;
     protected float size;
     protected float gravity;
-    protected float rCol;
-    protected float gCol;
-    protected float bCol;
-    public static double xOff;
-    public static double yOff;
-    public static double zOff;
+    protected float rCol, gCol, bCol;
+    public static double xOff, yOff, zOff;
     
     public Particle(final Level level, final double x, final double y, final double z, final double xa, final double ya, final double za) {
         super(level);
-        this.age = 0;
-        this.lifetime = 0;
         this.setSize(0.2f, 0.2f);
         this.heightOffset = this.bbHeight / 2.0f;
         this.setPos(x, y, z);
-        final float rCol = 1.0f;
-        this.bCol = rCol;
-        this.gCol = rCol;
-        this.rCol = rCol;
+        this.rCol = this.gCol = this.bCol = 1.0f;
+
         this.xd = xa + (float)(Math.random() * 2.0 - 1.0) * 0.4f;
         this.yd = ya + (float)(Math.random() * 2.0 - 1.0) * 0.4f;
         this.zd = za + (float)(Math.random() * 2.0 - 1.0) * 0.4f;
-        final float n = (float)(Math.random() + Math.random() + 1.0) * 0.15f;
-        final float sqrt = Mth.sqrt(this.xd * this.xd + this.yd * this.yd + this.zd * this.zd);
-        this.xd = this.xd / sqrt * n * 0.4000000059604645;
-        this.yd = this.yd / sqrt * n * 0.4000000059604645 + 0.10000000149011612;
-        this.zd = this.zd / sqrt * n * 0.4000000059604645;
+        final float speed = (float)(Math.random() + Math.random() + 1.0) * 0.15f;
+
+        final float dd = Mth.sqrt(this.xd * this.xd + this.yd * this.yd + this.zd * this.zd);
+        this.xd = this.xd / dd * speed * 0.4f;
+        this.yd = this.yd / dd * speed * 0.4f + 0.1f;
+        this.zd = this.zd / dd * speed * 0.4f;
+
         this.uo = this.random.nextFloat() * 3.0f;
         this.vo = this.random.nextFloat() * 3.0f;
+
         this.size = (this.random.nextFloat() * 0.5f + 0.5f) * 2.0f;
+
         this.lifetime = (int)(4.0f / (this.random.nextFloat() * 0.9f + 0.1f));
-        this.age = 0;
     }
     
     public Particle setPower(final float power) {
         this.xd *= power;
-        this.yd = (this.yd - 0.10000000149011612) * power + 0.10000000149011612;
+        this.yd = (this.yd - 0.1f) * power + 0.1f;
         this.zd *= power;
         return this;
     }
@@ -79,35 +73,39 @@ public class Particle extends Entity
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
-        if (this.age++ >= this.lifetime) {
-            this.remove();
-        }
+
+        if (this.age++ >= this.lifetime) this.remove();
+
         this.yd -= 0.04 * this.gravity;
         this.move(this.xd, this.yd, this.zd);
-        this.xd *= 0.9800000190734863;
-        this.yd *= 0.9800000190734863;
-        this.zd *= 0.9800000190734863;
+        this.xd *= 0.98f;
+        this.yd *= 0.98f;
+        this.zd *= 0.98f;
+
         if (this.onGround) {
-            this.xd *= 0.699999988079071;
-            this.zd *= 0.699999988079071;
+            this.xd *= 0.7f;
+            this.zd *= 0.7f;
         }
     }
     
     public void render(final Tesselator t, final float partialTick, final float xa, final float ya, final float za, final float xa2, final float za2) {
-        final float n = this.tex % 16 / 16.0f;
-        final float n2 = n + 0.0624375f;
-        final float n3 = this.tex / 16 / 16.0f;
-        final float n4 = n3 + 0.0624375f;
-        final float n5 = 0.1f * this.size;
-        final float n6 = (float)(this.xo + (this.x - this.xo) * partialTick - Particle.xOff);
-        final float n7 = (float)(this.yo + (this.y - this.yo) * partialTick - Particle.yOff);
-        final float n8 = (float)(this.zo + (this.z - this.zo) * partialTick - Particle.zOff);
-        final float brightness = this.getBrightness(partialTick);
-        t.color(this.rCol * brightness, this.gCol * brightness, this.bCol * brightness);
-        t.vertexUV(n6 - xa * n5 - xa2 * n5, n7 - ya * n5, n8 - za * n5 - za2 * n5, n2, n4);
-        t.vertexUV(n6 - xa * n5 + xa2 * n5, n7 + ya * n5, n8 - za * n5 + za2 * n5, n2, n3);
-        t.vertexUV(n6 + xa * n5 + xa2 * n5, n7 + ya * n5, n8 + za * n5 + za2 * n5, n, n3);
-        t.vertexUV(n6 + xa * n5 - xa2 * n5, n7 - ya * n5, n8 + za * n5 - za2 * n5, n, n4);
+        final float u0 = this.tex % 16 / 16.0f;
+        final float u1 = u0 + 0.999f / 16.0f;
+        final float v0 = this.tex / 16 / 16.0f;
+        final float v1 = v0 + 0.999f / 16.0f;
+        final float r = 0.1f * this.size;
+
+        final float x = (float)(this.xo + (this.x - this.xo) * partialTick - Particle.xOff);
+        final float y = (float)(this.yo + (this.y - this.yo) * partialTick - Particle.yOff);
+        final float z = (float)(this.zo + (this.z - this.zo) * partialTick - Particle.zOff);
+
+        final float br = this.getBrightness(partialTick);
+
+        t.color(this.rCol * br, this.gCol * br, this.bCol * br);
+        t.vertexUV(x - xa * r - xa2 * r, y - ya * r, z - za * r - za2 * r, u1, v1);
+        t.vertexUV(x - xa * r + xa2 * r, y + ya * r, z - za * r + za2 * r, u1, v0);
+        t.vertexUV(x + xa * r + xa2 * r, y + ya * r, z + za * r + za2 * r, u0, v0);
+        t.vertexUV(x + xa * r - xa2 * r, y - ya * r, z + za * r - za2 * r, u0, v1);
     }
     
     public int getParticleTexture() {

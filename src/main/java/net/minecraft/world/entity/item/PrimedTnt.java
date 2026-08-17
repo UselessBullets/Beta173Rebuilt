@@ -26,7 +26,7 @@ public class PrimedTnt extends Entity
         this.setPos(xo, yo, zo);
         final float n = (float)(Math.random() * Math.PI * 2.0);
         this.xd = -Mth.sin(n * Mth.DEGRAD) * 0.02f;
-        this.yd = 0.20000000298023224;
+        this.yd = 0.2f;
         this.zd = -Mth.cos(n * Mth.DEGRAD) * 0.02f;
         this.life = 80;
         this.xo = xo;
@@ -55,12 +55,12 @@ public class PrimedTnt extends Entity
         this.zo = this.z;
         this.yd -= 0.03999999910593033;
         this.move(this.xd, this.yd, this.zd);
-        this.xd *= 0.9800000190734863;
-        this.yd *= 0.9800000190734863;
-        this.zd *= 0.9800000190734863;
+        this.xd *= 0.98f;
+        this.yd *= 0.98f;
+        this.zd *= 0.98f;
         if (this.onGround) {
-            this.xd *= 0.699999988079071;
-            this.zd *= 0.699999988079071;
+            this.xd *= 0.7f;
+            this.zd *= 0.7f;
             this.yd *= -0.5;
         }
         if (this.life-- <= 0) {

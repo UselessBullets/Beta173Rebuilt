@@ -23,9 +23,9 @@ public class FlyingMob extends Mob
         if (this.isInWater()) {
             this.moveRelative(xa, ya, 0.02f);
             this.move(this.xd, this.yd, this.zd);
-            this.xd *= 0.800000011920929;
-            this.yd *= 0.800000011920929;
-            this.zd *= 0.800000011920929;
+            this.xd *= 0.8f;
+            this.yd *= 0.8f;
+            this.zd *= 0.8f;
         }
         else if (this.isInLava()) {
             this.moveRelative(xa, ya, 0.02f);

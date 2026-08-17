@@ -342,9 +342,9 @@ public class TileRenderer
             brightness = 1.0f;
         }
         instance.color(brightness, brightness, brightness);
-        final double n = 0.4000000059604645;
+        final double n = 0.4f;
         final double n2 = 0.5 - n;
-        final double n3 = 0.20000000298023224;
+        final double n3 = 0.2f;
         if (data == 1) {
             this.tesselateTorch(tt, x - n2, y + n3, z, -n, 0.0);
         }

@@ -35,7 +35,7 @@ public class FireTexture extends DynamicTexture
                 }
                 this.next[i + j * 16] = n2 / (n * 1.06f);
                 if (j >= 19) {
-                    this.next[i + j * 16] = (float)(Math.random() * Math.random() * Math.random() * 4.0 + Math.random() * 0.10000000149011612 + 0.20000000298023224);
+                    this.next[i + j * 16] = (float)(Math.random() * Math.random() * Math.random() * 4.0 + Math.random() * 0.1f + 0.2f);
                 }
             }
         }

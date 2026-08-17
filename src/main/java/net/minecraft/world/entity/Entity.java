@@ -222,7 +222,7 @@ public abstract class Entity
         this.yRotO = this.yRot;
         if (this.updateInWaterState()) {
             if (!this.wasInWater && !this.firstTick) {
-                float volume = Mth.sqrt(this.xd * this.xd * 0.20000000298023224 + this.yd * this.yd + this.zd * this.zd * 0.20000000298023224) * 0.2f;
+                float volume = Mth.sqrt(this.xd * this.xd * 0.2f + this.yd * this.yd + this.zd * this.zd * 0.2f) * 0.2f;
                 if (volume > 1.0f) {
                     volume = 1.0f;
                 }
@@ -439,7 +439,7 @@ public abstract class Entity
         if (this.makeStepSound() && !b && this.riding == null) {
             this.walkDist += (float)(Mth.sqrt(n12 * n12 + n13 * n13) * 0.6);
             final int floor = Mth.floor(this.x);
-            final int floor2 = Mth.floor(this.y - 0.20000000298023224 - this.heightOffset);
+            final int floor2 = Mth.floor(this.y - 0.2f - this.heightOffset);
             final int floor3 = Mth.floor(this.z);
             int n14 = this.level.getTile(floor, floor2, floor3);
             if (this.level.getTile(floor, floor2 - 1, floor3) == Tile.fence.id) {
@@ -536,7 +536,7 @@ public abstract class Entity
     }
     
     public boolean updateInWaterState() {
-        return this.level.checkAndHandleWater(this.bb.grow(0.0, -0.4000000059604645, 0.0).shrink(0.001, 0.001, 0.001), Material.water, this);
+        return this.level.checkAndHandleWater(this.bb.grow(0.0, -0.4f, 0.0).shrink(0.001, 0.001, 0.001), Material.water, this);
     }
     
     public boolean isUnderLiquid(final Material material) {
@@ -553,7 +553,7 @@ public abstract class Entity
     }
     
     public boolean isInLava() {
-        return this.level.containsMaterial(this.bb.grow(-0.10000000149011612, -0.4000000059604645, -0.10000000149011612), Material.lava);
+        return this.level.containsMaterial(this.bb.grow(-0.1f, -0.4f, -0.1f), Material.lava);
     }
     
     public void moveRelative(float xa, float za, final float speed) {
@@ -668,7 +668,7 @@ public abstract class Entity
         final double a = e.x - this.x;
         final double b = e.z - this.z;
         final double asbMax = Mth.asbMax(a, b);
-        if (asbMax >= 0.009999999776482582) {
+        if (asbMax >= 0.01f) {
             final double n = Mth.sqrt(asbMax);
             final double n2 = a / n;
             final double n3 = b / n;

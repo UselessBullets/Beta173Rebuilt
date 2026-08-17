@@ -78,7 +78,7 @@ public class Arrow extends Entity
         this.setSize(0.5f, 0.5f);
         this.moveTo(mob.x, mob.y + mob.getHeadHeight(), mob.z, mob.yRot, mob.xRot);
         this.x -= Mth.cos(this.yRot / 180.0f * Mth.PI) * 0.16f;
-        this.y -= 0.10000000149011612;
+        this.y -= 0.1f;
         this.z -= Mth.sin(this.yRot / 180.0f * Mth.PI) * 0.16f;
         this.setPos(this.x, this.y, this.z);
         this.heightOffset = 0.0f;
@@ -196,9 +196,9 @@ public class Arrow extends Entity
                         this.remove();
                     }
                     else {
-                        this.xd *= -0.10000000149011612;
-                        this.yd *= -0.10000000149011612;
-                        this.zd *= -0.10000000149011612;
+                        this.xd *= -0.1f;
+                        this.yd *= -0.1f;
+                        this.zd *= -0.1f;
                         this.yRot += 180.0f;
                         this.yRotO += 180.0f;
                         this.flightTime = 0;

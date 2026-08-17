@@ -79,7 +79,7 @@ public class FishingHook extends Entity
         (this.owner.fishing = this).setSize(0.25f, 0.25f);
         this.moveTo(mob.x, mob.y + 1.62 - mob.heightOffset, mob.z, mob.yRot, mob.xRot);
         this.x -= Mth.cos(this.yRot / 180.0f * Mth.PI) * 0.16f;
-        this.y -= 0.10000000149011612;
+        this.y -= 0.1f;
         this.z -= Mth.sin(this.yRot / 180.0f * Mth.PI) * 0.16f;
         this.setPos(this.x, this.y, this.z);
         this.heightOffset = 0.0f;
@@ -285,7 +285,7 @@ public class FishingHook extends Entity
                 }
                 if (this.random.nextInt(bound) == 0) {
                     this.nibble = this.random.nextInt(30) + 10;
-                    this.yd -= 0.20000000298023224;
+                    this.yd -= 0.2f;
                     this.level.playSound(this, "random.splash", 0.25f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
                     final float n7 = (float)Mth.floor(this.bb.y0);
                     for (int n8 = 0; n8 < 1.0f + this.bbWidth * 20.0f; ++n8) {

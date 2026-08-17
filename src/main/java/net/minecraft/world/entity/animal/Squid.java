@@ -150,7 +150,7 @@ public class Squid extends WaterAnimal
             if (!this.interpolateOnly) {
                 this.xd = 0.0;
                 this.yd -= 0.08;
-                this.yd *= 0.9800000190734863;
+                this.yd *= 0.98f;
                 this.zd = 0.0;
             }
             this.xBodyRot += (float)((-90.0f - this.xBodyRot) * 0.02);

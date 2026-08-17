@@ -94,7 +94,7 @@ public class RemotePlayer extends Player
         }
         this.oBob = this.bob;
         float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
-        float n2 = (float)Math.atan(-this.yd * 0.20000000298023224) * 15.0f;
+        float n2 = (float)Math.atan(-this.yd * 0.2f) * 15.0f;
         if (sqrt > 0.1f) {
             sqrt = 0.1f;
         }

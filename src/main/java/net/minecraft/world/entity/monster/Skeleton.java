@@ -57,7 +57,7 @@ public class Skeleton extends Monster
                 final Arrow arrow;
                 final Arrow e = arrow = new Arrow(this.level, this);
                 arrow.y += 1.399999976158142;
-                final double n3 = target.y + target.getHeadHeight() - 0.20000000298023224 - e.y;
+                final double n3 = target.y + target.getHeadHeight() - 0.2f - e.y;
                 final float n4 = Mth.sqrt(n * n + n2 * n2) * 0.2f;
                 this.level.playSound(this, "random.bow", 1.0f, 1.0f / (this.random.nextFloat() * 0.4f + 0.8f));
                 this.level.addEntity(e);

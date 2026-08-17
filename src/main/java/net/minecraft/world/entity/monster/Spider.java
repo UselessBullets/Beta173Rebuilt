@@ -63,9 +63,9 @@ public class Spider extends Monster
                 final double n = target.x - this.x;
                 final double n2 = target.z - this.z;
                 final float sqrt = Mth.sqrt(n * n + n2 * n2);
-                this.xd = n / sqrt * 0.5 * 0.800000011920929 + this.xd * 0.20000000298023224;
-                this.zd = n2 / sqrt * 0.5 * 0.800000011920929 + this.zd * 0.20000000298023224;
-                this.yd = 0.4000000059604645;
+                this.xd = n / sqrt * 0.5 * 0.8f + this.xd * 0.2f;
+                this.zd = n2 / sqrt * 0.5 * 0.8f + this.zd * 0.2f;
+                this.yd = 0.4f;
             }
         }
         else {

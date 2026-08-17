@@ -91,7 +91,7 @@ public abstract class Mob extends Entity
         this.attackTime = 0;
         this.dead = false;
         this.modelNum = -1;
-        this.animSpeed = (float)(Math.random() * 0.8999999761581421 + 0.10000000149011612);
+        this.animSpeed = (float)(Math.random() * 0.90f + 0.1f);
         this.fallTime = 0.0f;
         this.lastHurt = 0;
         this.noActionTime = 0;
@@ -404,10 +404,10 @@ public abstract class Mob extends Entity
         this.yd /= 2.0;
         this.zd /= 2.0;
         this.xd -= xd / sqrt * n;
-        this.yd += 0.4000000059604645;
+        this.yd += 0.4f;
         this.zd -= zd / sqrt * n;
-        if (this.yd > 0.4000000059604645) {
-            this.yd = 0.4000000059604645;
+        if (this.yd > 0.4f) {
+            this.yd = 0.4f;
         }
     }
     
@@ -444,7 +444,7 @@ public abstract class Mob extends Entity
         final int dmg = (int)Math.ceil(distance - 3.0f);
         if (dmg > 0) {
             this.hurt(null, dmg);
-            final int tile = this.level.getTile(Mth.floor(this.x), Mth.floor(this.y - 0.20000000298023224 - this.heightOffset), Mth.floor(this.z));
+            final int tile = this.level.getTile(Mth.floor(this.x), Mth.floor(this.y - 0.2f - this.heightOffset), Mth.floor(this.z));
             if (tile > 0) {
                 final Tile.SoundType soundType = Tile.tiles[tile].soundType;
                 this.level.playSound(this, soundType.getStepSound(), soundType.getVolume() * 0.5f, soundType.getPitch() * 0.75f);
@@ -457,12 +457,12 @@ public abstract class Mob extends Entity
             final double y = this.y;
             this.moveRelative(xa, ya, 0.02f);
             this.move(this.xd, this.yd, this.zd);
-            this.xd *= 0.800000011920929;
-            this.yd *= 0.800000011920929;
-            this.zd *= 0.800000011920929;
+            this.xd *= 0.8f;
+            this.yd *= 0.8f;
+            this.zd *= 0.8f;
             this.yd -= 0.02;
             if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6000000238418579 - this.y + y, this.zd)) {
-                this.yd = 0.30000001192092896;
+                this.yd = 0.3f;
             }
         }
         else if (this.isInLava()) {
@@ -474,7 +474,7 @@ public abstract class Mob extends Entity
             this.zd *= 0.5;
             this.yd -= 0.02;
             if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6000000238418579 - this.y + y2, this.zd)) {
-                this.yd = 0.30000001192092896;
+                this.yd = 0.3f;
             }
         }
         else {
@@ -523,7 +523,7 @@ public abstract class Mob extends Entity
                 this.yd = 0.2;
             }
             this.yd -= 0.08;
-            this.yd *= 0.9800000190734863;
+            this.yd *= 0.98f;
             this.xd *= n3;
             this.zd *= n3;
         }
@@ -621,7 +621,7 @@ public abstract class Mob extends Entity
         this.yya *= 0.98f;
         this.yRotA *= 0.9f;
         this.travel(this.xxa, this.yya);
-        final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.20000000298023224, 0.0, 0.20000000298023224));
+        final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.2f, 0.0, 0.2f));
         if (entities != null && entities.size() > 0) {
             for (int j = 0; j < entities.size(); ++j) {
                 final Entity entity = entities.get(j);

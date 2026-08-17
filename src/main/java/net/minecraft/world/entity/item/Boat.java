@@ -77,7 +77,7 @@ public class Boat extends Entity
     
     @Override
     public double getRideHeight() {
-        return this.bbHeight * 0.0 - 0.30000001192092896;
+        return this.bbHeight * 0.0 - 0.3f;
     }
     
     @Override
@@ -181,9 +181,9 @@ public class Boat extends Entity
                     this.yd *= 0.5;
                     this.zd *= 0.5;
                 }
-                this.xd *= 0.9900000095367432;
+                this.xd *= 0.99f;
                 this.yd *= 0.949999988079071;
-                this.zd *= 0.9900000095367432;
+                this.zd *= 0.99f;
             }
             return;
         }
@@ -246,9 +246,9 @@ public class Boat extends Entity
             }
         }
         else {
-            this.xd *= 0.9900000095367432;
+            this.xd *= 0.99f;
             this.yd *= 0.949999988079071;
-            this.zd *= 0.9900000095367432;
+            this.zd *= 0.99f;
         }
         this.xRot = 0.0f;
         double n8 = this.yRot;
@@ -269,7 +269,7 @@ public class Boat extends Entity
             n9 = -20.0;
         }
         this.setRot(this.yRot += (float)n9, this.xRot);
-        final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.20000000298023224, 0.0, 0.20000000298023224));
+        final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.2f, 0.0, 0.2f));
         if (entities != null && entities.size() > 0) {
             for (int l = 0; l < entities.size(); ++l) {
                 final Entity entity = entities.get(l);

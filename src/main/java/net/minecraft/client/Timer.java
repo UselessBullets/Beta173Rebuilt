@@ -40,7 +40,7 @@ public class Timer
         else {
             this.passedMs += n;
             if (this.passedMs > 1000L) {
-                this.adjustTime += (this.passedMs / (double)(n2 - this.lastMsSysTime) - this.adjustTime) * 0.20000000298023224;
+                this.adjustTime += (this.passedMs / (double)(n2 - this.lastMsSysTime) - this.adjustTime) * 0.2f;
                 this.lastMsSysTime = n2;
                 this.passedMs = 0L;
             }

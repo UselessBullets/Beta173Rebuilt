@@ -244,7 +244,7 @@ public abstract class Player extends Mob
         this.oBob = this.bob;
         super.aiStep();
         float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
-        float n = (float)Math.atan(-this.yd * 0.20000000298023224) * 15.0f;
+        float n = (float)Math.atan(-this.yd * 0.2f) * 15.0f;
         if (sqrt > 0.1f) {
             sqrt = 0.1f;
         }
@@ -282,7 +282,7 @@ public abstract class Player extends Mob
         super.die(source);
         this.setSize(0.2f, 0.2f);
         this.setPos(this.x, this.y, this.z);
-        this.yd = 0.10000000149011612;
+        this.yd = 0.1f;
         if (this.name.equals("Notch")) {
             this.drop(new ItemInstance(Item.apple, 1), true);
         }
@@ -323,14 +323,14 @@ public abstract class Player extends Mob
         if (item == null) {
             return;
         }
-        final ItemEntity itemEntity = new ItemEntity(this.level, this.x, this.y - 0.30000001192092896 + this.getHeadHeight(), this.z, item);
+        final ItemEntity itemEntity = new ItemEntity(this.level, this.x, this.y - 0.3f + this.getHeadHeight(), this.z, item);
         itemEntity.throwTime = 40;
         if (randomly) {
             final float n = this.random.nextFloat() * 0.5f;
             final float n2 = this.random.nextFloat() * Mth.PI * 2.0f;
             itemEntity.xd = -Mth.sin(n2) * n;
             itemEntity.zd = Mth.cos(n2) * n;
-            itemEntity.yd = 0.20000000298023224;
+            itemEntity.yd = 0.2f;
         }
         else {
             final float n3 = 0.3f;

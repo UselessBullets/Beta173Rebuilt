@@ -20,14 +20,11 @@ import static org.lwjgl.opengl.GL12.*;
 public abstract class AbstractContainerScreen extends Screen
 {
     private static ItemRenderer itemRenderer = new ItemRenderer();
-    protected int imageWidth;
-    protected int imageHeight;
+    protected int imageWidth = 176;
+    protected int imageHeight = 166;
     public AbstractContainerMenu menu;
     
     public AbstractContainerScreen(final AbstractContainerMenu menu) {
-        this.imageWidth = 176;
-        this.imageHeight = 166;
-
         this.menu = menu;
     }
     

@@ -9,14 +9,9 @@ import org.lwjgl.input.Keyboard;
 
 public class ChatScreen extends Screen
 {
-    protected String message;
-    private int frame;
+    protected String message = "";
+    private int frame = 0;
     private static final String allowedChars = SharedConstants.acceptableLetters;
-    
-    public ChatScreen() {
-        this.message = "";
-        this.frame = 0;
-    }
     
     @Override
     public void init() {

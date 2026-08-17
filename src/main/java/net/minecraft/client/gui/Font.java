@@ -20,9 +20,9 @@ import static org.lwjgl.opengl.GL11.*;
 public class Font
 {
     private int[] charWidths;
-    public int fontTexture;
+    public int fontTexture = 0;
     private int listPos;
-    private IntBuffer ib;
+    private IntBuffer ib = MemoryTracker.createIntBuffer(1024);
 
     // Useless - Added these font constants since they were variable in LCE leaks
     private static final int FONT_COLUMNS = 16;
@@ -32,10 +32,7 @@ public class Font
 
     public Font(final Options options, final String name, final Textures textures) {
         final int charC = FONT_COLUMNS * FONT_ROWS; // Number of characters in the font
-
         this.charWidths = new int[charC];
-        this.fontTexture = 0;
-        this.ib = MemoryTracker.createIntBuffer(1024);
 
         BufferedImage img;
         try {

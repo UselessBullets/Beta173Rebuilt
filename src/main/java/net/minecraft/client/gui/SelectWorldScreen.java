@@ -26,10 +26,10 @@ public class SelectWorldScreen extends Screen
     protected static final int BUTTON_DOWN_ID = 5;
     protected static final int BUTTON_RENAME_ID = 6;
 
-    private final DateFormat DATE_FORMAT;
+    private final DateFormat DATE_FORMAT = new SimpleDateFormat();
     protected Screen lastScreen;
-    protected String title;
-    private boolean done;
+    protected String title = "Select world";
+    private boolean done = false;
     private int selectedWorld;
     private List<LevelSummary> levelList;
     private WorldSelectionList worldSelectionList;
@@ -41,9 +41,6 @@ public class SelectWorldScreen extends Screen
     private Button renameButton;
     
     public SelectWorldScreen(final Screen lastScreen) {
-        this.DATE_FORMAT = new SimpleDateFormat();
-        this.title = "Select world";
-        this.done = false;
         this.lastScreen = lastScreen;
     }
     

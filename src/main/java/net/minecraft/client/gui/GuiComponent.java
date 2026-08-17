@@ -10,12 +10,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class GuiComponent
 {
-    protected float blitOffset;
-    
-    public GuiComponent() {
-        this.blitOffset = 0.0f;
-    }
-    
+    protected float blitOffset = 0.0f;
+
     protected void hLine(int x0, int x1, final int y, final int col) {
         if (x1 < x0) {
             final int tmp = x0;

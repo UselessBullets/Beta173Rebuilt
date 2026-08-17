@@ -11,12 +11,11 @@ import net.minecraft.client.Options;
 public class VideoSettingsScreen extends Screen
 {
     private Screen lastScreen;
-    protected String title;
+    protected String title = "Video Settings";
     private Options options;
     private static Option[] OPTIONS = new Option[] { Option.GRAPHICS, Option.RENDER_DISTANCE, Option.AMBIENT_OCCLUSION, Option.FRAMERATE_LIMIT, Option.ANAGLYPH, Option.VIEW_BOBBING, Option.GUI_SCALE, Option.ADVANCED_OPENGL };
     
     public VideoSettingsScreen(final Screen lastScreen, final Options options) {
-        this.title = "Video Settings";
         this.lastScreen = lastScreen;
         this.options = options;
     }

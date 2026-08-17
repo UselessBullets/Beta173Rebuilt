@@ -22,18 +22,15 @@ import net.minecraft.world.level.chunk.ChunkSource;
 // TODO Useless - find better deobf info for this class
 public class ServerChunkCache implements ChunkSource
 {
-    private Set<Integer> toDrop;
+    private Set<Integer> toDrop = new HashSet<>();
     private LevelChunk emptyChunk;
     private ChunkSource source;
     private ChunkStorage storage;
-    private Map<Integer, LevelChunk> cache;
-    private List<LevelChunk> loadedChunkList;
+    private Map<Integer, LevelChunk> cache = new HashMap<>();
+    private List<LevelChunk> loadedChunkList = new ArrayList<>();
     private Level level;
     
     public ServerChunkCache(final Level level, final ChunkStorage storage, final ChunkSource source) {
-        this.toDrop = new HashSet<>();
-        this.cache = new HashMap<>();
-        this.loadedChunkList = new ArrayList<>();
         this.emptyChunk = new EmptyLevelChunk(level, new byte[32768], 0, 0);
         this.level = level;
         this.storage = storage;

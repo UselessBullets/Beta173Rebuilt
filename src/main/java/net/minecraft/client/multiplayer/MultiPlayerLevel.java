@@ -21,19 +21,15 @@ import net.minecraft.world.level.Level;
 public class MultiPlayerLevel extends Level
 {
     private static final int TICKS_BEFORE_RESET = 80;
-    private LinkedList<ResetInfo> updatesToReset;
+    private LinkedList<ResetInfo> updatesToReset = new LinkedList<>();
     private ClientConnection connection;
     private MultiPlayerChunkCache chunkCache;
-    private IntHashMap<Entity> entitiesById;
-    private Set<Entity> forced;
-    private Set<Entity> reEntries;
+    private IntHashMap<Entity> entitiesById = new IntHashMap<>();
+    private Set<Entity> forced = new HashSet<>();
+    private Set<Entity> reEntries = new HashSet<>();
     
     public MultiPlayerLevel(final ClientConnection connection, final long seed, final int dimension) {
         super(new MockedLevelStorage(), "MpServer", Dimension.getNew(dimension), seed);
-        this.updatesToReset = new LinkedList<>();
-        this.entitiesById = new IntHashMap<>();
-        this.forced = new HashSet<>();
-        this.reEntries = new HashSet<>();
         this.connection = connection;
         this.setSpawnPos(new Pos(8, 64, 8));
         this.savedDataStorage = connection.savedDataStorage;

@@ -10,31 +10,16 @@ import java.util.Random;
 public class GuiParticle
 {
     private static final Random random = new Random();
-    public double x;
-    public double y;
-    public double xo;
-    public double yo;
-    public double xa;
-    public double ya;
+    public double x, y;
+    public double xo, yo;
+    public double xa, ya;
     public double friction;
-    public boolean removed;
-    public int life;
-    public int lifeTime;
-    public double r;
-    public double g;
-    public double b;
-    public double a;
-    public double or;
-    public double og;
-    public double ob;
-    public double oa;
+    public boolean removed = false;
+    public int life, lifeTime;
+    public double r, g, b, a = 1;
+    public double or, og, ob, oa;
 
     public GuiParticle(double x, double y, double xa, double ya) {
-        this.removed = false;
-        this.life = 0;
-        this.a = 1;
-        this.or = this.og = this.ob = this.oa = 0;
-
         this.xo = this.x = x;
         this.yo = this.y = y;
         this.xa = xa;

@@ -15,17 +15,14 @@ public class Button extends GuiComponent
     public int y;
     public String msg;
     public int id;
-    public boolean active;
-    public boolean visible;
+    public boolean active = true;
+    public boolean visible = true;
     
     public Button(final int id, final int x, final int y, final String msg) {
         this(id, x, y, 200, 20, msg);
     }
     
     public Button(final int id, final int x, final int y, final int w, final int h, final String msg) {
-        this.active = true;
-        this.visible = true;
-
         this.id = id;
         this.x = x;
         this.y = y;

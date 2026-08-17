@@ -13,14 +13,9 @@ import net.minecraft.locale.language.I18n;
 
 public class PauseScreen extends Screen
 {
-    private int saveStep;
-    private int visibleTime;
-    
-    public PauseScreen() {
-        this.saveStep = 0;
-        this.visibleTime = 0;
-    }
-    
+    private int saveStep = 0;
+    private int visibleTime = 0;
+
     @Override
     public void init() {
         this.saveStep = 0;

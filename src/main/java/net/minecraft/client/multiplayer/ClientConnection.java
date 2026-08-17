@@ -99,20 +99,16 @@ import net.minecraft.network.packet.PacketListener;
 
 public class ClientConnection extends PacketListener
 {
-    private boolean done;
+    private boolean done = false;
     private Connection connection;
     public String message;
     private Minecraft minecraft;
     private MultiPlayerLevel level;
-    private boolean started;
-    public SavedDataStorage savedDataStorage;
-    Random random;
+    private boolean started = false;
+    public SavedDataStorage savedDataStorage = new SavedDataStorage(null);
+    Random random = new Random();
     
     public ClientConnection(final Minecraft minecraft, final String ip, final int port) throws IOException {
-        this.done = false;
-        this.started = false;
-        this.savedDataStorage = new SavedDataStorage(null);
-        this.random = new Random();
         this.minecraft = minecraft;
         this.connection = new Connection(new Socket(InetAddress.getByName(ip), port), "Client", this);
     }

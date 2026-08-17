@@ -22,18 +22,13 @@ public class Cube
     public float xRot;
     public float yRot;
     public float zRot;
-    private boolean compiled;
-    private int list;
-    public boolean mirror;
-    public boolean visible;
-    public boolean neverRender;
+    private boolean compiled = false;
+    private int list = 0;
+    public boolean mirror = false;
+    public boolean visible = true;
+    public boolean neverRender = false;
     
     public Cube(final int xTexOffs, final int yTexOffs) {
-        this.compiled = false;
-        this.list = 0;
-        this.mirror = false;
-        this.visible = true;
-        this.neverRender = false;
         this.xTexOffs = xTexOffs;
         this.yTexOffs = yTexOffs;
     }

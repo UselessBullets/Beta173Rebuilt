@@ -10,19 +10,21 @@ public class ScreenSizeCalculator
 {
     private int w;
     private int h;
-    public double rawWidth;
-    public double rawHeight;
+    public double rawWidth, rawHeight;
     public int scale;
     
     public ScreenSizeCalculator(final Options options, final int width, final int height) {
         this.w = width;
         this.h = height;
         this.scale = 1;
+
         int maxScale = options.guiScale;
         if (maxScale == 0) maxScale = 1000;
+
         while (this.scale < maxScale && this.w / (this.scale + 1) >= 320 && this.h / (this.scale + 1) >= 240) {
             ++this.scale;
         }
+
         this.rawWidth = this.w / (double)this.scale;
         this.rawHeight = this.h / (double)this.scale;
         this.w = (int)Math.ceil(this.rawWidth);

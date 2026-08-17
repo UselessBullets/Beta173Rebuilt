@@ -19,13 +19,11 @@ import net.minecraft.world.level.chunk.ChunkSource;
 public class MultiPlayerChunkCache implements ChunkSource
 {
     private LevelChunk empty;
-    private Map<ChunkPos, LevelChunk> loadedChunks;
-    private List<LevelChunk> loadedChunkList;
+    private Map<ChunkPos, LevelChunk> loadedChunks = new HashMap<>();
+    private List<LevelChunk> loadedChunkList = new ArrayList<>();
     private Level level;
     
     public MultiPlayerChunkCache(final Level level) {
-        this.loadedChunks = new HashMap<>();
-        this.loadedChunkList = new ArrayList<>();
         this.empty = new EmptyLevelChunk(level, new byte[32768], 0, 0);
         this.level = level;
     }

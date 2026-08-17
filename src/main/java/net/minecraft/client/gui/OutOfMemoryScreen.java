@@ -6,12 +6,8 @@ package net.minecraft.client.gui;
 
 public class OutOfMemoryScreen extends Screen
 {
-    private int frame;
-    
-    public OutOfMemoryScreen() {
-        this.frame = 0;
-    }
-    
+    private int frame = 0;
+
     @Override
     public void tick() {
         ++this.frame;

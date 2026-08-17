@@ -12,12 +12,10 @@ public class Polygon
     private static final float X_TEX_SIZE = 64.0f; // Useless - doesn't definitely seem to exist in b1.7.3, however LCE made this a variable
     private static final float Y_TEX_SIZE = 32.0f; // Useless - doesn't definitely seem to exist in b1.7.3, however LCE made this a variable
     public Vertex[] vertices;
-    public int vertexCount;
-    private final boolean flipNormal;
+    public int vertexCount = 0;
+    private boolean flipNormal = false;
     
     public Polygon(final Vertex[] vertices) {
-        this.vertexCount = 0;
-        this.flipNormal = false;
         this.vertices = vertices;
         this.vertexCount = vertices.length;
     }
@@ -60,5 +58,10 @@ public class Polygon
             t.vertexUV((float)v.pos.x * scale, (float)v.pos.y * scale, (float)v.pos.z * scale, v.u, v.v);
         }
         t.end();
+    }
+
+    public Polygon flipNormal() {
+        this.flipNormal = true;
+        return this;
     }
 }

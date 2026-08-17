@@ -13,13 +13,11 @@ public class OptionsScreen extends Screen
     private static final int CONTROLS_BUTTON_ID = 100;
     private static final int VIDEO_BUTTON_ID = 101;
     private Screen lastScreen;
-    protected String title;
+    protected String title = "Options";
     private Options options;
     private static Option[] OPTIONS = new Option[] { Option.MUSIC, Option.SOUND, Option.INVERT_MOUSE, Option.SENSITIVITY, Option.DIFFICULTY };
     
     public OptionsScreen(final Screen lastScreen, final Options options) {
-        this.title = "Options";
-
         this.lastScreen = lastScreen;
         this.options = options;
     }

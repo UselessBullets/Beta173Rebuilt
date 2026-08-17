@@ -17,10 +17,9 @@ import java.net.UnknownHostException;
 public class ConnectScreen extends Screen
 {
     private ClientConnection connection;
-    private boolean aborted;
+    private boolean aborted = false;
     
     public ConnectScreen(final Minecraft minecraft, final String ip, final int port) {
-        this.aborted = false;
         System.out.println("Connecting to " + ip + ", " + port);
         minecraft.setLevel(null);
         new Thread(() -> {

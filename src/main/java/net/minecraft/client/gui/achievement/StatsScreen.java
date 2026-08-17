@@ -51,16 +51,14 @@ public class StatsScreen extends Screen
     private static final int SORT_DOWN = -1;
     private static final int SORT_UP = 1;
     protected Screen lastScreen;
-    protected String title;
+    protected String title = "Select world";
     private GeneralStatisticsList statsList;
     private ItemStatisticsList itemStatsList;
     private BlockStatisticsList blockStatsList;
     private final StatsCounter stats;
-    private ScrolledSelectionList activeList;
+    private ScrolledSelectionList activeList = null;
     
     public StatsScreen(final Screen lastScreen, final StatsCounter stats) {
-        this.title = "Select world";
-        this.activeList = null;
         this.lastScreen = lastScreen;
         this.stats = stats;
     }

@@ -24,18 +24,12 @@ public class Screen extends GuiComponent
     protected Minecraft minecraft;
     public int width;
     public int height;
-    protected List<Button> buttons;
-    public boolean passEvents;
+    protected List<Button> buttons = new ArrayList<>();
+    public boolean passEvents = false;
     protected Font font;
     public GuiParticles particles;
-    private Button clickedButton;
-    
-    public Screen() {
-        this.buttons = new ArrayList<>();
-        this.passEvents = false;
-        this.clickedButton = null;
-    }
-    
+    private Button clickedButton = null;
+
     public void render(final int xm, final int ym, final float partialTick) {
         for (int i = 0; i < this.buttons.size(); ++i) {
             this.buttons.get(i).render(this.minecraft, xm, ym);

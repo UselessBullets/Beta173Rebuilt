@@ -25,12 +25,11 @@ public class AchievementPopup extends GuiComponent
     private String desc;
     private Achievement ach;
     private long startTime;
-    private ItemRenderer ir;
+    private ItemRenderer ir = new ItemRenderer();
     private boolean isHelper;
     
     public AchievementPopup(final Minecraft mc) {
         this.mc = mc;
-        this.ir = new ItemRenderer();
     }
     
     public void popup(final Achievement ach) {

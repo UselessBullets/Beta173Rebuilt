@@ -17,13 +17,11 @@ public class EditBox extends GuiComponent
     private String value;
     private int maxLength;
     private int frame;
-    public boolean inFocus;
-    public boolean active;
+    public boolean inFocus = false;
+    public boolean active = true;
     private Screen screen;
     
     public EditBox(final Screen screen, final Font font, final int x, final int y, final int width, final int height, final String value) {
-        this.inFocus = false;
-        this.active = true;
         this.screen = screen;
         this.font = font;
         this.x = x;

@@ -29,26 +29,18 @@ public class Gui extends GuiComponent
 {
     private static final int MAX_MESSAGE_WIDTH = 320;
     private static ItemRenderer itemRenderer = new ItemRenderer();
-    private List<GuiMessage> guiMessages;
-    private Random random;
+    private List<GuiMessage> guiMessages = new ArrayList<>();
+    private Random random = new Random();
     private Minecraft minecraft;
-    public String selectedName;
-    private int tickCount;
-    private String overlayMessageString;
-    private int overlayMessageTime;
-    private boolean nowPlayingColor;
+    public String selectedName = null;
+    private int tickCount = 0;
+    private String overlayMessageString = "";
+    private int overlayMessageTime = 0;
+    private boolean nowPlayingColor = false;
     public float progress;
-    float tbr;
+    float tbr = 1.0f;
     
     public Gui(final Minecraft minecraft) {
-        this.guiMessages = new ArrayList<>();
-        this.random = new Random();
-        this.selectedName = null;
-        this.tickCount = 0;
-        this.overlayMessageString = "";
-        this.overlayMessageTime = 0;
-        this.nowPlayingColor = false;
-        this.tbr = 1.0f;
         this.minecraft = minecraft;
     }
     

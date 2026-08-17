@@ -15,10 +15,9 @@ import net.minecraft.client.Minecraft;
 public class GameMode
 {
     protected final Minecraft minecraft;
-    public boolean instaBuild;
+    public boolean instaBuild = false;
     
     public GameMode(final Minecraft minecraft) {
-        this.instaBuild = false;
         this.minecraft = minecraft;
     }
     

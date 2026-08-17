@@ -10,17 +10,14 @@ import net.minecraft.client.Options;
 public class ControlsScreen extends Screen
 {
     private Screen lastScreen;
-    protected String tile;
+    protected String tile = "Controls";
     private Options options;
-    private int selectedKey;
+    private int selectedKey = -1;
 
     private static final int BUTTON_WIDTH = 70;
     private static final int ROW_WIDTH = 160;
 
     public ControlsScreen(final Screen lastScreen, final Options options) {
-        this.tile = "Controls";
-        this.selectedKey = -1;
-
         this.lastScreen = lastScreen;
         this.options = options;
     }

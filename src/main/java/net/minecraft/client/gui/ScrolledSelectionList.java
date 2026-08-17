@@ -26,20 +26,16 @@ public abstract class ScrolledSelectionList
     protected final int itemHeight;
     private int upId;
     private int downId;
-    private float yDrag;
+    private float yDrag = -2.0f;
     private float yDragScale;
     private float yo;
-    private int lastSelection;
-    private long lastSelectionTime;
-    private boolean renderSelection;
+    private int lastSelection = -1;
+    private long lastSelectionTime = 0L;
+    private boolean renderSelection = true;
     private boolean renderHeader;
     private int headerHeight;
     
     public ScrolledSelectionList(final Minecraft minecraft, final int width, final int height, final int y0, final int y1, final int itemHeight) {
-        this.yDrag = -2.0f;
-        this.lastSelection = -1;
-        this.lastSelectionTime = 0L;
-        this.renderSelection = true;
         this.minecraft = minecraft;
         this.width = width;
         this.height = height;

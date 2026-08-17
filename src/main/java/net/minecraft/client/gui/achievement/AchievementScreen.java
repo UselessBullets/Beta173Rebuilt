@@ -37,30 +37,23 @@ public class AchievementScreen extends Screen
     private static final int xMax = Achievements.xMax * ACHIEVEMENT_COORD_SCALE - BIGMAP_HEIGHT / 2;
     private static final int yMax = Achievements.yMax * ACHIEVEMENT_COORD_SCALE - BIGMAP_HEIGHT / 2;
     private static final int MAX_BG_TILE_Y = (EDGE_VALUE_Y * 2 - 1) / 16;
-    protected int imageWidth;
-    protected int imageHeight;
-    protected int xLastScroll;
-    protected int yLastScroll;
+    protected int imageWidth = 256;
+    protected int imageHeight = 202;
+    protected int xLastScroll = 0;
+    protected int yLastScroll = 0;
     protected double xScrollO;
     protected double yScrollO;
     protected double xScrollP;
     protected double yScrollP;
     protected double xScrollTarget;
     protected double yScrollTarget;
-    private int scrolling;
+    private int scrolling = 0;
     private StatsCounter statsCounter;
     
     public AchievementScreen(final StatsCounter statsCounter) {
-        this.imageWidth = 256;
-        this.imageHeight = 202;
-        this.xLastScroll = 0;
-        this.yLastScroll = 0;
-        this.scrolling = 0;
-
         this.statsCounter = statsCounter;
         final int wBigMap = 141;
         final int hBigMap = 141;
-
 
         this.xScrollO = this.xScrollP = this.xScrollTarget = Achievements.openInventory.x * ACHIEVEMENT_COORD_SCALE - wBigMap / 2 - 12;
         this.yScrollO = this.yScrollP = this.yScrollTarget = Achievements.openInventory.y * ACHIEVEMENT_COORD_SCALE - hBigMap / 2;

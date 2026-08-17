@@ -20,28 +20,19 @@ import net.minecraft.client.gamemode.GameMode;
 
 public class MultiPlayerGameMode extends GameMode
 {
-    private int xDestroyBlock;
-    private int yDestroyBlock;
-    private int zDestroyBlock;
-    private float destroyProgress;
-    private float oDestroyProgress;
-    private float destroyTicks;
-    private int destroyDelay;
-    private boolean isDestroying;
+    private int xDestroyBlock = -1;
+    private int yDestroyBlock = -1;
+    private int zDestroyBlock = -1;
+    private float destroyProgress = 0.0f;
+    private float oDestroyProgress = 0.0f;
+    private float destroyTicks = 0.0f;
+    private int destroyDelay = 0;
+    private boolean isDestroying = false;
     private ClientConnection connection;
-    private int carriedItem;
+    private int carriedItem = 0;
     
     public MultiPlayerGameMode(final Minecraft minecraft, final ClientConnection connection) {
         super(minecraft);
-        this.xDestroyBlock = -1;
-        this.yDestroyBlock = -1;
-        this.zDestroyBlock = -1;
-        this.destroyProgress = 0.0f;
-        this.oDestroyProgress = 0.0f;
-        this.destroyTicks = 0.0f;
-        this.destroyDelay = 0;
-        this.isDestroying = false;
-        this.carriedItem = 0;
         this.connection = connection;
     }
     

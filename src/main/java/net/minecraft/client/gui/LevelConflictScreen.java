@@ -8,11 +8,7 @@ import net.minecraft.client.title.TitleScreen;
 
 public class LevelConflictScreen extends Screen
 {
-    private int frame;
-    
-    public LevelConflictScreen() {
-        this.frame = 0;
-    }
+    private int frame = 0;
     
     @Override
     public void tick() {

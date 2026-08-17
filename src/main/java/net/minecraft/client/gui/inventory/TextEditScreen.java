@@ -16,16 +16,13 @@ import net.minecraft.client.gui.Screen;
 
 public class TextEditScreen extends Screen
 {
-    protected String title;
+    protected String title = "Edit sign message:";
     private SignTileEntity sign;
     private int frame;
-    private int line;
+    private int line = 0;
     private static final String allowedChars = SharedConstants.acceptableLetters;
     
     public TextEditScreen(final SignTileEntity sign) {
-        this.line = 0;
-        this.title = "Edit sign message:";
-
         this.sign = sign;
     }
     

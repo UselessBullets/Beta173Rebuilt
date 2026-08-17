@@ -49,7 +49,7 @@ public class ReceivingLevelScreen extends Screen
         Language language = Language.getInstance();
 
         this.drawCenteredString(this.font, language.getElement("multiplayer.downloadingTerrain"), this.width / 2, this.height / 2 - 50, 0xffffff);
-        
+
         super.render(xm, ym, partialTick);
     }
 }

@@ -9,11 +9,7 @@ import net.minecraft.world.entity.Mob;
 public abstract class Model
 {
     public float attackTime;
-    public boolean riding;
-    
-    public Model() {
-        this.riding = false;
-    }
+    public boolean riding = false;
     
     public void render(final float time, final float r, final float bob, final float yRot, final float xRot, final float scale) {
     }

@@ -10,14 +10,12 @@ import net.minecraft.client.Minecraft;
 
 public class SlideButton extends Button
 {
-    public float value;
-    public boolean sliding;
+    public float value = 1.0f;
+    public boolean sliding = false;
     private Option option;
     
     public SlideButton(final int id, final int x, final int y, final Option option, final String msg, final float value) {
         super(id, x, y, 150, 20, msg);
-        this.value = 1.0f;
-        this.sliding = false;
         this.option = option;
         this.value = value;
     }

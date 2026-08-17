@@ -12,6 +12,11 @@ import net.minecraft.world.entity.Entity;
 
 public class AnimatePacket extends Packet
 {
+    public static final int SWING = 1;
+    public static final int HURT = 2;
+    public static final int WAKE_UP = 3;
+    public static final int RESPAWN = 4;
+
     public int id;
     public int action;
     

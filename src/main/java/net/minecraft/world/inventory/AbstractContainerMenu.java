@@ -21,6 +21,9 @@ public abstract class AbstractContainerMenu
     public static final int CLICK_QUICK_MOVE = 1;
     public static final int CLICK_SWAP = 2;
     public static final int CLICK_CLONE = 3;
+
+    public static final int CONTAINER_ID_CARRIED = -1;
+    public static final int CONTAINER_ID_INVENTORY = 0;
     public List<ItemInstance> lastSlots;
     public List<Slot> slots;
     public int containerId;

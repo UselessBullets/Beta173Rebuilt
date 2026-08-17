@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 public class SharedConstants
 {
     public static final String VERSION_STRING = "Beta 1.7.3";
+    public static final int NETWORK_PROTOCOL_VERSION = 14;
     public static final int maxChatLength = 100;
     public static final String acceptableLetters = readAcceptableChars();
     public static final char[] ILLEGAL_FILE_CHARACTERS = new char[] { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':' };

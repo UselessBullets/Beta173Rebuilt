@@ -181,7 +181,7 @@ public abstract class Packet
         map(54, true, false, TileEventPacket.class);
         map(60, true, false, ExplodePacket.class);
         map(61, true, false, LevelEventPacket.class);
-        map(70, true, false, BedResponsePacket.class);
+        map(70, true, false, GameEventPacket.class);
         map(71, true, false, AddGlobalEntityPacketPacket.class);
         map(100, true, false, ContainerOpenPacket.class);
         map(101, true, true, ContainerClosePacket.class);

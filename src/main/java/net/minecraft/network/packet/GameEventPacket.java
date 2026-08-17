@@ -8,39 +8,39 @@ import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public class BedResponsePacket extends Packet
+public class GameEventPacket extends Packet
 {
-    public static final String[] BED_RESPONSES;
-    public int type;
+    public static final int NO_RESPAWN_BED_AVAILABLE = 0;
+    public static final int START_RAINING = 1;
+    public static final int STOP_RAINING = 2;
+    public static final String[] EVENT_LANGUAGE_ID = new String[] { "tile.bed.notValid", null, null };
+    public int event;
 
-    public BedResponsePacket() {
+    public GameEventPacket() {
     }
 
-    public BedResponsePacket(final int type) {
-        this.type = type;
+    public GameEventPacket(final int event) {
+        this.event = event;
     }
 
     @Override
     public void read(final DataInputStream dis) throws IOException {
-        this.type = dis.readByte();
+        this.event = dis.readByte();
     }
     
     @Override
     public void write(final DataOutputStream dos) throws IOException {
-        dos.writeByte(this.type);
+        dos.writeByte(this.event);
     }
     
     @Override
     public void handle(final PacketListener listener) {
-        listener.handleBedResponse(this);
+        listener.handleGameEvent(this);
     }
     
     @Override
     public int getEstimatedSize() {
         return 1;
     }
-    
-    static {
-        BED_RESPONSES = new String[] { "tile.bed.notValid", null, null };
-    }
+
 }

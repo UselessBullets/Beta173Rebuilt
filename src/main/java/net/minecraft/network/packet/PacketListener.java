@@ -197,7 +197,7 @@ public abstract class PacketListener
         this.onUnhandledPacket(packet);
     }
     
-    public void handleBedResponse(final BedResponsePacket packet) {
+    public void handleGameEvent(final GameEventPacket packet) {
         this.onUnhandledPacket(packet);
     }
     

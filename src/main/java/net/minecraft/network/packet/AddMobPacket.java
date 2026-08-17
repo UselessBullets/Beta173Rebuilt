@@ -24,7 +24,7 @@ public class AddMobPacket extends Packet
     public byte yRot;
     public byte xRot;
     private SynchedEntityData entityData;
-    private List unpack;
+    private List<SynchedEntityData.DataItem> unpack;
     
     public AddMobPacket() {
     }
@@ -74,7 +74,7 @@ public class AddMobPacket extends Packet
         return 20;
     }
     
-    public List getUnpackedData() {
+    public List<SynchedEntityData.DataItem> getUnpackedData() {
         return this.unpack;
     }
 }

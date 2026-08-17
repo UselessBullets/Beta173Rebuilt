@@ -13,6 +13,21 @@ import java.io.IOException;
 
 public class AddEntityPacket extends Packet
 {
+    public static final int BOAT = 1;
+    public static final int MINECART_RIDEABLE = 10;
+    public static final int MINECART_CHEST = 11;
+    public static final int MINECART_FURNACE = 12;
+    public static final int PRIMED_TNT = 50;
+    public static final int ARROW = 60;
+    public static final int SNOWBALL = 61;
+    public static final int EGG = 62;
+    public static final int FIREBALL = 63;
+    public static final int FALLING_SAND = 70; // Useless - LCE called this just "Falling" and combined sand and gravel into one entity type, presumably in b1.7.3 they were split into two
+    public static final int FALLING_GRAVEL = 71;
+
+
+    public static final int FISH_HOOK = 90;
+
     public int id;
     public int x;
     public int y;

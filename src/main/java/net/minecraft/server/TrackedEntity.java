@@ -211,7 +211,7 @@ public class TrackedEntity
                     }
                 }
                 if (this.e instanceof Player && ((Player)this.e).isSleeping()) {
-                    sp.connection.send(new EntityActionAtPositionPacket(this.e, 0, Mth.floor(this.e.x), Mth.floor(this.e.y), Mth.floor(this.e.z)));
+                    sp.connection.send(new EntityActionAtPositionPacket(this.e, EntityActionAtPositionPacket.START_SLEEP, Mth.floor(this.e.x), Mth.floor(this.e.y), Mth.floor(this.e.z)));
                 }
             }
         }
@@ -242,52 +242,52 @@ public class TrackedEntity
         if (this.e instanceof Minecart) {
             final Minecart minecart = (Minecart)this.e;
             if (minecart.type == 0) {
-                return new AddEntityPacket(this.e, 10);
+                return new AddEntityPacket(this.e, AddEntityPacket.MINECART_RIDEABLE);
             }
             if (minecart.type == 1) {
-                return new AddEntityPacket(this.e, 11);
+                return new AddEntityPacket(this.e, AddEntityPacket.MINECART_CHEST);
             }
             if (minecart.type == 2) {
-                return new AddEntityPacket(this.e, 12);
+                return new AddEntityPacket(this.e, AddEntityPacket.MINECART_FURNACE);
             }
         }
         if (this.e instanceof Boat) {
-            return new AddEntityPacket(this.e, 1);
+            return new AddEntityPacket(this.e, AddEntityPacket.BOAT);
         }
         if (this.e instanceof Creature) {
             return new AddMobPacket((Mob)this.e);
         }
         if (this.e instanceof FishingHook) {
-            return new AddEntityPacket(this.e, 90);
+            return new AddEntityPacket(this.e, AddEntityPacket.FISH_HOOK);
         }
         if (this.e instanceof Arrow) {
             final Mob owner = ((Arrow)this.e).owner;
-            return new AddEntityPacket(this.e, 60, (owner != null) ? owner.entityId : this.e.entityId);
+            return new AddEntityPacket(this.e, AddEntityPacket.ARROW, (owner != null) ? owner.entityId : this.e.entityId);
         }
         if (this.e instanceof Snowball) {
-            return new AddEntityPacket(this.e, 61);
+            return new AddEntityPacket(this.e, AddEntityPacket.SNOWBALL);
         }
         if (this.e instanceof Fireball) {
             final Fireball fireball = (Fireball)this.e;
-            final AddEntityPacket addEntityPacket = new AddEntityPacket(this.e, 63, ((Fireball)this.e).owner.entityId);
+            final AddEntityPacket addEntityPacket = new AddEntityPacket(this.e, AddEntityPacket.FIREBALL, ((Fireball)this.e).owner.entityId);
             addEntityPacket.xa = (int)(fireball.xPower * 8000.0);
             addEntityPacket.ya = (int)(fireball.yPower * 8000.0);
             addEntityPacket.za = (int)(fireball.zPower * 8000.0);
             return addEntityPacket;
         }
         if (this.e instanceof ThrownEgg) {
-            return new AddEntityPacket(this.e, 62);
+            return new AddEntityPacket(this.e, AddEntityPacket.EGG);
         }
         if (this.e instanceof PrimedTnt) {
-            return new AddEntityPacket(this.e, 50);
+            return new AddEntityPacket(this.e, AddEntityPacket.PRIMED_TNT);
         }
         if (this.e instanceof FallingTile) {
             final FallingTile fallingTile = (FallingTile)this.e;
             if (fallingTile.tile == Tile.sand.id) {
-                return new AddEntityPacket(this.e, 70);
+                return new AddEntityPacket(this.e, AddEntityPacket.FALLING_SAND);
             }
             if (fallingTile.tile == Tile.gravel.id) {
-                return new AddEntityPacket(this.e, 71);
+                return new AddEntityPacket(this.e, AddEntityPacket.FALLING_GRAVEL);
             }
         }
         if (this.e instanceof Painting) {

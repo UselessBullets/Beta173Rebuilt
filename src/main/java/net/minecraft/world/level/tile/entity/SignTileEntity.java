@@ -10,6 +10,7 @@ import net.minecraft.network.packet.SignUpdatePacket;
 
 public class SignTileEntity extends TileEntity
 {
+    public static final int MAX_SIGN_LINES = 4;
     public String[] messages;
     public int selectedLine;
     private boolean isEditable;
@@ -33,7 +34,7 @@ public class SignTileEntity extends TileEntity
     public void load(final CompoundTag compoundTag) {
         this.isEditable = false;
         super.load(compoundTag);
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < MAX_SIGN_LINES; ++i) {
             this.messages[i] = compoundTag.getString("Text" + (i + 1));
             if (this.messages[i].length() > 15) {
                 this.messages[i] = this.messages[i].substring(0, 15);
@@ -43,8 +44,8 @@ public class SignTileEntity extends TileEntity
 
     @Override
     public Packet getUpdatePacket() {
-        final String[] lines = new String[4];
-        for (int i = 0; i < 4; ++i) {
+        final String[] lines = new String[MAX_SIGN_LINES];
+        for (int i = 0; i < MAX_SIGN_LINES; ++i) {
             lines[i] = this.messages[i];
         }
         return new SignUpdatePacket(this.x, this.y, this.z, lines);

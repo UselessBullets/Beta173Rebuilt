@@ -285,7 +285,7 @@ public class ServerPlayer extends Player implements ContainerListener
         final BedSleepingResult startSleepInBed = super.startSleepInBed(x, y, z);
         if (startSleepInBed == BedSleepingResult.OK) {
             final EntityTracker tracker = this.server.getTracker(this.dimension);
-            final EntityActionAtPositionPacket entityActionAtPositionPacket = new EntityActionAtPositionPacket(this, 0, x, y, z);
+            final EntityActionAtPositionPacket entityActionAtPositionPacket = new EntityActionAtPositionPacket(this, EntityActionAtPositionPacket.START_SLEEP, x, y, z);
             tracker.broadcast(this, entityActionAtPositionPacket);
             this.connection.teleport(this.x, this.y, this.z, this.yRot, this.xRot);
             this.connection.send(entityActionAtPositionPacket);

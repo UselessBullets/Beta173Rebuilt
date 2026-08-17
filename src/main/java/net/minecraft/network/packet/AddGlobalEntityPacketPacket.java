@@ -14,6 +14,8 @@ import net.minecraft.world.entity.Entity;
 
 public class AddGlobalEntityPacketPacket extends Packet
 {
+    public static final int LIGHTNING = 1;
+
     public int id;
     public int x;
     public int y;

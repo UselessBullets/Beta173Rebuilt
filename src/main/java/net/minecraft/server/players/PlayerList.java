@@ -16,7 +16,7 @@ import net.minecraft.world.level.PortalForcer;
 import net.minecraft.Pos;
 import net.minecraft.network.packet.RespawnPacket;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.BedResponsePacket;
+import net.minecraft.network.packet.GameEventPacket;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.PendingConnection;
 import net.minecraft.world.entity.player.Player;
@@ -168,7 +168,7 @@ public class PlayerList
                 serverPlayer2.setRespawnPosition(respawnPosition);
             }
             else {
-                serverPlayer2.connection.send(new BedResponsePacket(0));
+                serverPlayer2.connection.send(new GameEventPacket(GameEventPacket.NO_RESPAWN_BED_AVAILABLE));
             }
         }
         level.cache.create((int)serverPlayer2.x >> 4, (int)serverPlayer2.z >> 4);
@@ -513,7 +513,7 @@ public class PlayerList
     public void sendLevelInfo(final ServerPlayer player, final ServerLevel level) {
         player.connection.send(new SetTimePacket(level.getTime()));
         if (level.isRaining()) {
-            player.connection.send(new BedResponsePacket(1));
+            player.connection.send(new GameEventPacket(GameEventPacket.START_RAINING));
         }
     }
     

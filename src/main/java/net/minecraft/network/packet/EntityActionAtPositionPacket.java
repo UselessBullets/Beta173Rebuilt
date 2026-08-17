@@ -12,6 +12,8 @@ import java.io.IOException;
 
 public class EntityActionAtPositionPacket extends Packet
 {
+    public static final int START_SLEEP = 0;
+
     public int id;
     public int x;
     public int y;

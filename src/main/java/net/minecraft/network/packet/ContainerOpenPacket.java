@@ -10,6 +10,11 @@ import java.io.IOException;
 
 public class ContainerOpenPacket extends Packet
 {
+    public static final int CONTAINER = 0;
+    public static final int WORKBENCH = 1;
+    public static final int FURNACE = 2;
+    public static final int TRAP = 3;
+
     public int containerId;
     public int type;
     public String title;

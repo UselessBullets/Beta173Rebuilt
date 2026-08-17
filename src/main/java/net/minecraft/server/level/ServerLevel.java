@@ -4,7 +4,7 @@
 
 package net.minecraft.server.level;
 
-import net.minecraft.network.packet.BedResponsePacket;
+import net.minecraft.network.packet.GameEventPacket;
 import net.minecraft.network.packet.TileEventPacket;
 import net.minecraft.network.packet.ExplodePacket;
 import net.minecraft.world.level.Explosion;
@@ -136,10 +136,10 @@ public class ServerLevel extends Level
         super.tickWeather();
         if (raining != this.isRaining()) {
             if (raining) {
-                this.server.players.broadcastAll(new BedResponsePacket(2));
+                this.server.players.broadcastAll(new GameEventPacket(GameEventPacket.STOP_RAINING));
             }
             else {
-                this.server.players.broadcastAll(new BedResponsePacket(1));
+                this.server.players.broadcastAll(new GameEventPacket(GameEventPacket.START_RAINING));
             }
         }
     }

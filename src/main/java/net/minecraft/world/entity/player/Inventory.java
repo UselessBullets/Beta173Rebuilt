@@ -15,6 +15,12 @@ import net.minecraft.world.Container;
 
 public class Inventory implements Container
 {
+    public static final int POP_TIME_DURATION = 5;
+    public static final int MAX_INVENTORY_STACK_SIZE = 64;
+
+    private static final int INVENTORY_SIZE = 4 * 9;
+    private static final int SELECTION_SIZE = 9;
+
     public ItemInstance[] items;
     public ItemInstance[] armor;
     public int selected;

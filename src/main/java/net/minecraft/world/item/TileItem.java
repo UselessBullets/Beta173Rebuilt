@@ -15,8 +15,8 @@ public class TileItem extends Item
     
     public TileItem(final int id) {
         super(id);
-        this.tileId = id + 256;
-        this.setIcon(Tile.tiles[id + 256].getTexture(2));
+        this.tileId = id + Tile.TILE_NUM_COUNT;
+        this.setIcon(Tile.tiles[id + Tile.TILE_NUM_COUNT].getTexture(2));
     }
     
     @Override

@@ -7,7 +7,6 @@ package net.minecraft.client.renderer.entity;
 import net.minecraft.world.phys.Vec3;
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.projectile.FishingHook;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -16,70 +15,83 @@ import static org.lwjgl.opengl.GL12.*;
 public class FishingHookRenderer extends EntityRenderer<FishingHook>
 {
     public void render(final FishingHook entity, final double x, final double y, final double z, final float rot, final float a) {
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float)x, (float)y, (float)z);
-        GL11.glEnable(GL_RESCALE_NORMAL);
-        GL11.glScalef(0.5f, 0.5f, 0.5f);
-        final int n = 1;
-        final int n2 = 2;
+        glPushMatrix();
+
+        glTranslatef((float)x, (float)y, (float)z);
+        glEnable(GL_RESCALE_NORMAL);
+        glScalef(1 / 2.0f, 1 / 2.0f, 1 / 2.0f);
+        final int xi = 1;
+        final int yi = 2;
         this.bindTexture("/particles.png");
-        final Tesselator instance = Tesselator.instance;
-        final float n3 = (n * 8 + 0) / 128.0f;
-        final float n4 = (n * 8 + 8) / 128.0f;
-        final float n5 = (n2 * 8 + 0) / 128.0f;
-        final float n6 = (n2 * 8 + 8) / 128.0f;
-        final float n7 = 1.0f;
-        final float n8 = 0.5f;
-        final float n9 = 0.5f;
-        GL11.glRotatef(180.0f - this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(-this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
-        instance.begin();
-        instance.normal(0.0f, 1.0f, 0.0f);
-        instance.vertexUV(0.0f - n8, 0.0f - n9, 0.0, n3, n6);
-        instance.vertexUV(n7 - n8, 0.0f - n9, 0.0, n4, n6);
-        instance.vertexUV(n7 - n8, 1.0f - n9, 0.0, n4, n5);
-        instance.vertexUV(0.0f - n8, 1.0f - n9, 0.0, n3, n5);
-        instance.end();
-        GL11.glDisable(GL_RESCALE_NORMAL);
-        GL11.glPopMatrix();
+        final Tesselator t = Tesselator.instance;
+
+        final float u0 = (xi * 8 + 0) / 128.0f;
+        final float u1 = (xi * 8 + 8) / 128.0f;
+        final float v0 = (yi * 8 + 0) / 128.0f;
+        final float v1 = (yi * 8 + 8) / 128.0f;
+
+        final float r = 1.0f;
+        final float xo = 0.5f;
+        final float yo = 0.5f;
+
+        glRotatef(180.0f - this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        glRotatef(-this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+        t.begin();
+        t.normal(0.0f, 1.0f, 0.0f);
+        t.vertexUV(0 - xo, 0 - yo, 0, u0, v1);
+        t.vertexUV(r - xo, 0 - yo, 0, u1, v1);
+        t.vertexUV(r - xo, 1 - yo, 0, u1, v0);
+        t.vertexUV(0 - xo, 1 - yo, 0, u0, v0);
+        t.end();
+
+        glDisable(GL_RESCALE_NORMAL);
+        glPopMatrix();
+
         if (entity.owner != null) {
-            final float n10 = (entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * a) * Mth.DEGRAD;
-            final double n11 = Mth.sin(n10);
-            final double n12 = Mth.cos(n10);
-            final float sin = Mth.sin(Mth.sqrt(entity.owner.getAttackAnim(a)) * Mth.PI);
-            final Vec3 temp = Vec3.newTemp(-0.5, 0.03, 0.8);
-            temp.xRot(-(entity.owner.xRotO + (entity.owner.xRot - entity.owner.xRotO) * a) * Mth.DEGRAD);
-            temp.yRot(-(entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * a) * Mth.DEGRAD);
-            temp.yRot(sin * 0.5f);
-            temp.xRot(-sin * 0.7f);
-            double n13 = entity.owner.xo + (entity.owner.x - entity.owner.xo) * a + temp.x;
-            double n14 = entity.owner.yo + (entity.owner.y - entity.owner.yo) * a + temp.y;
-            double n15 = entity.owner.zo + (entity.owner.z - entity.owner.zo) * a + temp.z;
+            float rr = (entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * a) * Mth.DEGRAD;
+            double ss = Mth.sin(rr);
+            double cc = Mth.cos(rr);
+            final float swing = Mth.sin(Mth.sqrt(entity.owner.getAttackAnim(a)) * Mth.PI);
+
+            final Vec3 vv = Vec3.newTemp(-0.5, 0.03, 0.8);
+            vv.xRot(-(entity.owner.xRotO + (entity.owner.xRot - entity.owner.xRotO) * a) * Mth.DEGRAD);
+            vv.yRot(-(entity.owner.yRotO + (entity.owner.yRot - entity.owner.yRotO) * a) * Mth.DEGRAD);
+            vv.yRot(swing * 0.5f);
+            vv.xRot(-swing * 0.7f);
+
+            double xp = entity.owner.xo + (entity.owner.x - entity.owner.xo) * a + vv.x;
+            double yp = entity.owner.yo + (entity.owner.y - entity.owner.yo) * a + vv.y;
+            double zp = entity.owner.zo + (entity.owner.z - entity.owner.zo) * a + vv.z;
+
             if (this.entityRenderDispatcher.options.thirdPersonView) {
-                final float n16 = (entity.owner.yBodyRotO + (entity.owner.yBodyRot - entity.owner.yBodyRotO) * a) * Mth.DEGRAD;
-                final double n17 = Mth.sin(n16);
-                final double n18 = Mth.cos(n16);
-                n13 = entity.owner.xo + (entity.owner.x - entity.owner.xo) * a - n18 * 0.35 - n17 * 0.85;
-                n14 = entity.owner.yo + (entity.owner.y - entity.owner.yo) * a - 0.45;
-                n15 = entity.owner.zo + (entity.owner.z - entity.owner.zo) * a - n17 * 0.35 + n18 * 0.85;
+                rr = (entity.owner.yBodyRotO + (entity.owner.yBodyRot - entity.owner.yBodyRotO) * a) * Mth.DEGRAD;
+                ss = Mth.sin(rr);
+                cc = Mth.cos(rr);
+                xp = entity.owner.xo + (entity.owner.x - entity.owner.xo) * a - cc * 0.35 - ss * 0.85;
+                yp = entity.owner.yo + (entity.owner.y - entity.owner.yo) * a - 0.45;
+                zp = entity.owner.zo + (entity.owner.z - entity.owner.zo) * a - ss * 0.35 + cc * 0.85;
             }
-            final double n19 = entity.xo + (entity.x - entity.xo) * a;
-            final double n20 = entity.yo + (entity.y - entity.yo) * a + 0.25;
-            final double n21 = entity.zo + (entity.z - entity.zo) * a;
-            final double n22 = (float)(n13 - n19);
-            final double n23 = (float)(n14 - n20);
-            final double n24 = (float)(n15 - n21);
-            GL11.glDisable(GL_TEXTURE_2D);
-            GL11.glDisable(GL_LIGHTING);
-            instance.begin(GL_LINE_STRIP);
-            instance.color(0x0);
-            for (int n25 = 16, i = 0; i <= n25; ++i) {
-                final float n26 = i / (float)n25;
-                instance.vertex(x + n22 * n26, y + n23 * (n26 * n26 + n26) * 0.5 + 0.25, z + n24 * n26);
+
+            final double xh = entity.xo + (entity.x - entity.xo) * a;
+            final double yh = entity.yo + (entity.y - entity.yo) * a + 0.25;
+            final double zh = entity.zo + (entity.z - entity.zo) * a;
+
+            final double xa = (float)(xp - xh);
+            final double ya = (float)(yp - yh);
+            final double za = (float)(zp - zh);
+
+            glDisable(GL_TEXTURE_2D);
+            glDisable(GL_LIGHTING);
+            t.begin(GL_LINE_STRIP);
+            t.color(0x000000);
+            int steps = 16;
+            for (int i = 0; i <= steps; ++i) {
+                final float aa = i / (float)steps;
+                t.vertex(x + xa * aa, y + ya * (aa * aa + aa) * 0.5 + 4 / 16.0f, z + za * aa);
             }
-            instance.end();
-            GL11.glEnable(GL_LIGHTING);
-            GL11.glEnable(GL_TEXTURE_2D);
+            t.end();
+            glEnable(GL_LIGHTING);
+            glEnable(GL_TEXTURE_2D);
         }
     }
 }

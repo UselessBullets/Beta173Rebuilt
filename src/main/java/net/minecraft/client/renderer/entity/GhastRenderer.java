@@ -15,14 +15,12 @@ public class GhastRenderer extends MobRenderer<Ghast>
     }
     
     protected void scale(final Ghast mob, final float a) {
-        float n = (mob.oCharge + (mob.charge - mob.oCharge) * a) / 20.0f;
-        if (n < 0.0f) {
-            n = 0.0f;
-        }
-        final float n2 = 1.0f / (n * n * n * n * n * 2.0f + 1.0f);
-        final float n3 = (8.0f + n2) / 2.0f;
-        final float n4 = (8.0f + 1.0f / n2) / 2.0f;
-        GL11.glScalef(n4, n3, n4);
+        float ss = (mob.oCharge + (mob.charge - mob.oCharge) * a) / 20.0f;
+        if (ss < 0.0f) ss = 0.0f;
+        ss = 1.0f / (ss * ss * ss * ss * ss * 2.0f + 1.0f);
+        final float s = (8.0f + ss) / 2.0f;
+        final float hs = (8.0f + 1.0f / ss) / 2.0f;
+        GL11.glScalef(hs, s, hs);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 }

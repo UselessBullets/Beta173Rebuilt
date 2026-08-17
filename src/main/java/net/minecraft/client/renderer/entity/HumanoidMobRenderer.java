@@ -12,6 +12,8 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.client.model.HumanoidModel;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class HumanoidMobRenderer<T extends Mob> extends MobRenderer<T>
 {
     protected HumanoidModel humanoidModel;
@@ -23,36 +25,39 @@ public class HumanoidMobRenderer<T extends Mob> extends MobRenderer<T>
     
     @Override
     protected void additionalRendering(final Mob mob, final float a) {
-        final ItemInstance carriedItem = mob.getCarriedItem();
-        if (carriedItem != null) {
-            GL11.glPushMatrix();
-            this.humanoidModel.arm0.translateTo(0.0625f);
-            GL11.glTranslatef(-0.0625f, 0.4375f, 0.0625f);
-            if (carriedItem.id < 256 && TileRenderer.canRender(Tile.tiles[carriedItem.id].getRenderShape())) {
-                final float n = 0.5f;
-                GL11.glTranslatef(0.0f, 0.1875f, -0.3125f);
-                final float n2 = n * 0.75f;
-                GL11.glRotatef(20.0f, 1.0f, 0.0f, 0.0f);
-                GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
-                GL11.glScalef(n2, -n2, n2);
+        final ItemInstance item = mob.getCarriedItem();
+        if (item != null) {
+            glPushMatrix();
+
+            this.humanoidModel.arm0.translateTo(1 / 16.0f);
+            glTranslatef(-1 / 16.0f, 7 / 16.0f, 1 / 16.0f);
+
+            if (item.id < Tile.TILE_NUM_COUNT && TileRenderer.canRender(Tile.tiles[item.id].getRenderShape())) {
+                float s = 8 / 16.0f;
+                glTranslatef(0 / 16.0f, 3 / 16.0f, -5 / 16.0f);
+                s *= 0.75f;
+                glRotatef(20.0f, 1.0f, 0.0f, 0.0f);
+                glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
+                glScalef(s, -s, s);
             }
-            else if (Item.items[carriedItem.id].isHandEquipped()) {
-                final float n3 = 0.625f;
-                GL11.glTranslatef(0.0f, 0.1875f, 0.0f);
-                GL11.glScalef(n3, -n3, n3);
-                GL11.glRotatef(-100.0f, 1.0f, 0.0f, 0.0f);
-                GL11.glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
+            else if (Item.items[item.id].isHandEquipped()) {
+                final float s = 10 / 16.0f;
+                glTranslatef(0.0f, 3 / 16.0f, 0.0f);
+                glScalef(s, -s, s);
+                glRotatef(-100.0f, 1.0f, 0.0f, 0.0f);
+                glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             }
             else {
-                final float n4 = 0.375f;
-                GL11.glTranslatef(0.25f, 0.1875f, -0.1875f);
-                GL11.glScalef(n4, n4, n4);
-                GL11.glRotatef(60.0f, 0.0f, 0.0f, 1.0f);
-                GL11.glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-                GL11.glRotatef(20.0f, 0.0f, 0.0f, 1.0f);
+                final float s = 6 / 16.0f;
+                glTranslatef(4 / 16.0f, 3 / 16.0f, -3 / 16.0f);
+                glScalef(s, s, s);
+                glRotatef(60.0f, 0.0f, 0.0f, 1.0f);
+                glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+                glRotatef(20.0f, 0.0f, 0.0f, 1.0f);
             }
-            this.entityRenderDispatcher.itemInHandRenderer.renderItem(mob, carriedItem);
-            GL11.glPopMatrix();
+
+            this.entityRenderDispatcher.itemInHandRenderer.renderItem(mob, item);
+            glPopMatrix();
         }
     }
 }

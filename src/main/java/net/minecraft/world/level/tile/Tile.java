@@ -71,6 +71,10 @@ public class Tile
     public static final int SHAPE_FENCE = 11;
     public static final int SHAPE_LEVER = 12;
     public static final int SHAPE_CACTUS = 13;
+    public static final int SHAPE_BED = 14;
+    public static final int SHAPE_DIODE = 15;
+    public static final int SHAPE_PISTON_BASE = 16;
+    public static final int SHAPE_PISTON_EXTENSION = 17;
 
     public static final Tile[] tiles = new Tile[TILE_NUM_COUNT];
     public static final boolean[] shouldTick = new boolean[TILE_NUM_COUNT];
@@ -600,16 +604,16 @@ public class Tile
     }
     
     static {
-        Item.items[Tile.cloth.id] = new ClothTileItem(Tile.cloth.id - 256).setDescriptionId("cloth");
-        Item.items[Tile.treeTrunk.id] = new TreeTileItem(Tile.treeTrunk.id - 256).setDescriptionId("log");
-        Item.items[Tile.stoneSlabHalf.id] = new StoneSlabTileItem(Tile.stoneSlabHalf.id - 256).setDescriptionId("stoneSlab");
-        Item.items[Tile.sapling.id] = new SaplingTileItem(Tile.sapling.id - 256).setDescriptionId("sapling");
-        Item.items[Tile.leaves.id] = new LeavesTileItem(Tile.leaves.id - 256).setDescriptionId("leaves");
-        Item.items[Tile.pistonBase.id] = new PistonTileItem(Tile.pistonBase.id - 256);
-        Item.items[Tile.pistonStickyBase.id] = new PistonTileItem(Tile.pistonStickyBase.id - 256);
-        for (int i = 0; i < 256; ++i) {
+        Item.items[Tile.cloth.id] = new ClothTileItem(Tile.cloth.id - Tile.TILE_NUM_COUNT).setDescriptionId("cloth");
+        Item.items[Tile.treeTrunk.id] = new TreeTileItem(Tile.treeTrunk.id - Tile.TILE_NUM_COUNT).setDescriptionId("log");
+        Item.items[Tile.stoneSlabHalf.id] = new StoneSlabTileItem(Tile.stoneSlabHalf.id - Tile.TILE_NUM_COUNT).setDescriptionId("stoneSlab");
+        Item.items[Tile.sapling.id] = new SaplingTileItem(Tile.sapling.id - Tile.TILE_NUM_COUNT).setDescriptionId("sapling");
+        Item.items[Tile.leaves.id] = new LeavesTileItem(Tile.leaves.id - Tile.TILE_NUM_COUNT).setDescriptionId("leaves");
+        Item.items[Tile.pistonBase.id] = new PistonTileItem(Tile.pistonBase.id - Tile.TILE_NUM_COUNT);
+        Item.items[Tile.pistonStickyBase.id] = new PistonTileItem(Tile.pistonStickyBase.id - Tile.TILE_NUM_COUNT);
+        for (int i = 0; i < Tile.TILE_NUM_COUNT; ++i) {
             if (Tile.tiles[i] != null && Item.items[i] == null) {
-                Item.items[i] = new TileItem(i - 256);
+                Item.items[i] = new TileItem(i - Tile.TILE_NUM_COUNT);
                 Tile.tiles[i].init();
             }
         }

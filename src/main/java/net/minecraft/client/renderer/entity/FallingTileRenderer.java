@@ -15,18 +15,19 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class FallingTileRenderer extends EntityRenderer<FallingTile>
 {
-    private TileRenderer tileRenderer;
+    private TileRenderer tileRenderer = new TileRenderer();
     
     public FallingTileRenderer() {
-        this.tileRenderer = new TileRenderer();
         this.shadowRadius = 0.5f;
     }
     
     public void render(final FallingTile entity, final double x, final double y, final double z, final float rot, final float a) {
         GL11.glPushMatrix();
         GL11.glTranslatef((float)x, (float)y, (float)z);
+
         this.bindTexture("/terrain.png");
         final Tile tt = Tile.tiles[entity.tile];
+
         final Level level = entity.getLevel();
         GL11.glDisable(GL_LIGHTING);
         this.tileRenderer.renderBlock(tt, level, Mth.floor(entity.x), Mth.floor(entity.y), Mth.floor(entity.z));

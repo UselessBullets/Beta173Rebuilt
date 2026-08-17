@@ -19,6 +19,9 @@ public class ChickenRenderer extends MobRenderer<Chicken>
     }
     
     protected float getBob(final Chicken mob, final float a) {
-        return (Mth.sin(mob.oFlap + (mob.flap - mob.oFlap) * a) + 1.0f) * (mob.oFlapSpeed + (mob.flapSpeed - mob.oFlapSpeed) * a);
+        float flap = mob.oFlap + (mob.flap - mob.oFlap) * a;
+        float flapSpeed = mob.oFlapSpeed + (mob.flapSpeed - mob.oFlapSpeed) * a;
+
+        return (Mth.sin(flap) + 1.0f) * flapSpeed;
     }
 }

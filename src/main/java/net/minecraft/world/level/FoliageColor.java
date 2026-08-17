@@ -6,7 +6,7 @@ package net.minecraft.world.level;
 
 public class FoliageColor
 {
-    private static int[] pixels;
+    private static int[] pixels = new int[65536];
     
     public static void init(final int[] pixels) {
         FoliageColor.pixels = pixels;
@@ -18,18 +18,15 @@ public class FoliageColor
     }
     
     public static int getEvergreenColor() {
-        return 6396257;
+        return 0x619961;
     }
     
     public static int getBirchColor() {
-        return 8431445;
+        return 0x80a755;
     }
     
     public static int getDefaultColor() {
-        return 4764952;
+        return 0x48b518;
     }
-    
-    static {
-        FoliageColor.pixels = new int[65536];
-    }
+
 }

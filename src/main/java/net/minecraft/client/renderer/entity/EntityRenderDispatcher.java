@@ -58,8 +58,8 @@ import java.util.Map;
 
 public class EntityRenderDispatcher
 {
-    private Map<Class<? extends Entity>, EntityRenderer<? extends Entity>> renderers;
-    public static EntityRenderDispatcher instance;
+    private Map<Class<? extends Entity>, EntityRenderer<? extends Entity>> renderers = new HashMap<>();
+    public static EntityRenderDispatcher instance = new EntityRenderDispatcher();
     private Font font;
     public static double xOff;
     public static double yOff;
@@ -76,7 +76,7 @@ public class EntityRenderDispatcher
     public double zPlayer;
     
     private EntityRenderDispatcher() {
-        (this.renderers = new HashMap<>()).put(Spider.class, new SpiderRenderer());
+        this.renderers.put(Spider.class, new SpiderRenderer());
         this.renderers.put(Pig.class, new PigRenderer(new PigModel(), new PigModel(0.5f), 0.7f));
         this.renderers.put(Sheep.class, new SheepRenderer(new SheepModel(), new SheepFurModel(), 0.7f));
         this.renderers.put(Cow.class, new CowRenderer(new CowModel(), 0.7f));
@@ -104,19 +104,19 @@ public class EntityRenderDispatcher
         this.renderers.put(Boat.class, new BoatRenderer());
         this.renderers.put(FishingHook.class, new FishingHookRenderer());
         this.renderers.put(LightningBolt.class, new LightningBoltRenderer());
-        final Iterator<EntityRenderer<? extends Entity>> iterator = this.renderers.values().iterator();
-        while (iterator.hasNext()) {
-            iterator.next().init(this);
+
+        for (EntityRenderer<? extends Entity> entityRenderer : this.renderers.values()) {
+            entityRenderer.init(this);
         }
     }
     
     public <T extends Entity> EntityRenderer<T> getRenderer(final Class<? extends Entity> clazz) {
-        EntityRenderer<? extends Entity> renderer = this.renderers.get(clazz);
-        if (renderer == null && clazz != Entity.class) {
-            renderer = this.getRenderer((Class<? extends T>) clazz.getSuperclass());
-            this.renderers.put(clazz, renderer);
+        EntityRenderer<? extends Entity> r = this.renderers.get(clazz);
+        if (r == null && clazz != Entity.class) {
+            r = this.getRenderer((Class<? extends T>) clazz.getSuperclass());
+            this.renderers.put(clazz, r);
         }
-        return (EntityRenderer<T>) renderer;
+        return (EntityRenderer<T>) r;
     }
     
     public <T extends Entity> EntityRenderer<T> getRenderer(final Entity entity) {
@@ -129,9 +129,14 @@ public class EntityRenderDispatcher
         this.options = options;
         this.player = player;
         this.font = font;
+
         if (player.isSleeping()) {
-            if (level.getTile(Mth.floor(player.x), Mth.floor(player.y), Mth.floor(player.z)) == Tile.bed.id) {
-                this.playerRotY = (float)((level.getData(Mth.floor(player.x), Mth.floor(player.y), Mth.floor(player.z)) & 0x3) * 90 + 180);
+            int t = level.getTile(Mth.floor(player.x), Mth.floor(player.y), Mth.floor(player.z));
+            if (t == Tile.bed.id) {
+                int data = level.getData(Mth.floor(player.x), Mth.floor(player.y), Mth.floor(player.z));
+
+                int direction = data & 0x3;
+                this.playerRotY = (float)(direction * 90 + 180);
                 this.playerRotX = 0.0f;
             }
         }
@@ -139,19 +144,22 @@ public class EntityRenderDispatcher
             this.playerRotY = player.yRotO + (player.yRot - player.yRotO) * a;
             this.playerRotX = player.xRotO + (player.xRot - player.xRotO) * a;
         }
+
         this.xPlayer = player.xOld + (player.x - player.xOld) * a;
         this.yPlayer = player.yOld + (player.y - player.yOld) * a;
         this.zPlayer = player.zOld + (player.z - player.zOld) * a;
     }
     
     public void render(final Entity entity, final float a) {
-        final double n = entity.xOld + (entity.x - entity.xOld) * a;
-        final double n2 = entity.yOld + (entity.y - entity.yOld) * a;
-        final double n3 = entity.zOld + (entity.z - entity.zOld) * a;
-        final float rot = entity.yRotO + (entity.yRot - entity.yRotO) * a;
-        final float brightness = entity.getBrightness(a);
-        GL11.glColor3f(brightness, brightness, brightness);
-        this.render(entity, n - EntityRenderDispatcher.xOff, n2 - EntityRenderDispatcher.yOff, n3 - EntityRenderDispatcher.zOff, rot, a);
+        final double x = entity.xOld + (entity.x - entity.xOld) * a;
+        final double y = entity.yOld + (entity.y - entity.yOld) * a;
+        final double z = entity.zOld + (entity.z - entity.zOld) * a;
+
+        final float r = entity.yRotO + (entity.yRot - entity.yRotO) * a;
+        final float br = entity.getBrightness(a);
+        GL11.glColor3f(br, br, br);
+
+        this.render(entity, x - EntityRenderDispatcher.xOff, y - EntityRenderDispatcher.yOff, z - EntityRenderDispatcher.zOff, r, a);
     }
     
     public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float a) {
@@ -167,17 +175,14 @@ public class EntityRenderDispatcher
     }
     
     public double distanceToSqr(final double x, final double y, final double z) {
-        final double n = x - this.xPlayer;
-        final double n2 = y - this.yPlayer;
-        final double n3 = z - this.zPlayer;
-        return n * n + n2 * n2 + n3 * n3;
+        final double xd = x - this.xPlayer;
+        final double yd = y - this.yPlayer;
+        final double zd = z - this.zPlayer;
+        return xd * xd + yd * yd + zd * zd;
     }
     
     public Font getFont() {
         return this.font;
     }
-    
-    static {
-        EntityRenderDispatcher.instance = new EntityRenderDispatcher();
-    }
+
 }

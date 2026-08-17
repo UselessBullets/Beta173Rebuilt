@@ -7,6 +7,7 @@ package net.minecraft.client.gamemode;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.level.LevelListener;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -31,14 +32,16 @@ public class GameMode
     
     public boolean destroyBlock(final int x, final int y, final int z, final int face) {
         final Level level = this.minecraft.level;
-        final Tile tile = Tile.tiles[level.getTile(x, y, z)];
-        level.levelEvent(2001, x, y, z, tile.id + level.getData(x, y, z) * 256);
+        final Tile oldTile = Tile.tiles[level.getTile(x, y, z)];
+
+        level.levelEvent(LevelListener.PARTICLES_DESTROY_BLOCK, x, y, z, oldTile.id + level.getData(x, y, z) << Tile.TILE_NUM_SHIFT);
         final int data = level.getData(x, y, z);
-        final boolean setTile = level.setTile(x, y, z, 0);
-        if (tile != null && setTile) {
-            tile.destroy(level, x, y, z, data);
+        final boolean changed = level.setTile(x, y, z, 0);
+
+        if (oldTile != null && changed) {
+            oldTile.destroy(level, x, y, z, data);
         }
-        return setTile;
+        return changed;
     }
     
     public void continueDestroyBlock(final int x, final int y, final int z, final int face) {
@@ -55,11 +58,11 @@ public class GameMode
     }
     
     public boolean useItem(final Player player, final Level level, final ItemInstance item) {
-        final int count = item.count;
-        final ItemInstance use = item.use(level, player);
-        if (use != item || (use != null && use.count != count)) {
-            player.inventory.items[player.inventory.selected] = use;
-            if (use.count == 0) {
+        final int oldCount = item.count;
+        final ItemInstance itemInstance = item.use(level, player);
+        if (itemInstance != item || (itemInstance != null && itemInstance.count != oldCount)) {
+            player.inventory.items[player.inventory.selected] = itemInstance;
+            if (itemInstance.count == 0) {
                 player.inventory.items[player.inventory.selected] = null;
             }
             return true;
@@ -81,8 +84,15 @@ public class GameMode
     }
     
     public boolean useItemOn(final Player player, final Level level, final ItemInstance item, final int x, final int y, final int z, final int face) {
-        final int tile = level.getTile(x, y, z);
-        return (tile > 0 && Tile.tiles[tile].use(level, x, y, z, player)) || (item != null && item.useOn(player, level, x, y, z, face));
+        final int t = level.getTile(x, y, z);
+        if (t > 0) {
+            if (Tile.tiles[t].use(level, x, y, z, player)) {
+                return true;
+            }
+        }
+
+        if (item == null) return false;
+        return item.useOn(player, level, x, y, z, face);
     }
     
     public Player createPlayer(final Level level) {

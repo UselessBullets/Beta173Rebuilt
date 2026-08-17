@@ -31,32 +31,31 @@ public class SurvivalMode extends GameMode
     
     @Override
     public boolean destroyBlock(final int x, final int y, final int z, final int face) {
-        final int tile = this.minecraft.level.getTile(x, y, z);
+        final int t = this.minecraft.level.getTile(x, y, z);
         final int data = this.minecraft.level.getData(x, y, z);
-        final boolean destroyBlock = super.destroyBlock(x, y, z, face);
-        final ItemInstance selectedItem = this.minecraft.player.getSelectedItem();
-        final boolean canDestroy = this.minecraft.player.canDestroy(Tile.tiles[tile]);
-        if (selectedItem != null) {
-            selectedItem.mineBlock(tile, x, y, z, this.minecraft.player);
-            if (selectedItem.count == 0) {
-                selectedItem.snap(this.minecraft.player);
+        final boolean changed = super.destroyBlock(x, y, z, face);
+
+        final ItemInstance item = this.minecraft.player.getSelectedItem();
+        final boolean couldDestroy = this.minecraft.player.canDestroy(Tile.tiles[t]);
+        if (item != null) {
+            item.mineBlock(t, x, y, z, this.minecraft.player);
+            if (item.count == 0) {
+                item.snap(this.minecraft.player);
                 this.minecraft.player.removeSelectedItem();
             }
         }
-        if (destroyBlock && canDestroy) {
-            Tile.tiles[tile].playerDestroy(this.minecraft.level, this.minecraft.player, x, y, z, data);
+        if (changed && couldDestroy) {
+            Tile.tiles[t].playerDestroy(this.minecraft.level, this.minecraft.player, x, y, z, data);
         }
-        return destroyBlock;
+        return changed;
     }
     
     @Override
     public void startDestroyBlock(final int x, final int y, final int z, final int face) {
         this.minecraft.level.extinguishFire(this.minecraft.player, x, y, z, face);
-        final int tile = this.minecraft.level.getTile(x, y, z);
-        if (tile > 0 && this.destroyProgress == 0.0f) {
-            Tile.tiles[tile].attack(this.minecraft.level, x, y, z, this.minecraft.player);
-        }
-        if (tile > 0 && Tile.tiles[tile].getDestroyProgress(this.minecraft.player) >= 1.0f) {
+        final int t = this.minecraft.level.getTile(x, y, z);
+        if (t > 0 && this.destroyProgress == 0.0f) Tile.tiles[t].attack(this.minecraft.level, x, y, z, this.minecraft.player);
+        if (t > 0 && Tile.tiles[t].getDestroyProgress(this.minecraft.player) >= 1.0f) {
             this.destroyBlock(x, y, z, face);
         }
     }
@@ -73,17 +72,22 @@ public class SurvivalMode extends GameMode
             --this.destroyDelay;
             return;
         }
+
         if (x == this.xDestroyBlock && y == this.yDestroyBlock && z == this.zDestroyBlock) {
-            final int tile = this.minecraft.level.getTile(x, y, z);
-            if (tile == 0) {
-                return;
+            final int t = this.minecraft.level.getTile(x, y, z);
+            if (t == 0) return;
+            final Tile tile = Tile.tiles[t];
+
+            this.destroyProgress += tile.getDestroyProgress(this.minecraft.player);
+
+            if (this.destroyTicks % 4.0f == 0.0f) {
+                if (tile != null) {
+                    this.minecraft.soundEngine.play(tile.soundType.getStepSound(), x + 0.5f, y + 0.5f, z + 0.5f, (tile.soundType.getVolume() + 1.0f) / 8.0f, tile.soundType.getPitch() * 0.5f);
+                }
             }
-            final Tile tile2 = Tile.tiles[tile];
-            this.destroyProgress += tile2.getDestroyProgress(this.minecraft.player);
-            if (this.destroyTicks % 4.0f == 0.0f && tile2 != null) {
-                this.minecraft.soundEngine.play(tile2.soundType.getStepSound(), x + 0.5f, y + 0.5f, z + 0.5f, (tile2.soundType.getVolume() + 1.0f) / 8.0f, tile2.soundType.getPitch() * 0.5f);
-            }
+
             ++this.destroyTicks;
+
             if (this.destroyProgress >= 1.0f) {
                 this.destroyBlock(x, y, z, face);
                 this.destroyProgress = 0.0f;

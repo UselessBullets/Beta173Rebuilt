@@ -2307,7 +2307,7 @@ public class Level implements LevelSource
     
     public void levelEvent(final Player source, final int type, final int x, final int y, final int z, final int data) {
         for (int i = 0; i < this.listeners.size(); ++i) {
-            ((LevelListener)this.listeners.get(i)).levelEvent(source, type, x, y, z, data);
+            this.listeners.get(i).levelEvent(source, type, x, y, z, data);
         }
     }
     

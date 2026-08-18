@@ -10,19 +10,16 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class DynamicTexture
 {
-    public byte[] pixels;
+    public static final int TEXTURE_TERRAIN = 0;
+    public static final int TEXTURE_ITEMS = 1;
+    public byte[] pixels = new byte[16 * 16 * 4];
     public int tex;
-    public boolean anaglyph3d;
-    public int copyTo;
-    public int replicate;
-    public int textureId;
+    public boolean anaglyph3d = false;
+    public int copyTo = 0;
+    public int replicate = 1;
+    public int textureId = 0;
     
     public DynamicTexture(final int tex) {
-        this.pixels = new byte[1024];
-        this.anaglyph3d = false;
-        this.copyTo = 0;
-        this.replicate = 1;
-        this.textureId = 0;
         this.tex = tex;
     }
     
@@ -30,10 +27,10 @@ public class DynamicTexture
     }
     
     public void bindTexture(final Textures textures) {
-        if (this.textureId == 0) {
+        if (this.textureId == TEXTURE_TERRAIN) {
             glBindTexture(GL_TEXTURE_2D, textures.loadTexture("/terrain.png"));
         }
-        else if (this.textureId == 1) {
+        else if (this.textureId == TEXTURE_ITEMS) {
             glBindTexture(GL_TEXTURE_2D, textures.loadTexture("/gui/items.png"));
         }
     }

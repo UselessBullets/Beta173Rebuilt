@@ -4,6 +4,7 @@
 
 package net.minecraft.client.renderer.ptexture;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import net.minecraft.world.item.Item;
@@ -13,78 +14,82 @@ import util.Mth;
 public class ClockTexture extends DynamicTexture
 {
     private Minecraft mc;
-    private int[] raw;
-    private int[] dialRaw;
-    private double rot;
-    private double rota;
+    private int[] raw = new int[16 * 16];
+    private int[] dialRaw = new int[16 * 16];
+    private double rot, rota;
     
     public ClockTexture(final Minecraft mc) {
         super(Item.clock.getIcon(0));
-        this.raw = new int[256];
-        this.dialRaw = new int[256];
         this.mc = mc;
-        this.textureId = 1;
+        this.textureId = TEXTURE_ITEMS;
+
         try {
-            ImageIO.read(Minecraft.class.getResource("/gui/items.png")).getRGB(this.tex % 16 * 16, this.tex / 16 * 16, 16, 16, this.raw, 0, 16);
-            ImageIO.read(Minecraft.class.getResource("/misc/dial.png")).getRGB(0, 0, 16, 16, this.dialRaw, 0, 16);
+            BufferedImage bi = ImageIO.read(Minecraft.class.getResource("/gui/items.png"));
+            int xo = this.tex % 16 * 16;
+            int yo = this.tex / 16 * 16;
+            bi.getRGB(xo, yo, 16, 16, this.raw, 0, 16);
+            bi = ImageIO.read(Minecraft.class.getResource("/misc/dial.png"));
+            bi.getRGB(0, 0, 16, 16, this.dialRaw, 0, 16);
         }
-        catch (final IOException ex) {
-            ex.printStackTrace();
+        catch (final IOException e) {
+            e.printStackTrace();
         }
     }
     
     @Override
     public void tick() {
-        double n = 0.0;
+        double rott = 0.0;
         if (this.mc.level != null && this.mc.player != null) {
-            n = -this.mc.level.getTimeOfDay(1.0f) * Mth.PI * 2.0f;
+            rott = -this.mc.level.getTimeOfDay(1.0f) * Mth.PI * 2.0f;
             if (this.mc.level.dimension.foggy) {
-                n = Math.random() * Math.PI * 2.0;
+                rott = Math.random() * Math.PI * 2.0;
             }
         }
-        double n2;
-        for (n2 = n - this.rot; n2 < -Math.PI; n2 += 6.283185307179586) {}
-        while (n2 >= Math.PI) {
-            n2 -= 6.283185307179586;
-        }
-        if (n2 < -1.0) {
-            n2 = -1.0;
-        }
-        if (n2 > 1.0) {
-            n2 = 1.0;
-        }
-        this.rota += n2 * 0.1;
+
+        double rotd = rott - this.rot;
+        while (rotd < -Math.PI) rotd += Math.PI * 2;
+        while (rotd >= Math.PI) rotd -= Math.PI * 2;
+        if (rotd < -1.0) rotd = -1.0;
+        if (rotd > 1.0) rotd = 1.0;
+
+        this.rota += rotd * 0.1;
         this.rota *= 0.8;
+
         this.rot += this.rota;
         final double sin = Math.sin(this.rot);
         final double cos = Math.cos(this.rot);
-        for (int i = 0; i < 256; ++i) {
-            int n3 = this.raw[i] >> 24 & 0xFF;
-            int n4 = this.raw[i] >> 16 & 0xFF;
-            int n5 = this.raw[i] >> 8 & 0xFF;
-            int n6 = this.raw[i] >> 0 & 0xFF;
-            if (n4 == n6 && n5 == 0 && n6 > 0) {
-                final double n7 = -(i % 16 / 15.0 - 0.5);
-                final double n8 = i / 16 / 15.0 - 0.5;
-                final int n9 = n4;
-                final int n10 = ((int)((n7 * cos + n8 * sin + 0.5) * 16.0) & 0xF) + ((int)((n8 * cos - n7 * sin + 0.5) * 16.0) & 0xF) * 16;
-                n3 = (this.dialRaw[n10] >> 24 & 0xFF);
-                n4 = (this.dialRaw[n10] >> 16 & 0xFF) * n9 / 255;
-                n5 = (this.dialRaw[n10] >> 8 & 0xFF) * n9 / 255;
-                n6 = (this.dialRaw[n10] >> 0 & 0xFF) * n9 / 255;
+
+        for (int i = 0; i < (16 * 16); ++i) {
+            int a = this.raw[i] >> 24 & 0xFF;
+            int r = this.raw[i] >> 16 & 0xFF;
+            int g = this.raw[i] >> 8 & 0xFF;
+            int b = this.raw[i] >> 0 & 0xFF;
+            if (r == b && g == 0 && b > 0) {
+                final double xo = -(i % 16 / 15.0 - 0.5);
+                final double yo = i / 16 / 15.0 - 0.5;
+                final int br = r;
+                final int x = (int) ((xo * cos + yo * sin + 0.5) * 16.0);
+                final int y = (int)((yo * cos - xo * sin + 0.5) * 16.0);
+                final int j = (x & 0xF) + (y & 0xF) * 16;
+                a = (this.dialRaw[j] >> 24 & 0xFF);
+                r = (this.dialRaw[j] >> 16 & 0xFF) * br / 255;
+                g = (this.dialRaw[j] >> 8 & 0xFF) * br / 255;
+                b = (this.dialRaw[j] >> 0 & 0xFF) * br / 255;
             }
+
             if (this.anaglyph3d) {
-                final int n11 = (n4 * 30 + n5 * 59 + n6 * 11) / 100;
-                final int n12 = (n4 * 30 + n5 * 70) / 100;
-                final int n13 = (n4 * 30 + n6 * 70) / 100;
-                n4 = n11;
-                n5 = n12;
-                n6 = n13;
+                final int rr = (r * 30 + g * 59 + b * 11) / 100;
+                final int gg = (r * 30 + g * 70) / 100;
+                final int bb = (r * 30 + b * 70) / 100;
+                r = rr;
+                g = gg;
+                b = bb;
             }
-            this.pixels[i * 4 + 0] = (byte)n4;
-            this.pixels[i * 4 + 1] = (byte)n5;
-            this.pixels[i * 4 + 2] = (byte)n6;
-            this.pixels[i * 4 + 3] = (byte)n3;
+
+            this.pixels[i * 4 + 0] = (byte)r;
+            this.pixels[i * 4 + 1] = (byte)g;
+            this.pixels[i * 4 + 2] = (byte)b;
+            this.pixels[i * 4 + 3] = (byte)a;
         }
     }
 }

@@ -4,10 +4,11 @@
 
 package net.minecraft.client.model;
 
-import org.lwjgl.opengl.GL11;
 import util.Mth;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.Mob;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class WolfModel extends Model
 {
@@ -152,7 +153,7 @@ public class WolfModel extends Model
 
         if (wolf.isWet()) {
             final float brightness = wolf.getBrightness(a) * wolf.getWetShade(a);
-            GL11.glColor3f(brightness, brightness, brightness);
+            glColor3f(brightness, brightness, brightness);
         }
     }
     

@@ -21,7 +21,6 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.util.glu.GLU;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.entity.player.Player;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
@@ -205,7 +204,7 @@ public class GameRenderer
         final Mob cameraTargetPlayer = this.mc.cameraTargetPlayer;
         final float n = cameraTargetPlayer.hurtTime - a;
         if (cameraTargetPlayer.health <= 0) {
-            GL11.glRotatef(40.0f - 8000.0f / (cameraTargetPlayer.deathTime + a + 200.0f), 0.0f, 0.0f, 1.0f);
+            glRotatef(40.0f - 8000.0f / (cameraTargetPlayer.deathTime + a + 200.0f), 0.0f, 0.0f, 1.0f);
         }
         if (n < 0.0f) {
             return;
@@ -213,9 +212,9 @@ public class GameRenderer
         final float n2 = n / cameraTargetPlayer.hurtDuration;
         final float sin = Mth.sin(n2 * n2 * n2 * n2 * Mth.PI);
         final float hurtDir = cameraTargetPlayer.hurtDir;
-        GL11.glRotatef(-hurtDir, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(-sin * 14.0f, 0.0f, 0.0f, 1.0f);
-        GL11.glRotatef(hurtDir, 0.0f, 1.0f, 0.0f);
+        glRotatef(-hurtDir, 0.0f, 1.0f, 0.0f);
+        glRotatef(-sin * 14.0f, 0.0f, 0.0f, 1.0f);
+        glRotatef(hurtDir, 0.0f, 1.0f, 0.0f);
     }
     
     private void bobView(final float a) {
@@ -226,10 +225,10 @@ public class GameRenderer
         final float n = -(player.walkDist + (player.walkDist - player.walkDistO) * a);
         final float n2 = player.oBob + (player.bob - player.oBob) * a;
         final float n3 = player.oTilt + (player.tilt - player.oTilt) * a;
-        GL11.glTranslatef(Mth.sin(n * Mth.PI) * n2 * 0.5f, -Math.abs(Mth.cos(n * Mth.PI) * n2), 0.0f);
-        GL11.glRotatef(Mth.sin(n * Mth.PI) * n2 * 3.0f, 0.0f, 0.0f, 1.0f);
-        GL11.glRotatef(Math.abs(Mth.cos(n * Mth.PI - 0.2f) * n2) * 5.0f, 1.0f, 0.0f, 0.0f);
-        GL11.glRotatef(n3, 1.0f, 0.0f, 0.0f);
+        glTranslatef(Mth.sin(n * Mth.PI) * n2 * 0.5f, -Math.abs(Mth.cos(n * Mth.PI) * n2), 0.0f);
+        glRotatef(Mth.sin(n * Mth.PI) * n2 * 3.0f, 0.0f, 0.0f, 1.0f);
+        glRotatef(Math.abs(Mth.cos(n * Mth.PI - 0.2f) * n2) * 5.0f, 1.0f, 0.0f, 0.0f);
+        glRotatef(n3, 1.0f, 0.0f, 0.0f);
     }
     
     private void moveCameraToPlayer(final float a) {
@@ -238,16 +237,16 @@ public class GameRenderer
         final double x = cameraTargetPlayer.xo + (cameraTargetPlayer.x - cameraTargetPlayer.xo) * a;
         final double y = cameraTargetPlayer.yo + (cameraTargetPlayer.y - cameraTargetPlayer.yo) * a - n;
         final double z = cameraTargetPlayer.zo + (cameraTargetPlayer.z - cameraTargetPlayer.zo) * a;
-        GL11.glRotatef(this.cameraRollO + (this.cameraRoll - this.cameraRollO) * a, 0.0f, 0.0f, 1.0f);
+        glRotatef(this.cameraRollO + (this.cameraRoll - this.cameraRollO) * a, 0.0f, 0.0f, 1.0f);
         if (cameraTargetPlayer.isSleeping()) {
             ++n;
-            GL11.glTranslatef(0.0f, 0.3f, 0.0f);
+            glTranslatef(0.0f, 0.3f, 0.0f);
             if (!this.mc.options.fixedCamera) {
                 if (this.mc.level.getTile(Mth.floor(cameraTargetPlayer.x), Mth.floor(cameraTargetPlayer.y), Mth.floor(cameraTargetPlayer.z)) == Tile.bed.id) {
-                    GL11.glRotatef((float)((this.mc.level.getData(Mth.floor(cameraTargetPlayer.x), Mth.floor(cameraTargetPlayer.y), Mth.floor(cameraTargetPlayer.z)) & 0x3) * 90), 0.0f, 1.0f, 0.0f);
+                    glRotatef((float)((this.mc.level.getData(Mth.floor(cameraTargetPlayer.x), Mth.floor(cameraTargetPlayer.y), Mth.floor(cameraTargetPlayer.z)) & 0x3) * 90), 0.0f, 1.0f, 0.0f);
                 }
-                GL11.glRotatef(cameraTargetPlayer.yRotO + (cameraTargetPlayer.yRot - cameraTargetPlayer.yRotO) * a + 180.0f, 0.0f, -1.0f, 0.0f);
-                GL11.glRotatef(cameraTargetPlayer.xRotO + (cameraTargetPlayer.xRot - cameraTargetPlayer.xRotO) * a, -1.0f, 0.0f, 0.0f);
+                glRotatef(cameraTargetPlayer.yRotO + (cameraTargetPlayer.yRot - cameraTargetPlayer.yRotO) * a + 180.0f, 0.0f, -1.0f, 0.0f);
+                glRotatef(cameraTargetPlayer.xRotO + (cameraTargetPlayer.xRot - cameraTargetPlayer.xRotO) * a, -1.0f, 0.0f, 0.0f);
             }
         }
         else if (this.mc.options.thirdPersonView) {
@@ -255,9 +254,9 @@ public class GameRenderer
             if (this.mc.options.fixedCamera) {
                 final float n3 = this.thirdRotationO + (this.thirdRotation - this.thirdRotationO) * a;
                 final float n4 = this.thirdTiltO + (this.thirdTilt - this.thirdTiltO) * a;
-                GL11.glTranslatef(0.0f, 0.0f, (float)(-n2));
-                GL11.glRotatef(n4, 1.0f, 0.0f, 0.0f);
-                GL11.glRotatef(n3, 0.0f, 1.0f, 0.0f);
+                glTranslatef(0.0f, 0.0f, (float)(-n2));
+                glRotatef(n4, 1.0f, 0.0f, 0.0f);
+                glRotatef(n3, 0.0f, 1.0f, 0.0f);
             }
             else {
                 final float yRot = cameraTargetPlayer.yRot;
@@ -280,44 +279,44 @@ public class GameRenderer
                         }
                     }
                 }
-                GL11.glRotatef(cameraTargetPlayer.xRot - xRot, 1.0f, 0.0f, 0.0f);
-                GL11.glRotatef(cameraTargetPlayer.yRot - yRot, 0.0f, 1.0f, 0.0f);
-                GL11.glTranslatef(0.0f, 0.0f, (float)(-n2));
-                GL11.glRotatef(yRot - cameraTargetPlayer.yRot, 0.0f, 1.0f, 0.0f);
-                GL11.glRotatef(xRot - cameraTargetPlayer.xRot, 1.0f, 0.0f, 0.0f);
+                glRotatef(cameraTargetPlayer.xRot - xRot, 1.0f, 0.0f, 0.0f);
+                glRotatef(cameraTargetPlayer.yRot - yRot, 0.0f, 1.0f, 0.0f);
+                glTranslatef(0.0f, 0.0f, (float)(-n2));
+                glRotatef(yRot - cameraTargetPlayer.yRot, 0.0f, 1.0f, 0.0f);
+                glRotatef(xRot - cameraTargetPlayer.xRot, 1.0f, 0.0f, 0.0f);
             }
         }
         else {
-            GL11.glTranslatef(0.0f, 0.0f, -0.1f);
+            glTranslatef(0.0f, 0.0f, -0.1f);
         }
         if (!this.mc.options.fixedCamera) {
-            GL11.glRotatef(cameraTargetPlayer.xRotO + (cameraTargetPlayer.xRot - cameraTargetPlayer.xRotO) * a, 1.0f, 0.0f, 0.0f);
-            GL11.glRotatef(cameraTargetPlayer.yRotO + (cameraTargetPlayer.yRot - cameraTargetPlayer.yRotO) * a + 180.0f, 0.0f, 1.0f, 0.0f);
+            glRotatef(cameraTargetPlayer.xRotO + (cameraTargetPlayer.xRot - cameraTargetPlayer.xRotO) * a, 1.0f, 0.0f, 0.0f);
+            glRotatef(cameraTargetPlayer.yRotO + (cameraTargetPlayer.yRot - cameraTargetPlayer.yRotO) * a + 180.0f, 0.0f, 1.0f, 0.0f);
         }
-        GL11.glTranslatef(0.0f, n, 0.0f);
+        glTranslatef(0.0f, n, 0.0f);
         this.isInClouds = this.mc.levelRenderer.isInCloud(cameraTargetPlayer.xo + (cameraTargetPlayer.x - cameraTargetPlayer.xo) * a, cameraTargetPlayer.yo + (cameraTargetPlayer.y - cameraTargetPlayer.yo) * a - n, cameraTargetPlayer.zo + (cameraTargetPlayer.z - cameraTargetPlayer.zo) * a, a);
     }
     
     private void setupCamera(final float a, final int eye) {
         this.renderDistance = (float)(256 >> this.mc.options.viewDistance);
-        GL11.glMatrixMode(GL_PROJECTION);
-        GL11.glLoadIdentity();
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
         final float n = 0.07f;
         if (this.mc.options.anaglyph3d) {
-            GL11.glTranslatef(-(eye * 2 - 1) * n, 0.0f, 0.0f);
+            glTranslatef(-(eye * 2 - 1) * n, 0.0f, 0.0f);
         }
         if (this.zoom != 1.0) {
-            GL11.glTranslatef((float)this.zoom_x, (float)(-this.zoom_y), 0.0f);
-            GL11.glScaled(this.zoom, this.zoom, 1.0);
+            glTranslatef((float)this.zoom_x, (float)(-this.zoom_y), 0.0f);
+            glScaled(this.zoom, this.zoom, 1.0);
             GLU.gluPerspective(this.getFov(a), this.mc.width / (float)this.mc.height, 0.05f, this.renderDistance * 2.0f);
         }
         else {
             GLU.gluPerspective(this.getFov(a), this.mc.width / (float)this.mc.height, 0.05f, this.renderDistance * 2.0f);
         }
-        GL11.glMatrixMode(GL_MODELVIEW);
-        GL11.glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
         if (this.mc.options.anaglyph3d) {
-            GL11.glTranslatef((eye * 2 - 1) * 0.1f, 0.0f, 0.0f);
+            glTranslatef((eye * 2 - 1) * 0.1f, 0.0f, 0.0f);
         }
         this.bobHurt(a);
         if (this.mc.options.bobView) {
@@ -327,19 +326,19 @@ public class GameRenderer
         if (n2 > 0.0f) {
             final float n3 = 5.0f / (n2 * n2 + 5.0f) - n2 * 0.04f;
             final float n4 = n3 * n3;
-            GL11.glRotatef((this.tick + a) * 20.0f, 0.0f, 1.0f, 1.0f);
-            GL11.glScalef(1.0f / n4, 1.0f, 1.0f);
-            GL11.glRotatef(-(this.tick + a) * 20.0f, 0.0f, 1.0f, 1.0f);
+            glRotatef((this.tick + a) * 20.0f, 0.0f, 1.0f, 1.0f);
+            glScalef(1.0f / n4, 1.0f, 1.0f);
+            glRotatef(-(this.tick + a) * 20.0f, 0.0f, 1.0f, 1.0f);
         }
         this.moveCameraToPlayer(a);
     }
     
     private void renderItemInHand(final float a, final int eye) {
-        GL11.glLoadIdentity();
+        glLoadIdentity();
         if (this.mc.options.anaglyph3d) {
-            GL11.glTranslatef((eye * 2 - 1) * 0.1f, 0.0f, 0.0f);
+            glTranslatef((eye * 2 - 1) * 0.1f, 0.0f, 0.0f);
         }
-        GL11.glPushMatrix();
+        glPushMatrix();
         this.bobHurt(a);
         if (this.mc.options.bobView) {
             this.bobView(a);
@@ -347,7 +346,7 @@ public class GameRenderer
         if (!this.mc.options.thirdPersonView && !this.mc.cameraTargetPlayer.isSleeping() && !this.mc.options.hideGui) {
             this.itemInHandRenderer.render(a);
         }
-        GL11.glPopMatrix();
+        glPopMatrix();
         if (!this.mc.options.thirdPersonView && !this.mc.cameraTargetPlayer.isSleeping()) {
             this.itemInHandRenderer.renderScreenEffect(a);
             this.bobHurt(a);
@@ -422,11 +421,11 @@ public class GameRenderer
             }
         }
         else {
-            GL11.glViewport(0, 0, this.mc.width, this.mc.height);
-            GL11.glMatrixMode(GL_PROJECTION);
-            GL11.glLoadIdentity();
-            GL11.glMatrixMode(GL_MODELVIEW);
-            GL11.glLoadIdentity();
+            glViewport(0, 0, this.mc.width, this.mc.height);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
             this.setupGuiScreen();
             if (this.mc.options.limitFramerate == 2) {
                 long millis2 = (this.lastNsTime + 1000000000 / n6 - System.nanoTime()) / 1000000L;
@@ -445,7 +444,7 @@ public class GameRenderer
             this.lastNsTime = System.nanoTime();
         }
         if (this.mc.screen != null) {
-            GL11.glClear(GL_DEPTH_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT);
             this.mc.screen.render(n4, n5, a);
             if (this.mc.screen != null && this.mc.screen.particles != null) {
                 this.mc.screen.particles.render(a);
@@ -454,8 +453,8 @@ public class GameRenderer
     }
     
     public void renderLevel(final float a, final long until) {
-        GL11.glEnable(GL_CULL_FACE);
-        GL11.glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
         if (this.mc.cameraTargetPlayer == null) {
             this.mc.cameraTargetPlayer = this.mc.player;
         }
@@ -474,26 +473,26 @@ public class GameRenderer
             if (this.mc.options.anaglyph3d) {
                 GameRenderer.anaglyphPass = i;
                 if (GameRenderer.anaglyphPass == 0) {
-                    GL11.glColorMask(false, true, true, false);
+                    glColorMask(false, true, true, false);
                 }
                 else {
-                    GL11.glColorMask(true, false, false, false);
+                    glColorMask(true, false, false, false);
                 }
             }
-            GL11.glViewport(0, 0, this.mc.width, this.mc.height);
+            glViewport(0, 0, this.mc.width, this.mc.height);
             this.setupClearColor(a);
-            GL11.glClear(16640);
-            GL11.glEnable(GL_CULL_FACE);
+            glClear(16640);
+            glEnable(GL_CULL_FACE);
             this.setupCamera(a, i);
             Frustum.getFrustum();
             if (this.mc.options.viewDistance < 2) {
                 this.setupFog(-1, a);
                 levelRenderer.renderSky(a);
             }
-            GL11.glEnable(GL_FOG);
+            glEnable(GL_FOG);
             this.setupFog(1, a);
             if (this.mc.options.ambientOcclusion) {
-                GL11.glShadeModel(GL_SMOOTH);
+                glShadeModel(GL_SMOOTH);
             }
             final FrustumCuller frustumCuller = new FrustumCuller();
             frustumCuller.prepare(xOff, yOff, zOff);
@@ -513,11 +512,11 @@ public class GameRenderer
                 }
             }
             this.setupFog(0, a);
-            GL11.glEnable(GL_FOG);
-            GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
+            glEnable(GL_FOG);
+            glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             Lighting.turnOff();
             levelRenderer.render(cameraTargetPlayer, 0, a);
-            GL11.glShadeModel(GL_FLAT);
+            glShadeModel(GL_FLAT);
             Lighting.turnOn();
             levelRenderer.renderEntities(cameraTargetPlayer.getPos(a), frustumCuller, a);
             particleEngine.renderLit(cameraTargetPlayer, a);
@@ -526,68 +525,68 @@ public class GameRenderer
             particleEngine.render(cameraTargetPlayer, a);
             if (this.mc.hitResult != null && cameraTargetPlayer.isUnderLiquid(Material.water) && cameraTargetPlayer instanceof Player) {
                 final Player player = (Player)cameraTargetPlayer;
-                GL11.glDisable(GL_ALPHA_TEST);
+                glDisable(GL_ALPHA_TEST);
                 levelRenderer.renderHit(player, this.mc.hitResult, 0, player.inventory.getSelected(), a);
                 levelRenderer.renderHitOutline(player, this.mc.hitResult, 0, player.inventory.getSelected(), a);
-                GL11.glEnable(GL_ALPHA_TEST);
+                glEnable(GL_ALPHA_TEST);
             }
-            GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             this.setupFog(0, a);
-            GL11.glEnable(GL_BLEND);
-            GL11.glDisable(GL_CULL_FACE);
-            GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
+            glEnable(GL_BLEND);
+            glDisable(GL_CULL_FACE);
+            glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             if (this.mc.options.fancyGraphics) {
                 if (this.mc.options.ambientOcclusion) {
-                    GL11.glShadeModel(GL_SMOOTH);
+                    glShadeModel(GL_SMOOTH);
                 }
-                GL11.glColorMask(false, false, false, false);
+                glColorMask(false, false, false, false);
                 final int render = levelRenderer.render(cameraTargetPlayer, 1, a);
                 if (this.mc.options.anaglyph3d) {
                     if (GameRenderer.anaglyphPass == 0) {
-                        GL11.glColorMask(false, true, true, true);
+                        glColorMask(false, true, true, true);
                     }
                     else {
-                        GL11.glColorMask(true, false, false, true);
+                        glColorMask(true, false, false, true);
                     }
                 }
                 else {
-                    GL11.glColorMask(true, true, true, true);
+                    glColorMask(true, true, true, true);
                 }
                 if (render > 0) {
                     levelRenderer.renderSameAsLast(1, a);
                 }
-                GL11.glShadeModel(GL_FLAT);
+                glShadeModel(GL_FLAT);
             }
             else {
                 levelRenderer.render(cameraTargetPlayer, 1, a);
             }
-            GL11.glDepthMask(true);
-            GL11.glEnable(GL_CULL_FACE);
-            GL11.glDisable(GL_BLEND);
+            glDepthMask(true);
+            glEnable(GL_CULL_FACE);
+            glDisable(GL_BLEND);
             if (this.zoom == 1.0 && cameraTargetPlayer instanceof Player && this.mc.hitResult != null && !cameraTargetPlayer.isUnderLiquid(Material.water)) {
                 final Player player2 = (Player)cameraTargetPlayer;
-                GL11.glDisable(GL_ALPHA_TEST);
+                glDisable(GL_ALPHA_TEST);
                 levelRenderer.renderHit(player2, this.mc.hitResult, 0, player2.inventory.getSelected(), a);
                 levelRenderer.renderHitOutline(player2, this.mc.hitResult, 0, player2.inventory.getSelected(), a);
-                GL11.glEnable(GL_ALPHA_TEST);
+                glEnable(GL_ALPHA_TEST);
             }
             this.renderSnowAndRain(a);
-            GL11.glDisable(GL_FOG);
+            glDisable(GL_FOG);
             if (this.hovered != null) {}
             this.setupFog(0, a);
-            GL11.glEnable(GL_FOG);
+            glEnable(GL_FOG);
             levelRenderer.renderClouds(a);
-            GL11.glDisable(GL_FOG);
+            glDisable(GL_FOG);
             this.setupFog(1, a);
             if (this.zoom == 1.0) {
-                GL11.glClear(GL_DEPTH_BUFFER_BIT);
+                glClear(GL_DEPTH_BUFFER_BIT);
                 this.renderItemInHand(a, i);
             }
             if (!this.mc.options.anaglyph3d) {
                 return;
             }
         }
-        GL11.glColorMask(true, true, true, false);
+        glColorMask(true, true, true, false);
     }
     
     private void tickRain() {
@@ -654,12 +653,12 @@ public class GameRenderer
         final int floor2 = Mth.floor(cameraTargetPlayer.y);
         final int floor3 = Mth.floor(cameraTargetPlayer.z);
         final Tesselator instance = Tesselator.instance;
-        GL11.glDisable(GL_CULL_FACE);
-        GL11.glNormal3f(0.0f, 1.0f, 0.0f);
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glAlphaFunc(516, 0.01f);
-        GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/environment/snow.png"));
+        glDisable(GL_CULL_FACE);
+        glNormal3f(0.0f, 1.0f, 0.0f);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glAlphaFunc(516, 0.01f);
+        glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/environment/snow.png"));
         final double n = cameraTargetPlayer.xOld + (cameraTargetPlayer.x - cameraTargetPlayer.xOld) * a;
         final double v = cameraTargetPlayer.yOld + (cameraTargetPlayer.y - cameraTargetPlayer.yOld) * a;
         final double n2 = cameraTargetPlayer.zOld + (cameraTargetPlayer.z - cameraTargetPlayer.zOld) * a;
@@ -701,7 +700,7 @@ public class GameRenderer
                         final float n14 = Mth.sqrt(n12 * n12 + n13 * n13) / n3;
                         instance.begin();
                         final float brightness = level.getBrightness(i, y, j);
-                        GL11.glColor4f(brightness, brightness, brightness, ((1.0f - n14 * n14) * 0.3f + 0.5f) * rainLevel);
+                        glColor4f(brightness, brightness, brightness, ((1.0f - n14 * n14) * 0.3f + 0.5f) * rainLevel);
                         instance.offset(-n * 1.0, -v * 1.0, -n2 * 1.0);
                         instance.vertexUV(i + 0, n5, j + 0.5, 0.0f * n7 + n10, n5 * n7 / 4.0f + n9 * n7 + n11);
                         instance.vertexUV(i + 1, n5, j + 0.5, 1.0f * n7 + n10, n5 * n7 / 4.0f + n9 * n7 + n11);
@@ -717,7 +716,7 @@ public class GameRenderer
                 }
             }
         }
-        GL11.glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/environment/rain.png"));
+        glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/environment/rain.png"));
         if (this.mc.options.fancyGraphics) {
             n3 = 10;
         }
@@ -743,7 +742,7 @@ public class GameRenderer
                         final float n22 = Mth.sqrt(n20 * n20 + n21 * n21) / n3;
                         instance.begin();
                         final float n23 = level.getBrightness(k, 128, l) * 0.85f + 0.15f;
-                        GL11.glColor4f(n23, n23, n23, ((1.0f - n22 * n22) * 0.5f + 0.5f) * rainLevel);
+                        glColor4f(n23, n23, n23, ((1.0f - n22 * n22) * 0.5f + 0.5f) * rainLevel);
                         instance.offset(-n * 1.0, -v * 1.0, -n2 * 1.0);
                         instance.vertexUV(k + 0, n16, l + 0.5, 0.0f * n18, n16 * n18 / 4.0f + n19 * n18);
                         instance.vertexUV(k + 1, n16, l + 0.5, 1.0f * n18, n16 * n18 / 4.0f + n19 * n18);
@@ -759,20 +758,20 @@ public class GameRenderer
                 }
             }
         }
-        GL11.glEnable(GL_CULL_FACE);
-        GL11.glDisable(GL_BLEND);
-        GL11.glAlphaFunc(516, 0.1f);
+        glEnable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
+        glAlphaFunc(516, 0.1f);
     }
     
     public void setupGuiScreen() {
         final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.mc.options, this.mc.width, this.mc.height);
-        GL11.glClear(GL_DEPTH_BUFFER_BIT);
-        GL11.glMatrixMode(GL_PROJECTION);
-        GL11.glLoadIdentity();
-        GL11.glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 1000.0, 3000.0);
-        GL11.glMatrixMode(GL_MODELVIEW);
-        GL11.glLoadIdentity();
-        GL11.glTranslatef(0.0f, 0.0f, -2000.0f);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 1000.0, 3000.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslatef(0.0f, 0.0f, -2000.0f);
     }
     
     private void setupClearColor(final float a) {
@@ -833,46 +832,46 @@ public class GameRenderer
             this.fg = fg;
             this.fb = fb;
         }
-        GL11.glClearColor(this.fr, this.fg, this.fb, 0.0f);
+        glClearColor(this.fr, this.fg, this.fb, 0.0f);
     }
     
     private void setupFog(final int i, final float alpha) {
         final Mob cameraTargetPlayer = this.mc.cameraTargetPlayer;
-        GL11.glFog(2918, this.getBuffer(this.fr, this.fg, this.fb, 1.0f));
-        GL11.glNormal3f(0.0f, -1.0f, 0.0f);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glFog(2918, this.getBuffer(this.fr, this.fg, this.fb, 1.0f));
+        glNormal3f(0.0f, -1.0f, 0.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         if (this.isInClouds) {
-            GL11.glFogi(2917, 2048);
-            GL11.glFogf(2914, 0.1f);
+            glFogi(2917, 2048);
+            glFogf(2914, 0.1f);
             if (this.mc.options.anaglyph3d) {}
         }
         else if (cameraTargetPlayer.isUnderLiquid(Material.water)) {
-            GL11.glFogi(2917, 2048);
-            GL11.glFogf(2914, 0.1f);
+            glFogi(2917, 2048);
+            glFogf(2914, 0.1f);
             if (this.mc.options.anaglyph3d) {}
         }
         else if (cameraTargetPlayer.isUnderLiquid(Material.lava)) {
-            GL11.glFogi(2917, 2048);
-            GL11.glFogf(2914, 2.0f);
+            glFogi(2917, 2048);
+            glFogf(2914, 2.0f);
             if (this.mc.options.anaglyph3d) {}
         }
         else {
-            GL11.glFogi(2917, 9729);
-            GL11.glFogf(2915, this.renderDistance * 0.25f);
-            GL11.glFogf(2916, this.renderDistance);
+            glFogi(2917, 9729);
+            glFogf(2915, this.renderDistance * 0.25f);
+            glFogf(2916, this.renderDistance);
             if (i < 0) {
-                GL11.glFogf(2915, 0.0f);
-                GL11.glFogf(2916, this.renderDistance * 0.8f);
+                glFogf(2915, 0.0f);
+                glFogf(2916, this.renderDistance * 0.8f);
             }
             if (GLContext.getCapabilities().GL_NV_fog_distance) {
-                GL11.glFogi(34138, 34139);
+                glFogi(34138, 34139);
             }
             if (this.mc.level.dimension.foggy) {
-                GL11.glFogf(2915, 0.0f);
+                glFogf(2915, 0.0f);
             }
         }
-        GL11.glEnable(GL_COLOR_MATERIAL);
-        GL11.glColorMaterial(1028, 4608);
+        glEnable(GL_COLOR_MATERIAL);
+        glColorMaterial(1028, 4608);
     }
     
     private FloatBuffer getBuffer(final float a, final float b, final float c, final float d) {

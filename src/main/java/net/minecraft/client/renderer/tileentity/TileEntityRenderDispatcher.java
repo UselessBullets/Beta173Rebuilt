@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.tileentity;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.level.tile.entity.TileEntity;
 import java.util.Iterator;
 import net.minecraft.world.level.tile.entity.PistonPieceEntity;
@@ -16,6 +15,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.client.renderer.Textures;
 import net.minecraft.client.gui.Font;
 import java.util.Map;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class TileEntityRenderDispatcher
 {
@@ -81,7 +82,7 @@ public class TileEntityRenderDispatcher
     public void render(final TileEntity e, final float a) {
         if (e.distanceToSqr(this.xPlayer, this.yPlayer, this.zPlayer) < 4096.0) {
             final float brightness = this.level.getBrightness(e.x, e.y, e.z);
-            GL11.glColor3f(brightness, brightness, brightness);
+            glColor3f(brightness, brightness, brightness);
             this.render(e, e.x - TileEntityRenderDispatcher.xOff, e.y - TileEntityRenderDispatcher.yOff, e.z - TileEntityRenderDispatcher.zOff, a);
         }
     }

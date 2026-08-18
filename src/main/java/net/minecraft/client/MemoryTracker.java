@@ -9,8 +9,9 @@ import java.nio.FloatBuffer;
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import org.lwjgl.opengl.GL11;
 import java.util.List;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class MemoryTracker
 {
@@ -18,14 +19,14 @@ public class MemoryTracker
     private static List<Integer> textures;
     
     public static synchronized int genLists(final int count) {
-        final int glGenLists = GL11.glGenLists(count);
+        final int glGenLists = glGenLists(count);
         MemoryTracker.lists.add(glGenLists);
         MemoryTracker.lists.add(count);
         return glGenLists;
     }
     
     public static synchronized void genTextures(final IntBuffer ib) {
-        GL11.glGenTextures(ib);
+        glGenTextures(ib);
         for (int i = ib.position(); i < ib.limit(); ++i) {
             MemoryTracker.textures.add(ib.get(i));
         }
@@ -33,23 +34,23 @@ public class MemoryTracker
     
     public static synchronized void releaseLists(final int id) {
         final int index = MemoryTracker.lists.indexOf(id);
-        GL11.glDeleteLists(MemoryTracker.lists.get(index), MemoryTracker.lists.get(index + 1));
+        glDeleteLists(MemoryTracker.lists.get(index), MemoryTracker.lists.get(index + 1));
         MemoryTracker.lists.remove(index);
         MemoryTracker.lists.remove(index);
     }
     
     public static synchronized void release() {
         for (int i = 0; i < MemoryTracker.lists.size(); i += 2) {
-            GL11.glDeleteLists(MemoryTracker.lists.get(i), MemoryTracker.lists.get(i + 1));
+            glDeleteLists(MemoryTracker.lists.get(i), MemoryTracker.lists.get(i + 1));
         }
         final IntBuffer intBuffer = createIntBuffer(MemoryTracker.textures.size());
         intBuffer.flip();
-        GL11.glDeleteTextures(intBuffer);
+        glDeleteTextures(intBuffer);
         for (int j = 0; j < MemoryTracker.textures.size(); ++j) {
             intBuffer.put(MemoryTracker.textures.get(j));
         }
         intBuffer.flip();
-        GL11.glDeleteTextures(intBuffer);
+        glDeleteTextures(intBuffer);
         MemoryTracker.lists.clear();
         MemoryTracker.textures.clear();
     }

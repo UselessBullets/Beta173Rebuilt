@@ -37,7 +37,6 @@ import util.Mth;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import java.util.Random;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.ARBOcclusionQuery;
 import net.minecraft.client.MemoryTracker;
 import java.util.ArrayList;

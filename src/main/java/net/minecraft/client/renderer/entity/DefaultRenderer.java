@@ -4,15 +4,16 @@
 
 package net.minecraft.client.renderer.entity;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Entity;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class DefaultRenderer extends EntityRenderer<Entity>
 {
     @Override
     public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float a) {
-        GL11.glPushMatrix();
+        glPushMatrix();
         EntityRenderer.render(entity.bb, x - entity.xOld, y - entity.yOld, z - entity.zOld);
-        GL11.glPopMatrix();
+        glPopMatrix();
     }
 }

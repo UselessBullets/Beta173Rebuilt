@@ -5,7 +5,6 @@
 package net.minecraft.client.particle;
 
 import util.Mth;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.world.level.Level;
 import net.minecraft.client.renderer.Textures;
@@ -34,7 +33,7 @@ public class FootstepParticle extends Particle
         if (alpha > 1.0f) alpha = 1.0f;
         alpha = alpha * 0.2f;
 
-        GL11.glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHTING);
         final float r = 2 / 16.0f;
 
         final float xx = (float)(this.x - FootstepParticle.xOff);
@@ -44,8 +43,8 @@ public class FootstepParticle extends Particle
         final float br = this.level.getBrightness(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z));
 
         this.textures.bind(this.textures.loadTexture("/misc/footprint.png"));
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         t.begin();
         t.color(br, br, br, alpha);
@@ -55,8 +54,8 @@ public class FootstepParticle extends Particle
         t.vertexUV(xx - r, yy, zz - r, 0.0, 0.0);
         t.end();
 
-        GL11.glDisable(GL_BLEND);
-        GL11.glEnable(GL_LIGHTING);
+        glDisable(GL_BLEND);
+        glEnable(GL_LIGHTING);
     }
     
     @Override

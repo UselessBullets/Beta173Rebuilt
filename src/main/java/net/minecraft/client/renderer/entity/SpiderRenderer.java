@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.client.model.SpiderModel;
 
@@ -26,10 +25,10 @@ public class SpiderRenderer extends MobRenderer<Spider>
         this.bindTexture("/mob/spider_eyes.png");
 
         final float br = (1.0f - spider.getBrightness(1.0f)) * 0.5f;
-        GL11.glEnable(GL_BLEND);
-        GL11.glDisable(GL_ALPHA_TEST);
-        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, br);
+        glEnable(GL_BLEND);
+        glDisable(GL_ALPHA_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4f(1.0f, 1.0f, 1.0f, br);
         return true;
     }
 }

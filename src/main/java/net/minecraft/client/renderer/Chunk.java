@@ -9,13 +9,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.tile.entity.TileEntity;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderDispatcher;
 import net.minecraft.world.level.tile.Tile;
-import net.minecraft.world.level.LevelSource;
 import net.minecraft.world.level.Region;
-import java.util.Collection;
+
 import java.util.HashSet;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import org.lwjgl.opengl.GL11;
 import util.Mth;
 import java.util.ArrayList;
 import java.util.List;

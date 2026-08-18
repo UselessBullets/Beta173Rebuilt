@@ -8,10 +8,11 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.client.renderer.TileRenderer;
 import util.Mth;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.item.Minecart;
 import net.minecraft.client.model.MinecartModel;
 import net.minecraft.client.model.Model;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class MinecartRenderer extends EntityRenderer<Minecart>
 {
@@ -22,7 +23,7 @@ public class MinecartRenderer extends EntityRenderer<Minecart>
     }
     
     public void render(final Minecart minecart, double x, double y, double z, float rot, final float a) {
-        GL11.glPushMatrix();
+        glPushMatrix();
 
         final double xx = minecart.xOld + (minecart.x - minecart.xOld) * a;
         final double yy = minecart.yOld + (minecart.y - minecart.yOld) * a;
@@ -53,24 +54,24 @@ public class MinecartRenderer extends EntityRenderer<Minecart>
                 xRot = (float)(Math.atan(dir.y) * 73.0);
             }
         }
-        GL11.glTranslatef((float)x, (float)y, (float)z);
+        glTranslatef((float)x, (float)y, (float)z);
 
-        GL11.glRotatef(180.0f - rot, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(-xRot, 0.0f, 0.0f, 1.0f);
+        glRotatef(180.0f - rot, 0.0f, 1.0f, 0.0f);
+        glRotatef(-xRot, 0.0f, 0.0f, 1.0f);
         final float hurt = minecart.hurtTime - a;
         float dmg = minecart.damage - a;
         if (dmg < 0.0f) dmg = 0.0f;
         if (hurt > 0.0f) {
-            GL11.glRotatef(Mth.sin(hurt) * hurt * dmg / 10.0f * minecart.hurtDir, 1.0f, 0.0f, 0.0f);
+            glRotatef(Mth.sin(hurt) * hurt * dmg / 10.0f * minecart.hurtDir, 1.0f, 0.0f, 0.0f);
         }
 
         if (minecart.type != Minecart.RIDEABLE) {
             this.bindTexture("/terrain.png");
             final float ss = 12 / 16.0f;
-            GL11.glScalef(ss, ss, ss);
+            glScalef(ss, ss, ss);
 
-            GL11.glTranslatef(0.0f, 5.0f / 16.0f, 0.0f);
-            GL11.glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+            glTranslatef(0.0f, 5.0f / 16.0f, 0.0f);
+            glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
 
             if (minecart.type == Minecart.CHEST) {
                 new TileRenderer().renderTile(Tile.chest, 0, minecart.getBrightness(a));
@@ -78,14 +79,14 @@ public class MinecartRenderer extends EntityRenderer<Minecart>
             else if (minecart.type == Minecart.FURNACE) {
                 new TileRenderer().renderTile(Tile.furnace, 0, minecart.getBrightness(a));
             }
-            GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-            GL11.glTranslatef(0.0f, -5.0f / 16.0f, 0.0f);
-            GL11.glScalef(1.0f / ss, 1.0f / ss, 1.0f / ss);
+            glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+            glTranslatef(0.0f, -5.0f / 16.0f, 0.0f);
+            glScalef(1.0f / ss, 1.0f / ss, 1.0f / ss);
         }
 
         this.bindTexture("/item/cart.png");
-        GL11.glScalef(-1.0f, -1.0f, 1.0f);
+        glScalef(-1.0f, -1.0f, 1.0f);
         this.model.render(0.0f, 0.0f, -0.1f, 0.0f, 0.0f, 1.0f / 16.0f);
-        GL11.glPopMatrix();
+        glPopMatrix();
     }
 }

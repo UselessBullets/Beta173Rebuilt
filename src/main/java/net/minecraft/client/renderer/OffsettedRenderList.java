@@ -4,9 +4,10 @@
 
 package net.minecraft.client.renderer;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.MemoryTracker;
 import java.nio.IntBuffer;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class OffsettedRenderList
 {
@@ -57,10 +58,10 @@ public class OffsettedRenderList
             this.rendered = true;
         }
         if (this.lists.remaining() > 0) {
-            GL11.glPushMatrix();
-            GL11.glTranslatef(this.x - this.xOff, this.y - this.yOff, this.z - this.zOff);
-            GL11.glCallLists(this.lists);
-            GL11.glPopMatrix();
+            glPushMatrix();
+            glTranslatef(this.x - this.xOff, this.y - this.yOff, this.z - this.zOff);
+            glCallLists(this.lists);
+            glPopMatrix();
         }
     }
     

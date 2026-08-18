@@ -6,7 +6,6 @@ package net.minecraft.client;
 
 import org.lwjgl.opengl.Display;
 import net.minecraft.client.renderer.Tesselator;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.gui.ScreenSizeCalculator;
 import util.ProgressListener;
 
@@ -42,13 +41,13 @@ public class ProgressRenderer implements ProgressListener
         if (this.minecraft.running) {
             this.title = title;
             final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
-            GL11.glClear(GL_DEPTH_BUFFER_BIT);
-            GL11.glMatrixMode(GL_PROJECTION);
-            GL11.glLoadIdentity();
-            GL11.glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 100.0, 300.0);
-            GL11.glMatrixMode(GL_MODELVIEW);
-            GL11.glLoadIdentity();
-            GL11.glTranslatef(0.0f, 0.0f, -200.0f);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 100.0, 300.0);
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glTranslatef(0.0f, 0.0f, -200.0f);
             return;
         }
         if (this.noAbort) {
@@ -87,16 +86,16 @@ public class ProgressRenderer implements ProgressListener
             final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
             final int width = screenSizeCalculator.getWidth();
             final int height = screenSizeCalculator.getHeight();
-            GL11.glClear(GL_DEPTH_BUFFER_BIT);
-            GL11.glMatrixMode(GL_PROJECTION);
-            GL11.glLoadIdentity();
-            GL11.glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 100.0, 300.0);
-            GL11.glMatrixMode(GL_MODELVIEW);
-            GL11.glLoadIdentity();
-            GL11.glTranslatef(0.0f, 0.0f, -200.0f);
-            GL11.glClear(16640);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 100.0, 300.0);
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glTranslatef(0.0f, 0.0f, -200.0f);
+            glClear(16640);
             final Tesselator instance = Tesselator.instance;
-            GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
+            glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
             final float n = 32.0f;
             instance.begin();
             instance.color(0x404040);
@@ -110,7 +109,7 @@ public class ProgressRenderer implements ProgressListener
                 final int n3 = 2;
                 final int n4 = width / 2 - n2 / 2;
                 final int n5 = height / 2 + 16;
-                GL11.glDisable(GL_TEXTURE_2D);
+                glDisable(GL_TEXTURE_2D);
                 instance.begin();
                 instance.color(0x808080);
                 instance.vertex(n4, n5, 0.0);
@@ -123,7 +122,7 @@ public class ProgressRenderer implements ProgressListener
                 instance.vertex(n4 + i, n5 + n3, 0.0);
                 instance.vertex(n4 + i, n5, 0.0);
                 instance.end();
-                GL11.glEnable(GL_TEXTURE_2D);
+                glEnable(GL_TEXTURE_2D);
             }
             this.minecraft.font.drawShadow(this.title, (width - this.minecraft.font.width(this.title)) / 2, height / 2 - 4 - 16, 0xffffff);
             this.minecraft.font.drawShadow(this.status, (width - this.minecraft.font.width(this.status)) / 2, height / 2 - 4 + 8, 0xffffff);

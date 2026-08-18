@@ -4,10 +4,11 @@
 
 package net.minecraft.client.gui;
 
-import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import net.minecraft.client.Minecraft;
 import java.util.List;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class GuiParticles extends GuiComponent
 {
@@ -48,7 +49,7 @@ public class GuiParticles extends GuiComponent
             final float g = (float)(guiParticle.og + (guiParticle.g - guiParticle.og) * a);
             final float b = (float)(guiParticle.ob + (guiParticle.b - guiParticle.ob) * a);
 
-            GL11.glColor4f(r, g, b, alpha);
+            glColor4f(r, g, b, alpha);
             this.blit(xx, yy, 8 * 5, 0, 8, 8);
         }
     }

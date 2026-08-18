@@ -4,9 +4,10 @@
 
 package net.minecraft.client.renderer.entity;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.client.model.Model;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class SheepRenderer extends MobRenderer<Sheep>
 {
@@ -20,7 +21,7 @@ public class SheepRenderer extends MobRenderer<Sheep>
             this.bindTexture("/mob/sheep_fur.png");
             final float brightness = sheep.getBrightness(a);
             final int color = sheep.getColor();
-            GL11.glColor3f(brightness * Sheep.COLOR[color][0], brightness * Sheep.COLOR[color][1], brightness * Sheep.COLOR[color][2]);
+            glColor3f(brightness * Sheep.COLOR[color][0], brightness * Sheep.COLOR[color][1], brightness * Sheep.COLOR[color][2]);
             return true;
         }
         return false;

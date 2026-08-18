@@ -6,10 +6,10 @@ package net.minecraft.client.renderer.entity;
 
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Painting;
 import java.util.Random;
 
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.*;
 
 public class PaintingRenderer extends EntityRenderer<Painting>
@@ -19,18 +19,18 @@ public class PaintingRenderer extends EntityRenderer<Painting>
     public void render(final Painting entity, final double x, final double y, final double z, final float rot, final float a) {
         this.random.setSeed(187L);
 
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float)x, (float)y, (float)z);
-        GL11.glRotatef(rot, 0.0f, 1.0f, 0.0f);
-        GL11.glEnable(GL_RESCALE_NORMAL);
+        glPushMatrix();
+        glTranslatef((float)x, (float)y, (float)z);
+        glRotatef(rot, 0.0f, 1.0f, 0.0f);
+        glEnable(GL_RESCALE_NORMAL);
         this.bindTexture("/art/kz.png");
 
         final Painting.Motive motive = entity.motive;
         final float s = 1/ 16.0f;
-        GL11.glScalef(s, s, s);
+        glScalef(s, s, s);
         this.renderPainting(entity, motive.w, motive.h, motive.uo, motive.vo);
-        GL11.glDisable(GL_RESCALE_NORMAL);
-        GL11.glPopMatrix();
+        glDisable(GL_RESCALE_NORMAL);
+        glPopMatrix();
     }
     
     private void renderPainting(final Painting painting, final int w, final int h, final int uo, final int vo) {
@@ -121,6 +121,6 @@ public class PaintingRenderer extends EntityRenderer<Painting>
         if (painting.dir == 3) z = Mth.floor(painting.z + ss / 16.0f);
 
         final float br = this.entityRenderDispatcher.level.getBrightness(x, y, z);
-        GL11.glColor3f(br, br, br);
+        glColor3f(br, br, br);
     }
 }

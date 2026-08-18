@@ -4,9 +4,10 @@
 
 package net.minecraft.client.renderer.entity;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.client.model.Model;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class SquidRenderer extends MobRenderer<Squid>
 {
@@ -22,11 +23,11 @@ public class SquidRenderer extends MobRenderer<Squid>
         final float bodyXRot = squid.xBodyRotO + (squid.xBodyRot - squid.xBodyRotO) * a;
         final float bodyZRot = squid.zBodyRotO + (squid.zBodyRot - squid.zBodyRotO) * a;
 
-        GL11.glTranslatef(0.0f, 0.5f, 0.0f);
-        GL11.glRotatef(180.0f - bodyRot, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(bodyXRot, 1.0f, 0.0f, 0.0f);
-        GL11.glRotatef(bodyZRot, 0.0f, 1.0f, 0.0f);
-        GL11.glTranslatef(0.0f, -1.2f, 0.0f);
+        glTranslatef(0.0f, 0.5f, 0.0f);
+        glRotatef(180.0f - bodyRot, 0.0f, 1.0f, 0.0f);
+        glRotatef(bodyXRot, 1.0f, 0.0f, 0.0f);
+        glRotatef(bodyZRot, 0.0f, 1.0f, 0.0f);
+        glTranslatef(0.0f, -1.2f, 0.0f);
     }
     
     protected void scale(final Squid squid, final float a) {

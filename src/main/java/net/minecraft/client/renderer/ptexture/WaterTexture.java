@@ -67,7 +67,7 @@ public class WaterTexture extends DynamicTexture
                 g = gg;
                 b = bb;
             }
-            
+
             this.pixels[i * 4 + 0] = (byte)r;
             this.pixels[i * 4 + 1] = (byte)g;
             this.pixels[i * 4 + 2] = (byte)b;

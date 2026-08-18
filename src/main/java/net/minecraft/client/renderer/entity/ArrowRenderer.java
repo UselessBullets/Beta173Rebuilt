@@ -6,9 +6,9 @@ package net.minecraft.client.renderer.entity;
 
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.projectile.Arrow;
 
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.*;
 
 public class ArrowRenderer extends EntityRenderer<Arrow>
@@ -17,11 +17,11 @@ public class ArrowRenderer extends EntityRenderer<Arrow>
         if (arrow.yRotO == 0.0f && arrow.xRotO == 0.0f) return;
         this.bindTexture("/item/arrows.png");
 
-        GL11.glPushMatrix();
+        glPushMatrix();
 
-        GL11.glTranslatef((float)x, (float)y, (float)z);
-        GL11.glRotatef(arrow.yRotO + (arrow.yRot - arrow.yRotO) * a - 90.0f, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(arrow.xRotO + (arrow.xRot - arrow.xRotO) * a, 0.0f, 0.0f, 1.0f);
+        glTranslatef((float)x, (float)y, (float)z);
+        glRotatef(arrow.yRotO + (arrow.yRot - arrow.yRotO) * a - 90.0f, 0.0f, 1.0f, 0.0f);
+        glRotatef(arrow.xRotO + (arrow.xRot - arrow.xRotO) * a, 0.0f, 0.0f, 1.0f);
 
         final Tesselator t = Tesselator.instance;
         final int type = 0;
@@ -36,18 +36,18 @@ public class ArrowRenderer extends EntityRenderer<Arrow>
         final float v02 = (5 + type * 10) / 32.0f;
         final float v12 = (10 + type * 10) / 32.0f;
         final float ss = 0.05625f;
-        GL11.glEnable(GL_RESCALE_NORMAL);
+        glEnable(GL_RESCALE_NORMAL);
         final float shake = arrow.shakeTime - a;
         if (shake > 0.0f) {
             float pow = -Mth.sin(shake * 3.0f) * shake;
-            GL11.glRotatef(pow, 0.0f, 0.0f, 1.0f);
+            glRotatef(pow, 0.0f, 0.0f, 1.0f);
         }
-        GL11.glRotatef(45.0f, 1.0f, 0.0f, 0.0f);
-        GL11.glScalef(ss, ss, ss);
+        glRotatef(45.0f, 1.0f, 0.0f, 0.0f);
+        glScalef(ss, ss, ss);
 
-        GL11.glTranslatef(-4.0f, 0.0f, 0.0f);
+        glTranslatef(-4.0f, 0.0f, 0.0f);
 
-        GL11.glNormal3f(ss, 0.0f, 0.0f);
+        glNormal3f(ss, 0.0f, 0.0f);
         t.begin();
         t.vertexUV(-7.0, -2.0, -2.0, u02, v02);
         t.vertexUV(-7.0, -2.0, 2.0, u12, v02);
@@ -55,7 +55,7 @@ public class ArrowRenderer extends EntityRenderer<Arrow>
         t.vertexUV(-7.0, 2.0, -2.0, u02, v12);
         t.end();
 
-        GL11.glNormal3f(-ss, 0.0f, 0.0f);
+        glNormal3f(-ss, 0.0f, 0.0f);
         t.begin();
         t.vertexUV(-7.0, 2.0, -2.0, u02, v02);
         t.vertexUV(-7.0, 2.0, 2.0, u12, v02);
@@ -64,8 +64,8 @@ public class ArrowRenderer extends EntityRenderer<Arrow>
         t.end();
 
         for (int i = 0; i < 4; ++i) {
-            GL11.glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-            GL11.glNormal3f(0.0f, 0.0f, ss);
+            glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            glNormal3f(0.0f, 0.0f, ss);
             t.begin();
             t.vertexUV(-8.0, -2.0, 0.0, u0, v0);
             t.vertexUV(8.0, -2.0, 0.0, u1, v0);
@@ -73,7 +73,7 @@ public class ArrowRenderer extends EntityRenderer<Arrow>
             t.vertexUV(-8.0, 2.0, 0.0, u0, v1);
             t.end();
         }
-        GL11.glDisable(GL_RESCALE_NORMAL);
-        GL11.glPopMatrix();
+        glDisable(GL_RESCALE_NORMAL);
+        glPopMatrix();
     }
 }

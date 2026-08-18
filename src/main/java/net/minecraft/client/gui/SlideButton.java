@@ -5,8 +5,9 @@
 package net.minecraft.client.gui;
 
 import net.minecraft.client.Options.Option;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class SlideButton extends Button
 {
@@ -35,7 +36,7 @@ public class SlideButton extends Button
             minecraft.options.set(this.option, this.value);
             this.msg = minecraft.options.getMessage(this.option);
         }
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.blit(this.x + (int)(this.value * (this.w - 8)), this.y, 0, 66, 4, 20);
         this.blit(this.x + (int)(this.value * (this.w - 8)) + 4, this.y, 196, 66, 4, 20);
     }

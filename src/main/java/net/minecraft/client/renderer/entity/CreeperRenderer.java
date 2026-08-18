@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import org.lwjgl.opengl.GL11;
 import util.Mth;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.client.model.CreeperModel;
@@ -30,7 +29,7 @@ public class CreeperRenderer extends MobRenderer<Creeper>
         g = g * g;
         final float s = (1.0f + g * 0.4f) * wobble;
         final float hs = (1.0f + g * 0.1f) / wobble;
-        GL11.glScalef(s, hs, s);
+        glScalef(s, hs, s);
     }
     
     protected int getOverlayColor(final Creeper creeper, final float br, final float a) {
@@ -54,26 +53,26 @@ public class CreeperRenderer extends MobRenderer<Creeper>
             if (layer == 1) {
                 final float time = creeper.tickCount + a;
                 this.bindTexture("/armor/power.png");
-                GL11.glMatrixMode(GL_TEXTURE);
-                GL11.glLoadIdentity();
+                glMatrixMode(GL_TEXTURE);
+                glLoadIdentity();
                 float uo = time * 0.01f;
                 float vo = time * 0.01f;
-                GL11.glTranslatef(uo, vo, 0.0f);
+                glTranslatef(uo, vo, 0.0f);
                 this.setArmor(this.armorModel);
-                GL11.glMatrixMode(GL_MODELVIEW);
-                GL11.glEnable(GL_BLEND);
+                glMatrixMode(GL_MODELVIEW);
+                glEnable(GL_BLEND);
                 final float nr = 0.5f;
-                GL11.glColor4f(nr, nr, nr, 1.0f);
-                GL11.glDisable(GL_LIGHTING);
-                GL11.glBlendFunc(GL_ONE, GL_ONE);
+                glColor4f(nr, nr, nr, 1.0f);
+                glDisable(GL_LIGHTING);
+                glBlendFunc(GL_ONE, GL_ONE);
                 return true;
             }
             if (layer == 2) {
-                GL11.glMatrixMode(GL_TEXTURE);
-                GL11.glLoadIdentity();
-                GL11.glMatrixMode(GL_MODELVIEW);
-                GL11.glEnable(GL_LIGHTING);
-                GL11.glDisable(GL_BLEND);
+                glMatrixMode(GL_TEXTURE);
+                glLoadIdentity();
+                glMatrixMode(GL_MODELVIEW);
+                glEnable(GL_LIGHTING);
+                glDisable(GL_BLEND);
             }
         }
         return false;

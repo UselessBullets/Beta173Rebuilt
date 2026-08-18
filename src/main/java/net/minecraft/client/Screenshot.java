@@ -5,19 +5,20 @@
 package net.minecraft.client;
 
 import java.text.SimpleDateFormat;
-import java.awt.image.RenderedImage;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.util.Date;
-import org.lwjgl.opengl.GL11;
+
 import org.lwjgl.BufferUtils;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class Screenshot
 {
-    private static DateFormat df;
+    private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
     private static ByteBuffer pixels;
     private static byte[] buffer;
     private static int[] pixelBuffer;
@@ -33,10 +34,10 @@ public class Screenshot
                 Screenshot.buffer = new byte[width * height * 3];
                 Screenshot.pixelBuffer = new int[width * height];
             }
-            GL11.glPixelStorei(3333, 1);
-            GL11.glPixelStorei(3317, 1);
+            glPixelStorei(3333, 1);
+            glPixelStorei(3317, 1);
             Screenshot.pixels.clear();
-            GL11.glReadPixels(0, 0, width, height, 6407, 5121, Screenshot.pixels);
+            glReadPixels(0, 0, width, height, 6407, 5121, Screenshot.pixels);
             Screenshot.pixels.clear();
             final String string = "" + Screenshot.df.format(new Date());
             File output;
@@ -58,8 +59,5 @@ public class Screenshot
             return "Failed to save: " + obj;
         }
     }
-    
-    static {
-        Screenshot.df = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
-    }
+
 }

@@ -4,9 +4,10 @@
 
 package net.minecraft.client.renderer.entity;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.client.model.Model;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class GiantMobRenderer extends MobRenderer<Giant>
 {
@@ -18,6 +19,6 @@ public class GiantMobRenderer extends MobRenderer<Giant>
     }
     
     protected void scale(final Giant giant, final float a) {
-        GL11.glScalef(this.scale, this.scale, this.scale);
+        glScalef(this.scale, this.scale, this.scale);
     }
 }

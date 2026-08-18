@@ -5,9 +5,9 @@
 package net.minecraft.client.renderer.entity;
 
 import net.minecraft.client.renderer.Tesselator;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Entity;
 
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.*;
 
 public class ItemSpriteRenderer extends EntityRenderer<Entity>
@@ -20,11 +20,11 @@ public class ItemSpriteRenderer extends EntityRenderer<Entity>
     
     @Override
     public void render(final Entity entity, final double x, final double y, final double z, final float rot, final float a) {
-        GL11.glPushMatrix();
+        glPushMatrix();
 
-        GL11.glTranslatef((float)x, (float)y, (float)z);
-        GL11.glEnable(GL_RESCALE_NORMAL);
-        GL11.glScalef(0.5f, 0.5f, 0.5f);
+        glTranslatef((float)x, (float)y, (float)z);
+        glEnable(GL_RESCALE_NORMAL);
+        glScalef(0.5f, 0.5f, 0.5f);
         this.bindTexture("/gui/items.png");
         final Tesselator t = Tesselator.instance;
 
@@ -37,8 +37,8 @@ public class ItemSpriteRenderer extends EntityRenderer<Entity>
         final float xo = 0.5f;
         final float yo = 0.25f;
 
-        GL11.glRotatef(180.0f - this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        GL11.glRotatef(-this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+        glRotatef(180.0f - this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        glRotatef(-this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
         t.begin();
         t.normal(0.0f, 1.0f, 0.0f);
         t.vertexUV(0 - xo, 0 - yo, 0, u0, v1);
@@ -46,7 +46,7 @@ public class ItemSpriteRenderer extends EntityRenderer<Entity>
         t.vertexUV(r - xo, 1 - yo, 0, u1, v0);
         t.vertexUV(0 - xo, 1 - yo, 0, u0, v0);
         t.end();
-        GL11.glDisable(GL_RESCALE_NORMAL);
-        GL11.glPopMatrix();
+        glDisable(GL_RESCALE_NORMAL);
+        glPopMatrix();
     }
 }

@@ -5,11 +5,12 @@
 package net.minecraft.client.particle;
 
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import org.lwjgl.opengl.GL11;
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.Entity;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class TakeAnimationParticle extends Particle
 {
@@ -50,7 +51,7 @@ public class TakeAnimationParticle extends Particle
         yy -= TakeAnimationParticle.yOff;
         zz -= TakeAnimationParticle.zOff;
 
-        GL11.glColor4f(br, br, br, 1.0f);
+        glColor4f(br, br, br, 1.0f);
         EntityRenderDispatcher.instance.render(this.item, (float)xx, (float)yy, (float)zz, this.item.yRot, a);
     }
     

@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.level.tile.DoorTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.Level;
@@ -21,6 +20,8 @@ import net.minecraft.world.level.tile.BedTile;
 import net.minecraft.world.level.tile.RailTile;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.level.LevelSource;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class TileRenderer
 {
@@ -3220,7 +3221,7 @@ public class TileRenderer
         final Tesselator instance = Tesselator.instance;
         if (this.setColor) {
             final int color = tile.getColor(data);
-            GL11.glColor4f((color >> 16 & 0xFF) / 255.0f * brightness, (color >> 8 & 0xFF) / 255.0f * brightness, (color & 0xFF) / 255.0f * brightness, 1.0f);
+            glColor4f((color >> 16 & 0xFF) / 255.0f * brightness, (color >> 8 & 0xFF) / 255.0f * brightness, (color & 0xFF) / 255.0f * brightness, 1.0f);
         }
         final int renderShape = tile.getRenderShape();
         if (renderShape == 0 || renderShape == 16) {
@@ -3228,7 +3229,7 @@ public class TileRenderer
                 data = 1;
             }
             tile.updateDefaultShape();
-            GL11.glTranslatef(-0.5f, -0.5f, -0.5f);
+            glTranslatef(-0.5f, -0.5f, -0.5f);
             instance.begin();
             instance.normal(0.0f, -1.0f, 0.0f);
             this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(0, data));
@@ -3253,7 +3254,7 @@ public class TileRenderer
             instance.normal(1.0f, 0.0f, 0.0f);
             this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(5, data));
             instance.end();
-            GL11.glTranslatef(0.5f, 0.5f, 0.5f);
+            glTranslatef(0.5f, 0.5f, 0.5f);
         }
         else if (renderShape == 1) {
             instance.begin();
@@ -3263,7 +3264,7 @@ public class TileRenderer
         }
         else if (renderShape == 13) {
             tile.updateDefaultShape();
-            GL11.glTranslatef(-0.5f, -0.5f, -0.5f);
+            glTranslatef(-0.5f, -0.5f, -0.5f);
             final float n = 0.0625f;
             instance.begin();
             instance.normal(0.0f, -1.0f, 0.0f);
@@ -3297,7 +3298,7 @@ public class TileRenderer
             this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(5));
             instance.addOffset(n, 0.0f, 0.0f);
             instance.end();
-            GL11.glTranslatef(0.5f, 0.5f, 0.5f);
+            glTranslatef(0.5f, 0.5f, 0.5f);
         }
         else if (renderShape == 6) {
             instance.begin();
@@ -3319,7 +3320,7 @@ public class TileRenderer
                 if (i == 1) {
                     tile.setShape(0.0f, 0.0f, 0.5f, 1.0f, 0.5f, 1.0f);
                 }
-                GL11.glTranslatef(-0.5f, -0.5f, -0.5f);
+                glTranslatef(-0.5f, -0.5f, -0.5f);
                 instance.begin();
                 instance.normal(0.0f, -1.0f, 0.0f);
                 this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
@@ -3344,7 +3345,7 @@ public class TileRenderer
                 instance.normal(1.0f, 0.0f, 0.0f);
                 this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(5));
                 instance.end();
-                GL11.glTranslatef(0.5f, 0.5f, 0.5f);
+                glTranslatef(0.5f, 0.5f, 0.5f);
             }
         }
         else if (renderShape == 11) {
@@ -3363,7 +3364,7 @@ public class TileRenderer
                 if (j == 3) {
                     tile.setShape(0.5f - n3, 0.5f - n3 * 3.0f, -n3 * 2.0f, 0.5f + n3, 0.5f - n3, 1.0f + n3 * 2.0f);
                 }
-                GL11.glTranslatef(-0.5f, -0.5f, -0.5f);
+                glTranslatef(-0.5f, -0.5f, -0.5f);
                 instance.begin();
                 instance.normal(0.0f, -1.0f, 0.0f);
                 this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
@@ -3388,7 +3389,7 @@ public class TileRenderer
                 instance.normal(1.0f, 0.0f, 0.0f);
                 this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(5));
                 instance.end();
-                GL11.glTranslatef(0.5f, 0.5f, 0.5f);
+                glTranslatef(0.5f, 0.5f, 0.5f);
             }
             tile.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
         }

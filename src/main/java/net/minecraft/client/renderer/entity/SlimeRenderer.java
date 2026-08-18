@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer.entity;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.client.model.Model;
 
@@ -23,15 +22,15 @@ public class SlimeRenderer extends MobRenderer<Slime>
         if (layer == 0) {
             this.setArmor(this.slimeArmor);
 
-            GL11.glEnable(GL_NORMALIZE);
-            GL11.glEnable(GL_BLEND);
-            GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_NORMALIZE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             return true;
         }
         if (layer == 1) {
-            GL11.glDisable(GL_BLEND);
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            glDisable(GL_BLEND);
+            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
         return false;
     }
@@ -40,6 +39,6 @@ public class SlimeRenderer extends MobRenderer<Slime>
         final int size = slime.getSize();
         final float ss = (slime.oSquish + (slime.squish - slime.oSquish) * a) / (size * 0.5f + 1.0f);
         final float w = 1.0f / (ss + 1.0f);
-        GL11.glScalef(w * (float) size, 1.0f / w * (float) size, w * (float) size);
+        glScalef(w * (float) size, 1.0f / w * (float) size, w * (float) size);
     }
 }

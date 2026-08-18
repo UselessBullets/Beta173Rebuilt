@@ -4,8 +4,9 @@
 
 package net.minecraft.client.gui;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.title.TitleScreen;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class DeathScreen extends Screen
 {
@@ -44,10 +45,10 @@ public class DeathScreen extends Screen
     public void render(final int xm, final int ym, final float a) {
         this.fillGradient(0, 0, this.width, this.height, 0x60500000, 0xa0803030);
 
-        GL11.glPushMatrix();
-        GL11.glScalef(2.0f, 2.0f, 2.0f);
+        glPushMatrix();
+        glScalef(2.0f, 2.0f, 2.0f);
         this.drawCenteredString(this.font, "Game over!", this.width / 2 / 2, 30, 0xffffff);
-        GL11.glPopMatrix();
+        glPopMatrix();
         this.drawCenteredString(this.font, "Score: &e" + this.minecraft.player.getScore(), this.width / 2, 100, 0xffffff);
 
         super.render(xm, ym, a);

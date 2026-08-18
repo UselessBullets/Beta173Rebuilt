@@ -5,7 +5,6 @@
 package net.minecraft.client.gui;
 
 import net.minecraft.client.renderer.Tesselator;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -149,11 +148,11 @@ public class Screen extends GuiComponent
     }
     
     public void renderDirtBackground(final int vo) {
-        GL11.glDisable(GL_LIGHTING);
-        GL11.glDisable(GL_FOG);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_FOG);
         final Tesselator t = Tesselator.instance;
-        GL11.glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         final float s = 32.0f;
         t.begin();
         t.color(0x404040);

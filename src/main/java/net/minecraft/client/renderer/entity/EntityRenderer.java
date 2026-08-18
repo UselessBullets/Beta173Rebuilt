@@ -10,7 +10,6 @@ import net.minecraft.world.level.Level;
 import util.Mth;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.world.level.tile.Tile;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.Textures;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.client.model.HumanoidModel;
@@ -46,7 +45,7 @@ public abstract class EntityRenderer<T extends Entity>
     }
     
     private void renderFlame(final Entity e, final double x, final double y, final double z, final float a) {
-        GL11.glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHTING);
 
         final int tex = Tile.fire.tex;
         final int xt = (tex & 0xF) << 4;
@@ -56,11 +55,11 @@ public abstract class EntityRenderer<T extends Entity>
         float v0 = yt / 256.0f;
         float v1 = (yt + 15.99f) / 256.0f;
 
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float)x, (float)y, (float)z);
+        glPushMatrix();
+        glTranslatef((float)x, (float)y, (float)z);
 
         final float s = e.bbWidth * 1.4f;
-        GL11.glScalef(s, s, s);
+        glScalef(s, s, s);
         this.bindTexture("/terrain.png");
         final Tesselator t = Tesselator.instance;
 
@@ -70,10 +69,10 @@ public abstract class EntityRenderer<T extends Entity>
         float h = e.bbHeight / s;
         float yo = (float)(e.y - e.bb.y0);
 
-        GL11.glRotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        glRotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
 
-        GL11.glTranslatef(0.0f, 0.0f, -0.3f + (int)h * 0.02f);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glTranslatef(0.0f, 0.0f, -0.3f + (int)h * 0.02f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         float zo = 0.0f;
         int ss = 0;
         t.begin();
@@ -107,18 +106,18 @@ public abstract class EntityRenderer<T extends Entity>
             ++ss;
         }
         t.end();
-        GL11.glPopMatrix();
-        GL11.glEnable(GL_LIGHTING);
+        glPopMatrix();
+        glEnable(GL_LIGHTING);
     }
     
     private void renderShadow(final Entity e, final double x, final double y, final double z, final float pow, final float a) {
-        GL11.glEnable(GL_BLEND);
-        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         final Textures textures = this.entityRenderDispatcher.textures;
         textures.bind(textures.loadTexture("%clamp%/misc/shadow.png"));
         final Level level = this.getLevel();
-        GL11.glDepthMask(false);
+        glDepthMask(false);
 
         final float r = this.shadowRadius;
         final double ex = e.xOld + (e.x - e.xOld) * a;
@@ -150,9 +149,9 @@ public abstract class EntityRenderer<T extends Entity>
         }
 
         tt.end();
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glDisable(GL_BLEND);
-        GL11.glDepthMask(true);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glDisable(GL_BLEND);
+        glDepthMask(true);
     }
     
     private Level getLevel() {
@@ -187,9 +186,9 @@ public abstract class EntityRenderer<T extends Entity>
     }
     
     public static void render(final AABB bb, final double xo, final double yo, final double zo) {
-        GL11.glDisable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_2D);
         final Tesselator t = Tesselator.instance;
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         t.begin();
         t.offset(xo, yo, zo);
         t.normal(0.0f, 0.0f, -1.0f);
@@ -229,7 +228,7 @@ public abstract class EntityRenderer<T extends Entity>
         t.vertex(bb.x1, bb.y0, bb.z1);
         t.offset(0.0, 0.0, 0.0);
         t.end();
-        GL11.glEnable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_2D);
     }
     
     public static void renderFlat(final AABB bb) {

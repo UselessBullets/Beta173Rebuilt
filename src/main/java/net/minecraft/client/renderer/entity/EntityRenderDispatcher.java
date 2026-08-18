@@ -4,10 +4,8 @@
 
 package net.minecraft.client.renderer.entity;
 
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.level.tile.Tile;
 import util.Mth;
-import java.util.Iterator;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.item.Boat;
@@ -55,6 +53,8 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.Textures;
 import net.minecraft.client.gui.Font;
 import java.util.Map;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class EntityRenderDispatcher
 {
@@ -157,7 +157,7 @@ public class EntityRenderDispatcher
 
         final float r = entity.yRotO + (entity.yRot - entity.yRotO) * a;
         final float br = entity.getBrightness(a);
-        GL11.glColor3f(br, br, br);
+        glColor3f(br, br, br);
 
         this.render(entity, x - EntityRenderDispatcher.xOff, y - EntityRenderDispatcher.yOff, z - EntityRenderDispatcher.zOff, r, a);
     }

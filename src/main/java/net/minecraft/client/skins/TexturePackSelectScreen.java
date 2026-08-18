@@ -13,7 +13,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.SmallButton;
 import net.minecraft.locale.language.Language;
 import net.minecraft.client.gui.Screen;
-import org.lwjgl.opengl.GL11;
+
+import static org.lwjgl.opengl.GL11.*;
 
 public class TexturePackSelectScreen extends Screen
 {
@@ -67,7 +68,7 @@ public class TexturePackSelectScreen extends Screen
             protected void renderItem(final int i, final int x, final int y, final int h, final Tesselator t) {
                 final TexturePack texturePack = TexturePackSelectScreen.this.minecraft.skins.getAll().get(i);
                 texturePack.bindTexture(TexturePackSelectScreen.this.minecraft);
-                GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
                 t.begin();
                 t.color(0xffffff);
                 t.vertexUV(x, y + h, 0.0, 0.0, 1.0);

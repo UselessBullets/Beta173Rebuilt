@@ -8,7 +8,6 @@ import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.client.renderer.TileRenderer;
 import net.minecraft.world.level.tile.Tile;
-import org.lwjgl.opengl.GL11;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.client.model.HumanoidModel;
 

@@ -2,15 +2,15 @@
 // Decompiled by Procyon v0.6.0
 // 
 
-package net.minecraft.client;
+package net.minecraft.client.renderer;
 
-import net.minecraft.client.renderer.Tesselator;
+import net.minecraft.client.Options;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.MapItemSavedData;
 import net.minecraft.world.entity.player.Player;
 import java.awt.image.BufferedImage;
-import net.minecraft.client.renderer.Textures;
+
 import net.minecraft.client.gui.Font;
 
 import static org.lwjgl.opengl.GL11.*;

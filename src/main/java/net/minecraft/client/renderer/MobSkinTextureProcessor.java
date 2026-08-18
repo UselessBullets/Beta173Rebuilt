@@ -13,15 +13,11 @@ import java.awt.image.BufferedImage;
 public class MobSkinTextureProcessor implements HttpTextureProcessor
 {
     private int[] pixels;
-    private int width;
-    private int height;
+    private int width = 64;
+    private int height = 32;
     
     public BufferedImage process(final BufferedImage read) {
-        if (read == null) {
-            return null;
-        }
-        this.width = 64;
-        this.height = 32;
+        if (read == null) return null;
         final BufferedImage bufferedImage = new BufferedImage(this.width, this.height, 2);
         final Graphics graphics = bufferedImage.getGraphics();
         graphics.drawImage(read, 0, 0, null);

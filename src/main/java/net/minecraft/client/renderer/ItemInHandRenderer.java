@@ -15,7 +15,6 @@ import util.Mth;
 import net.minecraft.client.Lighting;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.client.Minimap;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.client.Minecraft;
 
@@ -25,144 +24,156 @@ import static org.lwjgl.opengl.GL12.*;
 public class ItemInHandRenderer
 {
     private Minecraft mc;
-    private ItemInstance selectedItem;
-    private float height;
-    private float oHeight;
-    private TileRenderer tileRenderer;
+    private ItemInstance selectedItem = null;
+    private float height = 0.0f;
+    private float oHeight = 0.0f;
+    private TileRenderer tileRenderer = new TileRenderer();
     private Minimap minimap;
-    private int lastSlot;
+    private int lastSlot = -1;
     
     public ItemInHandRenderer(final Minecraft mc) {
-        this.selectedItem = null;
-        this.height = 0.0f;
-        this.oHeight = 0.0f;
-        this.tileRenderer = new TileRenderer();
-        this.lastSlot = -1;
         this.mc = mc;
         this.minimap = new Minimap(mc.font, mc.options, mc.textures);
     }
     
     public void renderItem(final Mob mob, final ItemInstance item) {
         glPushMatrix();
-        if (item.id < 256 && TileRenderer.canRender(Tile.tiles[item.id].getRenderShape())) {
+        if (item.id < Tile.TILE_NUM_COUNT && TileRenderer.canRender(Tile.tiles[item.id].getRenderShape())) {
             glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             this.tileRenderer.renderTile(Tile.tiles[item.id], item.getAuxValue(), mob.getBrightness(1.0f));
         }
         else {
-            if (item.id < 256) {
+            if (item.id < Tile.TILE_NUM_COUNT) {
                 glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             }
             else {
                 glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/gui/items.png"));
             }
-            final Tesselator instance = Tesselator.instance;
-            final int itemInHandIcon = mob.getItemInHandIcon(item);
-            final float n = (itemInHandIcon % 16 * 16 + 0.0f) / 256.0f;
-            final float n2 = (itemInHandIcon % 16 * 16 + 15.99f) / 256.0f;
-            final float n3 = (itemInHandIcon / 16 * 16 + 0.0f) / 256.0f;
-            final float n4 = (itemInHandIcon / 16 * 16 + 15.99f) / 256.0f;
-            final float n5 = 1.0f;
-            final float n6 = 0.0f;
-            final float n7 = 0.3f;
+
+            final Tesselator t = Tesselator.instance;
+            final int icon = mob.getItemInHandIcon(item);
+            final float u1 = (icon % 16 * 16 + 0.0f) / 256.0f;
+            final float u0 = (icon % 16 * 16 + 15.99f) / 256.0f;
+            final float v0 = (icon / 16 * 16 + 0.0f) / 256.0f;
+            final float v1 = (icon / 16 * 16 + 15.99f) / 256.0f;
+
+            final float r = 1.0f;
+            final float xo = 0.0f;
+            final float yo = 0.3f;
+
             glEnable(GL_RESCALE_NORMAL);
-            glTranslatef(-n6, -n7, 0.0f);
-            final float n8 = 1.5f;
-            glScalef(n8, n8, n8);
+            glTranslatef(-xo, -yo, 0.0f);
+            final float s = 1.5f;
+            glScalef(s, s, s);
+
             glRotatef(50.0f, 0.0f, 1.0f, 0.0f);
-            glRotatef(335.0f, 0.0f, 0.0f, 1.0f);
-            glTranslatef(-0.9375f, -0.0625f, 0.0f);
-            final float n9 = 0.0625f;
-            instance.begin();
-            instance.normal(0.0f, 0.0f, 1.0f);
-            instance.vertexUV(0.0, 0.0, 0.0, n2, n4);
-            instance.vertexUV(n5, 0.0, 0.0, n, n4);
-            instance.vertexUV(n5, 1.0, 0.0, n, n3);
-            instance.vertexUV(0.0, 1.0, 0.0, n2, n3);
-            instance.end();
-            instance.begin();
-            instance.normal(0.0f, 0.0f, -1.0f);
-            instance.vertexUV(0.0, 1.0, 0.0f - n9, n2, n3);
-            instance.vertexUV(n5, 1.0, 0.0f - n9, n, n3);
-            instance.vertexUV(n5, 0.0, 0.0f - n9, n, n4);
-            instance.vertexUV(0.0, 0.0, 0.0f - n9, n2, n4);
-            instance.end();
-            instance.begin();
-            instance.normal(-1.0f, 0.0f, 0.0f);
+            glRotatef(45 + 290, 0.0f, 0.0f, 1.0f);
+            glTranslatef(-15 / 16.0f, -1 / 16.0f, 0);
+            final float dd = 1 / 16.0f;
+
+            t.begin();
+            t.normal(0.0f, 0.0f, 1.0f);
+            t.vertexUV(0.0, 0.0, 0.0, u0, v1);
+            t.vertexUV(r, 0.0, 0.0, u1, v1);
+            t.vertexUV(r, 1.0, 0.0, u1, v0);
+            t.vertexUV(0.0, 1.0, 0.0, u0, v0);
+            t.end();
+
+            t.begin();
+            t.normal(0.0f, 0.0f, -1.0f);
+            t.vertexUV(0.0, 1.0, 0.0f - dd, u0, v0);
+            t.vertexUV(r, 1.0, 0.0f - dd, u1, v0);
+            t.vertexUV(r, 0.0, 0.0f - dd, u1, v1);
+            t.vertexUV(0.0, 0.0, 0.0f - dd, u0, v1);
+            t.end();
+            t.begin();
+            t.normal(-1.0f, 0.0f, 0.0f);
+
             for (int i = 0; i < 16; ++i) {
-                final float n10 = i / 16.0f;
-                final float n11 = n2 + (n - n2) * n10 - 0.001953125f;
-                final float n12 = n5 * n10;
-                instance.vertexUV(n12, 0.0, 0.0f - n9, n11, n4);
-                instance.vertexUV(n12, 0.0, 0.0, n11, n4);
-                instance.vertexUV(n12, 1.0, 0.0, n11, n3);
-                instance.vertexUV(n12, 1.0, 0.0f - n9, n11, n3);
+                final float p = i / 16.0f;
+                final float uu = u0 + (u1 - u0) * p - 0.5f / 256.0f;
+                final float xx = r * p;
+                t.vertexUV(xx, 0.0, 0.0f - dd, uu, v1);
+                t.vertexUV(xx, 0.0, 0.0, uu, v1);
+                t.vertexUV(xx, 1.0, 0.0, uu, v0);
+                t.vertexUV(xx, 1.0, 0.0f - dd, uu, v0);
             }
-            instance.end();
-            instance.begin();
-            instance.normal(1.0f, 0.0f, 0.0f);
-            for (int j = 0; j < 16; ++j) {
-                final float n13 = j / 16.0f;
-                final float n14 = n2 + (n - n2) * n13 - 0.001953125f;
-                final float n15 = n5 * n13 + 0.0625f;
-                instance.vertexUV(n15, 1.0, 0.0f - n9, n14, n3);
-                instance.vertexUV(n15, 1.0, 0.0, n14, n3);
-                instance.vertexUV(n15, 0.0, 0.0, n14, n4);
-                instance.vertexUV(n15, 0.0, 0.0f - n9, n14, n4);
+
+            t.end();
+            t.begin();
+            t.normal(1.0f, 0.0f, 0.0f);
+
+            for (int i = 0; i < 16; ++i) {
+                final float p = i / 16.0f;
+                final float uu = u0 + (u1 - u0) * p - 0.5f / 256.0f;
+                final float xx = r * p + 0.0625f;
+                t.vertexUV(xx, 1.0, 0.0f - dd, uu, v0);
+                t.vertexUV(xx, 1.0, 0.0, uu, v0);
+                t.vertexUV(xx, 0.0, 0.0, uu, v1);
+                t.vertexUV(xx, 0.0, 0.0f - dd, uu, v1);
             }
-            instance.end();
-            instance.begin();
-            instance.normal(0.0f, 1.0f, 0.0f);
-            for (int k = 0; k < 16; ++k) {
-                final float n16 = k / 16.0f;
-                final float n17 = n4 + (n3 - n4) * n16 - 0.001953125f;
-                final float n18 = n5 * n16 + 0.0625f;
-                instance.vertexUV(0.0, n18, 0.0, n2, n17);
-                instance.vertexUV(n5, n18, 0.0, n, n17);
-                instance.vertexUV(n5, n18, 0.0f - n9, n, n17);
-                instance.vertexUV(0.0, n18, 0.0f - n9, n2, n17);
+
+            t.end();
+            t.begin();
+            t.normal(0.0f, 1.0f, 0.0f);
+
+            for (int i = 0; i < 16; ++i) {
+                final float p = i / 16.0f;
+                final float vv = v1 + (v0 - v1) * p - 0.5f / 256.0f;
+                final float yy = r * p + 0.0625f;
+                t.vertexUV(0.0, yy, 0.0, u0, vv);
+                t.vertexUV(r, yy, 0.0, u1, vv);
+                t.vertexUV(r, yy, 0.0f - dd, u1, vv);
+                t.vertexUV(0.0, yy, 0.0f - dd, u0, vv);
             }
-            instance.end();
-            instance.begin();
-            instance.normal(0.0f, -1.0f, 0.0f);
+
+            t.end();
+            t.begin();
+            t.normal(0.0f, -1.0f, 0.0f);
+
             for (int l = 0; l < 16; ++l) {
-                final float n19 = l / 16.0f;
-                final float n20 = n4 + (n3 - n4) * n19 - 0.001953125f;
-                final float n21 = n5 * n19;
-                instance.vertexUV(n5, n21, 0.0, n, n20);
-                instance.vertexUV(0.0, n21, 0.0, n2, n20);
-                instance.vertexUV(0.0, n21, 0.0f - n9, n2, n20);
-                instance.vertexUV(n5, n21, 0.0f - n9, n, n20);
+                final float p = l / 16.0f;
+                final float vv = v1 + (v0 - v1) * p - 0.5f / 256.0f;
+                final float yy = r * p;
+                t.vertexUV(r, yy, 0.0, u1, vv);
+                t.vertexUV(0.0, yy, 0.0, u0, vv);
+                t.vertexUV(0.0, yy, 0.0f - dd, u0, vv);
+                t.vertexUV(r, yy, 0.0f - dd, u1, vv);
             }
-            instance.end();
+
+            t.end();
             glDisable(GL_RESCALE_NORMAL);
         }
         glPopMatrix();
     }
     
     public void render(final float a) {
-        final float n = this.oHeight + (this.height - this.oHeight) * a;
-        final LocalPlayer player = this.mc.player;
-        final float n2 = player.xRotO + (player.xRot - player.xRotO) * a;
+        final float h = this.oHeight + (this.height - this.oHeight) * a;
+        final Player player = this.mc.player;
+
+        final float xr = player.xRotO + (player.xRot - player.xRotO) * a;
+
         glPushMatrix();
-        glRotatef(n2, 1.0f, 0.0f, 0.0f);
+        glRotatef(xr, 1.0f, 0.0f, 0.0f);
         glRotatef(player.yRotO + (player.yRot - player.yRotO) * a, 0.0f, 1.0f, 0.0f);
         Lighting.turnOn();
         glPopMatrix();
-        final ItemInstance selectedItem = this.selectedItem;
-        final float brightness = this.mc.level.getBrightness(Mth.floor(player.x), Mth.floor(player.y), Mth.floor(player.z));
-        if (selectedItem != null) {
-            final int color = Item.items[selectedItem.id].getColor(selectedItem.getAuxValue());
-            glColor4f(brightness * ((color >> 16 & 0xFF) / 255.0f), brightness * ((color >> 8 & 0xFF) / 255.0f), brightness * ((color & 0xFF) / 255.0f), 1.0f);
+
+        final ItemInstance item = this.selectedItem;
+        final float br = this.mc.level.getBrightness(Mth.floor(player.x), Mth.floor(player.y), Mth.floor(player.z));
+        if (item != null) {
+            final int color = Item.items[item.id].getColor(item.getAuxValue());
+            glColor4f(br * ((color >> 16 & 0xFF) / 255.0f), br * ((color >> 8 & 0xFF) / 255.0f), br * ((color & 0xFF) / 255.0f), 1.0f);
         }
         else {
-            glColor4f(brightness, brightness, brightness, 1.0f);
+            glColor4f(br, br, br, 1.0f);
         }
-        if (selectedItem != null && selectedItem.id == Item.map.id) {
+        if (item != null && item.id == Item.map.id) {
             glPushMatrix();
             final float n3 = 0.8f;
             final float attackAnim = player.getAttackAnim(a);
             glTranslatef(-Mth.sin(Mth.sqrt(attackAnim) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim) * Mth.PI * 2.0f) * 0.2f, -Mth.sin(attackAnim * Mth.PI) * 0.2f);
-            float n4 = 1.0f - n2 / 45.0f + 0.1f;
+            float n4 = 1.0f - xr / 45.0f + 0.1f;
             if (n4 < 0.0f) {
                 n4 = 0.0f;
             }
@@ -170,7 +181,7 @@ public class ItemInHandRenderer
                 n4 = 1.0f;
             }
             final float n5 = -Mth.cos(n4 * Mth.PI) * 0.5f + 0.5f;
-            glTranslatef(0.0f, 0.0f * n3 - (1.0f - n) * 1.2f - n5 * 0.5f + 0.04f, -0.9f * n3);
+            glTranslatef(0.0f, 0.0f * n3 - (1.0f - h) * 1.2f - n5 * 0.5f + 0.04f, -0.9f * n3);
             glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
             glRotatef(n5 * -85.0f, 0.0f, 0.0f, 1.0f);
             glEnable(GL_RESCALE_NORMAL);
@@ -213,15 +224,15 @@ public class ItemInHandRenderer
             instance.vertexUV(128 + n10, 0 - n10, 0.0, 1.0, 0.0);
             instance.vertexUV(0 - n10, 0 - n10, 0.0, 0.0, 0.0);
             instance.end();
-            this.minimap.render(this.mc.player, this.mc.textures, Item.map.getSavedData(selectedItem, this.mc.level));
+            this.minimap.render(this.mc.player, this.mc.textures, Item.map.getSavedData(item, this.mc.level));
             glPopMatrix();
         }
-        else if (selectedItem != null) {
+        else if (item != null) {
             glPushMatrix();
             final float n11 = 0.8f;
             final float attackAnim3 = player.getAttackAnim(a);
             glTranslatef(-Mth.sin(Mth.sqrt(attackAnim3) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim3) * Mth.PI * 2.0f) * 0.2f, -Mth.sin(attackAnim3 * Mth.PI) * 0.2f);
-            glTranslatef(0.7f * n11, -0.65f * n11 - (1.0f - n) * 0.6f, -0.9f * n11);
+            glTranslatef(0.7f * n11, -0.65f * n11 - (1.0f - h) * 0.6f, -0.9f * n11);
             glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             glEnable(GL_RESCALE_NORMAL);
             final float attackAnim4 = player.getAttackAnim(a);
@@ -232,10 +243,10 @@ public class ItemInHandRenderer
             glRotatef(-sin4 * 80.0f, 1.0f, 0.0f, 0.0f);
             final float n12 = 0.4f;
             glScalef(n12, n12, n12);
-            if (selectedItem.getItem().isMirroredArt()) {
+            if (item.getItem().isMirroredArt()) {
                 glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
             }
-            this.renderItem(player, selectedItem);
+            this.renderItem(player, item);
             glPopMatrix();
         }
         else {
@@ -243,7 +254,7 @@ public class ItemInHandRenderer
             final float n13 = 0.8f;
             final float attackAnim5 = player.getAttackAnim(a);
             glTranslatef(-Mth.sin(Mth.sqrt(attackAnim5) * Mth.PI) * 0.3f, Mth.sin(Mth.sqrt(attackAnim5) * Mth.PI * 2.0f) * 0.4f, -Mth.sin(attackAnim5 * Mth.PI) * 0.4f);
-            glTranslatef(0.8f * n13, -0.75f * n13 - (1.0f - n) * 0.6f, -0.9f * n13);
+            glTranslatef(0.8f * n13, -0.75f * n13 - (1.0f - h) * 0.6f, -0.9f * n13);
             glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             glEnable(GL_RESCALE_NORMAL);
             final float attackAnim6 = player.getAttackAnim(a);

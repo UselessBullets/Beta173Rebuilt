@@ -13,58 +13,55 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class SignRenderer extends TileEntityRenderer<SignTileEntity>
 {
-    private SignModel signModel;
+    private SignModel signModel = new SignModel();
     
-    public SignRenderer() {
-        this.signModel = new SignModel();
-    }
-    
-    public void render(final SignTileEntity entity, final double x, final double y, final double z, final float a) {
-        final Tile tile = entity.getTile();
+    public void render(final SignTileEntity sign, final double x, final double y, final double z, final float a) {
+        final Tile tile = sign.getTile();
+
         glPushMatrix();
-        final float n = 0.6666667f;
+        final float size = 16 / 24.0f;
         if (tile == Tile.sign) {
-            glTranslatef((float)x + 0.5f, (float)y + 0.75f * n, (float)z + 0.5f);
-            glRotatef(-(entity.getData() * 360 / 16.0f), 0.0f, 1.0f, 0.0f);
+            glTranslatef((float)x + 0.5f, (float)y + 0.75f * size, (float)z + 0.5f);
+            glRotatef(-(sign.getData() * 360 / 16.0f), 0.0f, 1.0f, 0.0f);
             this.signModel.cube2.visible = true;
         }
         else {
-            final int data = entity.getData();
-            float n2 = 0.0f;
-            if (data == 2) {
-                n2 = 180.0f;
-            }
-            if (data == 4) {
-                n2 = 90.0f;
-            }
-            if (data == 5) {
-                n2 = -90.0f;
-            }
-            glTranslatef((float)x + 0.5f, (float)y + 0.75f * n, (float)z + 0.5f);
-            glRotatef(-n2, 0.0f, 1.0f, 0.0f);
-            glTranslatef(0.0f, -0.3125f, -0.4375f);
+            final int face = sign.getData();
+            float rot = 0.0f;
+
+            if (face == 2) rot = 180.0f;
+            if (face == 4) rot = 90.0f;
+            if (face == 5) rot = -90.0f;
+
+            glTranslatef((float)x + 0.5f, (float)y + 0.75f * size, (float)z + 0.5f);
+            glRotatef(-rot, 0.0f, 1.0f, 0.0f);
+            glTranslatef(0, -5 / 16.0f, -7 / 16.0f);
             this.signModel.cube2.visible = false;
         }
+
         this.bindTexture("/item/sign.png");
+
         glPushMatrix();
-        glScalef(n, -n, -n);
+        glScalef(size, -size, -size);
         this.signModel.render();
         glPopMatrix();
         final Font font = this.getFont();
-        final float n3 = 0.016666668f * n;
-        glTranslatef(0.0f, 0.5f * n, 0.07f * n);
-        glScalef(n3, -n3, n3);
-        glNormal3f(0.0f, 0.0f, -1.0f * n3);
+
+        final float s = 1 / 60.0f * size;
+        glTranslatef(0.0f, 0.5f * size, 0.07f * size);
+        glScalef(s, -s, s);
+        glNormal3f(0.0f, 0.0f, -1.0f * s);
         glDepthMask(false);
+
         final int n4 = 0;
-        for (int i = 0; i < entity.messages.length; ++i) {
-            final String str = entity.messages[i];
-            if (i == entity.selectedLine) {
-                final String string = "> " + str + " <";
-                font.draw(string, -font.width(string) / 2, i * 10 - entity.messages.length * 5, n4);
+        for (int i = 0; i < sign.messages.length; ++i) {
+            String msg = sign.messages[i];
+            if (i == sign.selectedLine) {
+                msg = "> " + msg + " <";
+                font.draw(msg, -font.width(msg) / 2, i * 10 - sign.messages.length * 5, n4);
             }
             else {
-                font.draw(str, -font.width(str) / 2, i * 10 - entity.messages.length * 5, n4);
+                font.draw(msg, -font.width(msg) / 2, i * 10 - sign.messages.length * 5, n4);
             }
         }
         glDepthMask(true);

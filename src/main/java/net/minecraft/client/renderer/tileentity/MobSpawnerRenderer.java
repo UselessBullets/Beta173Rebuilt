@@ -28,12 +28,12 @@ public class MobSpawnerRenderer extends TileEntityRenderer<MobSpawnerTileEntity>
         }
         if (e != null) {
             e.setLevel(spawner.level);
-            final float n = 0.4375f;
+            final float s = 7 / 16.0f;
             glTranslatef(0.0f, 0.4f, 0.0f);
             glRotatef((float)(spawner.oSpin + (spawner.spin - spawner.oSpin) * a) * 10.0f, 0.0f, 1.0f, 0.0f);
             glRotatef(-30.0f, 1.0f, 0.0f, 0.0f);
             glTranslatef(0.0f, -0.4f, 0.0f);
-            glScalef(n, n, n);
+            glScalef(s, s, s);
             e.moveTo(x, y, z, 0.0f, 0.0f);
             EntityRenderDispatcher.instance.render(e, 0.0, 0.0, 0.0, 0.0f, a);
         }

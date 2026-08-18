@@ -20,38 +20,33 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class TileEntityRenderDispatcher
 {
-    private Map<Class<? extends TileEntity>, TileEntityRenderer<? extends TileEntity>> renderers;
+    private Map<Class<? extends TileEntity>, TileEntityRenderer<? extends TileEntity>> renderers = new HashMap<>();
     public static TileEntityRenderDispatcher instance = new TileEntityRenderDispatcher();
     private Font font;
-    public static double xOff;
-    public static double yOff;
-    public static double zOff;
+    public static double xOff, yOff, zOff;
     public Textures textures;
     public Level level;
     public Mob player;
-    public float playerRotY;
-    public float playerRotX;
-    public double xPlayer;
-    public double yPlayer;
-    public double zPlayer;
+    public float playerRotY, playerRotX;
+    public double xPlayer, yPlayer, zPlayer;
     
     private TileEntityRenderDispatcher() {
-        (this.renderers = new HashMap<>()).put(SignTileEntity.class, new SignRenderer());
+        this.renderers.put(SignTileEntity.class, new SignRenderer());
         this.renderers.put(MobSpawnerTileEntity.class, new MobSpawnerRenderer());
         this.renderers.put(PistonPieceEntity.class, new PistonPieceRenderer());
-        final Iterator<TileEntityRenderer<? extends TileEntity>> iterator = this.renderers.values().iterator();
-        while (iterator.hasNext()) {
-            iterator.next().bindTexture(this);
+
+        for (TileEntityRenderer<? extends TileEntity> tileEntityRenderer : this.renderers.values()) {
+            tileEntityRenderer.bindTexture(this);
         }
     }
     
     public <T extends TileEntity> TileEntityRenderer<T> getRenderer(final Class<? extends TileEntity> e) {
-        TileEntityRenderer<? extends TileEntity> renderer = this.renderers.get(e);
-        if (renderer == null && e != TileEntity.class) {
-            renderer = this.getRenderer((Class<? extends TileEntity>) e.getSuperclass());
-            this.renderers.put(e, renderer);
+        TileEntityRenderer<? extends TileEntity> r = this.renderers.get(e);
+        if (r == null && e != TileEntity.class) {
+            r = this.getRenderer((Class<? extends TileEntity>) e.getSuperclass());
+            this.renderers.put(e, r);
         }
-        return (TileEntityRenderer<T>) renderer;
+        return (TileEntityRenderer<T>) r;
     }
     
     public boolean hasRenderer(final TileEntity e) {
@@ -59,9 +54,7 @@ public class TileEntityRenderDispatcher
     }
     
     public <T extends TileEntity> TileEntityRenderer<T> getRenderer(final TileEntity e) {
-        if (e == null) {
-            return null;
-        }
+        if (e == null) return null;
         return this.getRenderer(e.getClass());
     }
     
@@ -72,17 +65,19 @@ public class TileEntityRenderDispatcher
         this.textures = textures;
         this.player = player;
         this.font = font;
+
         this.playerRotY = player.yRotO + (player.yRot - player.yRotO) * a;
         this.playerRotX = player.xRotO + (player.xRot - player.xRotO) * a;
+
         this.xPlayer = player.xOld + (player.x - player.xOld) * a;
         this.yPlayer = player.yOld + (player.y - player.yOld) * a;
         this.zPlayer = player.zOld + (player.z - player.zOld) * a;
     }
     
     public void render(final TileEntity e, final float a) {
-        if (e.distanceToSqr(this.xPlayer, this.yPlayer, this.zPlayer) < 4096.0) {
-            final float brightness = this.level.getBrightness(e.x, e.y, e.z);
-            glColor3f(brightness, brightness, brightness);
+        if (e.distanceToSqr(this.xPlayer, this.yPlayer, this.zPlayer) < 64 * 64) {
+            final float br = this.level.getBrightness(e.x, e.y, e.z);
+            glColor3f(br, br, br);
             this.render(e, e.x - TileEntityRenderDispatcher.xOff, e.y - TileEntityRenderDispatcher.yOff, e.z - TileEntityRenderDispatcher.zOff, a);
         }
     }
@@ -97,9 +92,7 @@ public class TileEntityRenderDispatcher
     public void setLevel(final Level level) {
         this.level = level;
         for (final TileEntityRenderer<? extends TileEntity> tileEntityRenderer : this.renderers.values()) {
-            if (tileEntityRenderer != null) {
-                tileEntityRenderer.onNewLevel(level);
-            }
+            if (tileEntityRenderer != null) tileEntityRenderer.onNewLevel(level);
         }
     }
     

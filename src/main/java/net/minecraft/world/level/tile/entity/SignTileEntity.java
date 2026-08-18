@@ -11,15 +11,9 @@ import net.minecraft.network.packet.SignUpdatePacket;
 public class SignTileEntity extends TileEntity
 {
     public static final int MAX_SIGN_LINES = 4;
-    public String[] messages;
-    public int selectedLine;
-    private boolean isEditable;
-    
-    public SignTileEntity() {
-        this.messages = new String[] { "", "", "", "" };
-        this.selectedLine = -1;
-        this.isEditable = true;
-    }
+    public String[] messages = new String[] { "", "", "", "" };
+    public int selectedLine = -1;
+    private boolean isEditable = true;
     
     @Override
     public void save(final CompoundTag compoundTag) {

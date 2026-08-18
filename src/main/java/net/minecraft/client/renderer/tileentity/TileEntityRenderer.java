@@ -16,8 +16,13 @@ public abstract class TileEntityRenderer<T extends TileEntity>
     public abstract void render(final T entity, final double x, final double y, final double z, final float a);
     
     protected void bindTexture(final String resourceName) {
-        final Textures textures = this.tileEntityRenderDispatcher.textures;
-        textures.bind(textures.loadTexture(resourceName));
+        final Textures t = this.tileEntityRenderDispatcher.textures;
+        t.bind(t.loadTexture(resourceName));
+    }
+
+    protected void bindTexture(String urlTexture, String backupTexture) { // Useless - In b1.2 & LCE leaks
+        Textures t = this.tileEntityRenderDispatcher.textures;
+        t.bind(t.loadHttpTexture(urlTexture, backupTexture));
     }
     
     public void bindTexture(final TileEntityRenderDispatcher tileEntityRenderDispatcher) {

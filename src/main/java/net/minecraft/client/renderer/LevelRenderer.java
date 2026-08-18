@@ -753,7 +753,7 @@ public class LevelRenderer implements LevelListener
         glEnable(GL_CULL_FACE);
     }
     
-    public boolean isInCloud(final double double1, final double double2, final double double3, final float float4) {
+    public boolean isInCloud(final double x, final double y, final double z, final float alpha) {
         return false;
     }
     

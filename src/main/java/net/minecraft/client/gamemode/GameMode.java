@@ -34,7 +34,7 @@ public class GameMode
         final Level level = this.minecraft.level;
         final Tile oldTile = Tile.tiles[level.getTile(x, y, z)];
 
-        level.levelEvent(LevelListener.PARTICLES_DESTROY_BLOCK, x, y, z, oldTile.id + level.getData(x, y, z) << Tile.TILE_NUM_SHIFT);
+        level.levelEvent(LevelListener.PARTICLES_DESTROY_BLOCK, x, y, z, oldTile.id + level.getData(x, y, z) * Tile.TILE_NUM_COUNT);
         final int data = level.getData(x, y, z);
         final boolean changed = level.setTile(x, y, z, 0);
 

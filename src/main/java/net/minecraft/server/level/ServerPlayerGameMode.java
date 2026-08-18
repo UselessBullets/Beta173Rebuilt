@@ -99,7 +99,7 @@ public class ServerPlayerGameMode
     public boolean c(final int integer1, final int integer2, final int integer3) {
         final int tile = this.b.getTile(integer1, integer2, integer3);
         final int data = this.b.getData(integer1, integer2, integer3);
-        this.b.levelEvent(this.player, 2001, integer1, integer2, integer3, tile + this.b.getData(integer1, integer2, integer3) * 256);
+        this.b.levelEvent(this.player, 2001, integer1, integer2, integer3, tile + this.b.getData(integer1, integer2, integer3) * Tile.TILE_NUM_COUNT);
         final boolean b = this.b(integer1, integer2, integer3);
         final ItemInstance selectedItem = this.player.getSelectedItem();
         if (selectedItem != null) {

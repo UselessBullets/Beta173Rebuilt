@@ -162,117 +162,168 @@ public class ItemInHandRenderer
         final ItemInstance item = this.selectedItem;
         final float br = this.mc.level.getBrightness(Mth.floor(player.x), Mth.floor(player.y), Mth.floor(player.z));
         if (item != null) {
-            final int color = Item.items[item.id].getColor(item.getAuxValue());
-            glColor4f(br * ((color >> 16 & 0xFF) / 255.0f), br * ((color >> 8 & 0xFF) / 255.0f), br * ((color & 0xFF) / 255.0f), 1.0f);
+            final int col = Item.items[item.id].getColor(item.getAuxValue());
+            float r = br * ((col >> 16 & 0xFF) / 255.0f);
+            float g = br * ((col >> 8 & 0xFF) / 255.0f);
+            float b = br * ((col & 0xFF) / 255.0f);
+
+            glColor4f(r, g, b, 1.0f);
         }
         else {
             glColor4f(br, br, br, 1.0f);
         }
+
         if (item != null && item.id == Item.map.id) {
             glPushMatrix();
-            final float n3 = 0.8f;
-            final float attackAnim = player.getAttackAnim(a);
-            glTranslatef(-Mth.sin(Mth.sqrt(attackAnim) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim) * Mth.PI * 2.0f) * 0.2f, -Mth.sin(attackAnim * Mth.PI) * 0.2f);
-            float n4 = 1.0f - xr / 45.0f + 0.1f;
-            if (n4 < 0.0f) {
-                n4 = 0.0f;
+            final float d = 0.8f;
+
+            {
+                final float swing = player.getAttackAnim(a);
+
+                float swing1 = swing * Mth.PI;
+                float swing2 = Mth.sqrt(swing) * Mth.PI;
+                glTranslatef(-Mth.sin(swing2) * 0.4f, Mth.sin(Mth.sqrt(swing) * Mth.PI * 2.0f) * 0.2f, -Mth.sin(swing1) * 0.2f);
             }
-            if (n4 > 1.0f) {
-                n4 = 1.0f;
-            }
-            final float n5 = -Mth.cos(n4 * Mth.PI) * 0.5f + 0.5f;
-            glTranslatef(0.0f, 0.0f * n3 - (1.0f - h) * 1.2f - n5 * 0.5f + 0.04f, -0.9f * n3);
+
+            float tilt = 1.0f - xr / 45.0f + 0.1f;
+            if (tilt < 0.0f) tilt = 0.0f;
+            if (tilt > 1.0f) tilt = 1.0f;
+            tilt = -Mth.cos(tilt * Mth.PI) * 0.5f + 0.5f;
+
+            glTranslatef(0.0f, 0.0f * d - (1.0f - h) * 1.2f - tilt * 0.5f + 0.04f, -0.9f * d);
+
             glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-            glRotatef(n5 * -85.0f, 0.0f, 0.0f, 1.0f);
+            glRotatef(tilt * -85.0f, 0.0f, 0.0f, 1.0f);
             glEnable(GL_RESCALE_NORMAL);
-            glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadHttpTexture(this.mc.player.customTextureUrl, this.mc.player.getTexture()));
-            for (int i = 0; i < 2; ++i) {
-                final int n6 = i * 2 - 1;
-                glPushMatrix();
-                glTranslatef(-0.0f, -0.6f, 1.1f * n6);
-                glRotatef((float)(-45 * n6), 1.0f, 0.0f, 0.0f);
-                glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-                glRotatef(59.0f, 0.0f, 0.0f, 1.0f);
-                glRotatef((float)(-65 * n6), 0.0f, 1.0f, 0.0f);
-                final EntityRenderer<Player> er = EntityRenderDispatcher.instance.getRenderer(this.mc.player);
-                final PlayerRenderer playerRenderer = (PlayerRenderer) er;
-                final float n7 = 1.0f;
-                glScalef(n7, n7, n7);
-                playerRenderer.renderHand();
-                glPopMatrix();
+
+            {
+                glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadHttpTexture(this.mc.player.customTextureUrl, this.mc.player.getTexture()));
+                for (int i = 0; i < 2; ++i) {
+                    final int flip = i * 2 - 1;
+                    glPushMatrix();
+
+                    glTranslatef(-0.0f, -0.6f, 1.1f * flip);
+                    glRotatef((float) (-45 * flip), 1.0f, 0.0f, 0.0f);
+                    glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
+                    glRotatef(59.0f, 0.0f, 0.0f, 1.0f);
+                    glRotatef((float) (-65 * flip), 0.0f, 1.0f, 0.0f);
+
+                    final EntityRenderer<Player> er = EntityRenderDispatcher.instance.getRenderer(this.mc.player);
+                    final PlayerRenderer playerRenderer = (PlayerRenderer) er;
+                    final float ss = 1.0f;
+                    glScalef(ss, ss, ss);
+
+                    playerRenderer.renderHand();
+                    glPopMatrix();
+                }
             }
-            final float attackAnim2 = player.getAttackAnim(a);
-            final float sin = Mth.sin(attackAnim2 * attackAnim2 * Mth.PI);
-            final float sin2 = Mth.sin(Mth.sqrt(attackAnim2) * Mth.PI);
-            glRotatef(-sin * 20.0f, 0.0f, 1.0f, 0.0f);
-            glRotatef(-sin2 * 20.0f, 0.0f, 0.0f, 1.0f);
-            glRotatef(-sin2 * 80.0f, 1.0f, 0.0f, 0.0f);
-            final float n8 = 0.38f;
-            glScalef(n8, n8, n8);
+
+            {
+                final float swing = player.getAttackAnim(a);
+                final float swing3 = Mth.sin(swing * swing * Mth.PI);
+                final float swing2 = Mth.sin(Mth.sqrt(swing) * Mth.PI);
+                glRotatef(-swing3 * 20.0f, 0.0f, 1.0f, 0.0f);
+                glRotatef(-swing2 * 20.0f, 0.0f, 0.0f, 1.0f);
+                glRotatef(-swing2 * 80.0f, 1.0f, 0.0f, 0.0f);
+            }
+
+            final float ss = 0.38f;
+            glScalef(ss, ss, ss);
+
             glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
             glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
+
             glTranslatef(-1.0f, -1.0f, 0.0f);
-            final float n9 = 0.015625f;
-            glScalef(n9, n9, n9);
+
+            final float s = 2 / 128.0f;
+            glScalef(s, s, s);
+
             this.mc.textures.bind(this.mc.textures.loadTexture("/misc/mapbg.png"));
-            final Tesselator instance = Tesselator.instance;
+            final Tesselator t = Tesselator.instance;
+
             glNormal3f(0.0f, 0.0f, -1.0f);
-            instance.begin();
-            final int n10 = 7;
-            instance.vertexUV(0 - n10, 128 + n10, 0.0, 0.0, 1.0);
-            instance.vertexUV(128 + n10, 128 + n10, 0.0, 1.0, 1.0);
-            instance.vertexUV(128 + n10, 0 - n10, 0.0, 1.0, 0.0);
-            instance.vertexUV(0 - n10, 0 - n10, 0.0, 0.0, 0.0);
-            instance.end();
+            t.begin();
+            final int vo = 7;
+            t.vertexUV(0 - vo, 128 + vo, 0.0, 0.0, 1.0);
+            t.vertexUV(128 + vo, 128 + vo, 0.0, 1.0, 1.0);
+            t.vertexUV(128 + vo, 0 - vo, 0.0, 1.0, 0.0);
+            t.vertexUV(0 - vo, 0 - vo, 0.0, 0.0, 0.0);
+            t.end();
+
             this.minimap.render(this.mc.player, this.mc.textures, Item.map.getSavedData(item, this.mc.level));
             glPopMatrix();
         }
         else if (item != null) {
             glPushMatrix();
-            final float n11 = 0.8f;
-            final float attackAnim3 = player.getAttackAnim(a);
-            glTranslatef(-Mth.sin(Mth.sqrt(attackAnim3) * Mth.PI) * 0.4f, Mth.sin(Mth.sqrt(attackAnim3) * Mth.PI * 2.0f) * 0.2f, -Mth.sin(attackAnim3 * Mth.PI) * 0.2f);
-            glTranslatef(0.7f * n11, -0.65f * n11 - (1.0f - h) * 0.6f, -0.9f * n11);
+            final float d = 0.8f;
+
+            {
+                final float swing = player.getAttackAnim(a);
+
+                float swing1 = Mth.sin(swing * Mth.PI);
+                float swing2 = Mth.sin(Mth.sqrt(swing) * Mth.PI);
+                glTranslatef(-swing2 * 0.4f, Mth.sin(Mth.sqrt(swing) * Mth.PI * 2.0f) * 0.2f, -swing1 * 0.2f);
+                glTranslatef(0.7f * d, -0.65f * d - (1.0f - h) * 0.6f, -0.9f * d);
+            }
+
             glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             glEnable(GL_RESCALE_NORMAL);
-            final float attackAnim4 = player.getAttackAnim(a);
-            final float sin3 = Mth.sin(attackAnim4 * attackAnim4 * Mth.PI);
-            final float sin4 = Mth.sin(Mth.sqrt(attackAnim4) * Mth.PI);
-            glRotatef(-sin3 * 20.0f, 0.0f, 1.0f, 0.0f);
-            glRotatef(-sin4 * 20.0f, 0.0f, 0.0f, 1.0f);
-            glRotatef(-sin4 * 80.0f, 1.0f, 0.0f, 0.0f);
-            final float n12 = 0.4f;
-            glScalef(n12, n12, n12);
+
+            final float swing = player.getAttackAnim(a);
+            final float swing3 = Mth.sin(swing * swing * Mth.PI);
+            final float swing2 = Mth.sin(Mth.sqrt(swing) * Mth.PI);
+            glRotatef(-swing3 * 20.0f, 0.0f, 1.0f, 0.0f);
+            glRotatef(-swing2 * 20.0f, 0.0f, 0.0f, 1.0f);
+            glRotatef(-swing2 * 80.0f, 1.0f, 0.0f, 0.0f);
+
+            final float ss = 0.4f;
+            glScalef(ss, ss, ss);
+
             if (item.getItem().isMirroredArt()) {
                 glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
             }
+
             this.renderItem(player, item);
             glPopMatrix();
         }
         else {
             glPushMatrix();
-            final float n13 = 0.8f;
-            final float attackAnim5 = player.getAttackAnim(a);
-            glTranslatef(-Mth.sin(Mth.sqrt(attackAnim5) * Mth.PI) * 0.3f, Mth.sin(Mth.sqrt(attackAnim5) * Mth.PI * 2.0f) * 0.4f, -Mth.sin(attackAnim5 * Mth.PI) * 0.4f);
-            glTranslatef(0.8f * n13, -0.75f * n13 - (1.0f - h) * 0.6f, -0.9f * n13);
+            final float d = 0.8f;
+
+            {
+                final float swing = player.getAttackAnim(a);
+
+                float swing1 = Mth.sin(swing * Mth.PI);
+                float swing2 = Mth.sin(Mth.sqrt(swing) * Mth.PI);
+                glTranslatef(-swing2 * 0.3f, Mth.sin(Mth.sqrt(swing) * Mth.PI * 2.0f) * 0.4f, -swing1 * 0.4f);
+            }
+
+            glTranslatef(0.8f * d, -0.75f * d - (1.0f - h) * 0.6f, -0.9f * d);
+
             glRotatef(45.0f, 0.0f, 1.0f, 0.0f);
             glEnable(GL_RESCALE_NORMAL);
-            final float attackAnim6 = player.getAttackAnim(a);
-            final float sin5 = Mth.sin(attackAnim6 * attackAnim6 * Mth.PI);
-            glRotatef(Mth.sin(Mth.sqrt(attackAnim6) * Mth.PI) * 70.0f, 0.0f, 1.0f, 0.0f);
-            glRotatef(-sin5 * 20.0f, 0.0f, 0.0f, 1.0f);
+            {
+                final float swing = player.getAttackAnim(a);
+                final float swing3 = Mth.sin(swing * swing * Mth.PI);
+                final float swing2 = Mth.sin(Mth.sqrt(swing) * Mth.PI);
+                glRotatef(swing2 * 70.0f, 0.0f, 1.0f, 0.0f);
+                glRotatef(-swing3 * 20.0f, 0.0f, 0.0f, 1.0f);
+            }
+
             glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadHttpTexture(this.mc.player.customTextureUrl, this.mc.player.getTexture()));
             glTranslatef(-1.0f, 3.6f, 3.5f);
             glRotatef(120.0f, 0.0f, 0.0f, 1.0f);
-            glRotatef(200.0f, 1.0f, 0.0f, 0.0f);
-            glRotatef(-135.0f, 0.0f, 1.0f, 0.0f);
-            glScalef(1.0f, 1.0f, 1.0f);
+            glRotatef(180.0f + 20.0f, 1.0f, 0.0f, 0.0f);
+            glRotatef(-90.0f - 45.0f, 0.0f, 1.0f, 0.0f);
+            glScalef(1.5f / 24.0f * 16, 1.5f / 24.0f * 16, 1.5f / 24.0f * 16);
             glTranslatef(5.6f, 0.0f, 0.0f);
+
             final EntityRenderer<Player> er = EntityRenderDispatcher.instance.getRenderer(this.mc.player);
-            final PlayerRenderer playerRenderer2 = (PlayerRenderer)er;
-            final float n14 = 1.0f;
-            glScalef(n14, n14, n14);
-            playerRenderer2.renderHand();
+            final PlayerRenderer playerRenderer = (PlayerRenderer)er;
+            final float ss = 1.0f;
+            glScalef(ss, ss, ss);
+
+            playerRenderer.renderHand();
             glPopMatrix();
         }
         glDisable(GL_RESCALE_NORMAL);
@@ -285,32 +336,34 @@ public class ItemInHandRenderer
             glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
             this.renderFire(a);
         }
+
         if (this.mc.player.isInWall()) {
-            final int floor = Mth.floor(this.mc.player.x);
-            final int floor2 = Mth.floor(this.mc.player.y);
-            final int floor3 = Mth.floor(this.mc.player.z);
+            final int x = Mth.floor(this.mc.player.x);
+            final int y = Mth.floor(this.mc.player.y);
+            final int z = Mth.floor(this.mc.player.z);
+
             glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/terrain.png"));
-            int n = this.mc.level.getTile(floor, floor2, floor3);
-            if (this.mc.level.isSolidBlockingTile(floor, floor2, floor3)) {
-                this.renderTex(a, Tile.tiles[n].getTexture(2));
+            int tile = this.mc.level.getTile(x, y, z);
+            if (this.mc.level.isSolidBlockingTile(x, y, z)) {
+                this.renderTex(a, Tile.tiles[tile].getTexture(2));
             }
             else {
                 for (int i = 0; i < 8; ++i) {
-                    final float n2 = ((i >> 0) % 2 - 0.5f) * this.mc.player.bbWidth * 0.9f;
-                    final float n3 = ((i >> 1) % 2 - 0.5f) * this.mc.player.bbHeight * 0.2f;
-                    final float n4 = ((i >> 2) % 2 - 0.5f) * this.mc.player.bbWidth * 0.9f;
-                    final int floor4 = Mth.floor(floor + n2);
-                    final int floor5 = Mth.floor(floor2 + n3);
-                    final int floor6 = Mth.floor(floor3 + n4);
-                    if (this.mc.level.isSolidBlockingTile(floor4, floor5, floor6)) {
-                        n = this.mc.level.getTile(floor4, floor5, floor6);
+                    final float xo = ((i >> 0) % 2 - 0.5f) * this.mc.player.bbWidth * 0.9f;
+                    final float yo = ((i >> 1) % 2 - 0.5f) * this.mc.player.bbHeight * 0.2f;
+                    final float zo = ((i >> 2) % 2 - 0.5f) * this.mc.player.bbWidth * 0.9f;
+                    final int xt = Mth.floor(x + xo);
+                    final int yt = Mth.floor(y + yo);
+                    final int zt = Mth.floor(z + zo);
+                    if (this.mc.level.isSolidBlockingTile(xt, yt, zt)) {
+                        tile = this.mc.level.getTile(xt, yt, zt);
                     }
                 }
             }
-            if (Tile.tiles[n] != null) {
-                this.renderTex(a, Tile.tiles[n].getTexture(2));
-            }
+
+            if (Tile.tiles[tile] != null) this.renderTex(a, Tile.tiles[tile].getTexture(2));
         }
+
         if (this.mc.player.isUnderLiquid(Material.water)) {
             glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/misc/water.png"));
             this.renderWater(a);
@@ -319,85 +372,101 @@ public class ItemInHandRenderer
     }
     
     private void renderTex(final float a, final int tex) {
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
+
         this.mc.player.getBrightness(a);
-        final float n = 0.1f;
-        glColor4f(n, n, n, 0.5f);
+        final float br = 0.1f;
+        glColor4f(br, br, br, 0.5f);
+
         glPushMatrix();
-        final float n2 = -1.0f;
-        final float n3 = 1.0f;
-        final float n4 = -1.0f;
-        final float n5 = 1.0f;
-        final float n6 = -0.5f;
-        final float n7 = 0.0078125f;
-        final float n8 = tex % 16 / 256.0f - n7;
-        final float n9 = (tex % 16 + 15.99f) / 256.0f + n7;
-        final float n10 = tex / 16 / 256.0f - n7;
-        final float n11 = (tex / 16 + 15.99f) / 256.0f + n7;
-        instance.begin();
-        instance.vertexUV(n2, n4, n6, n9, n11);
-        instance.vertexUV(n3, n4, n6, n8, n11);
-        instance.vertexUV(n3, n5, n6, n8, n10);
-        instance.vertexUV(n2, n5, n6, n9, n10);
-        instance.end();
+        final float x0 = -1.0f;
+        final float x1 = +1.0f;
+        final float y0 = -1.0f;
+        final float y1 = +1.0f;
+        final float z0 = -0.5f;
+
+        final float r = 2 / 256.0f;
+        final float u0 = tex % 16 / 256.0f - r;
+        final float u1 = (tex % 16 + 15.99f) / 256.0f + r;
+        final float v0 = tex / 16 / 256.0f - r;
+        final float v1 = (tex / 16 + 15.99f) / 256.0f + r;
+
+        t.begin();
+        t.vertexUV(x0, y0, z0, u1, v1);
+        t.vertexUV(x1, y0, z0, u0, v1);
+        t.vertexUV(x1, y1, z0, u0, v0);
+        t.vertexUV(x0, y1, z0, u1, v0);
+        t.end();
+
         glPopMatrix();
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
     
     private void renderWater(final float a) {
-        final Tesselator instance = Tesselator.instance;
-        final float brightness = this.mc.player.getBrightness(a);
-        glColor4f(brightness, brightness, brightness, 0.5f);
+        final Tesselator t = Tesselator.instance;
+
+        final float br = this.mc.player.getBrightness(a);
+        glColor4f(br, br, br, 0.5f);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         glPushMatrix();
-        final float n = 4.0f;
-        final float n2 = -1.0f;
-        final float n3 = 1.0f;
-        final float n4 = -1.0f;
-        final float n5 = 1.0f;
-        final float n6 = -0.5f;
-        final float n7 = -this.mc.player.yRot / 64.0f;
-        final float n8 = this.mc.player.xRot / 64.0f;
-        instance.begin();
-        instance.vertexUV(n2, n4, n6, n + n7, n + n8);
-        instance.vertexUV(n3, n4, n6, 0.0f + n7, n + n8);
-        instance.vertexUV(n3, n5, n6, 0.0f + n7, 0.0f + n8);
-        instance.vertexUV(n2, n5, n6, n + n7, 0.0f + n8);
-        instance.end();
+
+        final float size = 4.0f;
+
+        final float x0 = -1.0f;
+        final float x1 = +1.0f;
+        final float y0 = -1.0f;
+        final float y1 = +1.0f;
+        final float z0 = -0.5f;
+
+        final float uo = -this.mc.player.yRot / 64.0f;
+        final float vo = +this.mc.player.xRot / 64.0f;
+
+        t.begin();
+        t.vertexUV(x0, y0, z0, size + uo, size + vo);
+        t.vertexUV(x1, y0, z0, 0.0f + uo, size + vo);
+        t.vertexUV(x1, y1, z0, 0.0f + uo, 0.0f + vo);
+        t.vertexUV(x0, y1, z0, size + uo, 0.0f + vo);
+        t.end();
         glPopMatrix();
+
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         glDisable(GL_BLEND);
     }
     
     private void renderFire(final float a) {
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
         glColor4f(1.0f, 1.0f, 1.0f, 0.9f);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        final float n = 1.0f;
+
+        final float size = 1.0f;
         for (int i = 0; i < 2; ++i) {
             glPushMatrix();
-            final int n2 = Tile.fire.tex + i * 16;
-            final int n3 = (n2 & 0xF) << 4;
-            final int n4 = n2 & 0xF0;
-            final float n5 = n3 / 256.0f;
-            final float n6 = (n3 + 15.99f) / 256.0f;
-            final float n7 = n4 / 256.0f;
-            final float n8 = (n4 + 15.99f) / 256.0f;
-            final float n9 = (0.0f - n) / 2.0f;
-            final float n10 = n9 + n;
-            final float n11 = 0.0f - n / 2.0f;
-            final float n12 = n11 + n;
-            final float n13 = -0.5f;
+            final int tex = Tile.fire.tex + i * 16;
+            final int texX = (tex & 0xF) << 4;
+            final int texY = tex & 0xF0;
+
+            final float u0 = texX / 256.0f;
+            final float u1 = (texX + 15.99f) / 256.0f;
+            final float v0 = texY / 256.0f;
+            final float v1 = (texY + 15.99f) / 256.0f;
+
+            final float x0 = (0.0f - size) / 2.0f;
+            final float x1 = x0 + size;
+            final float y0 = 0.0f - size / 2.0f;
+            final float y1 = y0 + size;
+            final float z0 = -0.5f;
             glTranslatef(-(i * 2 - 1) * 0.24f, -0.3f, 0.0f);
             glRotatef((i * 2 - 1) * 10.0f, 0.0f, 1.0f, 0.0f);
-            instance.begin();
-            instance.vertexUV(n9, n11, n13, n6, n8);
-            instance.vertexUV(n10, n11, n13, n5, n8);
-            instance.vertexUV(n10, n12, n13, n5, n7);
-            instance.vertexUV(n9, n12, n13, n6, n7);
-            instance.end();
+
+            t.begin();
+            t.vertexUV(x0, y0, z0, u1, v1);
+            t.vertexUV(x1, y0, z0, u0, v1);
+            t.vertexUV(x1, y1, z0, u0, v0);
+            t.vertexUV(x0, y1, z0, u1, v0);
+            t.end();
             glPopMatrix();
         }
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -406,27 +475,28 @@ public class ItemInHandRenderer
     
     public void tick() {
         this.oHeight = this.height;
+
         final LocalPlayer player = this.mc.player;
-        final ItemInstance selected = player.inventory.getSelected();
-        boolean b = this.lastSlot == player.inventory.selected && selected == this.selectedItem;
-        if (this.selectedItem == null && selected == null) {
-            b = true;
+        final ItemInstance nextTile = player.inventory.getSelected();
+
+        boolean matches = this.lastSlot == player.inventory.selected && nextTile == this.selectedItem;
+        if (this.selectedItem == null && nextTile == null) {
+            matches = true;
         }
-        if (selected != null && this.selectedItem != null && selected != this.selectedItem && selected.id == this.selectedItem.id && selected.getAuxValue() == this.selectedItem.getAuxValue()) {
-            this.selectedItem = selected;
-            b = true;
+        if (nextTile != null && this.selectedItem != null && nextTile != this.selectedItem && nextTile.id == this.selectedItem.id && nextTile.getAuxValue() == this.selectedItem.getAuxValue()) {
+            this.selectedItem = nextTile;
+            matches = true;
         }
-        final float n = 0.4f;
-        float n2 = (b ? 1.0f : 0.0f) - this.height;
-        if (n2 < -n) {
-            n2 = -n;
-        }
-        if (n2 > n) {
-            n2 = n;
-        }
-        this.height += n2;
+
+        final float max = 0.4f;
+        float tHeight = (matches ? 1.0f : 0.0f);
+        float dd = tHeight - this.height;
+        if (dd < -max) dd = -max;
+        if (dd > max) dd = max;
+
+        this.height += dd;
         if (this.height < 0.1f) {
-            this.selectedItem = selected;
+            this.selectedItem = nextTile;
             this.lastSlot = player.inventory.selected;
         }
     }

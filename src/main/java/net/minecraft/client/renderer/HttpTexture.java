@@ -13,36 +13,36 @@ import java.net.URLConnection;
 public class HttpTexture
 {
     public BufferedImage loadedImage;
-    public int count;
-    public int id;
-    public boolean isLoaded;
+    public int count = 1;
+    public int id = -1;
+    public boolean isLoaded = false;
     
-    public HttpTexture(final String url, final HttpTextureProcessor processor) {
-        this.count = 1;
-        this.id = -1;
-        this.isLoaded = false;
+    public HttpTexture(final String _url, final HttpTextureProcessor processor) {
         new Thread(() -> {
-            URLConnection urlConnection = null;
+            HttpURLConnection huc = null;
             try {
-                urlConnection = new URL(url).openConnection();
-                urlConnection.setDoInput(true);
-                urlConnection.setDoOutput(false);
-                urlConnection.connect();
-                if (((HttpURLConnection)urlConnection).getResponseCode() / 100 == 4) {
-                    return;
-                }
+                URL url = new URL(_url);
+                huc = (HttpURLConnection) url.openConnection();
+                huc.setDoInput(true);
+                huc.setDoOutput(false);
+                huc.connect();
+                if (huc.getResponseCode() / 100 == 4) return;
+
                 if (processor == null) {
-                    loadedImage = ImageIO.read(urlConnection.getInputStream());
+                    this.loadedImage = ImageIO.read(huc.getInputStream());
                 }
                 else {
-                    loadedImage = processor.process(ImageIO.read(urlConnection.getInputStream()));
+                    this.loadedImage = processor.process(ImageIO.read(huc.getInputStream()));
                 }
+
+                return;
             }
-            catch (final Exception ex) {
-                ex.printStackTrace();
+            catch (final Exception e) {
+                e.printStackTrace();
+                return;
             }
             finally {
-                ((HttpURLConnection)urlConnection).disconnect();
+                huc.disconnect();
             }
         }).start();
     }

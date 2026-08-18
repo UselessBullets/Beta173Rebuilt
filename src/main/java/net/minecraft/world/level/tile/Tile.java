@@ -34,6 +34,7 @@ public class Tile
     public static final int TILE_NUM_COUNT = 256;
     public static final int TILE_NUM_MASK = 0xff; // 256 - 1
     public static final int TILE_NUM_SHIFT = 8; // 256 is 8 bits
+
     private static final String TILE_DESCRIPTION_PREFIX = "tile.";
     public static final float INDESTRUCTIBLE_DESTROY_TIME = -1.0f;
     public static final SoundType SOUND_NORMAL = new SoundType("stone", 1.0f, 1.0f);

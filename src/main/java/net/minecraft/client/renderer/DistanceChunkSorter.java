@@ -20,12 +20,14 @@ public class DistanceChunkSorter implements Comparator<Chunk>
     }
     
     public int compare(final Chunk a, final Chunk b) {
-        final double n = a.xm + this.ix;
-        final double n2 = a.ym + this.iy;
-        final double n3 = a.zm + this.iz;
-        final double n4 = b.xm + this.ix;
-        final double n5 = b.ym + this.iy;
-        final double n6 = b.zm + this.iz;
-        return (int)((n * n + n2 * n2 + n3 * n3 - (n4 * n4 + n5 * n5 + n6 * n6)) * 1024.0);
+        final double xd0 = a.xm + this.ix;
+        final double yd0 = a.ym + this.iy;
+        final double zd0 = a.zm + this.iz;
+
+        final double xd1 = b.xm + this.ix;
+        final double yd1 = b.ym + this.iy;
+        final double zd1 = b.zm + this.iz;
+
+        return (int)((xd0 * xd0 + yd0 * yd0 + zd0 * zd0 - (xd1 * xd1 + yd1 * yd1 + zd1 * zd1)) * 1024.0);
     }
 }

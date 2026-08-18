@@ -4,7 +4,6 @@
 
 package net.minecraft.client.renderer;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import java.util.Comparator;
 
@@ -17,22 +16,17 @@ public class DirtyChunkSorter implements Comparator<Chunk>
     }
     
     public int compare(final Chunk c0, final Chunk c1) {
-        final boolean visible = c0.visible;
-        final boolean visible2 = c1.visible;
-        if (visible && !visible2) {
-            return 1;
-        }
-        if (visible2 && !visible) {
-            return -1;
-        }
-        final double n = c0.distanceToSqr(this.player);
-        final double n2 = c1.distanceToSqr(this.player);
-        if (n < n2) {
-            return 1;
-        }
-        if (n > n2) {
-            return -1;
-        }
+        final boolean i0 = c0.visible;
+        final boolean i1 = c1.visible;
+        if (i0 && !i1) return 1;
+        if (i1 && !i0) return -1;
+
+        final double d0 = c0.distanceToSqr(this.player);
+        final double d1 = c1.distanceToSqr(this.player);
+
+        if (d0 < d1) return 1;
+        if (d0 > d1) return -1;
+
         return (c0.id < c1.id) ? 1 : -1;
     }
 }

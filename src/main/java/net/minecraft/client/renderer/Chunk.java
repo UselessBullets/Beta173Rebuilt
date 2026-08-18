@@ -17,6 +17,8 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import util.Mth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
 
@@ -25,55 +27,36 @@ import static org.lwjgl.opengl.GL11.*;
 public class Chunk
 {
     public Level level;
-    private int lists;
-    private static Tesselator t;
-    public static int updates;
-    public int x;
-    public int y;
-    public int z;
-    public int xs;
-    public int ys;
-    public int zs;
-    public int xRender;
-    public int yRender;
-    public int zRender;
-    public int xRenderOffs;
-    public int yRenderOffs;
-    public int zRenderOffs;
-    public boolean visible;
-    public boolean[] empty;
-    public int xm;
-    public int ym;
-    public int zm;
+    private int lists = -1;
+    private static Tesselator t = Tesselator.instance;
+    public static int updates = 0;
+    public int x, y, z;
+    public int xs, ys, zs;
+    public int xRender, yRender, zRender;
+    public int xRenderOffs, yRenderOffs, zRenderOffs;
+    public boolean visible = false;
+    public boolean[] empty = new boolean[2];
+    public int xm, ym, zm;
     public float radius;
-    public boolean dirty;
+    public boolean dirty = false;
     public AABB bb;
     public int id;
-    public boolean occlusion_visible;
+    public boolean occlusion_visible = true;
     public boolean occlusion_querying;
     public int occlusion_id;
     public boolean skyLit;
-    private boolean compiled;
-    public List renderableTileEntities;
-    private List globalRenderableTileEntities;
+    private boolean compiled = false;
+    public List<TileEntity> renderableTileEntities = new ArrayList<>();
+    private List<TileEntity> globalRenderableTileEntities;
     
-    public Chunk(final Level level, final List globalRenderableTileEntities, final int x, final int y, final int z, final int size, final int lists) {
-        this.lists = -1;
-        this.visible = false;
-        this.empty = new boolean[2];
-        this.occlusion_visible = true;
-        this.compiled = false;
-        this.renderableTileEntities = new ArrayList();
+    public Chunk(final Level level, final List<TileEntity> globalRenderableTileEntities, final int x, final int y, final int z, final int size, final int lists) {
         this.level = level;
         this.globalRenderableTileEntities = globalRenderableTileEntities;
-        this.zs = size;
-        this.ys = size;
-        this.xs = size;
+        this.xs = this.ys = this.zs = size;
         this.radius = Mth.sqrt((float)(this.xs * this.xs + this.ys * this.ys + this.zs * this.zs)) / 2.0f;
         this.lists = lists;
         this.x = -999;
         this.setPos(x, y, z);
-        this.dirty = false;
     }
     
     public void setPos(final int x, final int y, final int z) {
@@ -87,16 +70,27 @@ public class Chunk
         this.xm = x + this.xs / 2;
         this.ym = y + this.ys / 2;
         this.zm = z + this.zs / 2;
+
         this.xRenderOffs = (x & 0x3FF);
         this.yRenderOffs = y;
         this.zRenderOffs = (z & 0x3FF);
         this.xRender = x - this.xRenderOffs;
         this.yRender = y - this.yRenderOffs;
         this.zRender = z - this.zRenderOffs;
-        final float n = 6.0f;
-        this.bb = AABB.newPermanent(x - n, y - n, z - n, x + this.xs + n, y + this.ys + n, z + this.zs + n);
+
+        final float g = 6.0f;
+        this.bb = AABB.newPermanent(x - g, y - g, z - g, x + this.xs + g, y + this.ys + g, z + this.zs + g);
         glNewList(this.lists + 2, GL_COMPILE);
-        EntityRenderer.renderFlat(AABB.newTemp(this.xRenderOffs - n, this.yRenderOffs - n, this.zRenderOffs - n, this.xRenderOffs + this.xs + n, this.yRenderOffs + this.ys + n, this.zRenderOffs + this.zs + n));
+        EntityRenderer.renderFlat(
+                AABB.newTemp(
+                        this.xRenderOffs - g,
+                        this.yRenderOffs - g,
+                        this.zRenderOffs - g,
+                        this.xRenderOffs + this.xs + g,
+                        this.yRenderOffs + this.ys + g,
+                        this.zRenderOffs + this.zs + g
+                )
+        );
         glEndList();
         this.setDirty();
     }
@@ -106,96 +100,101 @@ public class Chunk
     }
     
     public void rebuild() {
-        if (!this.dirty) {
-            return;
-        }
+        if (!this.dirty) return;
         ++Chunk.updates;
-        final int x = this.x;
-        final int y = this.y;
-        final int z = this.z;
-        final int n = this.x + this.xs;
-        final int n2 = this.y + this.ys;
-        final int n3 = this.z + this.zs;
-        for (int i = 0; i < 2; ++i) {
-            this.empty[i] = true;
+
+        final int x0 = this.x;
+        final int y0 = this.y;
+        final int z0 = this.z;
+        final int x1 = this.x + this.xs;
+        final int y1 = this.y + this.ys;
+        final int z1 = this.z + this.zs;
+
+        for (int currentLayer = 0; currentLayer < 2; ++currentLayer) {
+            this.empty[currentLayer] = true;
         }
         LevelChunk.touchedSky = false;
-        final HashSet set = new HashSet();
-        set.addAll(this.renderableTileEntities);
+        final Set<TileEntity> oldTileEntities = new HashSet<>(this.renderableTileEntities);
         this.renderableTileEntities.clear();
-        final int n4 = 1;
-        final Region level = new Region(this.level, x - n4, y - n4, z - n4, n + n4, n2 + n4, n3 + n4);
+        final int r = 1;
+        final Region level = new Region(this.level, x0 - r, y0 - r, z0 - r, x1 + r, y1 + r, z1 + r);
         final TileRenderer tileRenderer = new TileRenderer(level);
-        for (int j = 0; j < 2; ++j) {
-            boolean b = false;
-            boolean b2 = false;
-            int n5 = 0;
-            for (int k = y; k < n2; ++k) {
-                for (int l = z; l < n3; ++l) {
-                    for (int x2 = x; x2 < n; ++x2) {
-                        final int tile = level.getTile(x2, k, l);
-                        if (tile > 0) {
-                            if (n5 == 0) {
-                                n5 = 1;
-                                glNewList(this.lists + j, GL_COMPILE);
+
+        for (int currentLayer = 0; currentLayer < 2; ++currentLayer) {
+            boolean renderNextLayer = false;
+            boolean rendered = false;
+            boolean started = false;
+
+            for (int y = y0; y < y1; ++y) {
+                for (int z = z0; z < z1; ++z) {
+                    for (int x = x0; x < x1; ++x) {
+                        final int tileId = level.getTile(x, y, z);
+                        if (tileId > 0) {
+                            if (!started) {
+                                started = true;
+                                glNewList(this.lists + currentLayer, GL_COMPILE);
                                 glPushMatrix();
                                 this.translateToPos();
-                                final float n6 = 1.000001f;
+                                final float ss = 1.000001f;
                                 glTranslatef(-this.zs / 2.0f, -this.ys / 2.0f, -this.zs / 2.0f);
-                                glScalef(n6, n6, n6);
+                                glScalef(ss, ss, ss);
                                 glTranslatef(this.zs / 2.0f, this.ys / 2.0f, this.zs / 2.0f);
                                 Chunk.t.begin();
                                 Chunk.t.offset(-this.x, -this.y, -this.z);
                             }
-                            if (j == 0 && Tile.isEntityTile[tile]) {
-                                final TileEntity tileEntity = level.getTileEntity(x2, k, l);
-                                if (TileEntityRenderDispatcher.instance.hasRenderer(tileEntity)) {
-                                    this.renderableTileEntities.add(tileEntity);
+
+                            if (currentLayer == 0 && Tile.isEntityTile[tileId]) {
+                                final TileEntity te = level.getTileEntity(x, y, z);
+                                if (TileEntityRenderDispatcher.instance.hasRenderer(te)) {
+                                    this.renderableTileEntities.add(te);
                                 }
                             }
-                            final Tile tt = Tile.tiles[tile];
-                            final int renderLayer = tt.getRenderLayer();
-                            if (renderLayer != j) {
-                                b = true;
+
+                            final Tile tile = Tile.tiles[tileId];
+                            final int renderLayer = tile.getRenderLayer();
+                            if (renderLayer != currentLayer) {
+                                renderNextLayer = true;
                             }
-                            else if (renderLayer == j) {
-                                b2 |= tileRenderer.tesselateInWorld(tt, x2, k, l);
+                            else if (renderLayer == currentLayer) {
+                                rendered |= tileRenderer.tesselateInWorld(tile, x, y, z);
                             }
                         }
                     }
                 }
             }
-            if (n5 != 0) {
+
+            if (started) {
                 Chunk.t.end();
                 glPopMatrix();
                 glEndList();
                 Chunk.t.offset(0.0, 0.0, 0.0);
             }
             else {
-                b2 = false;
+                rendered = false;
             }
-            if (b2) {
-                this.empty[j] = false;
+
+            if (rendered) {
+                this.empty[currentLayer] = false;
             }
-            if (!b) {
+
+            if (!renderNextLayer) {
                 break;
             }
         }
-        final HashSet set2 = new HashSet();
-        set2.addAll(this.renderableTileEntities);
-        set2.removeAll(set);
-        this.globalRenderableTileEntities.addAll(set2);
-        set.removeAll(this.renderableTileEntities);
-        this.globalRenderableTileEntities.removeAll(set);
+        final Set<TileEntity> newTileEntities = new HashSet<>(this.renderableTileEntities);
+        newTileEntities.removeAll(oldTileEntities);
+        this.globalRenderableTileEntities.addAll(newTileEntities);
+        oldTileEntities.removeAll(this.renderableTileEntities);
+        this.globalRenderableTileEntities.removeAll(oldTileEntities);
         this.skyLit = LevelChunk.touchedSky;
         this.compiled = true;
     }
     
     public float distanceToSqr(final Entity player) {
-        final float n = (float)(player.x - this.xm);
-        final float n2 = (float)(player.y - this.ym);
-        final float n3 = (float)(player.z - this.zm);
-        return n * n + n2 * n2 + n3 * n3;
+        final float xd = (float)(player.x - this.xm);
+        final float yd = (float)(player.y - this.ym);
+        final float zd = (float)(player.z - this.zm);
+        return xd * xd + yd * yd + zd * zd;
     }
     
     public void reset() {
@@ -212,13 +211,10 @@ public class Chunk
     }
     
     public int getList(final int layer) {
-        if (!this.visible) {
-            return -1;
-        }
-        if (!this.empty[layer]) {
-            return this.lists + layer;
-        }
-        return -1;
+        if (!this.visible) return -1;
+        if (this.empty[layer]) return -1;
+
+        return this.lists + layer;
     }
     
     public void cull(final Culler culler) {
@@ -236,9 +232,5 @@ public class Chunk
     public void setDirty() {
         this.dirty = true;
     }
-    
-    static {
-        Chunk.t = Tesselator.instance;
-        Chunk.updates = 0;
-    }
+
 }

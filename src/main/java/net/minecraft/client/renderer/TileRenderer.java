@@ -290,94 +290,114 @@ public class TileRenderer
         else if (dir == 3) this.tesselateTorch(tt, x, y + h, z - r2, 0.0, -r);
         else if (dir == 4) this.tesselateTorch(tt, x, y + h, z + r2, 0.0, r);
         else this.tesselateTorch(tt, x, y, z, 0.0, 0.0);
-        
+
         return true;
     }
     
     private boolean tesselateDiodeInWorld(final Tile tt, final int x, final int y, final int z) {
         final int data = this.level.getData(x, y, z);
-        final int n = data & 0x3;
-        final int n2 = (data & 0xC) >> 2;
+        final int dir = data & DiodeTile.DIRECTION_MASK;
+        final int delay = (data & DiodeTile.DELAY_MASK) >> DiodeTile.DELAY_SHIFT;
+
+        // render half-block edges
         this.tesselateBlockInWorld(tt, x, y, z);
-        final Tesselator instance = Tesselator.instance;
-        float brightness = tt.getBrightness(this.level, x, y, z);
-        if (Tile.lightEmission[tt.id] > 0) {
-            brightness = (brightness + 1.0f) * 0.5f;
-        }
-        instance.color(brightness, brightness, brightness);
-        final double n3 = -0.1875;
-        double n4 = 0.0;
-        double n5 = 0.0;
-        double n6 = 0.0;
-        double n7 = 0.0;
-        switch (n) {
-            case 0: {
-                n7 = -0.3125;
-                n5 = DiodeTile.DELAY_RENDER_OFFSETS[n2];
-                break;
+
+        final Tesselator t = Tesselator.instance;
+
+        float br = tt.getBrightness(this.level, x, y, z);
+        if (Tile.lightEmission[tt.id] > 0) br = (br + 1.0f) * 0.5f;
+        t.color(br, br, br);
+
+        {
+            double h = -3.0 / 16.0f;
+            double transmitterX = 0.0;
+            double transmitterZ = 0.0;
+            double receiverX = 0.0;
+            double receiverZ = 0.0;
+            switch (dir) {
+                case 0: {
+                    receiverZ = -5.0f / 16.0f;
+                    transmitterZ = DiodeTile.DELAY_RENDER_OFFSETS[delay];
+                    break;
+                }
+                case 2: {
+                    receiverZ = 5.0f / 16.0f;
+                    transmitterZ = -DiodeTile.DELAY_RENDER_OFFSETS[delay];
+                    break;
+                }
+                case 3: {
+                    receiverX = -5.0f / 16.0f;
+                    transmitterX = DiodeTile.DELAY_RENDER_OFFSETS[delay];
+                    break;
+                }
+                case 1: {
+                    receiverX = 5.0f / 16.0f;
+                    transmitterX = -DiodeTile.DELAY_RENDER_OFFSETS[delay];
+                    break;
+                }
             }
-            case 2: {
-                n7 = 0.3125;
-                n5 = -DiodeTile.DELAY_RENDER_OFFSETS[n2];
-                break;
-            }
-            case 3: {
-                n6 = -0.3125;
-                n4 = DiodeTile.DELAY_RENDER_OFFSETS[n2];
-                break;
-            }
-            case 1: {
-                n6 = 0.3125;
-                n4 = -DiodeTile.DELAY_RENDER_OFFSETS[n2];
-                break;
-            }
+
+            // render transmitter
+            this.tesselateTorch(tt, x + transmitterX, y + h, z + transmitterZ, 0.0, 0.0);
+            // render receiver
+            this.tesselateTorch(tt, x + receiverX, y + h, z + receiverZ, 0.0, 0.0);
         }
-        this.tesselateTorch(tt, x + n4, y + n3, z + n5, 0.0, 0.0);
-        this.tesselateTorch(tt, x + n6, y + n3, z + n7, 0.0, 0.0);
-        final int texture = tt.getTexture(1);
-        final int n8 = (texture & 0xF) << 4;
-        final int n9 = texture & 0xF0;
-        final double n10 = n8 / 256.0f;
-        final double n11 = (n8 + 15.99f) / 256.0f;
-        final double n12 = n9 / 256.0f;
-        final double n13 = (n9 + 15.99f) / 256.0f;
-        final float n14 = 0.125f;
-        float n15 = (float)(x + 1);
-        float n16 = (float)(x + 1);
-        float n17 = (float)(x + 0);
-        float n18 = (float)(x + 0);
-        float n19 = (float)(z + 0);
-        float n20 = (float)(z + 1);
-        float n21 = (float)(z + 1);
-        float n22 = (float)(z + 0);
-        final float n23 = y + n14;
-        if (n == 2) {
-            n16 = (n15 = (float)(x + 0));
-            n18 = (n17 = (float)(x + 1));
-            n22 = (n19 = (float)(z + 1));
-            n21 = (n20 = (float)(z + 0));
+
+        final int tex = tt.getTexture(Facing.UP);
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+
+        final double u0 = texX / 256.0f;
+        final double u1 = (texX + 15.99f) / 256.0f;
+        final double v0 = texY / 256.0f;
+        final double v1 = (texY + 15.99f) / 256.0f;
+
+        final float r = 2.0f / 16.0f;
+
+        float x0 = (float)(x + 1);
+        float x1 = (float)(x + 1);
+        float x2 = (float)(x + 0);
+        float x3 = (float)(x + 0);
+
+        float z0 = (float)(z + 0);
+        float z1 = (float)(z + 1);
+        float z2 = (float)(z + 1);
+        float z3 = (float)(z + 0);
+
+        float y0 = y + r;
+
+        if (dir == Direction.NORTH) {
+            // rotate 180 degrees
+            x1 = (x0 = (float)(x + 0));
+            x3 = (x2 = (float)(x + 1));
+            z3 = (z0 = (float)(z + 1));
+            z2 = (z1 = (float)(z + 0));
         }
-        else if (n == 3) {
-            n18 = (n15 = (float)(x + 0));
-            n17 = (n16 = (float)(x + 1));
-            n20 = (n19 = (float)(z + 0));
-            n22 = (n21 = (float)(z + 1));
+        else if (dir == Direction.EAST) {
+            // rotate 90 degrees counter-clockwise
+            x3 = (x0 = (float)(x + 0));
+            x2 = (x1 = (float)(x + 1));
+            z1 = (z0 = (float)(z + 0));
+            z3 = (z2 = (float)(z + 1));
         }
-        else if (n == 1) {
-            n18 = (n15 = (float)(x + 1));
-            n17 = (n16 = (float)(x + 0));
-            n20 = (n19 = (float)(z + 1));
-            n22 = (n21 = (float)(z + 0));
+        else if (dir == Direction.WEST) {
+            // rotate 90 degrees clockwise
+            x3 = (x0 = (float)(x + 1));
+            x2 = (x1 = (float)(x + 0));
+            z1 = (z0 = (float)(z + 1));
+            z3 = (z2 = (float)(z + 0));
         }
-        instance.vertexUV(n18, n23, n22, n10, n12);
-        instance.vertexUV(n17, n23, n21, n10, n13);
-        instance.vertexUV(n16, n23, n20, n11, n13);
-        instance.vertexUV(n15, n23, n19, n11, n12);
+
+        t.vertexUV(x3, y0, z3, u0, v0);
+        t.vertexUV(x2, y0, z2, u0, v1);
+        t.vertexUV(x1, y0, z1, u1, v1);
+        t.vertexUV(x0, y0, z0, u1, v0);
         return true;
     }
     
     public void tesselatePistonBaseForceExtended(final Tile tile, final int x, final int y, final int z) {
-        this.tesselatePistonBaseInWorld(tile, x, y, z, this.noCulling = true);
+        this.noCulling = true;
+        this.tesselatePistonBaseInWorld(tile, x, y, z, true);
         this.noCulling = false;
     }
     

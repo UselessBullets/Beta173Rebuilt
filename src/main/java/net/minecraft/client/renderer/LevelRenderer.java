@@ -19,6 +19,7 @@ import net.minecraft.client.particle.PortalParticle;
 import net.minecraft.client.particle.NoteParticle;
 import net.minecraft.client.particle.SmokeParticle;
 import net.minecraft.client.particle.BubbleParticle;
+import net.minecraft.world.level.LevelEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.phys.HitResult;
@@ -51,7 +52,7 @@ import static org.lwjgl.opengl.GL11.*;
 public class LevelRenderer implements LevelListener
 {
     public static final int CHUNK_SIZE = 16;
-    public static final int MAX_VISIBLE_REBUILDS_PER_FRAME = 3;
+    public static final int MAX_VISIBLE_REBUILDS_PER_FRAME = 3; // TODO Useless - find out where these constants are actually used, they're in b1.2 but finding usage is hard
     public static final int MAX_INVISIBLE_REBUILDS_PER_FRAME = 1;
     public List<TileEntity> renderableTileEntities = new ArrayList<>();
     private Level level;
@@ -1082,38 +1083,41 @@ public class LevelRenderer implements LevelListener
     }
     
     public void renderHit(final Player player, final HitResult h, final int mode, final ItemInstance inventoryItem, final float a) {
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
         glEnable(GL_BLEND);
         glEnable(GL_ALPHA_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glColor4f(1.0f, 1.0f, 1.0f, (Mth.sin(System.currentTimeMillis() / 100.0f) * 0.2f + 0.4f) * 0.5f);
         if (mode == 0) {
             if (this.destroyProgress > 0.0f) {
-                glBlendFunc(774, 768);
+                glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+
                 glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain.png"));
                 glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
                 glPushMatrix();
-                final int tile = this.level.getTile(h.x, h.y, h.z);
-                Tile rock = (tile > 0) ? Tile.tiles[tile] : null;
+
+                final int tileId = this.level.getTile(h.x, h.y, h.z);
+                Tile tile = (tileId > 0) ? Tile.tiles[tileId] : null;
                 glDisable(GL_ALPHA_TEST);
                 glPolygonOffset(-3.0f, -3.0f);
-                glEnable(32823);
-                final double n = player.xOld + (player.x - player.xOld) * a;
-                final double n2 = player.yOld + (player.y - player.yOld) * a;
-                final double n3 = player.zOld + (player.z - player.zOld) * a;
-                if (rock == null) {
-                    rock = Tile.rock;
-                }
+                glEnable(GL_POLYGON_OFFSET_FILL);
+
+                final double xo = player.xOld + (player.x - player.xOld) * a;
+                final double yo = player.yOld + (player.y - player.yOld) * a;
+                final double zo = player.zOld + (player.z - player.zOld) * a;
+                if (tile == null) tile = Tile.rock;
+
                 glEnable(GL_ALPHA_TEST);
-                instance.begin();
-                instance.offset(-n, -n2, -n3);
-                instance.noColor();
-                this.tileRenderer.tesselateInWorld(rock, h.x, h.y, h.z, 240 + (int)(this.destroyProgress * 10.0f));
-                instance.end();
-                instance.offset(0.0, 0.0, 0.0);
+                t.begin();
+                t.offset(-xo, -yo, -zo);
+                t.noColor();
+                this.tileRenderer.tesselateInWorld(tile, h.x, h.y, h.z, 240 + (int)(this.destroyProgress * 10.0f));
+                t.end();
+                t.offset(0.0, 0.0, 0.0);
                 glDisable(GL_ALPHA_TEST);
+
                 glPolygonOffset(0.0f, 0.0f);
-                glDisable(32823);
+                glDisable(GL_POLYGON_OFFSET_FILL);
                 glEnable(GL_ALPHA_TEST);
                 glDepthMask(true);
                 glPopMatrix();
@@ -1121,30 +1125,20 @@ public class LevelRenderer implements LevelListener
         }
         else if (inventoryItem != null) {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            final float n4 = Mth.sin(System.currentTimeMillis() / 100.0f) * 0.2f + 0.8f;
-            glColor4f(n4, n4, n4, Mth.sin(System.currentTimeMillis() / 200.0f) * 0.2f + 0.5f);
-            glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain.png"));
+            final float br = Mth.sin(System.currentTimeMillis() / 100.0f) * 0.2f + 0.8f;
+            glColor4f(br, br, br, Mth.sin(System.currentTimeMillis() / 200.0f) * 0.2f + 0.5f);
+            int tex = this.textures.loadTexture("/terrain.png");
+            glBindTexture(GL_TEXTURE_2D, tex);
+
             int x = h.x;
             int y = h.y;
             int z = h.z;
-            if (h.f == 0) {
-                --y;
-            }
-            if (h.f == 1) {
-                ++y;
-            }
-            if (h.f == 2) {
-                --z;
-            }
-            if (h.f == 3) {
-                ++z;
-            }
-            if (h.f == 4) {
-                --x;
-            }
-            if (h.f == 5) {
-                ++x;
-            }
+            if (h.f == 0) --y;
+            if (h.f == 1) ++y;
+            if (h.f == 2) --z;
+            if (h.f == 3) ++z;
+            if (h.f == 4) --x;
+            if (h.f == 5) ++x;
         }
         glDisable(GL_BLEND);
         glDisable(GL_ALPHA_TEST);
@@ -1158,11 +1152,15 @@ public class LevelRenderer implements LevelListener
             glLineWidth(2.0f);
             glDisable(GL_TEXTURE_2D);
             glDepthMask(false);
-            final float n = 0.002f;
-            final int tile = this.level.getTile(h.x, h.y, h.z);
-            if (tile > 0) {
-                Tile.tiles[tile].updateShape(this.level, h.x, h.y, h.z);
-                this.render(Tile.tiles[tile].getTileAABB(this.level, h.x, h.y, h.z).grow(n, n, n).cloneMove(-(player.xOld + (player.x - player.xOld) * a), -(player.yOld + (player.y - player.yOld) * a), -(player.zOld + (player.z - player.zOld) * a)));
+            final float ss = 0.002f;
+            final int tileId = this.level.getTile(h.x, h.y, h.z);
+
+            if (tileId > 0) {
+                Tile.tiles[tileId].updateShape(this.level, h.x, h.y, h.z);
+                double xo = (player.xOld + (player.x - player.xOld) * a);
+                double yo = (player.yOld + (player.y - player.yOld) * a);
+                double zo = (player.zOld + (player.z - player.zOld) * a);
+                this.render(Tile.tiles[tileId].getTileAABB(this.level, h.x, h.y, h.z).grow(ss, ss, ss).cloneMove(-xo, -yo, -zo));
             }
             glDepthMask(true);
             glEnable(GL_TEXTURE_2D);
@@ -1171,56 +1169,58 @@ public class LevelRenderer implements LevelListener
     }
     
     private void render(final AABB aabb) {
-        final Tesselator instance = Tesselator.instance;
-        instance.begin(GL_LINE_STRIP);
-        instance.vertex(aabb.x0, aabb.y0, aabb.z0);
-        instance.vertex(aabb.x1, aabb.y0, aabb.z0);
-        instance.vertex(aabb.x1, aabb.y0, aabb.z1);
-        instance.vertex(aabb.x0, aabb.y0, aabb.z1);
-        instance.vertex(aabb.x0, aabb.y0, aabb.z0);
-        instance.end();
-        instance.begin(GL_LINE_STRIP);
-        instance.vertex(aabb.x0, aabb.y1, aabb.z0);
-        instance.vertex(aabb.x1, aabb.y1, aabb.z0);
-        instance.vertex(aabb.x1, aabb.y1, aabb.z1);
-        instance.vertex(aabb.x0, aabb.y1, aabb.z1);
-        instance.vertex(aabb.x0, aabb.y1, aabb.z0);
-        instance.end();
-        instance.begin(GL_LINES);
-        instance.vertex(aabb.x0, aabb.y0, aabb.z0);
-        instance.vertex(aabb.x0, aabb.y1, aabb.z0);
-        instance.vertex(aabb.x1, aabb.y0, aabb.z0);
-        instance.vertex(aabb.x1, aabb.y1, aabb.z0);
-        instance.vertex(aabb.x1, aabb.y0, aabb.z1);
-        instance.vertex(aabb.x1, aabb.y1, aabb.z1);
-        instance.vertex(aabb.x0, aabb.y0, aabb.z1);
-        instance.vertex(aabb.x0, aabb.y1, aabb.z1);
-        instance.end();
+        final Tesselator t = Tesselator.instance;
+
+        t.begin(GL_LINE_STRIP);
+        t.vertex(aabb.x0, aabb.y0, aabb.z0);
+        t.vertex(aabb.x1, aabb.y0, aabb.z0);
+        t.vertex(aabb.x1, aabb.y0, aabb.z1);
+        t.vertex(aabb.x0, aabb.y0, aabb.z1);
+        t.vertex(aabb.x0, aabb.y0, aabb.z0);
+        t.end();
+
+        t.begin(GL_LINE_STRIP);
+        t.vertex(aabb.x0, aabb.y1, aabb.z0);
+        t.vertex(aabb.x1, aabb.y1, aabb.z0);
+        t.vertex(aabb.x1, aabb.y1, aabb.z1);
+        t.vertex(aabb.x0, aabb.y1, aabb.z1);
+        t.vertex(aabb.x0, aabb.y1, aabb.z0);
+        t.end();
+
+        t.begin(GL_LINES);
+        t.vertex(aabb.x0, aabb.y0, aabb.z0);
+        t.vertex(aabb.x0, aabb.y1, aabb.z0);
+        t.vertex(aabb.x1, aabb.y0, aabb.z0);
+        t.vertex(aabb.x1, aabb.y1, aabb.z0);
+        t.vertex(aabb.x1, aabb.y0, aabb.z1);
+        t.vertex(aabb.x1, aabb.y1, aabb.z1);
+        t.vertex(aabb.x0, aabb.y0, aabb.z1);
+        t.vertex(aabb.x0, aabb.y1, aabb.z1);
+        t.end();
     }
     
     public void setDirty(final int x0, final int y0, final int z0, final int x1, final int y1, final int z1) {
-        final int intFloorDiv = Mth.intFloorDiv(x0, 16);
-        final int intFloorDiv2 = Mth.intFloorDiv(y0, 16);
-        final int intFloorDiv3 = Mth.intFloorDiv(z0, 16);
-        final int intFloorDiv4 = Mth.intFloorDiv(x1, 16);
-        final int intFloorDiv5 = Mth.intFloorDiv(y1, 16);
-        final int intFloorDiv6 = Mth.intFloorDiv(z1, 16);
-        for (int i = intFloorDiv; i <= intFloorDiv4; ++i) {
-            int n = i % this.xChunks;
-            if (n < 0) {
-                n += this.xChunks;
-            }
-            for (int j = intFloorDiv2; j <= intFloorDiv5; ++j) {
-                int n2 = j % this.yChunks;
-                if (n2 < 0) {
-                    n2 += this.yChunks;
-                }
-                for (int k = intFloorDiv3; k <= intFloorDiv6; ++k) {
-                    int n3 = k % this.zChunks;
-                    if (n3 < 0) {
-                        n3 += this.zChunks;
-                    }
-                    final Chunk chunk = this.chunks[(n3 * this.yChunks + n2) * this.xChunks + n];
+        final int _x0 = Mth.intFloorDiv(x0, CHUNK_SIZE);
+        final int _y0 = Mth.intFloorDiv(y0, CHUNK_SIZE);
+        final int _z0 = Mth.intFloorDiv(z0, CHUNK_SIZE);
+        final int _x1 = Mth.intFloorDiv(x1, CHUNK_SIZE);
+        final int _y1 = Mth.intFloorDiv(y1, CHUNK_SIZE);
+        final int _z1 = Mth.intFloorDiv(z1, CHUNK_SIZE);
+
+        for (int x = _x0; x <= _x1; ++x) {
+            int xx = x % this.xChunks;
+            if (xx < 0) xx += this.xChunks;
+
+            for (int y = _y0; y <= _y1; ++y) {
+                int yy = y % this.yChunks;
+                if (yy < 0) yy += this.yChunks;
+
+                for (int z = _z0; z <= _z1; ++z) {
+                    int zz = z % this.zChunks;
+                    if (zz < 0) zz += this.zChunks;
+
+                    int p = (zz * this.yChunks + yy) * this.xChunks + xx;
+                    final Chunk chunk = this.chunks[p];
                     if (!chunk.dirty) {
                         this.dirtyChunks.add(chunk);
                         chunk.setDirty();
@@ -1244,101 +1244,62 @@ public class LevelRenderer implements LevelListener
                 this.chunks[i].cull(culler);
             }
         }
+
         ++this.cullstep;
     }
     
     public void playStreamingMusic(final String name, final int x, final int y, final int z) {
-        if (name != null) {
-            this.mc.gui.setNowPlaying("C418 - " + name);
-        }
+        if (name != null) this.mc.gui.setNowPlaying("C418 - " + name);
+
         this.mc.soundEngine.playStreaming(name, (float)x, (float)y, (float)z, 1.0f, 1.0f);
     }
     
     public void playSound(final String name, final double x, final double y, final double z, final float volume, final float pitch) {
-        float n = 16.0f;
-        if (volume > 1.0f) {
-            n *= volume;
-        }
-        if (this.mc.cameraTargetPlayer.distanceToSqr(x, y, z) < n * n) {
+        float dd = 16.0f;
+        if (volume > 1.0f) dd *= volume;
+
+        if (this.mc.cameraTargetPlayer.distanceToSqr(x, y, z) < dd * dd) {
             this.mc.soundEngine.play(name, (float)x, (float)y, (float)z, volume, pitch);
         }
     }
     
     public void addParticle(final String name, final double x, final double y, final double z, final double xa, final double ya, final double za) {
-        if (this.mc == null || this.mc.cameraTargetPlayer == null || this.mc.particleEngine == null) {
-            return;
-        }
-        final double n = this.mc.cameraTargetPlayer.x - x;
-        final double n2 = this.mc.cameraTargetPlayer.y - y;
-        final double n3 = this.mc.cameraTargetPlayer.z - z;
-        final double n4 = 16.0;
-        if (n * n + n2 * n2 + n3 * n3 > n4 * n4) {
-            return;
-        }
-        if (name.equals("bubble")) {
-            this.mc.particleEngine.add(new BubbleParticle(this.level, x, y, z, xa, ya, za));
-        }
-        else if (name.equals("smoke")) {
-            this.mc.particleEngine.add(new SmokeParticle(this.level, x, y, z, xa, ya, za));
-        }
-        else if (name.equals("note")) {
-            this.mc.particleEngine.add(new NoteParticle(this.level, x, y, z, xa, ya, za));
-        }
-        else if (name.equals("portal")) {
-            this.mc.particleEngine.add(new PortalParticle(this.level, x, y, z, xa, ya, za));
-        }
-        else if (name.equals("explode")) {
-            this.mc.particleEngine.add(new ExplodeParticle(this.level, x, y, z, xa, ya, za));
-        }
-        else if (name.equals("flame")) {
-            this.mc.particleEngine.add(new FlameParticle(this.level, x, y, z, xa, ya, za));
-        }
-        else if (name.equals("lava")) {
-            this.mc.particleEngine.add(new LavaParticle(this.level, x, y, z));
-        }
-        else if (name.equals("footstep")) {
-            this.mc.particleEngine.add(new FootstepParticle(this.textures, this.level, x, y, z));
-        }
-        else if (name.equals("splash")) {
-            this.mc.particleEngine.add(new SplashParticle(this.level, x, y, z, xa, ya, za));
-        }
-        else if (name.equals("largesmoke")) {
-            this.mc.particleEngine.add(new SmokeParticle(this.level, x, y, z, xa, ya, za, 2.5f));
-        }
-        else if (name.equals("reddust")) {
-            this.mc.particleEngine.add(new RedDustParticle(this.level, x, y, z, (float)xa, (float)ya, (float)za));
-        }
-        else if (name.equals("snowballpoof")) {
-            this.mc.particleEngine.add(new BreakingItemParticle(this.level, x, y, z, Item.snowBall));
-        }
-        else if (name.equals("snowshovel")) {
-            this.mc.particleEngine.add(new SnowShovelParticle(this.level, x, y, z, xa, ya, za));
-        }
-        else if (name.equals("slime")) {
-            this.mc.particleEngine.add(new BreakingItemParticle(this.level, x, y, z, Item.slimeBall));
-        }
-        else if (name.equals("heart")) {
-            this.mc.particleEngine.add(new HeartParticle(this.level, x, y, z, xa, ya, za));
-        }
+        if (this.mc == null || this.mc.cameraTargetPlayer == null || this.mc.particleEngine == null) return;
+
+        final double xd = this.mc.cameraTargetPlayer.x - x;
+        final double yd = this.mc.cameraTargetPlayer.y - y;
+        final double zd = this.mc.cameraTargetPlayer.z - z;
+
+        final double particleDistance = 16.0;
+        if (xd * xd + yd * yd + zd * zd > particleDistance * particleDistance) return;
+
+        if (name.equals("bubble")) this.mc.particleEngine.add(new BubbleParticle(this.level, x, y, z, xa, ya, za));
+        else if (name.equals("smoke")) this.mc.particleEngine.add(new SmokeParticle(this.level, x, y, z, xa, ya, za));
+        else if (name.equals("note")) this.mc.particleEngine.add(new NoteParticle(this.level, x, y, z, xa, ya, za));
+        else if (name.equals("portal")) this.mc.particleEngine.add(new PortalParticle(this.level, x, y, z, xa, ya, za));
+        else if (name.equals("explode")) this.mc.particleEngine.add(new ExplodeParticle(this.level, x, y, z, xa, ya, za));
+        else if (name.equals("flame")) this.mc.particleEngine.add(new FlameParticle(this.level, x, y, z, xa, ya, za));
+        else if (name.equals("lava")) this.mc.particleEngine.add(new LavaParticle(this.level, x, y, z));
+        else if (name.equals("footstep")) this.mc.particleEngine.add(new FootstepParticle(this.textures, this.level, x, y, z));
+        else if (name.equals("splash")) this.mc.particleEngine.add(new SplashParticle(this.level, x, y, z, xa, ya, za));
+        else if (name.equals("largesmoke")) this.mc.particleEngine.add(new SmokeParticle(this.level, x, y, z, xa, ya, za, 2.5f));
+        else if (name.equals("reddust")) this.mc.particleEngine.add(new RedDustParticle(this.level, x, y, z, (float) xa, (float) ya, (float) za));
+        else if (name.equals("snowballpoof")) this.mc.particleEngine.add(new BreakingItemParticle(this.level, x, y, z, Item.snowBall));
+        else if (name.equals("snowshovel")) this.mc.particleEngine.add(new SnowShovelParticle(this.level, x, y, z, xa, ya, za));
+        else if (name.equals("slime")) this.mc.particleEngine.add(new BreakingItemParticle(this.level, x, y, z, Item.slimeBall));
+        else if (name.equals("heart")) this.mc.particleEngine.add(new HeartParticle(this.level, x, y, z, xa, ya, za));
     }
     
     public void entityAdded(final Entity entity) {
         entity.prepareCustomTextures();
-        if (entity.customTextureUrl != null) {
-            this.textures.addHttpTexture(entity.customTextureUrl, new MobSkinTextureProcessor());
-        }
-        if (entity.customTextureUrl2 != null) {
-            this.textures.addHttpTexture(entity.customTextureUrl2, new MobSkinTextureProcessor());
-        }
+
+        if (entity.customTextureUrl != null) this.textures.addHttpTexture(entity.customTextureUrl, new MobSkinTextureProcessor());
+        if (entity.customTextureUrl2 != null) this.textures.addHttpTexture(entity.customTextureUrl2, new MobSkinTextureProcessor());
     }
     
     public void entityRemoved(final Entity entity) {
-        if (entity.customTextureUrl != null) {
-            this.textures.removeHttpTexture(entity.customTextureUrl);
-        }
-        if (entity.customTextureUrl2 != null) {
-            this.textures.removeHttpTexture(entity.customTextureUrl2);
-        }
+        if (entity.customTextureUrl != null) this.textures.removeHttpTexture(entity.customTextureUrl);
+        if (entity.customTextureUrl2 != null) this.textures.removeHttpTexture(entity.customTextureUrl2);
     }
     
     public void skyColorChanged() {
@@ -1360,57 +1321,64 @@ public class LevelRenderer implements LevelListener
     public void levelEvent(final Player source, final int type, final int x, final int y, final int z, final int data) {
         final Random random = this.level.random;
         switch (type) {
-            case 1001: {
+            case LevelEvent.SOUND_CLICK_FAIL: {
                 this.level.playLocalSound(x, y, z, "random.click", 1.0f, 1.2f);
                 break;
             }
-            case 1000: {
+            case LevelEvent.SOUND_CLICK: {
                 this.level.playLocalSound(x, y, z, "random.click", 1.0f, 1.0f);
                 break;
             }
-            case 1002: {
+            case LevelEvent.SOUND_LAUNCH: {
                 this.level.playLocalSound(x, y, z, "random.bow", 1.0f, 1.2f);
                 break;
             }
-            case 2000: {
-                final int n = data % 3 - 1;
-                final int n2 = data / 3 % 3 - 1;
-                final double n3 = x + n * 0.6 + 0.5;
-                final double n4 = y + 0.5;
-                final double n5 = z + n2 * 0.6 + 0.5;
+            case LevelEvent.PARTICLES_SHOOT: {
+                final int xd = data % 3 - 1;
+                final int zd = data / 3 % 3 - 1;
+                final double xp = x + xd * 0.6 + 0.5;
+                final double yp = y + 0.5;
+                final double zp = z + zd * 0.6 + 0.5;
                 for (int i = 0; i < 10; ++i) {
-                    final double n6 = random.nextDouble() * 0.2 + 0.01;
-                    this.addParticle("smoke", n3 + n * 0.01 + (random.nextDouble() - 0.5) * n2 * 0.5, n4 + (random.nextDouble() - 0.5) * 0.5, n5 + n2 * 0.01 + (random.nextDouble() - 0.5) * n * 0.5, n * n6 + random.nextGaussian() * 0.01, -0.03 + random.nextGaussian() * 0.01, n2 * n6 + random.nextGaussian() * 0.01);
+                    final double pow = random.nextDouble() * 0.2 + 0.01;
+                    double xs = xp + xd * 0.01 + (random.nextDouble() - 0.5) * zd * 0.5;
+                    double ys = yp + (random.nextDouble() - 0.5) * 0.5;
+                    double zs = zp + zd * 0.01 + (random.nextDouble() - 0.5) * xd * 0.5;
+                    double xsa = xd * pow + random.nextGaussian() * 0.01;
+                    double ysa = -0.03 + random.nextGaussian() * 0.01;
+                    double zsa = zd * pow + random.nextGaussian() * 0.01;
+                    this.addParticle("smoke", xs, ys, zs, xsa, ysa, zsa);
                 }
                 break;
             }
-            case 2001: {
-                final int n7 = data & 0xFF;
-                if (n7 > 0) {
-                    final Tile tile = Tile.tiles[n7];
-                    this.mc.soundEngine.play(tile.soundType.getBreakSound(), x + 0.5f, y + 0.5f, z + 0.5f, (tile.soundType.getVolume() + 1.0f) / 2.0f, tile.soundType.getPitch() * 0.8f);
+            case LevelEvent.PARTICLES_DESTROY_BLOCK: {
+                final int t = data & Tile.TILE_NUM_MASK;
+                if (t > 0) {
+                    final Tile oldTIle = Tile.tiles[t];
+                    this.mc.soundEngine.play(oldTIle.soundType.getBreakSound(), x + 0.5f, y + 0.5f, z + 0.5f, (oldTIle.soundType.getVolume() + 1.0f) / 2.0f, oldTIle.soundType.getPitch() * 0.8f);
                 }
                 this.mc.particleEngine.destroy(x, y, z, data & 0xFF, data >> 8 & 0xFF);
                 break;
             }
-            case 1003: {
+            case LevelEvent.SOUND_OPEN_DOOR: {
                 if (Math.random() < 0.5) {
                     this.level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.door_open", 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f);
-                    break;
+                } else {
+                    this.level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.door_close", 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f);
                 }
-                this.level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.door_close", 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f);
                 break;
             }
-            case 1004: {
+            case LevelEvent.SOUND_FIZZ: {
                 this.level.playLocalSound(x + 0.5f, y + 0.5f, z + 0.5f, "random.fizz", 0.5f, 2.6f + (random.nextFloat() - random.nextFloat()) * 0.8f);
                 break;
             }
-            case 1005: {
+            case LevelEvent.SOUND_PLAY_RECORDING: {
                 if (Item.items[data] instanceof RecordingItem) {
-                    this.level.playStreamingMusic(((RecordingItem)Item.items[data]).recording, x, y, z);
-                    break;
+                    RecordingItem recording = (RecordingItem)Item.items[data];
+                    this.level.playStreamingMusic(recording.recording, x, y, z);
+                } else {
+                    this.level.playStreamingMusic(null, x, y, z);
                 }
-                this.level.playStreamingMusic(null, x, y, z);
                 break;
             }
         }

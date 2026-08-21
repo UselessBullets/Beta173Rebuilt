@@ -7,6 +7,7 @@ package net.minecraft.client.gamemode;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.level.LevelEvent;
 import net.minecraft.world.level.LevelListener;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.entity.player.Player;
@@ -34,7 +35,7 @@ public class GameMode
         final Level level = this.minecraft.level;
         final Tile oldTile = Tile.tiles[level.getTile(x, y, z)];
 
-        level.levelEvent(LevelListener.PARTICLES_DESTROY_BLOCK, x, y, z, oldTile.id + level.getData(x, y, z) * Tile.TILE_NUM_COUNT);
+        level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, x, y, z, oldTile.id + (level.getData(x, y, z) << Tile.TILE_NUM_SHIFT));
         final int data = level.getData(x, y, z);
         final boolean changed = level.setTile(x, y, z, 0);
 

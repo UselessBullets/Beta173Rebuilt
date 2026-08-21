@@ -1013,7 +1013,7 @@ public class TileRenderer
                     u1 = (texX + 15.99f) / 256.0f;
                     v0 = (texY + 16) / 256.0f;
                     v1 = (texY + 15.99f + 16.0f) / 256.0f;
-                    
+
                     t.vertexUV(x + 1, y + h, z0_, u1, v0);
                     t.vertexUV(x + 1, y + 0, z0, u1, v1);
                     t.vertexUV(x + 0, y + 0, z0, u0, v1);
@@ -1025,7 +1025,8 @@ public class TileRenderer
     }
     
     public boolean tesselateDustInWorld(final Tile tt, final int x, final int y, final int z) {
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
+
         final int data = this.level.getData(x, y, z);
         int n = tt.getTexture(1, data);
         if (this.fixedTexture >= 0) {
@@ -1045,7 +1046,7 @@ public class TileRenderer
         if (n5 < 0.0f) {
             n5 = 0.0f;
         }
-        instance.color(brightness * n3, brightness * n4, brightness * n5);
+        t.color(brightness * n3, brightness * n4, brightness * n5);
         final int n6 = (n & 0xF) << 4;
         final int n7 = n & 0xF0;
         double n8 = n6 / 256.0f;
@@ -1114,37 +1115,37 @@ public class TileRenderer
                     n11 -= 0.01953125;
                 }
             }
-            instance.vertexUV(n13, y + 0.015625f, n15, n9, n11);
-            instance.vertexUV(n13, y + 0.015625f, n14, n9, n10);
-            instance.vertexUV(n12, y + 0.015625f, n14, n8, n10);
-            instance.vertexUV(n12, y + 0.015625f, n15, n8, n11);
-            instance.color(brightness, brightness, brightness);
-            instance.vertexUV(n13, y + 0.015625f, n15, n9, n11 + 0.0625);
-            instance.vertexUV(n13, y + 0.015625f, n14, n9, n10 + 0.0625);
-            instance.vertexUV(n12, y + 0.015625f, n14, n8, n10 + 0.0625);
-            instance.vertexUV(n12, y + 0.015625f, n15, n8, n11 + 0.0625);
+            t.vertexUV(n13, y + 0.015625f, n15, n9, n11);
+            t.vertexUV(n13, y + 0.015625f, n14, n9, n10);
+            t.vertexUV(n12, y + 0.015625f, n14, n8, n10);
+            t.vertexUV(n12, y + 0.015625f, n15, n8, n11);
+            t.color(brightness, brightness, brightness);
+            t.vertexUV(n13, y + 0.015625f, n15, n9, n11 + 0.0625);
+            t.vertexUV(n13, y + 0.015625f, n14, n9, n10 + 0.0625);
+            t.vertexUV(n12, y + 0.015625f, n14, n8, n10 + 0.0625);
+            t.vertexUV(n12, y + 0.015625f, n15, n8, n11 + 0.0625);
         }
         else if (n16 == 1) {
-            instance.vertexUV(n13, y + 0.015625f, n15, n9, n11);
-            instance.vertexUV(n13, y + 0.015625f, n14, n9, n10);
-            instance.vertexUV(n12, y + 0.015625f, n14, n8, n10);
-            instance.vertexUV(n12, y + 0.015625f, n15, n8, n11);
-            instance.color(brightness, brightness, brightness);
-            instance.vertexUV(n13, y + 0.015625f, n15, n9, n11 + 0.0625);
-            instance.vertexUV(n13, y + 0.015625f, n14, n9, n10 + 0.0625);
-            instance.vertexUV(n12, y + 0.015625f, n14, n8, n10 + 0.0625);
-            instance.vertexUV(n12, y + 0.015625f, n15, n8, n11 + 0.0625);
+            t.vertexUV(n13, y + 0.015625f, n15, n9, n11);
+            t.vertexUV(n13, y + 0.015625f, n14, n9, n10);
+            t.vertexUV(n12, y + 0.015625f, n14, n8, n10);
+            t.vertexUV(n12, y + 0.015625f, n15, n8, n11);
+            t.color(brightness, brightness, brightness);
+            t.vertexUV(n13, y + 0.015625f, n15, n9, n11 + 0.0625);
+            t.vertexUV(n13, y + 0.015625f, n14, n9, n10 + 0.0625);
+            t.vertexUV(n12, y + 0.015625f, n14, n8, n10 + 0.0625);
+            t.vertexUV(n12, y + 0.015625f, n15, n8, n11 + 0.0625);
         }
         else if (n16 == 2) {
-            instance.vertexUV(n13, y + 0.015625f, n15, n9, n11);
-            instance.vertexUV(n13, y + 0.015625f, n14, n8, n11);
-            instance.vertexUV(n12, y + 0.015625f, n14, n8, n10);
-            instance.vertexUV(n12, y + 0.015625f, n15, n9, n10);
-            instance.color(brightness, brightness, brightness);
-            instance.vertexUV(n13, y + 0.015625f, n15, n9, n11 + 0.0625);
-            instance.vertexUV(n13, y + 0.015625f, n14, n8, n11 + 0.0625);
-            instance.vertexUV(n12, y + 0.015625f, n14, n8, n10 + 0.0625);
-            instance.vertexUV(n12, y + 0.015625f, n15, n9, n10 + 0.0625);
+            t.vertexUV(n13, y + 0.015625f, n15, n9, n11);
+            t.vertexUV(n13, y + 0.015625f, n14, n8, n11);
+            t.vertexUV(n12, y + 0.015625f, n14, n8, n10);
+            t.vertexUV(n12, y + 0.015625f, n15, n9, n10);
+            t.color(brightness, brightness, brightness);
+            t.vertexUV(n13, y + 0.015625f, n15, n9, n11 + 0.0625);
+            t.vertexUV(n13, y + 0.015625f, n14, n8, n11 + 0.0625);
+            t.vertexUV(n12, y + 0.015625f, n14, n8, n10 + 0.0625);
+            t.vertexUV(n12, y + 0.015625f, n15, n9, n10 + 0.0625);
         }
         if (!this.level.isSolidBlockingTile(x, y + 1, z)) {
             final double n17 = (n6 + 16) / 256.0f;
@@ -1152,52 +1153,52 @@ public class TileRenderer
             final double n19 = n7 / 256.0f;
             final double n20 = (n7 + 15.99f) / 256.0f;
             if (this.level.isSolidBlockingTile(x - 1, y, z) && this.level.getTile(x - 1, y + 1, z) == Tile.redStoneDust.id) {
-                instance.color(brightness * n3, brightness * n4, brightness * n5);
-                instance.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 1, n18, n19);
-                instance.vertexUV(x + 0.015625f, y + 0, z + 1, n17, n19);
-                instance.vertexUV(x + 0.015625f, y + 0, z + 0, n17, n20);
-                instance.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 0, n18, n20);
-                instance.color(brightness, brightness, brightness);
-                instance.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 1, n18, n19 + 0.0625);
-                instance.vertexUV(x + 0.015625f, y + 0, z + 1, n17, n19 + 0.0625);
-                instance.vertexUV(x + 0.015625f, y + 0, z + 0, n17, n20 + 0.0625);
-                instance.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 0, n18, n20 + 0.0625);
+                t.color(brightness * n3, brightness * n4, brightness * n5);
+                t.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 1, n18, n19);
+                t.vertexUV(x + 0.015625f, y + 0, z + 1, n17, n19);
+                t.vertexUV(x + 0.015625f, y + 0, z + 0, n17, n20);
+                t.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 0, n18, n20);
+                t.color(brightness, brightness, brightness);
+                t.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 1, n18, n19 + 0.0625);
+                t.vertexUV(x + 0.015625f, y + 0, z + 1, n17, n19 + 0.0625);
+                t.vertexUV(x + 0.015625f, y + 0, z + 0, n17, n20 + 0.0625);
+                t.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 0, n18, n20 + 0.0625);
             }
             if (this.level.isSolidBlockingTile(x + 1, y, z) && this.level.getTile(x + 1, y + 1, z) == Tile.redStoneDust.id) {
-                instance.color(brightness * n3, brightness * n4, brightness * n5);
-                instance.vertexUV(x + 1 - 0.015625f, y + 0, z + 1, n17, n20);
-                instance.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 1, n18, n20);
-                instance.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 0, n18, n19);
-                instance.vertexUV(x + 1 - 0.015625f, y + 0, z + 0, n17, n19);
-                instance.color(brightness, brightness, brightness);
-                instance.vertexUV(x + 1 - 0.015625f, y + 0, z + 1, n17, n20 + 0.0625);
-                instance.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 1, n18, n20 + 0.0625);
-                instance.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 0, n18, n19 + 0.0625);
-                instance.vertexUV(x + 1 - 0.015625f, y + 0, z + 0, n17, n19 + 0.0625);
+                t.color(brightness * n3, brightness * n4, brightness * n5);
+                t.vertexUV(x + 1 - 0.015625f, y + 0, z + 1, n17, n20);
+                t.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 1, n18, n20);
+                t.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 0, n18, n19);
+                t.vertexUV(x + 1 - 0.015625f, y + 0, z + 0, n17, n19);
+                t.color(brightness, brightness, brightness);
+                t.vertexUV(x + 1 - 0.015625f, y + 0, z + 1, n17, n20 + 0.0625);
+                t.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 1, n18, n20 + 0.0625);
+                t.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 0, n18, n19 + 0.0625);
+                t.vertexUV(x + 1 - 0.015625f, y + 0, z + 0, n17, n19 + 0.0625);
             }
             if (this.level.isSolidBlockingTile(x, y, z - 1) && this.level.getTile(x, y + 1, z - 1) == Tile.redStoneDust.id) {
-                instance.color(brightness * n3, brightness * n4, brightness * n5);
-                instance.vertexUV(x + 1, y + 0, z + 0.015625f, n17, n20);
-                instance.vertexUV(x + 1, y + 1 + 0.021875f, z + 0.015625f, n18, n20);
-                instance.vertexUV(x + 0, y + 1 + 0.021875f, z + 0.015625f, n18, n19);
-                instance.vertexUV(x + 0, y + 0, z + 0.015625f, n17, n19);
-                instance.color(brightness, brightness, brightness);
-                instance.vertexUV(x + 1, y + 0, z + 0.015625f, n17, n20 + 0.0625);
-                instance.vertexUV(x + 1, y + 1 + 0.021875f, z + 0.015625f, n18, n20 + 0.0625);
-                instance.vertexUV(x + 0, y + 1 + 0.021875f, z + 0.015625f, n18, n19 + 0.0625);
-                instance.vertexUV(x + 0, y + 0, z + 0.015625f, n17, n19 + 0.0625);
+                t.color(brightness * n3, brightness * n4, brightness * n5);
+                t.vertexUV(x + 1, y + 0, z + 0.015625f, n17, n20);
+                t.vertexUV(x + 1, y + 1 + 0.021875f, z + 0.015625f, n18, n20);
+                t.vertexUV(x + 0, y + 1 + 0.021875f, z + 0.015625f, n18, n19);
+                t.vertexUV(x + 0, y + 0, z + 0.015625f, n17, n19);
+                t.color(brightness, brightness, brightness);
+                t.vertexUV(x + 1, y + 0, z + 0.015625f, n17, n20 + 0.0625);
+                t.vertexUV(x + 1, y + 1 + 0.021875f, z + 0.015625f, n18, n20 + 0.0625);
+                t.vertexUV(x + 0, y + 1 + 0.021875f, z + 0.015625f, n18, n19 + 0.0625);
+                t.vertexUV(x + 0, y + 0, z + 0.015625f, n17, n19 + 0.0625);
             }
             if (this.level.isSolidBlockingTile(x, y, z + 1) && this.level.getTile(x, y + 1, z + 1) == Tile.redStoneDust.id) {
-                instance.color(brightness * n3, brightness * n4, brightness * n5);
-                instance.vertexUV(x + 1, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n19);
-                instance.vertexUV(x + 1, y + 0, z + 1 - 0.015625f, n17, n19);
-                instance.vertexUV(x + 0, y + 0, z + 1 - 0.015625f, n17, n20);
-                instance.vertexUV(x + 0, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n20);
-                instance.color(brightness, brightness, brightness);
-                instance.vertexUV(x + 1, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n19 + 0.0625);
-                instance.vertexUV(x + 1, y + 0, z + 1 - 0.015625f, n17, n19 + 0.0625);
-                instance.vertexUV(x + 0, y + 0, z + 1 - 0.015625f, n17, n20 + 0.0625);
-                instance.vertexUV(x + 0, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n20 + 0.0625);
+                t.color(brightness * n3, brightness * n4, brightness * n5);
+                t.vertexUV(x + 1, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n19);
+                t.vertexUV(x + 1, y + 0, z + 1 - 0.015625f, n17, n19);
+                t.vertexUV(x + 0, y + 0, z + 1 - 0.015625f, n17, n20);
+                t.vertexUV(x + 0, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n20);
+                t.color(brightness, brightness, brightness);
+                t.vertexUV(x + 1, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n19 + 0.0625);
+                t.vertexUV(x + 1, y + 0, z + 1 - 0.015625f, n17, n19 + 0.0625);
+                t.vertexUV(x + 0, y + 0, z + 1 - 0.015625f, n17, n20 + 0.0625);
+                t.vertexUV(x + 0, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n20 + 0.0625);
             }
         }
         return true;

@@ -4,6 +4,7 @@
 
 package net.minecraft.client.renderer;
 
+import net.minecraft.Facing;
 import net.minecraft.world.level.tile.DoorTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.Level;
@@ -26,98 +27,36 @@ import static org.lwjgl.opengl.GL11.*;
 public class TileRenderer
 {
     private LevelSource level;
-    private int fixedTexture;
-    private boolean xFlipTexture;
-    private boolean noCulling;
+    private int fixedTexture = -1;
+    private boolean xFlipTexture = false;
+    private boolean noCulling = false;
     public static boolean fancy;
-    public boolean setColor;
-    private int northFlip;
-    private int southFlip;
-    private int eastFlip;
-    private int westFlip;
-    private int upFlip;
-    private int downFlip;
+    public boolean setColor = true;
+    private static final int FLIP_NONE = 0, FLIP_CW = 1, FLIP_CCW = 2, FLIP_180 = 3;
+    private int northFlip = FLIP_NONE;
+    private int southFlip = FLIP_NONE;
+    private int eastFlip = FLIP_NONE;
+    private int westFlip = FLIP_NONE;
+    private int upFlip = FLIP_NONE;
+    private int downFlip = FLIP_NONE;
     private boolean applyAmbienceOcclusion;
-    private float ll000;
-    private float llx00;
-    private float ll0y0;
-    private float ll00z;
-    private float llX00;
-    private float ll0Y0;
-    private float ll00Z;
-    private float llxyz;
-    private float llxy0;
-    private float llxyZ;
-    private float ll0yz;
-    private float ll0yZ;
-    private float llXyz;
-    private float llXy0;
-    private float llXyZ;
-    private float llxYz;
-    private float llxY0;
-    private float llxYZ;
-    private float ll0Yz;
-    private float llXYz;
-    private float llXY0;
-    private float ll0YZ;
-    private float llXYZ;
-    private float llx0z;
-    private float llX0z;
-    private float llx0Z;
-    private float llX0Z;
-    private int blsmooth;
-    private float c1r;
-    private float c2r;
-    private float c3r;
-    private float c4r;
-    private float c1g;
-    private float c2g;
-    private float c3g;
-    private float c4g;
-    private float c1b;
-    private float c2b;
-    private float c3b;
-    private float c4b;
-    private boolean llTrans0Yz;
-    private boolean llTransXY0;
-    private boolean llTransxY0;
-    private boolean llTrans0YZ;
-    private boolean llTransx0z;
-    private boolean llTransX0Z;
-    private boolean llTransx0Z;
-    private boolean llTransX0z;
-    private boolean llTrans0yz;
-    private boolean llTransXy0;
-    private boolean llTransxy0;
-    private boolean llTrans0yZ;
+    private float ll000, llx00, ll0y0, ll00z, llX00, ll0Y0, ll00Z;
+    private float llxyz, llxy0, llxyZ, ll0yz, ll0yZ, llXyz, llXy0;
+    private float llXyZ, llxYz, llxY0, llxYZ, ll0Yz, llXYz, llXY0;
+    private float ll0YZ, llXYZ, llx0z, llX0z, llx0Z, llX0Z;
+    private int blsmooth = 1;
+    private float c1r, c2r, c3r, c4r;
+    private float c1g, c2g, c3g, c4g;
+    private float c1b, c2b, c3b, c4b;
+    private boolean llTrans0Yz, llTransXY0, llTransxY0, llTrans0YZ;
+    private boolean llTransx0z, llTransX0Z, llTransx0Z, llTransX0z;
+    private boolean llTrans0yz, llTransXy0, llTransxy0, llTrans0yZ;
     
     public TileRenderer(final LevelSource level) {
-        this.fixedTexture = -1;
-        this.xFlipTexture = false;
-        this.noCulling = false;
-        this.setColor = true;
-        this.northFlip = 0;
-        this.southFlip = 0;
-        this.eastFlip = 0;
-        this.westFlip = 0;
-        this.upFlip = 0;
-        this.downFlip = 0;
-        this.blsmooth = 1;
         this.level = level;
     }
     
     public TileRenderer() {
-        this.fixedTexture = -1;
-        this.xFlipTexture = false;
-        this.noCulling = false;
-        this.setColor = true;
-        this.northFlip = 0;
-        this.southFlip = 0;
-        this.eastFlip = 0;
-        this.westFlip = 0;
-        this.upFlip = 0;
-        this.downFlip = 0;
-        this.blsmooth = 1;
     }
     
     public void tesselateInWorld(final Tile tile, final int x, final int y, final int z, final int fixedTexture) {
@@ -133,151 +72,143 @@ public class TileRenderer
     }
     
     public boolean tesselateInWorld(final Tile tt, final int x, final int y, final int z) {
-        final int renderShape = tt.getRenderShape();
+        final int shape = tt.getRenderShape();
         tt.updateShape(this.level, x, y, z);
-        if (renderShape == 0) {
-            return this.tesselateBlockInWorld(tt, x, y, z);
-        }
-        if (renderShape == 4) {
-            return this.tesselateWaterInWorld(tt, x, y, z);
-        }
-        if (renderShape == 13) {
-            return this.tesselateCactusInWorld(tt, x, y, z);
-        }
-        if (renderShape == 1) {
-            return this.tesselateCrossInWorld(tt, x, y, z);
-        }
-        if (renderShape == 6) {
-            return this.tesselateRowInWorld(tt, x, y, z);
-        }
-        if (renderShape == 2) {
-            return this.tesselateTorchInWorld(tt, x, y, z);
-        }
-        if (renderShape == 3) {
-            return this.tesselateFireInWorld(tt, x, y, z);
-        }
-        if (renderShape == 5) {
-            return this.tesselateDustInWorld(tt, x, y, z);
-        }
-        if (renderShape == 8) {
-            return this.tesselateLadderInWorld(tt, x, y, z);
-        }
-        if (renderShape == 7) {
-            return this.tesselateDoorInWorld(tt, x, y, z);
-        }
-        if (renderShape == 9) {
-            return this.tesselateRailInWorld((RailTile)tt, x, y, z);
-        }
-        if (renderShape == 10) {
-            return this.tesselateStairsInWorld(tt, x, y, z);
-        }
-        if (renderShape == 11) {
-            return this.tesselateFenceInWorld(tt, x, y, z);
-        }
-        if (renderShape == 12) {
-            return this.tesselateLeverInWorld(tt, x, y, z);
-        }
-        if (renderShape == 14) {
-            return this.tesselateBedInWorld(tt, x, y, z);
-        }
-        if (renderShape == 15) {
-            return this.tesselateDiodeInWorld(tt, x, y, z);
-        }
-        if (renderShape == 16) {
-            return this.tesselatePistonBaseInWorld(tt, x, y, z, false);
-        }
-        return renderShape == 17 && this.tesselatePistonExtensionInWorld(tt, x, y, z, true);
+        if (shape == Tile.SHAPE_BLOCK) return this.tesselateBlockInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_WATER) return this.tesselateWaterInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_CACTUS) return this.tesselateCactusInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_CROSS_TEXTURE) return this.tesselateCrossInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_ROWS) return this.tesselateRowInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_TORCH) return this.tesselateTorchInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_FIRE) return this.tesselateFireInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_RED_DUST) return this.tesselateDustInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_LADDER) return this.tesselateLadderInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_DOOR) return this.tesselateDoorInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_RAIL) return this.tesselateRailInWorld((RailTile) tt, x, y, z);
+        if (shape == Tile.SHAPE_STAIRS) return this.tesselateStairsInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_FENCE) return this.tesselateFenceInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_LEVER) return this.tesselateLeverInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_BED) return this.tesselateBedInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_DIODE) return this.tesselateDiodeInWorld(tt, x, y, z);
+        if (shape == Tile.SHAPE_PISTON_BASE) return this.tesselatePistonBaseInWorld(tt, x, y, z, false);
+        if (shape == Tile.SHAPE_PISTON_EXTENSION) return this.tesselatePistonExtensionInWorld(tt, x, y, z, true);
+        return false;
     }
     
     private boolean tesselateBedInWorld(final Tile tt, final int x, final int y, final int z) {
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
         final int data = this.level.getData(x, y, z);
         final int direction = BedTile.getDirection(data);
-        final boolean headPiece = BedTile.isHeadPiece(data);
-        final float n = 0.5f;
-        final float n2 = 1.0f;
-        final float n3 = 0.8f;
-        final float n4 = 0.6f;
-        final float n5 = n2;
-        final float n6 = n2;
-        final float n7 = n2;
-        final float n8 = n;
-        final float n9 = n3;
-        final float n10 = n4;
-        final float n11 = n;
-        final float n12 = n3;
-        final float n13 = n4;
-        final float n14 = n;
-        final float n15 = n3;
-        final float n16 = n4;
-        final float brightness = tt.getBrightness(this.level, x, y, z);
-        instance.color(n8 * brightness, n11 * brightness, n14 * brightness);
-        final int texture = tt.getTexture(this.level, x, y, z, 0);
-        final int n17 = (texture & 0xF) << 4;
-        final int n18 = texture & 0xF0;
-        final double n19 = n17 / 256.0f;
-        final double n20 = (n17 + 16 - 0.01) / 256.0;
-        final double n21 = n18 / 256.0f;
-        final double n22 = (n18 + 16 - 0.01) / 256.0;
-        final double n23 = x + tt.xx0;
-        final double n24 = x + tt.xx1;
-        final double n25 = y + tt.yy0 + 0.1875;
-        final double n26 = z + tt.zz0;
-        final double n27 = z + tt.zz1;
-        instance.vertexUV(n23, n25, n27, n19, n22);
-        instance.vertexUV(n23, n25, n26, n19, n21);
-        instance.vertexUV(n24, n25, n26, n20, n21);
-        instance.vertexUV(n24, n25, n27, n20, n22);
-        final float brightness2 = tt.getBrightness(this.level, x, y + 1, z);
-        instance.color(n5 * brightness2, n6 * brightness2, n7 * brightness2);
-        final int texture2 = tt.getTexture(this.level, x, y, z, 1);
-        final int n28 = (texture2 & 0xF) << 4;
-        final int n29 = texture2 & 0xF0;
-        final double n30 = n28 / 256.0f;
-        final double n31 = (n28 + 16 - 0.01) / 256.0;
-        final double n32 = n29 / 256.0f;
-        final double n33 = (n29 + 16 - 0.01) / 256.0;
-        double u = n30;
-        double u2 = n31;
-        double v = n32;
-        double v2 = n32;
-        double u3 = n30;
-        double u4 = n31;
-        double v3 = n33;
-        double v4 = n33;
-        if (direction == 0) {
-            u2 = n30;
-            v = n33;
-            u3 = n31;
-            v4 = n32;
+        final boolean isHead = BedTile.isHeadPiece(data);
+
+        final float c10 = 0.5f;
+        final float c11 = 1.0f;
+        final float c2 = 0.8f;
+        final float c3 = 0.6f;
+
+        final float r10 = c10;
+        final float g10 = c10;
+        final float b10 = c10;
+
+        final float r11 = c11;
+        final float g11 = c11;
+        final float b11 = c11;
+
+        final float r2 = c2;
+        final float g2 = c2;
+        final float b2 = c2;
+
+        final float r3 = c3;
+        final float g3 = c3;
+        final float b3 = c3;
+
+        // Render wooden underside
+        {
+            final float centerBrightness = tt.getBrightness(this.level, x, y, z);
+            t.color(r10 * centerBrightness, g10 * centerBrightness, b10 * centerBrightness);
+
+            final int tex = tt.getTexture(this.level, x, y, z, Facing.DOWN);
+            final int texX = (tex & 0xF) << 4;
+            final int texY = tex & 0xF0;
+
+            final double u0 = texX / 256.0f;
+            final double u1 = (texX + 16 - 0.01) / 256.0;
+            final double v0 = texY / 256.0f;
+            final double v1 = (texY + 16 - 0.01) / 256.0;
+
+            final double x0 = x + tt.xx0;
+            final double x1 = x + tt.xx1;
+            final double y0 = y + tt.yy0 + 0.1875;
+            final double z0 = z + tt.zz0;
+            final double z1 = z + tt.zz1;
+
+            t.vertexUV(x0, y0, z1, u0, v1);
+            t.vertexUV(x0, y0, z0, u0, v0);
+            t.vertexUV(x1, y0, z0, u1, v0);
+            t.vertexUV(x1, y0, z1, u1, v1);
         }
-        else if (direction == 2) {
-            u = n31;
-            v2 = n33;
-            u4 = n30;
-            v3 = n32;
+
+        // render bed top
+        final float brightness = tt.getBrightness(this.level, x, y + 1, z);
+        t.color(r11 * brightness, g11 * brightness, b11 * brightness);
+
+        final int tex = tt.getTexture(this.level, x, y, z, 1);
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+
+        final double u0 = texX / 256.0f;
+        final double u1 = (texX + 16 - 0.01) / 256.0;
+        final double v0 = texY / 256.0f;
+        final double v1 = (texY + 16 - 0.01) / 256.0;
+
+        double topLeftU = u0;
+        double topRightU = u1;
+        double topLeftV = v0;
+        double topRightV = v0;
+        double bottomLeftU = u0;
+        double bottomRightU = u1;
+        double bottomLeftV = v1;
+        double bottomRightV = v1;
+
+        if (direction == Direction.SOUTH) {
+            // rotate 90 degrees clockwise
+            topRightU = u0;
+            topLeftV = v1;
+            bottomLeftU = u1;
+            bottomRightV = v0;
         }
-        else if (direction == 3) {
-            u = n31;
-            v2 = n33;
-            u4 = n30;
-            v3 = n32;
-            u2 = n30;
-            v = n33;
-            u3 = n31;
-            v4 = n32;
+        else if (direction == Direction.NORTH) {
+            // rotate 90 degrees counter-clockwise
+            topLeftU = u1;
+            topRightV = v1;
+            bottomRightU = u0;
+            bottomLeftV = v0;
         }
-        final double n34 = x + tt.xx0;
-        final double n35 = x + tt.xx1;
-        final double n36 = y + tt.yy1;
-        final double n37 = z + tt.zz0;
-        final double n38 = z + tt.zz1;
-        instance.vertexUV(n35, n36, n38, u3, v3);
-        instance.vertexUV(n35, n36, n37, u, v);
-        instance.vertexUV(n34, n36, n37, u2, v2);
-        instance.vertexUV(n34, n36, n38, u4, v4);
+        else if (direction == Direction.EAST) {
+            // rotate 180 degrees
+            topLeftU = u1;
+            topRightV = v1;
+            bottomRightU = u0;
+            bottomLeftV = v0;
+            topRightU = u0;
+            topLeftV = v1;
+            bottomLeftU = u1;
+            bottomRightV = v0;
+        }
+
+        final double x0 = x + tt.xx0;
+        final double x1 = x + tt.xx1;
+        final double y1 = y + tt.yy1;
+        final double z0 = z + tt.zz0;
+        final double z1 = z + tt.zz1;
+
+        t.vertexUV(x1, y1, z1, bottomLeftU, bottomLeftV);
+        t.vertexUV(x1, y1, z0, topLeftU, topLeftV);
+        t.vertexUV(x0, y1, z0, topRightU, topRightV);
+        t.vertexUV(x0, y1, z1, bottomRightU, bottomRightV);
+        
         int n39 = Direction.DIRECTION_FACING[direction];
-        if (headPiece) {
+        if (isHead) {
             n39 = Direction.DIRECTION_FACING[Direction.DIRECTION_OPPOSITE[direction]];
         }
         int n40 = 4;
@@ -298,36 +229,36 @@ public class TileRenderer
         if (n39 != 2 && (this.noCulling || tt.isFaceVisible(this.level, x, y, z - 1, 2))) {
             float brightness3 = tt.getBrightness(this.level, x, y, z - 1);
             if (tt.zz0 > 0.0) {
-                brightness3 = brightness;
+                brightness3 = br;
             }
-            instance.color(n9 * brightness3, n12 * brightness3, n15 * brightness3);
+            t.color(r2 * brightness3, g2 * brightness3, b2 * brightness3);
             this.xFlipTexture = (n40 == 2);
             this.renderNorth(tt, x, y, z, tt.getTexture(this.level, x, y, z, 2));
         }
         if (n39 != 3 && (this.noCulling || tt.isFaceVisible(this.level, x, y, z + 1, 3))) {
             float brightness4 = tt.getBrightness(this.level, x, y, z + 1);
             if (tt.zz1 < 1.0) {
-                brightness4 = brightness;
+                brightness4 = br;
             }
-            instance.color(n9 * brightness4, n12 * brightness4, n15 * brightness4);
+            t.color(r2 * brightness4, g2 * brightness4, b2 * brightness4);
             this.xFlipTexture = (n40 == 3);
             this.renderSouth(tt, x, y, z, tt.getTexture(this.level, x, y, z, 3));
         }
         if (n39 != 4 && (this.noCulling || tt.isFaceVisible(this.level, x - 1, y, z, 4))) {
             float brightness5 = tt.getBrightness(this.level, x - 1, y, z);
             if (tt.xx0 > 0.0) {
-                brightness5 = brightness;
+                brightness5 = br;
             }
-            instance.color(n10 * brightness5, n13 * brightness5, n16 * brightness5);
+            t.color(r3 * brightness5, g3 * brightness5, b3 * brightness5);
             this.xFlipTexture = (n40 == 4);
             this.renderWest(tt, x, y, z, tt.getTexture(this.level, x, y, z, 4));
         }
         if (n39 != 5 && (this.noCulling || tt.isFaceVisible(this.level, x + 1, y, z, 5))) {
             float brightness6 = tt.getBrightness(this.level, x + 1, y, z);
             if (tt.xx1 < 1.0) {
-                brightness6 = brightness;
+                brightness6 = br;
             }
-            instance.color(n10 * brightness6, n13 * brightness6, n16 * brightness6);
+            t.color(r3 * brightness6, g3 * brightness6, b3 * brightness6);
             this.xFlipTexture = (n40 == 5);
             this.renderEast(tt, x, y, z, tt.getTexture(this.level, x, y, z, 5));
         }

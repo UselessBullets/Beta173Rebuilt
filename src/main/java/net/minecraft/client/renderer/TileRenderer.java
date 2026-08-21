@@ -1028,179 +1028,165 @@ public class TileRenderer
         final Tesselator t = Tesselator.instance;
 
         final int data = this.level.getData(x, y, z);
-        int n = tt.getTexture(1, data);
-        if (this.fixedTexture >= 0) {
-            n = this.fixedTexture;
-        }
-        final float brightness = tt.getBrightness(this.level, x, y, z);
-        final float n2 = data / 15.0f;
-        float n3 = n2 * 0.6f + 0.4f;
-        if (data == 0) {
-            n3 = 0.3f;
-        }
-        float n4 = n2 * n2 * 0.7f - 0.5f;
-        float n5 = n2 * n2 * 0.6f - 0.7f;
-        if (n4 < 0.0f) {
-            n4 = 0.0f;
-        }
-        if (n5 < 0.0f) {
-            n5 = 0.0f;
-        }
-        t.color(brightness * n3, brightness * n4, brightness * n5);
-        final int n6 = (n & 0xF) << 4;
-        final int n7 = n & 0xF0;
-        double n8 = n6 / 256.0f;
-        double n9 = (n6 + 15.99f) / 256.0f;
-        double n10 = n7 / 256.0f;
-        double n11 = (n7 + 15.99f) / 256.0f;
-        boolean b = RedStoneDustTile.shouldReceivePowerFrom(this.level, x - 1, y, z, 1) || (!this.level.isSolidBlockingTile(x - 1, y, z) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x - 1, y - 1, z, -1));
-        boolean b2 = RedStoneDustTile.shouldReceivePowerFrom(this.level, x + 1, y, z, 3) || (!this.level.isSolidBlockingTile(x + 1, y, z) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x + 1, y - 1, z, -1));
-        boolean b3 = RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y, z - 1, 2) || (!this.level.isSolidBlockingTile(x, y, z - 1) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y - 1, z - 1, -1));
-        boolean b4 = RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y, z + 1, 0) || (!this.level.isSolidBlockingTile(x, y, z + 1) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y - 1, z + 1, -1));
+        int tex = tt.getTexture(1, data);
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+
+        final float br = tt.getBrightness(this.level, x, y, z);
+
+        final float pow = data / 15.0f;
+        float red = pow * 0.6f + 0.4f;
+        if (data == 0) red = 0.3f;
+
+        float green = pow * pow * 0.7f - 0.5f;
+        float blue = pow * pow * 0.6f - 0.7f;
+        if (green < 0.0f) green = 0.0f;
+        if (blue < 0.0f) blue = 0.0f;
+        t.color(br * red, br * green, br * blue);
+
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        double u0 = texX / 256.0f;
+        double u1 = (texX + 15.99f) / 256.0f;
+        double v0 = texY / 256.0f;
+        double v1 = (texY + 15.99f) / 256.0f;
+
+        float dustOffset = 0.25f / 16.0F;
+        float overlayOffset = 0.25f / 16.0F;
+
+        boolean w = RedStoneDustTile.shouldReceivePowerFrom(this.level, x - 1, y, z, Direction.WEST) || (!this.level.isSolidBlockingTile(x - 1, y, z) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x - 1, y - 1, z, Direction.UNDEFINED));
+        boolean e = RedStoneDustTile.shouldReceivePowerFrom(this.level, x + 1, y, z, Direction.EAST) || (!this.level.isSolidBlockingTile(x + 1, y, z) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x + 1, y - 1, z, Direction.UNDEFINED));
+        boolean n = RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y, z - 1, Direction.NORTH) || (!this.level.isSolidBlockingTile(x, y, z - 1) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y - 1, z - 1, Direction.UNDEFINED));
+        boolean s = RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y, z + 1, Direction.SOUTH) || (!this.level.isSolidBlockingTile(x, y, z + 1) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y - 1, z + 1, Direction.UNDEFINED));
         if (!this.level.isSolidBlockingTile(x, y + 1, z)) {
-            if (this.level.isSolidBlockingTile(x - 1, y, z) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x - 1, y + 1, z, -1)) {
-                b = true;
+            if (this.level.isSolidBlockingTile(x - 1, y, z) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x - 1, y + 1, z, Direction.UNDEFINED)) w = true;
+            if (this.level.isSolidBlockingTile(x + 1, y, z) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x + 1, y + 1, z, Direction.UNDEFINED)) e = true;
+            if (this.level.isSolidBlockingTile(x, y, z - 1) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y + 1, z - 1, Direction.UNDEFINED)) n = true;
+            if (this.level.isSolidBlockingTile(x, y, z + 1) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y + 1, z + 1, Direction.UNDEFINED)) s = true;
+        }
+        float d = 5.0f / 16.0f;
+        float x0 = (float)(x + 0);
+        float x1 = (float)(x + 1);
+        float z0 = (float)(z + 0);
+        float z1 = (float)(z + 1);
+
+        int pic = 0;
+        if ((w || e) && !n && !s) pic = 1;
+        if ((n || s) && !e && !w) pic = 2;
+
+        if (pic != 0) {
+            u0 = (texX + 16) / 256.0f;
+            u1 = (texX + 16 + 15.99f) / 256.0f;
+            v0 = texY / 256.0f;
+            v1 = (texY + 15.99f) / 256.0f;
+        }
+
+        if (pic == 0) {
+            if (e || n || s || w) {
+                if (!w) x0 += d;
+                if (!w) u0 += d / 16.0F;
+                if (!e) x1 -= d;
+                if (!e) u1 -= d / 16.0F;
+                if (!n) z0 += d;
+                if (!n) v0 += d / 16.0F;
+                if (!s) z1 -= d;
+                if (!s) v1 -= d / 16.0F;
             }
-            if (this.level.isSolidBlockingTile(x + 1, y, z) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x + 1, y + 1, z, -1)) {
-                b2 = true;
-            }
-            if (this.level.isSolidBlockingTile(x, y, z - 1) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y + 1, z - 1, -1)) {
-                b3 = true;
-            }
-            if (this.level.isSolidBlockingTile(x, y, z + 1) && RedStoneDustTile.shouldReceivePowerFrom(this.level, x, y + 1, z + 1, -1)) {
-                b4 = true;
-            }
+            t.vertexUV(x1, y + dustOffset, z1, u1, v1);
+            t.vertexUV(x1, y + dustOffset, z0, u1, v0);
+            t.vertexUV(x0, y + dustOffset, z0, u0, v0);
+            t.vertexUV(x0, y + dustOffset, z1, u0, v1);
+
+            t.color(br, br, br);
+            t.vertexUV(x1, y + dustOffset, z1, u1, v1 + 1 / 16.0f);
+            t.vertexUV(x1, y + dustOffset, z0, u1, v0 + 1 / 16.0f);
+            t.vertexUV(x0, y + dustOffset, z0, u0, v0 + 1 / 16.0f);
+            t.vertexUV(x0, y + dustOffset, z1, u0, v1 + 1 / 16.0f);
         }
-        float n12 = (float)(x + 0);
-        float n13 = (float)(x + 1);
-        float n14 = (float)(z + 0);
-        float n15 = (float)(z + 1);
-        int n16 = 0;
-        if ((b || b2) && !b3 && !b4) {
-            n16 = 1;
+        else if (pic == 1) {
+            t.vertexUV(x1, y + dustOffset, z1, u1, v1);
+            t.vertexUV(x1, y + dustOffset, z0, u1, v0);
+            t.vertexUV(x0, y + dustOffset, z0, u0, v0);
+            t.vertexUV(x0, y + dustOffset, z1, u0, v1);
+            t.color(br, br, br);
+
+            t.vertexUV(x1, y + overlayOffset, z1, u1, v1 + 1 / 16.0f);
+            t.vertexUV(x1, y + overlayOffset, z0, u1, v0 + 1 / 16.0f);
+            t.vertexUV(x0, y + overlayOffset, z0, u0, v0 + 1 / 16.0f);
+            t.vertexUV(x0, y + overlayOffset, z1, u0, v1 + 1 / 16.0f);
         }
-        if ((b3 || b4) && !b2 && !b) {
-            n16 = 2;
+        else if (pic == 2) {
+            t.vertexUV(x1, y + dustOffset, z1, u1, v1);
+            t.vertexUV(x1, y + dustOffset, z0, u0, v1);
+            t.vertexUV(x0, y + dustOffset, z0, u0, v0);
+            t.vertexUV(x0, y + dustOffset, z1, u1, v0);
+            t.color(br, br, br);
+
+            t.vertexUV(x1, y + overlayOffset, z1, u1, v1 + 1 / 16.0f);
+            t.vertexUV(x1, y + overlayOffset, z0, u0, v1 + 1 / 16.0f);
+            t.vertexUV(x0, y + overlayOffset, z0, u0, v0 + 1 / 16.0f);
+            t.vertexUV(x0, y + overlayOffset, z1, u1, v0 + 1 / 16.0f);
         }
-        if (n16 != 0) {
-            n8 = (n6 + 16) / 256.0f;
-            n9 = (n6 + 16 + 15.99f) / 256.0f;
-            n10 = n7 / 256.0f;
-            n11 = (n7 + 15.99f) / 256.0f;
-        }
-        if (n16 == 0) {
-            if (b2 || b3 || b4 || b) {
-                if (!b) {
-                    n12 += 0.3125f;
-                }
-                if (!b) {
-                    n8 += 0.01953125;
-                }
-                if (!b2) {
-                    n13 -= 0.3125f;
-                }
-                if (!b2) {
-                    n9 -= 0.01953125;
-                }
-                if (!b3) {
-                    n14 += 0.3125f;
-                }
-                if (!b3) {
-                    n10 += 0.01953125;
-                }
-                if (!b4) {
-                    n15 -= 0.3125f;
-                }
-                if (!b4) {
-                    n11 -= 0.01953125;
-                }
-            }
-            t.vertexUV(n13, y + 0.015625f, n15, n9, n11);
-            t.vertexUV(n13, y + 0.015625f, n14, n9, n10);
-            t.vertexUV(n12, y + 0.015625f, n14, n8, n10);
-            t.vertexUV(n12, y + 0.015625f, n15, n8, n11);
-            t.color(brightness, brightness, brightness);
-            t.vertexUV(n13, y + 0.015625f, n15, n9, n11 + 0.0625);
-            t.vertexUV(n13, y + 0.015625f, n14, n9, n10 + 0.0625);
-            t.vertexUV(n12, y + 0.015625f, n14, n8, n10 + 0.0625);
-            t.vertexUV(n12, y + 0.015625f, n15, n8, n11 + 0.0625);
-        }
-        else if (n16 == 1) {
-            t.vertexUV(n13, y + 0.015625f, n15, n9, n11);
-            t.vertexUV(n13, y + 0.015625f, n14, n9, n10);
-            t.vertexUV(n12, y + 0.015625f, n14, n8, n10);
-            t.vertexUV(n12, y + 0.015625f, n15, n8, n11);
-            t.color(brightness, brightness, brightness);
-            t.vertexUV(n13, y + 0.015625f, n15, n9, n11 + 0.0625);
-            t.vertexUV(n13, y + 0.015625f, n14, n9, n10 + 0.0625);
-            t.vertexUV(n12, y + 0.015625f, n14, n8, n10 + 0.0625);
-            t.vertexUV(n12, y + 0.015625f, n15, n8, n11 + 0.0625);
-        }
-        else if (n16 == 2) {
-            t.vertexUV(n13, y + 0.015625f, n15, n9, n11);
-            t.vertexUV(n13, y + 0.015625f, n14, n8, n11);
-            t.vertexUV(n12, y + 0.015625f, n14, n8, n10);
-            t.vertexUV(n12, y + 0.015625f, n15, n9, n10);
-            t.color(brightness, brightness, brightness);
-            t.vertexUV(n13, y + 0.015625f, n15, n9, n11 + 0.0625);
-            t.vertexUV(n13, y + 0.015625f, n14, n8, n11 + 0.0625);
-            t.vertexUV(n12, y + 0.015625f, n14, n8, n10 + 0.0625);
-            t.vertexUV(n12, y + 0.015625f, n15, n9, n10 + 0.0625);
-        }
+
         if (!this.level.isSolidBlockingTile(x, y + 1, z)) {
-            final double n17 = (n6 + 16) / 256.0f;
-            final double n18 = (n6 + 16 + 15.99f) / 256.0f;
-            final double n19 = n7 / 256.0f;
-            final double n20 = (n7 + 15.99f) / 256.0f;
+            u0 = (texX + 16) / 256.0f;
+            u1 = (texX + 16 + 15.99f) / 256.0f;
+            v0 = texY / 256.0f;
+            v1 = (texY + 15.99f) / 256.0f;
+
+            final float yStretch = 0.35f / 16.0f;
             if (this.level.isSolidBlockingTile(x - 1, y, z) && this.level.getTile(x - 1, y + 1, z) == Tile.redStoneDust.id) {
-                t.color(brightness * n3, brightness * n4, brightness * n5);
-                t.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 1, n18, n19);
-                t.vertexUV(x + 0.015625f, y + 0, z + 1, n17, n19);
-                t.vertexUV(x + 0.015625f, y + 0, z + 0, n17, n20);
-                t.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 0, n18, n20);
-                t.color(brightness, brightness, brightness);
-                t.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 1, n18, n19 + 0.0625);
-                t.vertexUV(x + 0.015625f, y + 0, z + 1, n17, n19 + 0.0625);
-                t.vertexUV(x + 0.015625f, y + 0, z + 0, n17, n20 + 0.0625);
-                t.vertexUV(x + 0.015625f, y + 1 + 0.021875f, z + 0, n18, n20 + 0.0625);
+                t.color(br * red, br * green, br * blue);
+                t.vertexUV(x + overlayOffset, y + 1 + yStretch, z + 1, u1, v0);
+                t.vertexUV(x + overlayOffset, y + 0, z + 1, u0, v0);
+                t.vertexUV(x + overlayOffset, y + 0, z + 0, u0, v1);
+                t.vertexUV(x + overlayOffset, y + 1 + yStretch, z + 0, u1, v1);
+                t.color(br, br, br);
+                t.vertexUV(x + overlayOffset, y + 1 + yStretch, z + 1, u1, v0 + 1 / 16.0f);
+                t.vertexUV(x + overlayOffset, y + 0, z + 1, u0, v0 + 1 / 16.0f);
+                t.vertexUV(x + overlayOffset, y + 0, z + 0, u0, v1 + 1 / 16.0f);
+                t.vertexUV(x + overlayOffset, y + 1 + yStretch, z + 0, u1, v1 + 1 / 16.0f);
             }
             if (this.level.isSolidBlockingTile(x + 1, y, z) && this.level.getTile(x + 1, y + 1, z) == Tile.redStoneDust.id) {
-                t.color(brightness * n3, brightness * n4, brightness * n5);
-                t.vertexUV(x + 1 - 0.015625f, y + 0, z + 1, n17, n20);
-                t.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 1, n18, n20);
-                t.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 0, n18, n19);
-                t.vertexUV(x + 1 - 0.015625f, y + 0, z + 0, n17, n19);
-                t.color(brightness, brightness, brightness);
-                t.vertexUV(x + 1 - 0.015625f, y + 0, z + 1, n17, n20 + 0.0625);
-                t.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 1, n18, n20 + 0.0625);
-                t.vertexUV(x + 1 - 0.015625f, y + 1 + 0.021875f, z + 0, n18, n19 + 0.0625);
-                t.vertexUV(x + 1 - 0.015625f, y + 0, z + 0, n17, n19 + 0.0625);
+                t.color(br * red, br * green, br * blue);
+                t.vertexUV(x + 1 - overlayOffset, y + 0, z + 1, u0, v1);
+                t.vertexUV(x + 1 - overlayOffset, y + 1 + yStretch, z + 1, u1, v1);
+                t.vertexUV(x + 1 - overlayOffset, y + 1 + yStretch, z + 0, u1, v0);
+                t.vertexUV(x + 1 - overlayOffset, y + 0, z + 0, u0, v0);
+
+                t.color(br, br, br);
+                t.vertexUV(x + 1 - overlayOffset, y + 0, z + 1, u0, v1 + 1 / 16.0f);
+                t.vertexUV(x + 1 - overlayOffset, y + 1 + yStretch, z + 1, u1, v1 + 1 / 16.0f);
+                t.vertexUV(x + 1 - overlayOffset, y + 1 + yStretch, z + 0, u1, v0 + 1 / 16.0f);
+                t.vertexUV(x + 1 - overlayOffset, y + 0, z + 0, u0, v0 + 1 / 16.0f);
             }
             if (this.level.isSolidBlockingTile(x, y, z - 1) && this.level.getTile(x, y + 1, z - 1) == Tile.redStoneDust.id) {
-                t.color(brightness * n3, brightness * n4, brightness * n5);
-                t.vertexUV(x + 1, y + 0, z + 0.015625f, n17, n20);
-                t.vertexUV(x + 1, y + 1 + 0.021875f, z + 0.015625f, n18, n20);
-                t.vertexUV(x + 0, y + 1 + 0.021875f, z + 0.015625f, n18, n19);
-                t.vertexUV(x + 0, y + 0, z + 0.015625f, n17, n19);
-                t.color(brightness, brightness, brightness);
-                t.vertexUV(x + 1, y + 0, z + 0.015625f, n17, n20 + 0.0625);
-                t.vertexUV(x + 1, y + 1 + 0.021875f, z + 0.015625f, n18, n20 + 0.0625);
-                t.vertexUV(x + 0, y + 1 + 0.021875f, z + 0.015625f, n18, n19 + 0.0625);
-                t.vertexUV(x + 0, y + 0, z + 0.015625f, n17, n19 + 0.0625);
+                t.color(br * red, br * green, br * blue);
+                t.vertexUV(x + 1, y + 0, z + overlayOffset, u0, v1);
+                t.vertexUV(x + 1, y + 1 + yStretch, z + overlayOffset, u1, v1);
+                t.vertexUV(x + 0, y + 1 + yStretch, z + overlayOffset, u1, v0);
+                t.vertexUV(x + 0, y + 0, z + overlayOffset, u0, v0);
+
+                t.color(br, br, br);
+                t.vertexUV(x + 1, y + 0, z + overlayOffset, u0, v1 + 1 / 16.0f);
+                t.vertexUV(x + 1, y + 1 + yStretch, z + overlayOffset, u1, v1 + 1 / 16.0f);
+                t.vertexUV(x + 0, y + 1 + yStretch, z + overlayOffset, u1, v0 + 1 / 16.0f);
+                t.vertexUV(x + 0, y + 0, z + overlayOffset, u0, v0 + 1 / 16.0f);
             }
             if (this.level.isSolidBlockingTile(x, y, z + 1) && this.level.getTile(x, y + 1, z + 1) == Tile.redStoneDust.id) {
-                t.color(brightness * n3, brightness * n4, brightness * n5);
-                t.vertexUV(x + 1, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n19);
-                t.vertexUV(x + 1, y + 0, z + 1 - 0.015625f, n17, n19);
-                t.vertexUV(x + 0, y + 0, z + 1 - 0.015625f, n17, n20);
-                t.vertexUV(x + 0, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n20);
-                t.color(brightness, brightness, brightness);
-                t.vertexUV(x + 1, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n19 + 0.0625);
-                t.vertexUV(x + 1, y + 0, z + 1 - 0.015625f, n17, n19 + 0.0625);
-                t.vertexUV(x + 0, y + 0, z + 1 - 0.015625f, n17, n20 + 0.0625);
-                t.vertexUV(x + 0, y + 1 + 0.021875f, z + 1 - 0.015625f, n18, n20 + 0.0625);
+                t.color(br * red, br * green, br * blue);
+                t.vertexUV(x + 1, y + 1 + yStretch, z + 1 - overlayOffset, u1, v0);
+                t.vertexUV(x + 1, y + 0, z + 1 - overlayOffset, u0, v0);
+                t.vertexUV(x + 0, y + 0, z + 1 - overlayOffset, u0, v1);
+                t.vertexUV(x + 0, y + 1 + yStretch, z + 1 - overlayOffset, u1, v1);
+
+                t.color(br, br, br);
+                t.vertexUV(x + 1, y + 1 + yStretch, z + 1 - overlayOffset, u1, v0 + 1 / 16.0f);
+                t.vertexUV(x + 1, y + 0, z + 1 - overlayOffset, u0, v0 + 1 / 16.0f);
+                t.vertexUV(x + 0, y + 0, z + 1 - overlayOffset, u0, v1 + 1 / 16.0f);
+                t.vertexUV(x + 0, y + 1 + yStretch, z + 1 - overlayOffset, u1, v1 + 1 / 16.0f);
             }
         }
+
         return true;
     }
     

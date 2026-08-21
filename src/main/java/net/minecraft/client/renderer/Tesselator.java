@@ -26,49 +26,34 @@ public class Tesselator
     private IntBuffer ib;
     private FloatBuffer fb;
     private int[] array;
-    private int vertices;
-    private double u;
-    private double v;
+    private int vertices = 0;
+    private double u, v;
     private int col;
-    private boolean hasColor;
-    private boolean hasTexture;
-    private boolean hasNormal;
-    private int p;
-    private int count;
-    private boolean noColor;
+    private boolean hasColor = false;
+    private boolean hasTexture = false;
+    private boolean hasNormal = false;
+    private int p = 0;
+    private int count = 0;
+    private boolean noColor = false;
     private int mode;
-    private double xo;
-    private double yo;
-    private double zo;
+    private double xo, yo, zo;
     private int normal;
     public static final Tesselator instance = new Tesselator(MAX_FLOATS);
-    private boolean tesselating;
-    private boolean vboMode;
+    private boolean tesselating = false;
+    private boolean vboMode = false;
     private IntBuffer vboIds;
-    private int vboId;
-    private int vboCounts;
+    private int vboId = 0;
+    private int vboCounts = 10;
     private int size;
     
     private Tesselator(final int size) {
-        this.vertices = 0;
-        this.hasColor = false;
-        this.hasTexture = false;
-        this.hasNormal = false;
-        this.p = 0;
-        this.count = 0;
-        this.noColor = false;
-        this.tesselating = false;
-        this.vboMode = false;
-        this.vboId = 0;
-        this.vboCounts = 10;
-
         this.size = size;
-        this.buffer = MemoryTracker.createByteBuffer(size * 4);
+        this.buffer = MemoryTracker.createByteBuffer(size * Integer.BYTES);
         this.ib = this.buffer.asIntBuffer();
         this.fb = this.buffer.asFloatBuffer();
         this.array = new int[size];
-        this.vboMode = (Tesselator.USE_VBO && GLContext.getCapabilities().GL_ARB_vertex_buffer_object);
 
+        this.vboMode = (Tesselator.USE_VBO && GLContext.getCapabilities().GL_ARB_vertex_buffer_object);
         if (this.vboMode) {
             this.vboIds = MemoryTracker.createIntBuffer(this.vboCounts);
             ARBVertexBufferObject.glGenBuffersARB(this.vboIds);
@@ -76,9 +61,8 @@ public class Tesselator
     }
     
     public void end() {
-        if (!this.tesselating) {
-            throw new IllegalStateException("Not tesselating!");
-        }
+        if (!this.tesselating) throw new IllegalStateException("Not tesselating!");
+
         this.tesselating = false;
         if (this.vertices > 0) {
             this.ib.clear();
@@ -90,6 +74,7 @@ public class Tesselator
                 ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, this.vboIds.get(this.vboId));
                 ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, this.buffer, ARBBufferObject.GL_STREAM_DRAW_ARB);
             }
+
             if (this.hasTexture) {
                 if (this.vboMode) {
                     glTexCoordPointer(2, GL_FLOAT, 32, 12L);
@@ -100,6 +85,7 @@ public class Tesselator
                 }
                 glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             }
+
             if (this.hasColor) {
                 if (this.vboMode) {
                     glColorPointer(4, GL_UNSIGNED_BYTE, 32, 20L);
@@ -110,6 +96,7 @@ public class Tesselator
                 }
                 glEnableClientState(GL_COLOR_ARRAY);
             }
+
             if (this.hasNormal) {
                 if (this.vboMode) {
                     glNormalPointer(GL_BYTE, 32, 24L);
@@ -120,6 +107,7 @@ public class Tesselator
                 }
                 glEnableClientState(GL_NORMAL_ARRAY);
             }
+
             if (this.vboMode) {
                 glVertexPointer(3, GL_FLOAT, 32, 0L);
             }
@@ -127,6 +115,7 @@ public class Tesselator
                 this.fb.position(0);
                 glVertexPointer(3, 32, this.fb);
             }
+
             glEnableClientState(GL_VERTEX_ARRAY);
             if (this.mode == GL_QUADS && Tesselator.TRIANGLE_MODE) {
                 glDrawArrays(GL_TRIANGLES, 0, this.vertices);
@@ -155,10 +144,9 @@ public class Tesselator
     }
     
     public void begin(final int mode) {
-        if (this.tesselating) {
-            throw new IllegalStateException("Already tesselating!");
-        }
+        if (this.tesselating) throw new IllegalStateException("Already tesselating!");
         this.tesselating = true;
+
         this.clear();
         this.mode = mode;
         this.hasNormal = false;
@@ -186,9 +174,8 @@ public class Tesselator
     }
     
     public void color(int r, int g, int b, int a) {
-        if (this.noColor) {
-            return;
-        }
+        if (this.noColor) return;
+
         if (r > 255) r = 255;
         if (g > 255) g = 255;
         if (b > 255) b = 255;
@@ -199,12 +186,8 @@ public class Tesselator
         if (a < 0) a = 0;
 
         this.hasColor = true;
-        if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
-            this.col = (a << 24 | b << 16 | g << 8 | r);
-        }
-        else {
-            this.col = (r << 24 | g << 16 | b << 8 | a);
-        }
+        if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) this.col = (a << 24 | b << 16 | g << 8 | r);
+        else this.col = (r << 24 | g << 16 | b << 8 | a);
     }
     
     public void vertexUV(final double x, final double y, final double z, final double u, final double v) {
@@ -216,31 +199,37 @@ public class Tesselator
         ++this.count;
         if (this.mode == GL_QUADS && Tesselator.TRIANGLE_MODE && this.count % 4 == 0) {
             for (int i = 0; i < 2; ++i) {
-                final int n = 8 * (3 - i);
+                final int offs = 8 * (3 - i);
                 if (this.hasTexture) {
-                    this.array[this.p + 3] = this.array[this.p - n + 3];
-                    this.array[this.p + 4] = this.array[this.p - n + 4];
+                    this.array[this.p + 3] = this.array[this.p - offs + 3];
+                    this.array[this.p + 4] = this.array[this.p - offs + 4];
                 }
+
                 if (this.hasColor) {
-                    this.array[this.p + 5] = this.array[this.p - n + 5];
+                    this.array[this.p + 5] = this.array[this.p - offs + 5];
                 }
-                this.array[this.p + 0] = this.array[this.p - n + 0];
-                this.array[this.p + 1] = this.array[this.p - n + 1];
-                this.array[this.p + 2] = this.array[this.p - n + 2];
+
+                this.array[this.p + 0] = this.array[this.p - offs + 0];
+                this.array[this.p + 1] = this.array[this.p - offs + 1];
+                this.array[this.p + 2] = this.array[this.p - offs + 2];
                 ++this.vertices;
                 this.p += 8;
             }
         }
+
         if (this.hasTexture) {
             this.array[this.p + 3] = Float.floatToRawIntBits((float)this.u);
             this.array[this.p + 4] = Float.floatToRawIntBits((float)this.v);
         }
+
         if (this.hasColor) {
             this.array[this.p + 5] = this.col;
         }
+
         if (this.hasNormal) {
             this.array[this.p + 6] = this.normal;
         }
+
         this.array[this.p + 0] = Float.floatToRawIntBits((float)(x + this.xo));
         this.array[this.p + 1] = Float.floatToRawIntBits((float)(y + this.yo));
         this.array[this.p + 2] = Float.floatToRawIntBits((float)(z + this.zo));
@@ -253,11 +242,17 @@ public class Tesselator
     }
     
     public void color(final int c) {
-        this.color(c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF);
+        int r = c >> 16 & 0xFF;
+        int g = c >> 8 & 0xFF;
+        int b = c & 0xFF;
+        this.color(r, g, b);
     }
     
     public void color(final int c, final int alpha) {
-        this.color(c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF, alpha);
+        int r = c >> 16 & 0xFF;
+        int g = c >> 8 & 0xFF;
+        int b = c & 0xFF;
+        this.color(r, g, b, alpha);
     }
     
     public void noColor() {
@@ -265,17 +260,18 @@ public class Tesselator
     }
     
     public void normal(final float x, final float y, final float z) {
-        if (!this.tesselating) {
-            System.out.println("But..");
-        }
+        if (!this.tesselating) System.out.println("But..");
         this.hasNormal = true;
-        this.normal = ((byte)(x * 128.0f) | (byte)(y * 127.0f) << 8 | (byte)(z * 127.0f) << 16);
+        byte xx = (byte)(x * 128.0f);
+        byte yy = (byte)(y * 127.0f);
+        byte zz = (byte)(z * 127.0f);
+        this.normal = xx | yy << 8 | zz << 16;
     }
     
-    public void offset(final double x, final double y, final double z) {
-        this.xo = x;
-        this.yo = y;
-        this.zo = z;
+    public void offset(final double xo, final double yo, final double zo) {
+        this.xo = xo;
+        this.yo = yo;
+        this.zo = zo;
     }
     
     public void addOffset(final float x, final float y, final float z) {

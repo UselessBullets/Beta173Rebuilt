@@ -11,21 +11,12 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class OffsettedRenderList
 {
-    private int x;
-    private int y;
-    private int z;
-    private float xOff;
-    private float yOff;
-    private float zOff;
-    private IntBuffer lists;
-    private boolean inited;
-    private boolean rendered;
-    
-    public OffsettedRenderList() {
-        this.lists = MemoryTracker.createIntBuffer(65536);
-        this.inited = false;
-        this.rendered = false;
-    }
+    private int x, y, z;
+    private float xOff, yOff, zOff;
+    private IntBuffer lists = MemoryTracker.createIntBuffer(1024 * 64);
+    private boolean inited = false;
+    private boolean rendered = false;
+
     
     public void init(final int x, final int y, final int z, final double xOff, final double yOff, final double zOff) {
         this.inited = true;
@@ -33,13 +24,15 @@ public class OffsettedRenderList
         this.x = x;
         this.y = y;
         this.z = z;
+
         this.xOff = (float)xOff;
         this.yOff = (float)yOff;
         this.zOff = (float)zOff;
     }
     
     public boolean isAt(final int x, final int y, final int z) {
-        return this.inited && x == this.x && y == this.y && z == this.z;
+        if (!this.inited) return false;
+        return x == this.x && y == this.y && z == this.z;
     }
     
     public void add(final int list) {
@@ -50,9 +43,7 @@ public class OffsettedRenderList
     }
     
     public void render() {
-        if (!this.inited) {
-            return;
-        }
+        if (!this.inited) return;
         if (!this.rendered) {
             this.lists.flip();
             this.rendered = true;

@@ -1428,80 +1428,96 @@ public class TileRenderer
         final double u1 = (texX + 15.99f) / 256.0f;
         final double v0 = texY / 256.0f;
         final double v1 = (texY + 15.99f) / 256.0f;
-        final double n8 = x + 0.5 - 0.44999998807907104;
-        final double n9 = x + 0.5 + 0.44999998807907104;
-        final double n10 = z + 0.5 - 0.44999998807907104;
-        final double n11 = z + 0.5 + 0.44999998807907104;
-        t.vertexUV(n8, y + 1.0, n10, u0, v0);
-        t.vertexUV(n8, y + 0.0, n10, u0, v1);
-        t.vertexUV(n9, y + 0.0, n11, u1, v1);
-        t.vertexUV(n9, y + 1.0, n11, u1, v0);
-        t.vertexUV(n9, y + 1.0, n11, u0, v0);
-        t.vertexUV(n9, y + 0.0, n11, u0, v1);
-        t.vertexUV(n8, y + 0.0, n10, u1, v1);
-        t.vertexUV(n8, y + 1.0, n10, u1, v0);
-        t.vertexUV(n8, y + 1.0, n11, u0, v0);
-        t.vertexUV(n8, y + 0.0, n11, u0, v1);
-        t.vertexUV(n9, y + 0.0, n10, u1, v1);
-        t.vertexUV(n9, y + 1.0, n10, u1, v0);
-        t.vertexUV(n9, y + 1.0, n10, u0, v0);
-        t.vertexUV(n9, y + 0.0, n10, u0, v1);
-        t.vertexUV(n8, y + 0.0, n11, u1, v1);
-        t.vertexUV(n8, y + 1.0, n11, u1, v0);
+
+        final float width = 0.45f;
+        final double x0 = x + 0.5 - width;
+        final double x1 = x + 0.5 + width;
+        final double z0 = z + 0.5 - width;
+        final double z1 = z + 0.5 + width;
+
+        t.vertexUV(x0, y + 1.0, z0, u0, v0);
+        t.vertexUV(x0, y + 0.0, z0, u0, v1);
+        t.vertexUV(x1, y + 0.0, z1, u1, v1);
+        t.vertexUV(x1, y + 1.0, z1, u1, v0);
+
+        t.vertexUV(x1, y + 1.0, z1, u0, v0);
+        t.vertexUV(x1, y + 0.0, z1, u0, v1);
+        t.vertexUV(x0, y + 0.0, z0, u1, v1);
+        t.vertexUV(x0, y + 1.0, z0, u1, v0);
+
+        t.vertexUV(x0, y + 1.0, z1, u0, v0);
+        t.vertexUV(x0, y + 0.0, z1, u0, v1);
+        t.vertexUV(x1, y + 0.0, z0, u1, v1);
+        t.vertexUV(x1, y + 1.0, z0, u1, v0);
+
+        t.vertexUV(x1, y + 1.0, z0, u0, v0);
+        t.vertexUV(x1, y + 0.0, z0, u0, v1);
+        t.vertexUV(x0, y + 0.0, z1, u1, v1);
+        t.vertexUV(x0, y + 1.0, z1, u1, v0);
     }
     
     public void tesselateRowTexture(final Tile tt, final int data, final double x, final double y, final double z) {
         final Tesselator instance = Tesselator.instance;
-        int n = tt.getTexture(0, data);
-        if (this.fixedTexture >= 0) {
-            n = this.fixedTexture;
-        }
-        final int n2 = (n & 0xF) << 4;
-        final int n3 = n & 0xF0;
-        final double n4 = n2 / 256.0f;
-        final double n5 = (n2 + 15.99f) / 256.0f;
-        final double n6 = n3 / 256.0f;
-        final double n7 = (n3 + 15.99f) / 256.0f;
-        final double n8 = x + 0.5 - 0.25;
-        final double n9 = x + 0.5 + 0.25;
-        final double n10 = z + 0.5 - 0.5;
-        final double n11 = z + 0.5 + 0.5;
-        instance.vertexUV(n8, y + 1.0, n10, n4, n6);
-        instance.vertexUV(n8, y + 0.0, n10, n4, n7);
-        instance.vertexUV(n8, y + 0.0, n11, n5, n7);
-        instance.vertexUV(n8, y + 1.0, n11, n5, n6);
-        instance.vertexUV(n8, y + 1.0, n11, n4, n6);
-        instance.vertexUV(n8, y + 0.0, n11, n4, n7);
-        instance.vertexUV(n8, y + 0.0, n10, n5, n7);
-        instance.vertexUV(n8, y + 1.0, n10, n5, n6);
-        instance.vertexUV(n9, y + 1.0, n11, n4, n6);
-        instance.vertexUV(n9, y + 0.0, n11, n4, n7);
-        instance.vertexUV(n9, y + 0.0, n10, n5, n7);
-        instance.vertexUV(n9, y + 1.0, n10, n5, n6);
-        instance.vertexUV(n9, y + 1.0, n10, n4, n6);
-        instance.vertexUV(n9, y + 0.0, n10, n4, n7);
-        instance.vertexUV(n9, y + 0.0, n11, n5, n7);
-        instance.vertexUV(n9, y + 1.0, n11, n5, n6);
-        final double n12 = x + 0.5 - 0.5;
-        final double n13 = x + 0.5 + 0.5;
-        final double n14 = z + 0.5 - 0.25;
-        final double n15 = z + 0.5 + 0.25;
-        instance.vertexUV(n12, y + 1.0, n14, n4, n6);
-        instance.vertexUV(n12, y + 0.0, n14, n4, n7);
-        instance.vertexUV(n13, y + 0.0, n14, n5, n7);
-        instance.vertexUV(n13, y + 1.0, n14, n5, n6);
-        instance.vertexUV(n13, y + 1.0, n14, n4, n6);
-        instance.vertexUV(n13, y + 0.0, n14, n4, n7);
-        instance.vertexUV(n12, y + 0.0, n14, n5, n7);
-        instance.vertexUV(n12, y + 1.0, n14, n5, n6);
-        instance.vertexUV(n13, y + 1.0, n15, n4, n6);
-        instance.vertexUV(n13, y + 0.0, n15, n4, n7);
-        instance.vertexUV(n12, y + 0.0, n15, n5, n7);
-        instance.vertexUV(n12, y + 1.0, n15, n5, n6);
-        instance.vertexUV(n12, y + 1.0, n15, n4, n6);
-        instance.vertexUV(n12, y + 0.0, n15, n4, n7);
-        instance.vertexUV(n13, y + 0.0, n15, n5, n7);
-        instance.vertexUV(n13, y + 1.0, n15, n5, n6);
+        int tex = tt.getTexture(0, data);
+
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        final double u0 = texX / 256.0f;
+        final double u1 = (texX + 15.99f) / 256.0f;
+        final double v0 = texY / 256.0f;
+        final double v1 = (texY + 15.99f) / 256.0f;
+
+        double x0 = x + 0.5 - 0.25;
+        double x1 = x + 0.5 + 0.25;
+        double z0 = z + 0.5 - 0.5;
+        double z1 = z + 0.5 + 0.5;
+
+        instance.vertexUV(x0, y + 1.0, z0, u0, v0);
+        instance.vertexUV(x0, y + 0.0, z0, u0, v1);
+        instance.vertexUV(x0, y + 0.0, z1, u1, v1);
+        instance.vertexUV(x0, y + 1.0, z1, u1, v0);
+
+        instance.vertexUV(x0, y + 1.0, z1, u0, v0);
+        instance.vertexUV(x0, y + 0.0, z1, u0, v1);
+        instance.vertexUV(x0, y + 0.0, z0, u1, v1);
+        instance.vertexUV(x0, y + 1.0, z0, u1, v0);
+
+        instance.vertexUV(x1, y + 1.0, z1, u0, v0);
+        instance.vertexUV(x1, y + 0.0, z1, u0, v1);
+        instance.vertexUV(x1, y + 0.0, z0, u1, v1);
+        instance.vertexUV(x1, y + 1.0, z0, u1, v0);
+
+        instance.vertexUV(x1, y + 1.0, z0, u0, v0);
+        instance.vertexUV(x1, y + 0.0, z0, u0, v1);
+        instance.vertexUV(x1, y + 0.0, z1, u1, v1);
+        instance.vertexUV(x1, y + 1.0, z1, u1, v0);
+
+        x0 = x + 0.5 - 0.5;
+        x1 = x + 0.5 + 0.5;
+        z0 = z + 0.5 - 0.25;
+        z1 = z + 0.5 + 0.25;
+
+        instance.vertexUV(x0, y + 1.0, z0, u0, v0);
+        instance.vertexUV(x0, y + 0.0, z0, u0, v1);
+        instance.vertexUV(x1, y + 0.0, z0, u1, v1);
+        instance.vertexUV(x1, y + 1.0, z0, u1, v0);
+
+        instance.vertexUV(x1, y + 1.0, z0, u0, v0);
+        instance.vertexUV(x1, y + 0.0, z0, u0, v1);
+        instance.vertexUV(x0, y + 0.0, z0, u1, v1);
+        instance.vertexUV(x0, y + 1.0, z0, u1, v0);
+
+        instance.vertexUV(x1, y + 1.0, z1, u0, v0);
+        instance.vertexUV(x1, y + 0.0, z1, u0, v1);
+        instance.vertexUV(x0, y + 0.0, z1, u1, v1);
+        instance.vertexUV(x0, y + 1.0, z1, u1, v0);
+        
+        instance.vertexUV(x0, y + 1.0, z1, u0, v0);
+        instance.vertexUV(x0, y + 0.0, z1, u0, v1);
+        instance.vertexUV(x1, y + 0.0, z1, u1, v1);
+        instance.vertexUV(x1, y + 1.0, z1, u1, v0);
     }
     
     public boolean tesselateWaterInWorld(final Tile tt, final int x, final int y, final int z) {

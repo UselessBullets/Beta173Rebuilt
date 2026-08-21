@@ -10,8 +10,8 @@ import java.util.List;
 
 public class Vec3
 {
-    private static List<Vec3> pool;
-    private static int poolPointer;
+    private static List<Vec3> pool = new ArrayList<>();
+    private static int poolPointer = 0;
     public double x;
     public double y;
     public double z;
@@ -149,10 +149,11 @@ public class Vec3
     public String toString() {
         return "(" + this.x + ", " + this.y + ", " + this.z + ")";
     }
-    
-    public void xRot(final float n) {
-        final float cos = Mth.cos(n);
-        final float sin = Mth.sin(n);
+
+    // Useless -
+    public void xRot(final float degs) {
+        final float cos = Mth.cos(degs);
+        final float sin = Mth.sin(degs);
         final double x = this.x;
         final double y = this.y * cos + this.z * sin;
         final double z = this.z * cos - this.y * sin;
@@ -161,9 +162,9 @@ public class Vec3
         this.z = z;
     }
     
-    public void yRot(final float n) {
-        final float cos = Mth.cos(n);
-        final float sin = Mth.sin(n);
+    public void yRot(final float degs) {
+        final float cos = Mth.cos(degs);
+        final float sin = Mth.sin(degs);
         final double x = this.x * cos + this.z * sin;
         final double y = this.y;
         final double z = this.z * cos - this.x * sin;
@@ -171,9 +172,5 @@ public class Vec3
         this.y = y;
         this.z = z;
     }
-    
-    static {
-        Vec3.pool = new ArrayList();
-        Vec3.poolPointer = 0;
-    }
+
 }

@@ -685,168 +685,143 @@ public class TileRenderer
     
     public boolean tesselateLeverInWorld(final Tile tt, final int x, final int ry, final int z) {
         final int data = this.level.getData(x, ry, z);
-        final int n = data & 0x7;
-        final boolean b = (data & 0x8) > 0;
-        final Tesselator instance = Tesselator.instance;
-        final boolean b2 = this.fixedTexture >= 0;
-        if (!b2) {
-            this.fixedTexture = Tile.stoneBrick.tex;
-        }
-        final float n2 = 0.25f;
-        final float n3 = 0.1875f;
-        final float n4 = 0.1875f;
-        if (n == 5) {
-            tt.setShape(0.5f - n3, 0.0f, 0.5f - n2, 0.5f + n3, n4, 0.5f + n2);
-        }
-        else if (n == 6) {
-            tt.setShape(0.5f - n2, 0.0f, 0.5f - n3, 0.5f + n2, n4, 0.5f + n3);
-        }
-        else if (n == 4) {
-            tt.setShape(0.5f - n3, 0.5f - n2, 1.0f - n4, 0.5f + n3, 0.5f + n2, 1.0f);
-        }
-        else if (n == 3) {
-            tt.setShape(0.5f - n3, 0.5f - n2, 0.0f, 0.5f + n3, 0.5f + n2, n4);
-        }
-        else if (n == 2) {
-            tt.setShape(1.0f - n4, 0.5f - n2, 0.5f - n3, 1.0f, 0.5f + n2, 0.5f + n3);
-        }
-        else if (n == 1) {
-            tt.setShape(0.0f, 0.5f - n2, 0.5f - n3, n4, 0.5f + n2, 0.5f + n3);
-        }
+
+        final int dir = data & 0x7;
+        final boolean flipped = (data & 0x8) > 0;
+
+        final Tesselator t = Tesselator.instance;
+
+        final boolean hadFixed = this.fixedTexture >= 0;
+        if (!hadFixed) this.fixedTexture = Tile.stoneBrick.tex;
+
+        final float w1 = 4.0f / 16.0f;
+        final float w2 = 3.0f / 16.0f;
+        final float h = 3.0f / 16.0f;
+
+        if (dir == 5) tt.setShape(0.5f - w2, 0.0f, 0.5f - w1, 0.5f + w2, h, 0.5f + w1);
+        else if (dir == 6) tt.setShape(0.5f - w1, 0.0f, 0.5f - w2, 0.5f + w1, h, 0.5f + w2);
+        else if (dir == 4) tt.setShape(0.5f - w2, 0.5f - w1, 1.0f - h, 0.5f + w2, 0.5f + w1, 1.0f);
+        else if (dir == 3) tt.setShape(0.5f - w2, 0.5f - w1, 0.0f, 0.5f + w2, 0.5f + w1, h);
+        else if (dir == 2) tt.setShape(1.0f - h, 0.5f - w1, 0.5f - w2, 1.0f, 0.5f + w1, 0.5f + w2);
+        else if (dir == 1) tt.setShape(0.0f, 0.5f - w1, 0.5f - w2, h, 0.5f + w1, 0.5f + w2);
         this.tesselateBlockInWorld(tt, x, ry, z);
-        if (!b2) {
-            this.fixedTexture = -1;
-        }
-        float brightness = tt.getBrightness(this.level, x, ry, z);
-        if (Tile.lightEmission[tt.id] > 0) {
-            brightness = 1.0f;
-        }
-        instance.color(brightness, brightness, brightness);
-        int n5 = tt.getTexture(0);
-        if (this.fixedTexture >= 0) {
-            n5 = this.fixedTexture;
-        }
-        final int n6 = (n5 & 0xF) << 4;
-        final int n7 = n5 & 0xF0;
-        float n8 = n6 / 256.0f;
-        float n9 = (n6 + 15.99f) / 256.0f;
-        float n10 = n7 / 256.0f;
-        float n11 = (n7 + 15.99f) / 256.0f;
-        final Vec3[] array = new Vec3[8];
-        final float n12 = 0.0625f;
-        final float n13 = 0.0625f;
-        final float n14 = 0.625f;
-        array[0] = Vec3.newTemp(-n12, 0.0, -n13);
-        array[1] = Vec3.newTemp(n12, 0.0, -n13);
-        array[2] = Vec3.newTemp(n12, 0.0, n13);
-        array[3] = Vec3.newTemp(-n12, 0.0, n13);
-        array[4] = Vec3.newTemp(-n12, n14, -n13);
-        array[5] = Vec3.newTemp(n12, n14, -n13);
-        array[6] = Vec3.newTemp(n12, n14, n13);
-        array[7] = Vec3.newTemp(-n12, n14, n13);
+
+        if (!hadFixed) this.fixedTexture = -1;
+
+        float br = tt.getBrightness(this.level, x, ry, z);
+        if (Tile.lightEmission[tt.id] > 0) br = 1.0f;
+        t.color(br, br, br);
+        int tex = tt.getTexture(0);
+
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+
+        float u0 = texX / 256.0f;
+        float v0 = (texX + 15.99f) / 256.0f;
+        float u1 = texY / 256.0f;
+        float v1 = (texY + 15.99f) / 256.0f;
+
+        final Vec3[] corners = new Vec3[8];
+        final float xv = 1.0f / 16.0f;
+        final float zv = 1.0f / 16.0f;
+        final float yv = 10.0f / 16.0f;
+        corners[0] = Vec3.newTemp(-xv, -0, -zv);
+        corners[1] = Vec3.newTemp(+xv, -0, -zv);
+        corners[2] = Vec3.newTemp(+xv, -0, +zv);
+        corners[3] = Vec3.newTemp(-xv, -0, +zv);
+        corners[4] = Vec3.newTemp(-xv, +yv, -zv);
+        corners[5] = Vec3.newTemp(+xv, +yv, -zv);
+        corners[6] = Vec3.newTemp(+xv, +yv, +zv);
+        corners[7] = Vec3.newTemp(-xv, +yv, +zv);
+
         for (int i = 0; i < 8; ++i) {
-            if (b) {
-                final Vec3 vec3 = array[i];
-                vec3.z -= 0.0625;
-                array[i].xRot(0.69813174f);
+            if (flipped) {
+                corners[i].z -= 1 / 16.0f;
+                corners[i].xRot(40 * Mth.DEGRAD);
             }
             else {
-                final Vec3 vec4 = array[i];
-                vec4.z += 0.0625;
-                array[i].xRot(-0.69813174f);
+                corners[i].z += 1 / 16.0f;
+                corners[i].xRot(-40 * Mth.DEGRAD);
             }
-            if (n == 6) {
-                array[i].yRot(Mth.HALF_PI);
+
+            if (dir == 6) {
+                corners[i].yRot(90 * Mth.DEGRAD);
             }
-            if (n < 5) {
-                final Vec3 vec5 = array[i];
-                vec5.y -= 0.375;
-                array[i].xRot(Mth.HALF_PI);
-                if (n == 4) {
-                    array[i].yRot(0.0f);
-                }
-                if (n == 3) {
-                    array[i].yRot(Mth.PI);
-                }
-                if (n == 2) {
-                    array[i].yRot(Mth.HALF_PI);
-                }
-                if (n == 1) {
-                    array[i].yRot(-Mth.HALF_PI);
-                }
-                final Vec3 vec6 = array[i];
-                vec6.x += x + 0.5;
-                final Vec3 vec7 = array[i];
-                vec7.y += ry + 0.5f;
-                final Vec3 vec8 = array[i];
-                vec8.z += z + 0.5;
+
+            if (dir < 5) {
+                corners[i].y -= 6 / 16.0f;
+                corners[i].xRot(90 * Mth.DEGRAD);
+
+                if (dir == 4) corners[i].yRot(  0 * Mth.DEGRAD);
+                if (dir == 3) corners[i].yRot(180 * Mth.DEGRAD);
+                if (dir == 2) corners[i].yRot( 90 * Mth.DEGRAD);
+                if (dir == 1) corners[i].yRot(-90 * Mth.DEGRAD);
+
+                corners[i].x += x + 0.5;
+                corners[i].y += ry + 0.5f;
+                corners[i].z += z + 0.5;
             }
             else {
-                final Vec3 vec9 = array[i];
-                vec9.x += x + 0.5;
-                final Vec3 vec10 = array[i];
-                vec10.y += ry + 0.125f;
-                final Vec3 vec11 = array[i];
-                vec11.z += z + 0.5;
+                corners[i].x += x + 0.5;
+                corners[i].y += ry + 2 / 16.0f;
+                corners[i].z += z + 0.5;
             }
         }
-        Vec3 vec12 = null;
-        Vec3 vec13 = null;
-        Vec3 vec14 = null;
-        Vec3 vec15 = null;
-        for (int j = 0; j < 6; ++j) {
-            if (j == 0) {
-                n8 = (n6 + 7) / 256.0f;
-                n9 = (n6 + 9 - 0.01f) / 256.0f;
-                n10 = (n7 + 6) / 256.0f;
-                n11 = (n7 + 8 - 0.01f) / 256.0f;
+        Vec3 c0 = null, c1 = null, c2 = null, c3 = null;
+        for (int i = 0; i < 6; ++i) {
+            if (i == 0) {
+                u0 = (texX + 7) / 256.0f;
+                v0 = (texX + 9 - 0.01f) / 256.0f;
+                u1 = (texY + 6) / 256.0f;
+                v1 = (texY + 8 - 0.01f) / 256.0f;
             }
-            else if (j == 2) {
-                n8 = (n6 + 7) / 256.0f;
-                n9 = (n6 + 9 - 0.01f) / 256.0f;
-                n10 = (n7 + 6) / 256.0f;
-                n11 = (n7 + 16 - 0.01f) / 256.0f;
+            else if (i == 2) {
+                u0 = (texX + 7) / 256.0f;
+                v0 = (texX + 9 - 0.01f) / 256.0f;
+                u1 = (texY + 6) / 256.0f;
+                v1 = (texY + 16 - 0.01f) / 256.0f;
             }
-            if (j == 0) {
-                vec12 = array[0];
-                vec13 = array[1];
-                vec14 = array[2];
-                vec15 = array[3];
+            if (i == 0) {
+                c0 = corners[0];
+                c1 = corners[1];
+                c2 = corners[2];
+                c3 = corners[3];
             }
-            else if (j == 1) {
-                vec12 = array[7];
-                vec13 = array[6];
-                vec14 = array[5];
-                vec15 = array[4];
+            else if (i == 1) {
+                c0 = corners[7];
+                c1 = corners[6];
+                c2 = corners[5];
+                c3 = corners[4];
             }
-            else if (j == 2) {
-                vec12 = array[1];
-                vec13 = array[0];
-                vec14 = array[4];
-                vec15 = array[5];
+            else if (i == 2) {
+                c0 = corners[1];
+                c1 = corners[0];
+                c2 = corners[4];
+                c3 = corners[5];
             }
-            else if (j == 3) {
-                vec12 = array[2];
-                vec13 = array[1];
-                vec14 = array[5];
-                vec15 = array[6];
+            else if (i == 3) {
+                c0 = corners[2];
+                c1 = corners[1];
+                c2 = corners[5];
+                c3 = corners[6];
             }
-            else if (j == 4) {
-                vec12 = array[3];
-                vec13 = array[2];
-                vec14 = array[6];
-                vec15 = array[7];
+            else if (i == 4) {
+                c0 = corners[3];
+                c1 = corners[2];
+                c2 = corners[6];
+                c3 = corners[7];
             }
-            else if (j == 5) {
-                vec12 = array[0];
-                vec13 = array[3];
-                vec14 = array[7];
-                vec15 = array[4];
+            else if (i == 5) {
+                c0 = corners[0];
+                c1 = corners[3];
+                c2 = corners[7];
+                c3 = corners[4];
             }
-            instance.vertexUV(vec12.x, vec12.y, vec12.z, n8, n11);
-            instance.vertexUV(vec13.x, vec13.y, vec13.z, n9, n11);
-            instance.vertexUV(vec14.x, vec14.y, vec14.z, n9, n10);
-            instance.vertexUV(vec15.x, vec15.y, vec15.z, n8, n10);
+            t.vertexUV(c0.x, c0.y, c0.z, u0, v1);
+            t.vertexUV(c1.x, c1.y, c1.z, v0, v1);
+            t.vertexUV(c2.x, c2.y, c2.z, v0, u1);
+            t.vertexUV(c3.x, c3.y, c3.z, u0, u1);
         }
         return true;
     }

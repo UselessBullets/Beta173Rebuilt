@@ -123,8 +123,9 @@ public class TileRenderer
         final float b3 = c3;
 
         // Render wooden underside
+        final float centerBrightness;
         {
-            final float centerBrightness = tt.getBrightness(this.level, x, y, z);
+            centerBrightness = tt.getBrightness(this.level, x, y, z);
             t.color(r10 * centerBrightness, g10 * centerBrightness, b10 * centerBrightness);
 
             final int tex = tt.getTexture(this.level, x, y, z, Facing.DOWN);
@@ -206,60 +207,65 @@ public class TileRenderer
         t.vertexUV(x1, y1, z0, topLeftU, topLeftV);
         t.vertexUV(x0, y1, z0, topRightU, topRightV);
         t.vertexUV(x0, y1, z1, bottomRightU, bottomRightV);
-        
-        int n39 = Direction.DIRECTION_FACING[direction];
+
+        // determine which edge to skip (the one between foot and head piece)
+        int skipEdge = Direction.DIRECTION_FACING[direction];
         if (isHead) {
-            n39 = Direction.DIRECTION_FACING[Direction.DIRECTION_OPPOSITE[direction]];
+            skipEdge = Direction.DIRECTION_FACING[Direction.DIRECTION_OPPOSITE[direction]];
         }
-        int n40 = 4;
+
+        // and which edge to x-flip
+        int flipEdge = Facing.WEST;
         switch (direction) {
-            case 0: {
-                n40 = 5;
+            case Direction.NORTH:
+                break;
+            case Direction.SOUTH: {
+                flipEdge = Facing.EAST;
                 break;
             }
-            case 3: {
-                n40 = 2;
+            case Direction.EAST: {
+                flipEdge = Facing.NORTH;
                 break;
             }
-            case 1: {
-                n40 = 3;
+            case Direction.WEST: {
+                flipEdge = Facing.SOUTH;
                 break;
             }
         }
-        if (n39 != 2 && (this.noCulling || tt.isFaceVisible(this.level, x, y, z - 1, 2))) {
-            float brightness3 = tt.getBrightness(this.level, x, y, z - 1);
-            if (tt.zz0 > 0.0) {
-                brightness3 = br;
-            }
-            t.color(r2 * brightness3, g2 * brightness3, b2 * brightness3);
-            this.xFlipTexture = (n40 == 2);
+
+        if (skipEdge != Facing.NORTH && (this.noCulling || tt.isFaceVisible(this.level, x, y, z - 1, Facing.NORTH))) {
+            float br = tt.getBrightness(this.level, x, y, z - 1);
+            if (tt.zz0 > 0.0) br = centerBrightness;
+            t.color(r2 * br, g2 * br, b2 * br);
+
+            this.xFlipTexture = flipEdge == Facing.NORTH;
             this.renderNorth(tt, x, y, z, tt.getTexture(this.level, x, y, z, 2));
         }
-        if (n39 != 3 && (this.noCulling || tt.isFaceVisible(this.level, x, y, z + 1, 3))) {
-            float brightness4 = tt.getBrightness(this.level, x, y, z + 1);
-            if (tt.zz1 < 1.0) {
-                brightness4 = br;
-            }
-            t.color(r2 * brightness4, g2 * brightness4, b2 * brightness4);
-            this.xFlipTexture = (n40 == 3);
+
+        if (skipEdge != Facing.SOUTH && (this.noCulling || tt.isFaceVisible(this.level, x, y, z + 1, Facing.SOUTH))) {
+            float br = tt.getBrightness(this.level, x, y, z + 1);
+            if (tt.zz1 < 1.0) br = centerBrightness;
+            t.color(r2 * br, g2 * br, b2 * br);
+
+            this.xFlipTexture = flipEdge == Facing.SOUTH;
             this.renderSouth(tt, x, y, z, tt.getTexture(this.level, x, y, z, 3));
         }
-        if (n39 != 4 && (this.noCulling || tt.isFaceVisible(this.level, x - 1, y, z, 4))) {
-            float brightness5 = tt.getBrightness(this.level, x - 1, y, z);
-            if (tt.xx0 > 0.0) {
-                brightness5 = br;
-            }
-            t.color(r3 * brightness5, g3 * brightness5, b3 * brightness5);
-            this.xFlipTexture = (n40 == 4);
+
+        if (skipEdge != Facing.WEST && (this.noCulling || tt.isFaceVisible(this.level, x - 1, y, z, Facing.WEST))) {
+            float br = tt.getBrightness(this.level, x - 1, y, z);
+            if (tt.xx0 > 0.0) br = centerBrightness;
+            t.color(r3 * br, g3 * br, b3 * br);
+
+            this.xFlipTexture = flipEdge == Facing.WEST;
             this.renderWest(tt, x, y, z, tt.getTexture(this.level, x, y, z, 4));
         }
-        if (n39 != 5 && (this.noCulling || tt.isFaceVisible(this.level, x + 1, y, z, 5))) {
-            float brightness6 = tt.getBrightness(this.level, x + 1, y, z);
-            if (tt.xx1 < 1.0) {
-                brightness6 = br;
-            }
-            t.color(r3 * brightness6, g3 * brightness6, b3 * brightness6);
-            this.xFlipTexture = (n40 == 5);
+
+        if (skipEdge != Facing.EAST && (this.noCulling || tt.isFaceVisible(this.level, x + 1, y, z, Facing.EAST))) {
+            float br = tt.getBrightness(this.level, x + 1, y, z);
+            if (tt.xx1 < 1.0) br = centerBrightness;
+            t.color(r3 * br, g3 * br, b3 * br);
+
+            this.xFlipTexture = flipEdge == Facing.EAST;
             this.renderEast(tt, x, y, z, tt.getTexture(this.level, x, y, z, 5));
         }
         this.xFlipTexture = false;
@@ -267,31 +273,24 @@ public class TileRenderer
     }
     
     public boolean tesselateTorchInWorld(final Tile tt, final int x, final int y, final int z) {
-        final int data = this.level.getData(x, y, z);
-        final Tesselator instance = Tesselator.instance;
-        float brightness = tt.getBrightness(this.level, x, y, z);
-        if (Tile.lightEmission[tt.id] > 0) {
-            brightness = 1.0f;
-        }
-        instance.color(brightness, brightness, brightness);
-        final double n = 0.4f;
-        final double n2 = 0.5 - n;
-        final double n3 = 0.2f;
-        if (data == 1) {
-            this.tesselateTorch(tt, x - n2, y + n3, z, -n, 0.0);
-        }
-        else if (data == 2) {
-            this.tesselateTorch(tt, x + n2, y + n3, z, n, 0.0);
-        }
-        else if (data == 3) {
-            this.tesselateTorch(tt, x, y + n3, z - n2, 0.0, -n);
-        }
-        else if (data == 4) {
-            this.tesselateTorch(tt, x, y + n3, z + n2, 0.0, n);
-        }
-        else {
-            this.tesselateTorch(tt, x, y, z, 0.0, 0.0);
-        }
+        final int dir = this.level.getData(x, y, z);
+
+        final Tesselator t = Tesselator.instance;
+
+        float br = tt.getBrightness(this.level, x, y, z);
+        if (Tile.lightEmission[tt.id] > 0) br = 1.0f;
+        t.color(br, br, br);
+
+        final double r = 0.4f;
+        final double r2 = 0.5 - r;
+        final double h = 0.2f;
+
+        if (dir == 1) this.tesselateTorch(tt, x - r2, y + h, z, -r, 0.0);
+        else if (dir == 2) this.tesselateTorch(tt, x + r2, y + h, z, r, 0.0);
+        else if (dir == 3) this.tesselateTorch(tt, x, y + h, z - r2, 0.0, -r);
+        else if (dir == 4) this.tesselateTorch(tt, x, y + h, z + r2, 0.0, r);
+        else this.tesselateTorch(tt, x, y, z, 0.0, 0.0);
+        
         return true;
     }
     

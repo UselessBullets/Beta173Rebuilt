@@ -1191,152 +1191,172 @@ public class TileRenderer
     }
     
     public boolean tesselateRailInWorld(final RailTile tt, final int x, final int y, final int z) {
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
         int data = this.level.getData(x, y, z);
-        int n = tt.getTexture(0, data);
-        if (this.fixedTexture >= 0) {
-            n = this.fixedTexture;
-        }
-        if (tt.isUsesDataBit()) {
-            data &= 0x7;
-        }
-        final float brightness = tt.getBrightness(this.level, x, y, z);
-        instance.color(brightness, brightness, brightness);
-        final int n2 = (n & 0xF) << 4;
-        final int n3 = n & 0xF0;
-        final double n4 = n2 / 256.0f;
-        final double n5 = (n2 + 15.99f) / 256.0f;
-        final double n6 = n3 / 256.0f;
-        final double n7 = (n3 + 15.99f) / 256.0f;
-        final float n8 = 0.0625f;
-        float n9 = (float)(x + 1);
-        float n10 = (float)(x + 1);
-        float n11 = (float)(x + 0);
-        float n12 = (float)(x + 0);
-        float n13 = (float)(z + 0);
-        float n14 = (float)(z + 1);
-        float n15 = (float)(z + 1);
-        float n16 = (float)(z + 0);
-        float n17 = y + n8;
-        float n18 = y + n8;
-        float n19 = y + n8;
-        float n20 = y + n8;
+
+        int tex = tt.getTexture(0, data);
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+
+        if (tt.isUsesDataBit()) data &= RailTile.RAIL_DIRECTION_MASK;
+
+        final float br = tt.getBrightness(this.level, x, y, z);
+        t.color(br, br, br);
+
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        final double u0 = texX / 256.0f;
+        final double u1 = (texX + 15.99f) / 256.0f;
+        final double v0 = texY / 256.0f;
+        final double v1 = (texY + 15.99f) / 256.0f;
+
+        final float r = 1 / 16.0f;
+
+        float x0 = (float)(x + 1);
+        float x1 = (float)(x + 1);
+        float x2 = (float)(x + 0);
+        float x3 = (float)(x + 0);
+
+        float z0 = (float)(z + 0);
+        float z1 = (float)(z + 1);
+        float z2 = (float)(z + 1);
+        float z3 = (float)(z + 0);
+
+        float y0 = y + r;
+        float y1 = y + r;
+        float y2 = y + r;
+        float y3 = y + r;
+
         if (data == 1 || data == 2 || data == 3 || data == 7) {
-            n12 = (n9 = (float)(x + 1));
-            n11 = (n10 = (float)(x + 0));
-            n14 = (n13 = (float)(z + 1));
-            n16 = (n15 = (float)(z + 0));
+            x3 = (x0 = (float)(x + 1));
+            x2 = (x1 = (float)(x + 0));
+            z1 = (z0 = (float)(z + 1));
+            z3 = (z2 = (float)(z + 0));
         }
         else if (data == 8) {
-            n10 = (n9 = (float)(x + 0));
-            n12 = (n11 = (float)(x + 1));
-            n16 = (n13 = (float)(z + 1));
-            n15 = (n14 = (float)(z + 0));
+            x1 = (x0 = (float)(x + 0));
+            x3 = (x2 = (float)(x + 1));
+            z3 = (z0 = (float)(z + 1));
+            z2 = (z1 = (float)(z + 0));
         }
         else if (data == 9) {
-            n12 = (n9 = (float)(x + 0));
-            n11 = (n10 = (float)(x + 1));
-            n14 = (n13 = (float)(z + 0));
-            n16 = (n15 = (float)(z + 1));
+            x3 = (x0 = (float)(x + 0));
+            x2 = (x1 = (float)(x + 1));
+            z1 = (z0 = (float)(z + 0));
+            z3 = (z2 = (float)(z + 1));
         }
+
         if (data == 2 || data == 4) {
-            ++n17;
-            ++n20;
+            ++y0;
+            ++y3;
         }
         else if (data == 3 || data == 5) {
-            ++n18;
-            ++n19;
+            ++y1;
+            ++y2;
         }
-        instance.vertexUV(n9, n17, n13, n5, n6);
-        instance.vertexUV(n10, n18, n14, n5, n7);
-        instance.vertexUV(n11, n19, n15, n4, n7);
-        instance.vertexUV(n12, n20, n16, n4, n6);
-        instance.vertexUV(n12, n20, n16, n4, n6);
-        instance.vertexUV(n11, n19, n15, n4, n7);
-        instance.vertexUV(n10, n18, n14, n5, n7);
-        instance.vertexUV(n9, n17, n13, n5, n6);
+
+        t.vertexUV(x0, y0, z0, u1, v0);
+        t.vertexUV(x1, y1, z1, u1, v1);
+        t.vertexUV(x2, y2, z2, u0, v1);
+        t.vertexUV(x3, y3, z3, u0, v0);
+
+        t.vertexUV(x3, y3, z3, u0, v0);
+        t.vertexUV(x2, y2, z2, u0, v1);
+        t.vertexUV(x1, y1, z1, u1, v1);
+        t.vertexUV(x0, y0, z0, u1, v0);
+
         return true;
     }
     
     public boolean tesselateLadderInWorld(final Tile tt, final int x, final int y, final int z) {
-        final Tesselator instance = Tesselator.instance;
-        int n = tt.getTexture(0);
-        if (this.fixedTexture >= 0) {
-            n = this.fixedTexture;
+        final Tesselator t = Tesselator.instance;
+
+        int tex = tt.getTexture(0);
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+
+        final float br = tt.getBrightness(this.level, x, y, z);
+        t.color(br, br, br);
+
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        final double u0 = texX / 256.0f;
+        final double u1 = (texX + 15.99f) / 256.0f;
+        final double v0 = texY / 256.0f;
+        final double v1 = (texY + 15.99f) / 256.0f;
+
+        final int face = this.level.getData(x, y, z);
+
+        final float o = 0 / 16.0f;
+        final float r = 0.05f;
+        if (face == 5) {
+            t.vertexUV(x + r, y + 1 + o, z + 1 + o, u0, v0);
+            t.vertexUV(x + r, y + 0 - o, z + 1 + o, u0, v1);
+            t.vertexUV(x + r, y + 0 - o, z + 0 - o, u1, v1);
+            t.vertexUV(x + r, y + 1 + o, z + 0 - o, u1, v0);
         }
-        final float brightness = tt.getBrightness(this.level, x, y, z);
-        instance.color(brightness, brightness, brightness);
-        final int n2 = (n & 0xF) << 4;
-        final int n3 = n & 0xF0;
-        final double n4 = n2 / 256.0f;
-        final double n5 = (n2 + 15.99f) / 256.0f;
-        final double n6 = n3 / 256.0f;
-        final double n7 = (n3 + 15.99f) / 256.0f;
-        final int data = this.level.getData(x, y, z);
-        final float n8 = 0.0f;
-        final float n9 = 0.05f;
-        if (data == 5) {
-            instance.vertexUV(x + n9, y + 1 + n8, z + 1 + n8, n4, n6);
-            instance.vertexUV(x + n9, y + 0 - n8, z + 1 + n8, n4, n7);
-            instance.vertexUV(x + n9, y + 0 - n8, z + 0 - n8, n5, n7);
-            instance.vertexUV(x + n9, y + 1 + n8, z + 0 - n8, n5, n6);
+        if (face == 4) {
+            t.vertexUV(x + 1 - r, y + 0 - o, z + 1 + o, u1, v1);
+            t.vertexUV(x + 1 - r, y + 1 + o, z + 1 + o, u1, v0);
+            t.vertexUV(x + 1 - r, y + 1 + o, z + 0 - o, u0, v0);
+            t.vertexUV(x + 1 - r, y + 0 - o, z + 0 - o, u0, v1);
         }
-        if (data == 4) {
-            instance.vertexUV(x + 1 - n9, y + 0 - n8, z + 1 + n8, n5, n7);
-            instance.vertexUV(x + 1 - n9, y + 1 + n8, z + 1 + n8, n5, n6);
-            instance.vertexUV(x + 1 - n9, y + 1 + n8, z + 0 - n8, n4, n6);
-            instance.vertexUV(x + 1 - n9, y + 0 - n8, z + 0 - n8, n4, n7);
+        if (face == 3) {
+            t.vertexUV(x + 1 + o, y + 0 - o, z + r, u1, v1);
+            t.vertexUV(x + 1 + o, y + 1 + o, z + r, u1, v0);
+            t.vertexUV(x + 0 - o, y + 1 + o, z + r, u0, v0);
+            t.vertexUV(x + 0 - o, y + 0 - o, z + r, u0, v1);
         }
-        if (data == 3) {
-            instance.vertexUV(x + 1 + n8, y + 0 - n8, z + n9, n5, n7);
-            instance.vertexUV(x + 1 + n8, y + 1 + n8, z + n9, n5, n6);
-            instance.vertexUV(x + 0 - n8, y + 1 + n8, z + n9, n4, n6);
-            instance.vertexUV(x + 0 - n8, y + 0 - n8, z + n9, n4, n7);
-        }
-        if (data == 2) {
-            instance.vertexUV(x + 1 + n8, y + 1 + n8, z + 1 - n9, n4, n6);
-            instance.vertexUV(x + 1 + n8, y + 0 - n8, z + 1 - n9, n4, n7);
-            instance.vertexUV(x + 0 - n8, y + 0 - n8, z + 1 - n9, n5, n7);
-            instance.vertexUV(x + 0 - n8, y + 1 + n8, z + 1 - n9, n5, n6);
+        if (face == 2) {
+            t.vertexUV(x + 1 + o, y + 1 + o, z + 1 - r, u0, v0);
+            t.vertexUV(x + 1 + o, y + 0 - o, z + 1 - r, u0, v1);
+            t.vertexUV(x + 0 - o, y + 0 - o, z + 1 - r, u1, v1);
+            t.vertexUV(x + 0 - o, y + 1 + o, z + 1 - r, u1, v0);
         }
         return true;
     }
     
     public boolean tesselateCrossInWorld(final Tile tt, final int x, final int y, final int z) {
-        final Tesselator instance = Tesselator.instance;
-        final float brightness = tt.getBrightness(this.level, x, y, z);
-        final int color = tt.getColor(this.level, x, y, z);
-        float n = (color >> 16 & 0xFF) / 255.0f;
-        float n2 = (color >> 8 & 0xFF) / 255.0f;
-        float n3 = (color & 0xFF) / 255.0f;
+        final Tesselator t = Tesselator.instance;
+
+        final float br = tt.getBrightness(this.level, x, y, z);
+        final int col = tt.getColor(this.level, x, y, z);
+        float r = (col >> 16 & 0xFF) / 255.0f;
+        float g = (col >> 8 & 0xFF) / 255.0f;
+        float b = (col & 0xFF) / 255.0f;
+
         if (GameRenderer.anaglyph3d) {
-            final float n4 = (n * 30.0f + n2 * 59.0f + n3 * 11.0f) / 100.0f;
-            final float n5 = (n * 30.0f + n2 * 70.0f) / 100.0f;
-            final float n6 = (n * 30.0f + n3 * 70.0f) / 100.0f;
-            n = n4;
-            n2 = n5;
-            n3 = n6;
+            final float rr = (r * 30.0f + g * 59.0f + b * 11.0f) / 100.0f;
+            final float gg = (r * 30.0f + g * 70.0f) / 100.0f;
+            final float bb = (r * 30.0f + b * 70.0f) / 100.0f;
+            r = rr;
+            g = gg;
+            b = bb;
         }
-        instance.color(brightness * n, brightness * n2, brightness * n3);
-        double x2 = x;
-        double y2 = y;
-        double z2 = z;
+        t.color(br * r, br * g, br * b);
+
+        double xt = x;
+        double yt = y;
+        double zt = z;
+
         if (tt == Tile.tallgrass) {
-            final long n7 = (long)(x * 3129871) ^ z * 116129781L ^ (long)y;
-            final long n8 = n7 * n7 * 42317861L + n7 * 11L;
-            x2 += ((n8 >> 16 & 0xFL) / 15.0f - 0.5) * 0.5;
-            y2 += ((n8 >> 20 & 0xFL) / 15.0f - 1.0) * 0.2;
-            z2 += ((n8 >> 24 & 0xFL) / 15.0f - 0.5) * 0.5;
+            long seed = (x * 3129871L) ^ z * 116129781L ^ (long)y;
+            seed = seed * seed * 42317861L + seed * 11L;
+
+            xt += ((seed >> 16 & 0xFL) / 15.0f - 0.5) * 0.5;
+            yt += ((seed >> 20 & 0xFL) / 15.0f - 1.0) * 0.2;
+            zt += ((seed >> 24 & 0xFL) / 15.0f - 0.5) * 0.5;
         }
-        this.tesselateCrossTexture(tt, this.level.getData(x, y, z), x2, y2, z2);
+
+        this.tesselateCrossTexture(tt, this.level.getData(x, y, z), xt, yt, zt);
         return true;
     }
     
     public boolean tesselateRowInWorld(final Tile tt, final int x, final int y, final int z) {
-        final Tesselator instance = Tesselator.instance;
-        final float brightness = tt.getBrightness(this.level, x, y, z);
-        instance.color(brightness, brightness, brightness);
-        this.tesselateRowTexture(tt, this.level.getData(x, y, z), x, y - 0.0625f, z);
+        final Tesselator t = Tesselator.instance;
+
+        final float br = tt.getBrightness(this.level, x, y, z);
+        t.color(br, br, br);
+
+        this.tesselateRowTexture(tt, this.level.getData(x, y, z), x, y - 1.0 / 16.0f, z);
         return true;
     }
     

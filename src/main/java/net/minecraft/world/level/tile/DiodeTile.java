@@ -15,8 +15,8 @@ import net.minecraft.world.level.material.Material;
 
 public class DiodeTile extends Tile
 {
-    public static final int DIRECTION_MASK = 0x3; // Useless - possibly a forward port, DiodeTile starts extending DirectionalTile in the future and this mask is part of DirectionalTile
-    public static final int DELAY_MASK = 0xC;
+    public static final int DIRECTION_MASK = 0b11; // Useless - possibly a forward port, DiodeTile starts extending DirectionalTile in the future and this mask is part of DirectionalTile
+    public static final int DELAY_MASK = 0b1100;
     public static final int DELAY_SHIFT = 2;
     public static final double[] DELAY_RENDER_OFFSETS;
     private static final int[] DELAYS;

@@ -17,6 +17,11 @@ import net.minecraft.world.level.Level;
 
 public class RailTile extends Tile
 {
+    public static final int DIR_FLAT_Z = 0;
+    public static final int DIR_FLAT_X = 1;
+    // the data bit is used by boosters and detectors, so they can't turn
+    public static final int RAIL_DATA_BIT = 0b1000;
+    public static final int RAIL_DIRECTION_MASK = 0b111;
     private final boolean usesDataBit;
     
     public static final boolean isRail(final Level level, final int x, final int y, final int z) {

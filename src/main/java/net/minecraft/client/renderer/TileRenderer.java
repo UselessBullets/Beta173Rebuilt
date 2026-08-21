@@ -827,174 +827,197 @@ public class TileRenderer
     }
     
     public boolean tesselateFireInWorld(final Tile tt, final int x, int y, final int z) {
-        final Tesselator instance = Tesselator.instance;
-        int n = tt.getTexture(0);
-        if (this.fixedTexture >= 0) {
-            n = this.fixedTexture;
-        }
-        final float brightness = tt.getBrightness(this.level, x, y, z);
-        instance.color(brightness, brightness, brightness);
-        final int n2 = (n & 0xF) << 4;
-        final int n3 = n & 0xF0;
-        double n4 = n2 / 256.0f;
-        double n5 = (n2 + 15.99f) / 256.0f;
-        double n6 = n3 / 256.0f;
-        double n7 = (n3 + 15.99f) / 256.0f;
-        final float n8 = 1.4f;
+        final Tesselator t = Tesselator.instance;
+        int tex = tt.getTexture(0);
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+
+        final float br = tt.getBrightness(this.level, x, y, z);
+        t.color(br, br, br);
+
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        double u0 = texX / 256.0f;
+        double u1 = (texX + 15.99f) / 256.0f;
+        double v0 = texY / 256.0f;
+        double v1 = (texY + 15.99f) / 256.0f;
+        float h = 1.4f;
+
         if (this.level.isSolidBlockingTile(x, y - 1, z) || Tile.fire.canBurn(this.level, x, y - 1, z)) {
-            final double n9 = x + 0.5 + 0.2;
-            final double n10 = x + 0.5 - 0.2;
-            final double n11 = z + 0.5 + 0.2;
-            final double n12 = z + 0.5 - 0.2;
-            final double n13 = x + 0.5 - 0.3;
-            final double n14 = x + 0.5 + 0.3;
-            final double n15 = z + 0.5 - 0.3;
-            final double n16 = z + 0.5 + 0.3;
-            instance.vertexUV(n13, y + n8, z + 1, n5, n6);
-            instance.vertexUV(n9, y + 0, z + 1, n5, n7);
-            instance.vertexUV(n9, y + 0, z + 0, n4, n7);
-            instance.vertexUV(n13, y + n8, z + 0, n4, n6);
-            instance.vertexUV(n14, y + n8, z + 0, n5, n6);
-            instance.vertexUV(n10, y + 0, z + 0, n5, n7);
-            instance.vertexUV(n10, y + 0, z + 1, n4, n7);
-            instance.vertexUV(n14, y + n8, z + 1, n4, n6);
-            final double n17 = n2 / 256.0f;
-            final double n18 = (n2 + 15.99f) / 256.0f;
-            final double n19 = (n3 + 16) / 256.0f;
-            final double n20 = (n3 + 15.99f + 16.0f) / 256.0f;
-            instance.vertexUV(x + 1, y + n8, n16, n18, n19);
-            instance.vertexUV(x + 1, y + 0, n12, n18, n20);
-            instance.vertexUV(x + 0, y + 0, n12, n17, n20);
-            instance.vertexUV(x + 0, y + n8, n16, n17, n19);
-            instance.vertexUV(x + 0, y + n8, n15, n18, n19);
-            instance.vertexUV(x + 0, y + 0, n11, n18, n20);
-            instance.vertexUV(x + 1, y + 0, n11, n17, n20);
-            instance.vertexUV(x + 1, y + n8, n15, n17, n19);
-            final double n21 = x + 0.5 - 0.5;
-            final double n22 = x + 0.5 + 0.5;
-            final double n23 = z + 0.5 - 0.5;
-            final double n24 = z + 0.5 + 0.5;
-            final double n25 = x + 0.5 - 0.4;
-            final double n26 = x + 0.5 + 0.4;
-            final double n27 = z + 0.5 - 0.4;
-            final double n28 = z + 0.5 + 0.4;
-            instance.vertexUV(n25, y + n8, z + 0, n17, n19);
-            instance.vertexUV(n21, y + 0, z + 0, n17, n20);
-            instance.vertexUV(n21, y + 0, z + 1, n18, n20);
-            instance.vertexUV(n25, y + n8, z + 1, n18, n19);
-            instance.vertexUV(n26, y + n8, z + 1, n17, n19);
-            instance.vertexUV(n22, y + 0, z + 1, n17, n20);
-            instance.vertexUV(n22, y + 0, z + 0, n18, n20);
-            instance.vertexUV(n26, y + n8, z + 0, n18, n19);
-            final double n29 = n2 / 256.0f;
-            final double n30 = (n2 + 15.99f) / 256.0f;
-            final double n31 = n3 / 256.0f;
-            final double n32 = (n3 + 15.99f) / 256.0f;
-            instance.vertexUV(x + 0, y + n8, n28, n29, n31);
-            instance.vertexUV(x + 0, y + 0, n24, n29, n32);
-            instance.vertexUV(x + 1, y + 0, n24, n30, n32);
-            instance.vertexUV(x + 1, y + n8, n28, n30, n31);
-            instance.vertexUV(x + 1, y + n8, n27, n29, n31);
-            instance.vertexUV(x + 1, y + 0, n23, n29, n32);
-            instance.vertexUV(x + 0, y + 0, n23, n30, n32);
-            instance.vertexUV(x + 0, y + n8, n27, n30, n31);
+            double x0 = x + 0.5 + 0.2;
+            double x1 = x + 0.5 - 0.2;
+            double z0 = z + 0.5 + 0.2;
+            double z1 = z + 0.5 - 0.2;
+
+            double x0_ = x + 0.5 - 0.3;
+            double x1_ = x + 0.5 + 0.3;
+            double z0_ = z + 0.5 - 0.3;
+            double z1_ = z + 0.5 + 0.3;
+
+            t.vertexUV(x0_, y + h, z + 1, u1, v0);
+            t.vertexUV(x0, y + 0, z + 1, u1, v1);
+            t.vertexUV(x0, y + 0, z + 0, u0, v1);
+            t.vertexUV(x0_, y + h, z + 0, u0, v0);
+
+            t.vertexUV(x1_, y + h, z + 0, u1, v0);
+            t.vertexUV(x1, y + 0, z + 0, u1, v1);
+            t.vertexUV(x1, y + 0, z + 1, u0, v1);
+            t.vertexUV(x1_, y + h, z + 1, u0, v0);
+
+            u0 = texX / 256.0f;
+            u1 = (texX + 15.99f) / 256.0f;
+            v0 = (texY + 16) / 256.0f;
+            v1 = (texY + 15.99f + 16.0f) / 256.0f;
+
+            t.vertexUV(x + 1, y + h, z1_, u1, v0);
+            t.vertexUV(x + 1, y + 0, z1, u1, v1);
+            t.vertexUV(x + 0, y + 0, z1, u0, v1);
+            t.vertexUV(x + 0, y + h, z1_, u0, v0);
+
+            t.vertexUV(x + 0, y + h, z0_, u1, v0);
+            t.vertexUV(x + 0, y + 0, z0, u1, v1);
+            t.vertexUV(x + 1, y + 0, z0, u0, v1);
+            t.vertexUV(x + 1, y + h, z0_, u0, v0);
+
+            x0 = x + 0.5 - 0.5;
+            x1 = x + 0.5 + 0.5;
+            z0 = z + 0.5 - 0.5;
+            z1 = z + 0.5 + 0.5;
+
+            x0_ = x + 0.5 - 0.4;
+            x1_ = x + 0.5 + 0.4;
+            z0_ = z + 0.5 - 0.4;
+            z1_ = z + 0.5 + 0.4;
+
+            t.vertexUV(x0_, y + h, z + 0, u0, v0);
+            t.vertexUV(x0, y + 0, z + 0, u0, v1);
+            t.vertexUV(x0, y + 0, z + 1, u1, v1);
+            t.vertexUV(x0_, y + h, z + 1, u1, v0);
+
+            t.vertexUV(x1_, y + h, z + 1, u0, v0);
+            t.vertexUV(x1, y + 0, z + 1, u0, v1);
+            t.vertexUV(x1, y + 0, z + 0, u1, v1);
+            t.vertexUV(x1_, y + h, z + 0, u1, v0);
+
+            u0 = texX / 256.0f;
+            u1 = (texX + 15.99f) / 256.0f;
+            v0 = texY / 256.0f;
+            v1 = (texY + 15.99f) / 256.0f;
+
+            t.vertexUV(x + 0, y + h, z1_, u0, v0);
+            t.vertexUV(x + 0, y + 0, z1, u0, v1);
+            t.vertexUV(x + 1, y + 0, z1, u1, v1);
+            t.vertexUV(x + 1, y + h, z1_, u1, v0);
+
+            t.vertexUV(x + 1, y + h, z0_, u0, v0);
+            t.vertexUV(x + 1, y + 0, z0, u0, v1);
+            t.vertexUV(x + 0, y + 0, z0, u1, v1);
+            t.vertexUV(x + 0, y + h, z0_, u1, v0);
         }
         else {
-            final float n33 = 0.2f;
-            final float n34 = 0.0625f;
+            final float r = 0.2f;
+            final float yo = 1 / 16.0f;
             if ((x + y + z & 0x1) == 0x1) {
-                n4 = n2 / 256.0f;
-                n5 = (n2 + 15.99f) / 256.0f;
-                n6 = (n3 + 16) / 256.0f;
-                n7 = (n3 + 15.99f + 16.0f) / 256.0f;
+                u0 = texX / 256.0f;
+                u1 = (texX + 15.99f) / 256.0f;
+                v0 = (texY + 16) / 256.0f;
+                v1 = (texY + 15.99f + 16.0f) / 256.0f;
             }
             if ((x / 2 + y / 2 + z / 2 & 0x1) == 0x1) {
-                final double n35 = n5;
-                n5 = n4;
-                n4 = n35;
+                final double tmp = u1;
+                u1 = u0;
+                u0 = tmp;
             }
+
             if (Tile.fire.canBurn(this.level, x - 1, y, z)) {
-                instance.vertexUV(x + n33, y + n8 + n34, z + 1, n5, n6);
-                instance.vertexUV(x + 0, y + 0 + n34, z + 1, n5, n7);
-                instance.vertexUV(x + 0, y + 0 + n34, z + 0, n4, n7);
-                instance.vertexUV(x + n33, y + n8 + n34, z + 0, n4, n6);
-                instance.vertexUV(x + n33, y + n8 + n34, z + 0, n4, n6);
-                instance.vertexUV(x + 0, y + 0 + n34, z + 0, n4, n7);
-                instance.vertexUV(x + 0, y + 0 + n34, z + 1, n5, n7);
-                instance.vertexUV(x + n33, y + n8 + n34, z + 1, n5, n6);
+                t.vertexUV(x + r, y + h + yo, z + 1, u1, v0);
+                t.vertexUV(x + 0, y + 0 + yo, z + 1, u1, v1);
+                t.vertexUV(x + 0, y + 0 + yo, z + 0, u0, v1);
+                t.vertexUV(x + r, y + h + yo, z + 0, u0, v0);
+                t.vertexUV(x + r, y + h + yo, z + 0, u0, v0);
+                t.vertexUV(x + 0, y + 0 + yo, z + 0, u0, v1);
+                t.vertexUV(x + 0, y + 0 + yo, z + 1, u1, v1);
+                t.vertexUV(x + r, y + h + yo, z + 1, u1, v0);
             }
             if (Tile.fire.canBurn(this.level, x + 1, y, z)) {
-                instance.vertexUV(x + 1 - n33, y + n8 + n34, z + 0, n4, n6);
-                instance.vertexUV(x + 1 - 0, y + 0 + n34, z + 0, n4, n7);
-                instance.vertexUV(x + 1 - 0, y + 0 + n34, z + 1, n5, n7);
-                instance.vertexUV(x + 1 - n33, y + n8 + n34, z + 1, n5, n6);
-                instance.vertexUV(x + 1 - n33, y + n8 + n34, z + 1, n5, n6);
-                instance.vertexUV(x + 1 - 0, y + 0 + n34, z + 1, n5, n7);
-                instance.vertexUV(x + 1 - 0, y + 0 + n34, z + 0, n4, n7);
-                instance.vertexUV(x + 1 - n33, y + n8 + n34, z + 0, n4, n6);
+                t.vertexUV(x + 1 - r, y + h + yo, z + 0, u0, v0);
+                t.vertexUV(x + 1 - 0, y + 0 + yo, z + 0, u0, v1);
+                t.vertexUV(x + 1 - 0, y + 0 + yo, z + 1, u1, v1);
+                t.vertexUV(x + 1 - r, y + h + yo, z + 1, u1, v0);
+                t.vertexUV(x + 1 - r, y + h + yo, z + 1, u1, v0);
+                t.vertexUV(x + 1 - 0, y + 0 + yo, z + 1, u1, v1);
+                t.vertexUV(x + 1 - 0, y + 0 + yo, z + 0, u0, v1);
+                t.vertexUV(x + 1 - r, y + h + yo, z + 0, u0, v0);
             }
             if (Tile.fire.canBurn(this.level, x, y, z - 1)) {
-                instance.vertexUV(x + 0, y + n8 + n34, z + n33, n5, n6);
-                instance.vertexUV(x + 0, y + 0 + n34, z + 0, n5, n7);
-                instance.vertexUV(x + 1, y + 0 + n34, z + 0, n4, n7);
-                instance.vertexUV(x + 1, y + n8 + n34, z + n33, n4, n6);
-                instance.vertexUV(x + 1, y + n8 + n34, z + n33, n4, n6);
-                instance.vertexUV(x + 1, y + 0 + n34, z + 0, n4, n7);
-                instance.vertexUV(x + 0, y + 0 + n34, z + 0, n5, n7);
-                instance.vertexUV(x + 0, y + n8 + n34, z + n33, n5, n6);
+                t.vertexUV(x + 0, y + h + yo, z + r, u1, v0);
+                t.vertexUV(x + 0, y + 0 + yo, z + 0, u1, v1);
+                t.vertexUV(x + 1, y + 0 + yo, z + 0, u0, v1);
+                t.vertexUV(x + 1, y + h + yo, z + r, u0, v0);
+                t.vertexUV(x + 1, y + h + yo, z + r, u0, v0);
+                t.vertexUV(x + 1, y + 0 + yo, z + 0, u0, v1);
+                t.vertexUV(x + 0, y + 0 + yo, z + 0, u1, v1);
+                t.vertexUV(x + 0, y + h + yo, z + r, u1, v0);
             }
             if (Tile.fire.canBurn(this.level, x, y, z + 1)) {
-                instance.vertexUV(x + 1, y + n8 + n34, z + 1 - n33, n4, n6);
-                instance.vertexUV(x + 1, y + 0 + n34, z + 1 - 0, n4, n7);
-                instance.vertexUV(x + 0, y + 0 + n34, z + 1 - 0, n5, n7);
-                instance.vertexUV(x + 0, y + n8 + n34, z + 1 - n33, n5, n6);
-                instance.vertexUV(x + 0, y + n8 + n34, z + 1 - n33, n5, n6);
-                instance.vertexUV(x + 0, y + 0 + n34, z + 1 - 0, n5, n7);
-                instance.vertexUV(x + 1, y + 0 + n34, z + 1 - 0, n4, n7);
-                instance.vertexUV(x + 1, y + n8 + n34, z + 1 - n33, n4, n6);
+                t.vertexUV(x + 1, y + h + yo, z + 1 - r, u0, v0);
+                t.vertexUV(x + 1, y + 0 + yo, z + 1 - 0, u0, v1);
+                t.vertexUV(x + 0, y + 0 + yo, z + 1 - 0, u1, v1);
+                t.vertexUV(x + 0, y + h + yo, z + 1 - r, u1, v0);
+                t.vertexUV(x + 0, y + h + yo, z + 1 - r, u1, v0);
+                t.vertexUV(x + 0, y + 0 + yo, z + 1 - 0, u1, v1);
+                t.vertexUV(x + 1, y + 0 + yo, z + 1 - 0, u0, v1);
+                t.vertexUV(x + 1, y + h + yo, z + 1 - r, u0, v0);
             }
             if (Tile.fire.canBurn(this.level, x, y + 1, z)) {
-                final double n36 = x + 0.5 + 0.5;
-                final double n37 = x + 0.5 - 0.5;
-                final double n38 = z + 0.5 + 0.5;
-                final double n39 = z + 0.5 - 0.5;
-                final double n40 = x + 0.5 - 0.5;
-                final double n41 = x + 0.5 + 0.5;
-                final double n42 = z + 0.5 - 0.5;
-                final double n43 = z + 0.5 + 0.5;
-                final double n44 = n2 / 256.0f;
-                final double n45 = (n2 + 15.99f) / 256.0f;
-                final double n46 = n3 / 256.0f;
-                final double n47 = (n3 + 15.99f) / 256.0f;
+                double x0 = x + 0.5 + 0.5;
+                double x1 = x + 0.5 - 0.5;
+                double z0 = z + 0.5 + 0.5;
+                double z1 = z + 0.5 - 0.5;
+
+                double x0_ = x + 0.5 - 0.5;
+                double x1_ = x + 0.5 + 0.5;
+                double z0_ = z + 0.5 - 0.5;
+                double z1_ = z + 0.5 + 0.5;
+
+                u0 = texX / 256.0f;
+                u1 = (texX + 15.99f) / 256.0f;
+                v0 = texY / 256.0f;
+                v1 = (texY + 15.99f) / 256.0f;
+
                 ++y;
-                final float n48 = -0.2f;
+                h = -0.2f;
+
                 if ((x + y + z & 0x1) == 0x0) {
-                    instance.vertexUV(n40, y + n48, z + 0, n45, n46);
-                    instance.vertexUV(n36, y + 0, z + 0, n45, n47);
-                    instance.vertexUV(n36, y + 0, z + 1, n44, n47);
-                    instance.vertexUV(n40, y + n48, z + 1, n44, n46);
-                    final double n49 = n2 / 256.0f;
-                    final double n50 = (n2 + 15.99f) / 256.0f;
-                    final double n51 = (n3 + 16) / 256.0f;
-                    final double n52 = (n3 + 15.99f + 16.0f) / 256.0f;
-                    instance.vertexUV(n41, y + n48, z + 1, n50, n51);
-                    instance.vertexUV(n37, y + 0, z + 1, n50, n52);
-                    instance.vertexUV(n37, y + 0, z + 0, n49, n52);
-                    instance.vertexUV(n41, y + n48, z + 0, n49, n51);
+                    t.vertexUV(x0_, y + h, z + 0, u1, v0);
+                    t.vertexUV(x0, y + 0, z + 0, u1, v1);
+                    t.vertexUV(x0, y + 0, z + 1, u0, v1);
+                    t.vertexUV(x0_, y + h, z + 1, u0, v0);
+
+                    u0 = texX / 256.0f;
+                    u1 = (texX + 15.99f) / 256.0f;
+                    v0 = (texY + 16) / 256.0f;
+                    v1 = (texY + 15.99f + 16.0f) / 256.0f;
+
+                    t.vertexUV(x1_, y + h, z + 1, u1, v0);
+                    t.vertexUV(x1, y + 0, z + 1, u1, v1);
+                    t.vertexUV(x1, y + 0, z + 0, u0, v1);
+                    t.vertexUV(x1_, y + h, z + 0, u0, v0);
                 }
                 else {
-                    instance.vertexUV(x + 0, y + n48, n43, n45, n46);
-                    instance.vertexUV(x + 0, y + 0, n39, n45, n47);
-                    instance.vertexUV(x + 1, y + 0, n39, n44, n47);
-                    instance.vertexUV(x + 1, y + n48, n43, n44, n46);
-                    final double n53 = n2 / 256.0f;
-                    final double n54 = (n2 + 15.99f) / 256.0f;
-                    final double n55 = (n3 + 16) / 256.0f;
-                    final double n56 = (n3 + 15.99f + 16.0f) / 256.0f;
-                    instance.vertexUV(x + 1, y + n48, n42, n54, n55);
-                    instance.vertexUV(x + 1, y + 0, n38, n54, n56);
-                    instance.vertexUV(x + 0, y + 0, n38, n53, n56);
-                    instance.vertexUV(x + 0, y + n48, n42, n53, n55);
+                    t.vertexUV(x + 0, y + h, z1_, u1, v0);
+                    t.vertexUV(x + 0, y + 0, z1, u1, v1);
+                    t.vertexUV(x + 1, y + 0, z1, u0, v1);
+                    t.vertexUV(x + 1, y + h, z1_, u0, v0);
+
+                    u0 = texX / 256.0f;
+                    u1 = (texX + 15.99f) / 256.0f;
+                    v0 = (texY + 16) / 256.0f;
+                    v1 = (texY + 15.99f + 16.0f) / 256.0f;
+                    
+                    t.vertexUV(x + 1, y + h, z0_, u1, v0);
+                    t.vertexUV(x + 1, y + 0, z0, u1, v1);
+                    t.vertexUV(x + 0, y + 0, z0, u0, v1);
+                    t.vertexUV(x + 0, y + h, z0_, u0, v0);
                 }
             }
         }

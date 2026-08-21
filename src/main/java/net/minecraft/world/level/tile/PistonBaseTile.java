@@ -18,6 +18,19 @@ import net.minecraft.world.level.material.Material;
 
 public class PistonBaseTile extends Tile
 {
+    public static final int EXTENDED_BIT = 8;
+    public static final int UNDEFINED_FACING = 7;
+
+    public static final float PLATFORM_THICKNESS = 4.0f;
+    public static final int MAX_PUSH_DEPTH = 12;
+    public static final int TRIGGER_EXTEND = 0;
+    public static final int TRIGGER_CONTRACT = 1;
+
+    public static final int EDGE_TEX = 108;
+    public static final int PLATFORM_TEX = 107;
+    public static final int PLATFORM_STICKY_TEX = 106;
+    public static final int BACK_TEX = 109;
+    public static final int INSIDE_TEX = 110;
     private boolean isSticky;
     private boolean ignoreUpdate;
     
@@ -29,29 +42,27 @@ public class PistonBaseTile extends Tile
     }
     
     public int getPlatformTexture() {
-        if (this.isSticky) {
-            return 106;
-        }
-        return 107;
+        if (this.isSticky) return PLATFORM_STICKY_TEX;
+        return PLATFORM_TEX;
     }
     
     @Override
     public int getTexture(final int face, final int data) {
         final int facing = getFacing(data);
         if (facing > 5) {
-            return this.tex;
+            return this.tex; // Useless - this is the platform tex
         }
         if (face == facing) {
             if (isExtended(data) || this.xx0 > 0.0 || this.yy0 > 0.0 || this.zz0 > 0.0 || this.xx1 < 1.0 || this.yy1 < 1.0 || this.zz1 < 1.0) {
-                return 110;
+                return INSIDE_TEX;
             }
-            return this.tex;
+            return this.tex; // Useless - this is the platform tex
         }
         else {
             if (face == Facing.OPPOSITE_FACING[facing]) {
-                return 109;
+                return BACK_TEX;
             }
-            return 108;
+            return EDGE_TEX;
         }
     }
     

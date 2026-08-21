@@ -114,11 +114,11 @@ public class Tile
     public static final Tile bed = new BedTile(26).setDestroyTime(0.2f).setDescriptionId("bed").setNotCollectStatistics().sendTileData();
     public static final Tile goldenRail = new RailTile(27, 179, true).setDestroyTime(0.7f).setSoundType(Tile.SOUND_METAL).setDescriptionId("goldenRail").sendTileData();
     public static final Tile detectorRail = new DetectorRailTile(28, 195).setDestroyTime(0.7f).setSoundType(Tile.SOUND_METAL).setDescriptionId("detectorRail").sendTileData();
-    public static final Tile pistonStickyBase = new PistonBaseTile(29, 106, true).setDescriptionId("pistonStickyBase").sendTileData();
+    public static final Tile pistonStickyBase = new PistonBaseTile(29, PistonBaseTile.PLATFORM_STICKY_TEX, true).setDescriptionId("pistonStickyBase").sendTileData();
     public static final Tile web = new WebTile(30, 11).setLightBlock(1).setDestroyTime(4.0f).setDescriptionId("web");
     public static final TallGrass tallgrass = (TallGrass)new TallGrass(31, 39).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("tallgrass");
     public static final DeadBushTile deadBush = (DeadBushTile)new DeadBushTile(32, 55).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("deadbush");
-    public static final Tile pistonBase = new PistonBaseTile(33, 107, false).setDescriptionId("pistonBase").sendTileData();
+    public static final Tile pistonBase = new PistonBaseTile(33, PistonBaseTile.PLATFORM_STICKY_TEX, false).setDescriptionId("pistonBase").sendTileData();
     public static final PistonExtensionTile pistonExtension = (PistonExtensionTile)new PistonExtensionTile(34, 107).sendTileData();
     public static final Tile cloth = new ClothTile().setDestroyTime(0.8f).setSoundType(Tile.SOUND_CLOTH).setDescriptionId("cloth").sendTileData();
     public static final PistonMovingPiece pistonMovingPiece = new PistonMovingPiece(36);

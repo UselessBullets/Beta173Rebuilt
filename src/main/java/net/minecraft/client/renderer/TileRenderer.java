@@ -403,163 +403,176 @@ public class TileRenderer
     
     private boolean tesselatePistonBaseInWorld(final Tile tt, final int x, final int y, final int z, final boolean forceExtended) {
         final int data = this.level.getData(x, y, z);
-        final boolean b = forceExtended || (data & 0x8) != 0x0;
+        final boolean extended = forceExtended || (data & PistonBaseTile.EXTENDED_BIT) != 0;
         final int facing = PistonBaseTile.getFacing(data);
-        if (b) {
+
+        final float thickness = PistonBaseTile.PLATFORM_THICKNESS / 16.0f;
+
+        if (extended) {
             switch (facing) {
-                case 0: {
-                    this.northFlip = 3;
-                    this.southFlip = 3;
-                    this.eastFlip = 3;
-                    this.westFlip = 3;
-                    tt.setShape(0.0f, 0.25f, 0.0f, 1.0f, 1.0f, 1.0f);
+                case Facing.DOWN: {
+                    this.northFlip = FLIP_180;
+                    this.southFlip = FLIP_180;
+                    this.eastFlip = FLIP_180;
+                    this.westFlip = FLIP_180;
+                    tt.setShape(0.0f, thickness, 0.0f, 1.0f, 1.0f, 1.0f);
                     break;
                 }
-                case 1: {
-                    tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.75f, 1.0f);
+                case Facing.UP: {
+                    tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1 - thickness, 1.0f);
                     break;
                 }
-                case 2: {
-                    this.eastFlip = 1;
-                    this.westFlip = 2;
-                    tt.setShape(0.0f, 0.0f, 0.25f, 1.0f, 1.0f, 1.0f);
+                case Facing.NORTH: {
+                    this.eastFlip = FLIP_CW;
+                    this.westFlip = FLIP_CCW;
+                    tt.setShape(0.0f, 0.0f, thickness, 1.0f, 1.0f, 1.0f);
                     break;
                 }
-                case 3: {
-                    this.eastFlip = 2;
-                    this.westFlip = 1;
-                    this.upFlip = 3;
-                    this.downFlip = 3;
-                    tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.75f);
+                case Facing.SOUTH: {
+                    this.eastFlip = FLIP_CCW;
+                    this.westFlip = FLIP_CW;
+                    this.upFlip = FLIP_180;
+                    this.downFlip = FLIP_180;
+                    tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1 - thickness);
                     break;
                 }
-                case 4: {
-                    this.northFlip = 1;
-                    this.southFlip = 2;
-                    this.upFlip = 2;
-                    this.downFlip = 1;
-                    tt.setShape(0.25f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+                case Facing.WEST: {
+                    this.northFlip = FLIP_CW;
+                    this.southFlip = FLIP_CCW;
+                    this.upFlip = FLIP_CCW;
+                    this.downFlip = FLIP_CW;
+                    tt.setShape(thickness, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
                     break;
                 }
-                case 5: {
-                    this.northFlip = 2;
-                    this.southFlip = 1;
-                    this.upFlip = 1;
-                    this.downFlip = 2;
-                    tt.setShape(0.0f, 0.0f, 0.0f, 0.75f, 1.0f, 1.0f);
+                case Facing.EAST: {
+                    this.northFlip = FLIP_CCW;
+                    this.southFlip = FLIP_CW;
+                    this.upFlip = FLIP_CW;
+                    this.downFlip = FLIP_CCW;
+                    tt.setShape(0.0f, 0.0f, 0.0f, 1 - thickness, 1.0f, 1.0f);
                     break;
                 }
             }
             this.tesselateBlockInWorld(tt, x, y, z);
-            this.northFlip = 0;
-            this.southFlip = 0;
-            this.eastFlip = 0;
-            this.westFlip = 0;
-            this.upFlip = 0;
-            this.downFlip = 0;
+            this.northFlip = FLIP_NONE;
+            this.southFlip = FLIP_NONE;
+            this.eastFlip = FLIP_NONE;
+            this.westFlip = FLIP_NONE;
+            this.upFlip = FLIP_NONE;
+            this.downFlip = FLIP_NONE;
             tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
         }
         else {
             switch (facing) {
-                case 0: {
-                    this.northFlip = 3;
-                    this.southFlip = 3;
-                    this.eastFlip = 3;
-                    this.westFlip = 3;
+                case Facing.DOWN: {
+                    this.northFlip = FLIP_180;
+                    this.southFlip = FLIP_180;
+                    this.eastFlip = FLIP_180;
+                    this.westFlip = FLIP_180;
                 }
-                case 2: {
-                    this.eastFlip = 1;
-                    this.westFlip = 2;
+                case Facing.NORTH: {
+                    this.eastFlip = FLIP_CW;
+                    this.westFlip = FLIP_CCW;
                     break;
                 }
-                case 3: {
-                    this.eastFlip = 2;
-                    this.westFlip = 1;
-                    this.upFlip = 3;
-                    this.downFlip = 3;
+                case Facing.SOUTH: {
+                    this.eastFlip = FLIP_CCW;
+                    this.westFlip = FLIP_CW;
+                    this.upFlip = FLIP_180;
+                    this.downFlip = FLIP_180;
                     break;
                 }
-                case 4: {
-                    this.northFlip = 1;
-                    this.southFlip = 2;
-                    this.upFlip = 2;
-                    this.downFlip = 1;
+                case Facing.WEST: {
+                    this.northFlip = FLIP_CW;
+                    this.southFlip = FLIP_CCW;
+                    this.upFlip = FLIP_CCW;
+                    this.downFlip = FLIP_CW;
                     break;
                 }
-                case 5: {
-                    this.northFlip = 2;
-                    this.southFlip = 1;
-                    this.upFlip = 1;
-                    this.downFlip = 2;
+                case Facing.EAST: {
+                    this.northFlip = FLIP_CCW;
+                    this.southFlip = FLIP_CW;
+                    this.upFlip = FLIP_CW;
+                    this.downFlip = FLIP_CCW;
                     break;
                 }
             }
             this.tesselateBlockInWorld(tt, x, y, z);
-            this.northFlip = 0;
-            this.southFlip = 0;
-            this.eastFlip = 0;
-            this.westFlip = 0;
-            this.upFlip = 0;
-            this.downFlip = 0;
+            this.northFlip = FLIP_NONE;
+            this.southFlip = FLIP_NONE;
+            this.eastFlip = FLIP_NONE;
+            this.westFlip = FLIP_NONE;
+            this.upFlip = FLIP_NONE;
+            this.downFlip = FLIP_NONE;
         }
+
         return true;
     }
     
     private void renderPistonArmUpDown(final double x0, final double x1, final double y0, final double y1, final double z0, final double z1, final float br, final double armLengthPixels) {
-        int fixedTexture = 108;
-        if (this.fixedTexture >= 0) {
-            fixedTexture = this.fixedTexture;
-        }
-        final int n = (fixedTexture & 0xF) << 4;
-        final int n2 = fixedTexture & 0xF0;
-        final Tesselator instance = Tesselator.instance;
-        final double n3 = (n + 0) / 256.0f;
-        final double n4 = (n2 + 0) / 256.0f;
-        final double n5 = (n + armLengthPixels - 0.01) / 256.0;
-        final double n6 = (n2 + 4.0f - 0.01) / 256.0;
-        instance.color(br, br, br);
-        instance.vertexUV(x0, y1, z0, n5, n4);
-        instance.vertexUV(x0, y0, z0, n3, n4);
-        instance.vertexUV(x1, y0, z1, n3, n6);
-        instance.vertexUV(x1, y1, z1, n5, n6);
+        int armTex = PistonBaseTile.EDGE_TEX;
+        if (this.fixedTexture >= 0) armTex = this.fixedTexture;
+
+        final int texX = (armTex & 0xF) << 4;
+        final int texY = armTex & 0xF0;
+        final Tesselator t = Tesselator.instance;
+
+        // upwards arm
+        final double u00 = (texX + 0) / 256.0f;
+        final double v00 = (texY + 0) / 256.0f;
+        final double u11 = (texX + armLengthPixels - 0.01) / 256.0;
+        final double v11 = (texY + 4.0f - 0.01) / 256.0;
+
+        t.color(br, br, br);
+
+        t.vertexUV(x0, y1, z0, u11, v00);
+        t.vertexUV(x0, y0, z0, u00, v00);
+        t.vertexUV(x1, y0, z1, u00, v11);
+        t.vertexUV(x1, y1, z1, u11, v11);
     }
     
     private void renderPistonArmNorthSouth(final double x0, final double x1, final double y0, final double y1, final double z0, final double z1, final float br, final double armLengthPixels) {
-        int fixedTexture = 108;
-        if (this.fixedTexture >= 0) {
-            fixedTexture = this.fixedTexture;
-        }
-        final int n = (fixedTexture & 0xF) << 4;
-        final int n2 = fixedTexture & 0xF0;
-        final Tesselator instance = Tesselator.instance;
-        final double n3 = (n + 0) / 256.0f;
-        final double n4 = (n2 + 0) / 256.0f;
-        final double n5 = (n + armLengthPixels - 0.01) / 256.0;
-        final double n6 = (n2 + 4.0f - 0.01) / 256.0;
-        instance.color(br, br, br);
-        instance.vertexUV(x0, y0, z1, n5, n4);
-        instance.vertexUV(x0, y0, z0, n3, n4);
-        instance.vertexUV(x1, y1, z0, n3, n6);
-        instance.vertexUV(x1, y1, z1, n5, n6);
+        int armTex = PistonBaseTile.EDGE_TEX;
+        if (this.fixedTexture >= 0) armTex = this.fixedTexture;
+
+        final int texX = (armTex & 0xF) << 4;
+        final int texY = armTex & 0xF0;
+        final Tesselator t = Tesselator.instance;
+
+        // upwards arm
+        final double u00 = (texX + 0) / 256.0f;
+        final double v00 = (texY + 0) / 256.0f;
+        final double u11 = (texX + armLengthPixels - 0.01) / 256.0;
+        final double v11 = (texY + 4.0f - 0.01) / 256.0;
+
+        t.color(br, br, br);
+
+        t.vertexUV(x0, y0, z1, u11, v00);
+        t.vertexUV(x0, y0, z0, u00, v00);
+        t.vertexUV(x1, y1, z0, u00, v11);
+        t.vertexUV(x1, y1, z1, u11, v11);
     }
     
     private void renderPistonArmEastWest(final double x0, final double x1, final double y0, final double y1, final double z0, final double z1, final float br, final double armLengthPixels) {
-        int fixedTexture = 108;
-        if (this.fixedTexture >= 0) {
-            fixedTexture = this.fixedTexture;
-        }
-        final int n = (fixedTexture & 0xF) << 4;
-        final int n2 = fixedTexture & 0xF0;
-        final Tesselator instance = Tesselator.instance;
-        final double n3 = (n + 0) / 256.0f;
-        final double n4 = (n2 + 0) / 256.0f;
-        final double n5 = (n + armLengthPixels - 0.01) / 256.0;
-        final double n6 = (n2 + 4.0f - 0.01) / 256.0;
-        instance.color(br, br, br);
-        instance.vertexUV(x1, y0, z0, n5, n4);
-        instance.vertexUV(x0, y0, z0, n3, n4);
-        instance.vertexUV(x0, y1, z1, n3, n6);
-        instance.vertexUV(x1, y1, z1, n5, n6);
+        int armTex = PistonBaseTile.EDGE_TEX;
+        if (this.fixedTexture >= 0) armTex = this.fixedTexture;
+
+        final int texX = (armTex & 0xF) << 4;
+        final int texY = armTex & 0xF0;
+        final Tesselator t = Tesselator.instance;
+
+        // upwards arm
+        final double u00 = (texX + 0) / 256.0f;
+        final double v00 = (texY + 0) / 256.0f;
+        final double u11 = (texX + armLengthPixels - 0.01) / 256.0;
+        final double v11 = (texY + 4.0f - 0.01) / 256.0;
+
+        t.color(br, br, br);
+
+        t.vertexUV(x1, y0, z0, u11, v00);
+        t.vertexUV(x0, y0, z0, u00, v00);
+        t.vertexUV(x0, y1, z1, u00, v11);
+        t.vertexUV(x1, y1, z1, u11, v11);
     }
     
     public void tesselatePistonArmNoCulling(final Tile tile, final int x, final int y, final int z, final boolean fullArm) {
@@ -569,91 +582,104 @@ public class TileRenderer
     }
     
     private boolean tesselatePistonExtensionInWorld(final Tile tt, final int x, final int y, final int z, final boolean fullArm) {
-        final int facing = PistonExtensionTile.getFacing(this.level.getData(x, y, z));
-        final float brightness = tt.getBrightness(this.level, x, y, z);
-        final float n = fullArm ? 1.0f : 0.5f;
-        final double n2 = fullArm ? 16.0 : 8.0;
+        int data = this.level.getData(x, y, z);
+        int facing = PistonExtensionTile.getFacing(data);
+
+        final float thickness = PistonBaseTile.PLATFORM_THICKNESS / 16.0f;
+        final float leftEdge = (8.0f - (PistonBaseTile.PLATFORM_THICKNESS / 2.0f)) / 16.0f;
+        final float rightEdge = (8.0f + (PistonBaseTile.PLATFORM_THICKNESS / 2.0f)) / 16.0f;
+        float br = tt.getBrightness(this.level, x, y, z);
+        float armLength = fullArm ? 1.0f : 0.5f;
+        double armLengthPixels = fullArm ? 16.0 : 8.0;
+
         switch (facing) {
-            case 0: {
-                this.northFlip = 3;
-                this.southFlip = 3;
-                this.eastFlip = 3;
-                this.westFlip = 3;
-                tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.25f, 1.0f);
+            case Facing.DOWN: {
+                this.northFlip = FLIP_180;
+                this.southFlip = FLIP_180;
+                this.eastFlip = FLIP_180;
+                this.westFlip = FLIP_180;
+                tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, thickness, 1.0f);
                 this.tesselateBlockInWorld(tt, x, y, z);
-                this.renderPistonArmUpDown(x + 0.375f, x + 0.625f, y + 0.25f, y + 0.25f + n, z + 0.625f, z + 0.625f, brightness * 0.8f, n2);
-                this.renderPistonArmUpDown(x + 0.625f, x + 0.375f, y + 0.25f, y + 0.25f + n, z + 0.375f, z + 0.375f, brightness * 0.8f, n2);
-                this.renderPistonArmUpDown(x + 0.375f, x + 0.375f, y + 0.25f, y + 0.25f + n, z + 0.375f, z + 0.625f, brightness * 0.6f, n2);
-                this.renderPistonArmUpDown(x + 0.625f, x + 0.625f, y + 0.25f, y + 0.25f + n, z + 0.625f, z + 0.375f, brightness * 0.6f, n2);
+
+                this.renderPistonArmUpDown(x + leftEdge, x + rightEdge, y + thickness, y + thickness + armLength, z + rightEdge, z + rightEdge, br * 0.8f, armLengthPixels);
+                this.renderPistonArmUpDown(x + rightEdge, x + leftEdge, y + thickness, y + thickness + armLength, z + leftEdge, z + leftEdge, br * 0.8f, armLengthPixels);
+                this.renderPistonArmUpDown(x + leftEdge, x + leftEdge, y + thickness, y + thickness + armLength, z + leftEdge, z + rightEdge, br * 0.6f, armLengthPixels);
+                this.renderPistonArmUpDown(x + rightEdge, x + rightEdge, y + thickness, y + thickness + armLength, z + rightEdge, z + leftEdge, br * 0.6f, armLengthPixels);
                 break;
             }
-            case 1: {
-                tt.setShape(0.0f, 0.75f, 0.0f, 1.0f, 1.0f, 1.0f);
+            case Facing.UP: {
+                tt.setShape(0.0f, 1.0f - thickness, 0.0f, 1.0f, 1.0f, 1.0f);
                 this.tesselateBlockInWorld(tt, x, y, z);
-                this.renderPistonArmUpDown(x + 0.375f, x + 0.625f, y - 0.25f + 1.0f - n, y - 0.25f + 1.0f, z + 0.625f, z + 0.625f, brightness * 0.8f, n2);
-                this.renderPistonArmUpDown(x + 0.625f, x + 0.375f, y - 0.25f + 1.0f - n, y - 0.25f + 1.0f, z + 0.375f, z + 0.375f, brightness * 0.8f, n2);
-                this.renderPistonArmUpDown(x + 0.375f, x + 0.375f, y - 0.25f + 1.0f - n, y - 0.25f + 1.0f, z + 0.375f, z + 0.625f, brightness * 0.6f, n2);
-                this.renderPistonArmUpDown(x + 0.625f, x + 0.625f, y - 0.25f + 1.0f - n, y - 0.25f + 1.0f, z + 0.625f, z + 0.375f, brightness * 0.6f, n2);
+
+                this.renderPistonArmUpDown(x + leftEdge, x + rightEdge, y - thickness + 1.0f - armLength, y - thickness + 1.0f, z + rightEdge, z + rightEdge, br * 0.8f, armLengthPixels);
+                this.renderPistonArmUpDown(x + rightEdge, x + leftEdge, y - thickness + 1.0f - armLength, y - thickness + 1.0f, z + leftEdge, z + leftEdge, br * 0.8f, armLengthPixels);
+                this.renderPistonArmUpDown(x + leftEdge, x + leftEdge, y - thickness + 1.0f - armLength, y - thickness + 1.0f, z + leftEdge, z + rightEdge, br * 0.6f, armLengthPixels);
+                this.renderPistonArmUpDown(x + rightEdge, x + rightEdge, y - thickness + 1.0f - armLength, y - thickness + 1.0f, z + rightEdge, z + leftEdge, br * 0.6f, armLengthPixels);
                 break;
             }
-            case 2: {
-                this.eastFlip = 1;
-                this.westFlip = 2;
-                tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.25f);
+            case Facing.NORTH: {
+                this.eastFlip = FLIP_CW;
+                this.westFlip = FLIP_CCW;
+                tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, thickness);
                 this.tesselateBlockInWorld(tt, x, y, z);
-                this.renderPistonArmNorthSouth(x + 0.375f, x + 0.375f, y + 0.625f, y + 0.375f, z + 0.25f, z + 0.25f + n, brightness * 0.6f, n2);
-                this.renderPistonArmNorthSouth(x + 0.625f, x + 0.625f, y + 0.375f, y + 0.625f, z + 0.25f, z + 0.25f + n, brightness * 0.6f, n2);
-                this.renderPistonArmNorthSouth(x + 0.375f, x + 0.625f, y + 0.375f, y + 0.375f, z + 0.25f, z + 0.25f + n, brightness * 0.5f, n2);
-                this.renderPistonArmNorthSouth(x + 0.625f, x + 0.375f, y + 0.625f, y + 0.625f, z + 0.25f, z + 0.25f + n, brightness, n2);
+
+                this.renderPistonArmNorthSouth(x + leftEdge, x + leftEdge, y + rightEdge, y + leftEdge, z + thickness, z + thickness + armLength, br * 0.6f, armLengthPixels);
+                this.renderPistonArmNorthSouth(x + rightEdge, x + rightEdge, y + leftEdge, y + rightEdge, z + thickness, z + thickness + armLength, br * 0.6f, armLengthPixels);
+                this.renderPistonArmNorthSouth(x + leftEdge, x + rightEdge, y + leftEdge, y + leftEdge, z + thickness, z + thickness + armLength, br * 0.5f, armLengthPixels);
+                this.renderPistonArmNorthSouth(x + rightEdge, x + leftEdge, y + rightEdge, y + rightEdge, z + thickness, z + thickness + armLength, br, armLengthPixels);
                 break;
             }
-            case 3: {
-                this.eastFlip = 2;
-                this.westFlip = 1;
-                this.upFlip = 3;
-                this.downFlip = 3;
-                tt.setShape(0.0f, 0.0f, 0.75f, 1.0f, 1.0f, 1.0f);
+            case Facing.SOUTH: {
+                this.eastFlip = FLIP_CCW;
+                this.westFlip = FLIP_CW;
+                this.upFlip = FLIP_180;
+                this.downFlip = FLIP_180;
+                tt.setShape(0.0f, 0.0f, 1.0f - thickness, 1.0f, 1.0f, 1.0f);
                 this.tesselateBlockInWorld(tt, x, y, z);
-                this.renderPistonArmNorthSouth(x + 0.375f, x + 0.375f, y + 0.625f, y + 0.375f, z - 0.25f + 1.0f - n, z - 0.25f + 1.0f, brightness * 0.6f, n2);
-                this.renderPistonArmNorthSouth(x + 0.625f, x + 0.625f, y + 0.375f, y + 0.625f, z - 0.25f + 1.0f - n, z - 0.25f + 1.0f, brightness * 0.6f, n2);
-                this.renderPistonArmNorthSouth(x + 0.375f, x + 0.625f, y + 0.375f, y + 0.375f, z - 0.25f + 1.0f - n, z - 0.25f + 1.0f, brightness * 0.5f, n2);
-                this.renderPistonArmNorthSouth(x + 0.625f, x + 0.375f, y + 0.625f, y + 0.625f, z - 0.25f + 1.0f - n, z - 0.25f + 1.0f, brightness, n2);
+
+                this.renderPistonArmNorthSouth(x + leftEdge, x + leftEdge, y + rightEdge, y + leftEdge, z - thickness + 1.0f - armLength, z - thickness + 1.0f, br * 0.6f, armLengthPixels);
+                this.renderPistonArmNorthSouth(x + rightEdge, x + rightEdge, y + leftEdge, y + rightEdge, z - thickness + 1.0f - armLength, z - thickness + 1.0f, br * 0.6f, armLengthPixels);
+                this.renderPistonArmNorthSouth(x + leftEdge, x + rightEdge, y + leftEdge, y + leftEdge, z - thickness + 1.0f - armLength, z - thickness + 1.0f, br * 0.5f, armLengthPixels);
+                this.renderPistonArmNorthSouth(x + rightEdge, x + leftEdge, y + rightEdge, y + rightEdge, z - thickness + 1.0f - armLength, z - thickness + 1.0f, br, armLengthPixels);
                 break;
             }
-            case 4: {
-                this.northFlip = 1;
-                this.southFlip = 2;
-                this.upFlip = 2;
-                this.downFlip = 1;
-                tt.setShape(0.0f, 0.0f, 0.0f, 0.25f, 1.0f, 1.0f);
+            case Facing.WEST: {
+                this.northFlip = FLIP_CW;
+                this.southFlip = FLIP_CCW;
+                this.upFlip = FLIP_CCW;
+                this.downFlip = FLIP_CW;
+                tt.setShape(0.0f, 0.0f, 0.0f, thickness, 1.0f, 1.0f);
                 this.tesselateBlockInWorld(tt, x, y, z);
-                this.renderPistonArmEastWest(x + 0.25f, x + 0.25f + n, y + 0.375f, y + 0.375f, z + 0.625f, z + 0.375f, brightness * 0.5f, n2);
-                this.renderPistonArmEastWest(x + 0.25f, x + 0.25f + n, y + 0.625f, y + 0.625f, z + 0.375f, z + 0.625f, brightness, n2);
-                this.renderPistonArmEastWest(x + 0.25f, x + 0.25f + n, y + 0.375f, y + 0.625f, z + 0.375f, z + 0.375f, brightness * 0.6f, n2);
-                this.renderPistonArmEastWest(x + 0.25f, x + 0.25f + n, y + 0.625f, y + 0.375f, z + 0.625f, z + 0.625f, brightness * 0.6f, n2);
+
+                this.renderPistonArmEastWest(x + thickness, x + thickness + armLength, y + leftEdge, y + leftEdge, z + rightEdge, z + leftEdge, br * 0.5f, armLengthPixels);
+                this.renderPistonArmEastWest(x + thickness, x + thickness + armLength, y + rightEdge, y + rightEdge, z + leftEdge, z + rightEdge, br, armLengthPixels);
+                this.renderPistonArmEastWest(x + thickness, x + thickness + armLength, y + leftEdge, y + rightEdge, z + leftEdge, z + leftEdge, br * 0.6f, armLengthPixels);
+                this.renderPistonArmEastWest(x + thickness, x + thickness + armLength, y + rightEdge, y + leftEdge, z + rightEdge, z + rightEdge, br * 0.6f, armLengthPixels);
                 break;
             }
-            case 5: {
-                this.northFlip = 2;
-                this.southFlip = 1;
-                this.upFlip = 1;
-                this.downFlip = 2;
-                tt.setShape(0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+            case Facing.EAST: {
+                this.northFlip = FLIP_CCW;
+                this.southFlip = FLIP_CW;
+                this.upFlip = FLIP_CW;
+                this.downFlip = FLIP_CCW;
+                tt.setShape(1.0f - thickness, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
                 this.tesselateBlockInWorld(tt, x, y, z);
-                this.renderPistonArmEastWest(x - 0.25f + 1.0f - n, x - 0.25f + 1.0f, y + 0.375f, y + 0.375f, z + 0.625f, z + 0.375f, brightness * 0.5f, n2);
-                this.renderPistonArmEastWest(x - 0.25f + 1.0f - n, x - 0.25f + 1.0f, y + 0.625f, y + 0.625f, z + 0.375f, z + 0.625f, brightness, n2);
-                this.renderPistonArmEastWest(x - 0.25f + 1.0f - n, x - 0.25f + 1.0f, y + 0.375f, y + 0.625f, z + 0.375f, z + 0.375f, brightness * 0.6f, n2);
-                this.renderPistonArmEastWest(x - 0.25f + 1.0f - n, x - 0.25f + 1.0f, y + 0.625f, y + 0.375f, z + 0.625f, z + 0.625f, brightness * 0.6f, n2);
+
+                this.renderPistonArmEastWest(x - thickness + 1.0f - armLength, x - thickness + 1.0f, y + leftEdge, y + leftEdge, z + rightEdge, z + leftEdge, br * 0.5f, armLengthPixels);
+                this.renderPistonArmEastWest(x - thickness + 1.0f - armLength, x - thickness + 1.0f, y + rightEdge, y + rightEdge, z + leftEdge, z + rightEdge, br, armLengthPixels);
+                this.renderPistonArmEastWest(x - thickness + 1.0f - armLength, x - thickness + 1.0f, y + leftEdge, y + rightEdge, z + leftEdge, z + leftEdge, br * 0.6f, armLengthPixels);
+                this.renderPistonArmEastWest(x - thickness + 1.0f - armLength, x - thickness + 1.0f, y + rightEdge, y + leftEdge, z + rightEdge, z + rightEdge, br * 0.6f, armLengthPixels);
                 break;
             }
         }
-        this.northFlip = 0;
-        this.southFlip = 0;
-        this.eastFlip = 0;
-        this.westFlip = 0;
-        this.upFlip = 0;
-        this.downFlip = 0;
+        this.northFlip = FLIP_NONE;
+        this.southFlip = FLIP_NONE;
+        this.eastFlip = FLIP_NONE;
+        this.westFlip = FLIP_NONE;
+        this.upFlip = FLIP_NONE;
+        this.downFlip = FLIP_NONE;
         tt.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+
         return true;
     }
     

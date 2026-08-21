@@ -19,13 +19,12 @@ public class Minimap
 {
     private static final int w = MapItem.IMAGE_WIDTH;
     private static final int h = MapItem.IMAGE_HEIGHT;
-    private int[] pixels;
+    private int[] pixels = new int[w * h];
     private int mapTexture;
     private Options options;
     private Font font;
     
     public Minimap(final Font font, final Options options, final Textures textures) {
-        this.pixels = new int[w * h];
         this.options = options;
         this.font = font;
         this.mapTexture = textures.getTexture(new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB));

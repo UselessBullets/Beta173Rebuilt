@@ -4,8 +4,6 @@
 
 package net.minecraft.client.skins;
 
-import java.util.Iterator;
-import java.util.Collection;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -16,32 +14,29 @@ import java.util.List;
 
 public class TexturePackRepository
 {
-    private List<TexturePack> texturePacks;
-    private TexturePack defaultTexturePack;
+    private List<TexturePack> texturePacks = new ArrayList<>();
+    private TexturePack defaultTexturePack = new DefaultTexturePack();
     public TexturePack selected;
-    private Map<String, TexturePack> skinCache;
+    private Map<String, TexturePack> skinCache = new HashMap<>();
     private Minecraft minecraft;
     private File workDir;
     private String chosenSkinName;
     
     public TexturePackRepository(final Minecraft minecraft, final File file) {
-        this.texturePacks = new ArrayList();
-        this.defaultTexturePack = new DefaultTexturePack();
-        this.skinCache = new HashMap();
         this.minecraft = minecraft;
         this.workDir = new File(file, "texturepacks");
         if (!this.workDir.exists()) {
             this.workDir.mkdirs();
         }
+
         this.chosenSkinName = minecraft.options.skin;
         this.updateList();
         this.selected.select();
     }
     
     public boolean selectSkin(final TexturePack skin) {
-        if (skin == this.selected) {
-            return false;
-        }
+        if (skin == this.selected) return false;
+
         this.selected.deselect();
         this.chosenSkinName = skin.name;
         this.selected = skin;
@@ -52,25 +47,30 @@ public class TexturePackRepository
     }
     
     public void updateList() {
-        final ArrayList texturePacks = new ArrayList();
+        final ArrayList<TexturePack> newSkins = new ArrayList<>();
+
         this.selected = null;
-        texturePacks.add(this.defaultTexturePack);
+        newSkins.add(this.defaultTexturePack);
+
         if (this.workDir.exists() && this.workDir.isDirectory()) {
             for (final File file : this.workDir.listFiles()) {
                 if (file.isFile() && file.getName().toLowerCase().endsWith(".zip")) {
-                    final String string = file.getName() + ":" + file.length() + ":" + file.lastModified();
+                    final String id = file.getName() + ":" + file.length() + ":" + file.lastModified();
+
                     try {
-                        if (!this.skinCache.containsKey(string)) {
-                            final FileTexturePack fileTexturePack = new FileTexturePack(file);
-                            fileTexturePack.id = string;
-                            this.skinCache.put(string, fileTexturePack);
-                            fileTexturePack.load(this.minecraft);
+                        if (!this.skinCache.containsKey(id)) {
+                            TexturePack skin = new FileTexturePack(file);
+                            skin.id = id;
+                            this.skinCache.put(id, skin);
+                            skin.load(this.minecraft);
                         }
-                        final TexturePack selected = this.skinCache.get(string);
-                        if (selected.name.equals(this.chosenSkinName)) {
-                            this.selected = selected;
+
+                        TexturePack skin = this.skinCache.get(id);
+                        if (skin.name.equals(this.chosenSkinName)) {
+                            this.selected = skin;
                         }
-                        texturePacks.add(selected);
+
+                        newSkins.add(skin);
                     }
                     catch (final IOException ex) {
                         ex.printStackTrace();
@@ -78,15 +78,19 @@ public class TexturePackRepository
                 }
             }
         }
+
         if (this.selected == null) {
             this.selected = this.defaultTexturePack;
         }
-        this.texturePacks.removeAll(texturePacks);
+
+        this.texturePacks.removeAll(newSkins);
+
         for (final TexturePack texturePack : this.texturePacks) {
             texturePack.unload(this.minecraft);
             this.skinCache.remove(texturePack.id);
         }
-        this.texturePacks = texturePacks;
+
+        this.texturePacks = newSkins;
     }
     
     public List<TexturePack> getAll() {

@@ -19,13 +19,11 @@ import static org.lwjgl.opengl.GL11.*;
 public class TexturePackSelectScreen extends Screen
 {
     protected Screen lastScreen;
-    private int updateIn;
-    private String instructions;
+    private int updateIn = -1;
+    private String instructions = "";
     private ScrolledSelectionList packList;
     
     public TexturePackSelectScreen(final Screen lastScreen) {
-        this.updateIn = -1;
-        this.instructions = "";
         this.lastScreen = lastScreen;
     }
     
@@ -69,6 +67,7 @@ public class TexturePackSelectScreen extends Screen
                 final TexturePack texturePack = TexturePackSelectScreen.this.minecraft.skins.getAll().get(i);
                 texturePack.bindTexture(TexturePackSelectScreen.this.minecraft);
                 glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
                 t.begin();
                 t.color(0xffffff);
                 t.vertexUV(x, y + h, 0.0, 0.0, 1.0);
@@ -76,6 +75,7 @@ public class TexturePackSelectScreen extends Screen
                 t.vertexUV(x + 32, y, 0.0, 1.0, 0.0);
                 t.vertexUV(x, y, 0.0, 0.0, 0.0);
                 t.end();
+                
                 drawString(TexturePackSelectScreen.this.font, texturePack.name, x + 32 + 2, y + 1, 0xffffff);
                 drawString(TexturePackSelectScreen.this.font, texturePack.desc1, x + 32 + 2, y + 12, 0x808080);
                 drawString(TexturePackSelectScreen.this.font, texturePack.desc2, x + 32 + 2, y + 12 + 10, 0x808080);
@@ -85,9 +85,8 @@ public class TexturePackSelectScreen extends Screen
     
     @Override
     protected void buttonClicked(final Button button) {
-        if (!button.active) {
-            return;
-        }
+        if (!button.active) return;
+
         if (button.id == 5) {
             Sys.openURL("file://" + this.instructions);
         }

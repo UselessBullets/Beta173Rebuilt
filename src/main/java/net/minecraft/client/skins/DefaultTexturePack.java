@@ -13,26 +13,23 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class DefaultTexturePack extends TexturePack
 {
-    private int texture;
+    private int texture = -1;
     private BufferedImage icon;
     
     public DefaultTexturePack() {
-        this.texture = -1;
         this.name = "Default";
         this.desc1 = "The default look of Minecraft";
         try {
             this.icon = ImageIO.read(DefaultTexturePack.class.getResource("/pack.png"));
         }
-        catch (final IOException ex) {
-            ex.printStackTrace();
+        catch (final IOException e) {
+            e.printStackTrace();
         }
     }
     
     @Override
     public void unload(final Minecraft minecraft) {
-        if (this.icon != null) {
-            minecraft.textures.releaseTexture(this.texture);
-        }
+        if (this.icon != null) minecraft.textures.releaseTexture(this.texture);
     }
     
     @Override
@@ -40,10 +37,10 @@ public class DefaultTexturePack extends TexturePack
         if (this.icon != null && this.texture < 0) {
             this.texture = minecraft.textures.getTexture(this.icon);
         }
+
         if (this.icon != null) {
             minecraft.textures.bind(this.texture);
-        }
-        else {
+        } else {
             glBindTexture(GL_TEXTURE_2D, minecraft.textures.loadTexture("/gui/unknown_pack.png"));
         }
     }

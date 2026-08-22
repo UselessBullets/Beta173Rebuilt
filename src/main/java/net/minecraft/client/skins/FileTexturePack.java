@@ -20,12 +20,11 @@ import static org.lwjgl.opengl.GL11.*;
 public class FileTexturePack extends TexturePack
 {
     private ZipFile zf;
-    private int texture;
+    private int texture = -1;
     private BufferedImage icon;
     private File file;
     
     public FileTexturePack(final File file) {
-        this.texture = -1;
         this.name = file.getName();
         this.file = file;
     }
@@ -34,52 +33,56 @@ public class FileTexturePack extends TexturePack
         if (line != null && line.length() > 34) {
             line = line.substring(0, 34);
         }
+
         return line;
     }
     
     @Override
     public void load(final Minecraft minecraft) throws IOException {
-        ZipFile zipFile = null;
-        InputStream inputStream = null;
+        ZipFile zf = null;
+        InputStream in = null;
+
         try {
-            zipFile = new ZipFile(this.file);
+            zf = new ZipFile(this.file);
+
             try {
-                inputStream = zipFile.getInputStream(zipFile.getEntry("pack.txt"));
-                final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                this.desc1 = this.trim(bufferedReader.readLine());
-                this.desc2 = this.trim(bufferedReader.readLine());
-                bufferedReader.close();
-                inputStream.close();
+                in = zf.getInputStream(zf.getEntry("pack.txt"));
+                final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                this.desc1 = this.trim(br.readLine());
+                this.desc2 = this.trim(br.readLine());
+                br.close();
+                in.close();
             }
-            catch (final Exception ex) {}
+            catch (final Exception ignored) {}
+
             try {
-                inputStream = zipFile.getInputStream(zipFile.getEntry("pack.png"));
-                this.icon = ImageIO.read(inputStream);
-                inputStream.close();
+                in = zf.getInputStream(zf.getEntry("pack.png"));
+                this.icon = ImageIO.read(in);
+                in.close();
             }
-            catch (final Exception ex2) {}
-            zipFile.close();
+            catch (final Exception ignored) {}
+
+            zf.close();
         }
-        catch (final Exception ex3) {
-            ex3.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
         finally {
             try {
-                inputStream.close();
+                in.close();
             }
-            catch (final Exception ex4) {}
+            catch (final Exception e) {}
+
             try {
-                zipFile.close();
+                zf.close();
             }
-            catch (final Exception ex5) {}
+            catch (final Exception e) {}
         }
     }
     
     @Override
     public void unload(final Minecraft minecraft) {
-        if (this.icon != null) {
-            minecraft.textures.releaseTexture(this.texture);
-        }
+        if (this.icon != null) minecraft.textures.releaseTexture(this.texture);
         this.deselect();
     }
     
@@ -88,10 +91,10 @@ public class FileTexturePack extends TexturePack
         if (this.icon != null && this.texture < 0) {
             this.texture = minecraft.textures.getTexture(this.icon);
         }
+
         if (this.icon != null) {
             minecraft.textures.bind(this.texture);
-        }
-        else {
+        } else {
             glBindTexture(GL_TEXTURE_2D, minecraft.textures.loadTexture("/gui/unknown_pack.png"));
         }
     }
@@ -101,7 +104,7 @@ public class FileTexturePack extends TexturePack
         try {
             this.zf = new ZipFile(this.file);
         }
-        catch (final Exception ex) {}
+        catch (final Exception ignored) {}
     }
     
     @Override
@@ -109,7 +112,7 @@ public class FileTexturePack extends TexturePack
         try {
             this.zf.close();
         }
-        catch (final Exception ex) {}
+        catch (final Exception ignored) {}
         this.zf = null;
     }
     
@@ -121,7 +124,7 @@ public class FileTexturePack extends TexturePack
                 return this.zf.getInputStream(entry);
             }
         }
-        catch (final Exception ex) {}
+        catch (final Exception ignored) {}
         return TexturePack.class.getResourceAsStream(name);
     }
 }

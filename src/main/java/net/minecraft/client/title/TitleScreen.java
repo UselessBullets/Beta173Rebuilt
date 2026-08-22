@@ -27,27 +27,28 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class TitleScreen extends Screen
 {
-    private static final Random random;
-    private float vo;
-    private String splash;
+    private static final Random random = new Random();
+    private float vo = 0.0f;
+    private String splash = "missingno";
     private Button multiplayerButton;
     
     public TitleScreen() {
-        this.vo = 0.0f;
-        this.splash = "missingno";
         try {
-            final ArrayList list = new ArrayList();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(TitleScreen.class.getResourceAsStream("/title/splashes.txt"), StandardCharsets.UTF_8));
+            final ArrayList<String> splashes = new ArrayList<>();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(TitleScreen.class.getResourceAsStream("/title/splashes.txt"), StandardCharsets.UTF_8));
+
             String line;
-            while ((line = reader.readLine()) != null) {
-                final String trim = line.trim();
-                if (trim.length() > 0) {
-                    list.add(trim);
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.length() > 0) {
+                    splashes.add(line);
                 }
             }
-            this.splash = (String)list.get(TitleScreen.random.nextInt(list.size()));
+
+            this.splash = splashes.get(TitleScreen.random.nextInt(splashes.size()));
         }
-        catch (final Exception ex) {}
+        catch (final Exception e) {}
     }
     
     @Override
@@ -61,32 +62,39 @@ public class TitleScreen extends Screen
     
     @Override
     public void init() {
-        final Calendar instance = Calendar.getInstance();
-        instance.setTime(new Date());
-        if (instance.get(2) + 1 == 11 && instance.get(5) == 9) {
+        final Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+
+        if (c.get(Calendar.MONTH) + 1 == 11 && c.get(Calendar.DAY_OF_MONTH) == 9) {
             this.splash = "Happy birthday, ez!";
         }
-        else if (instance.get(2) + 1 == 6 && instance.get(5) == 1) {
+        else if (c.get(Calendar.MONTH) + 1 == 6 && c.get(Calendar.DAY_OF_MONTH) == 1) {
             this.splash = "Happy birthday, Notch!";
         }
-        else if (instance.get(2) + 1 == 12 && instance.get(5) == 24) {
+        else if (c.get(Calendar.MONTH) + 1 == 12 && c.get(Calendar.DAY_OF_MONTH) == 24) {
             this.splash = "Merry X-mas!";
         }
-        else if (instance.get(2) + 1 == 1 && instance.get(5) == 1) {
+        else if (c.get(Calendar.MONTH) + 1 == 1 && c.get(Calendar.DAY_OF_MONTH) == 1) {
             this.splash = "Happy new year!";
         }
-        final Language instance2 = Language.getInstance();
-        final int y = this.height / 4 + 48;
-        this.buttons.add(new Button(1, this.width / 2 - 100, y, instance2.getElement("menu.singleplayer")));
-        this.buttons.add(this.multiplayerButton = new Button(2, this.width / 2 - 100, y + 24, instance2.getElement("menu.multiplayer")));
-        this.buttons.add(new Button(3, this.width / 2 - 100, y + 48, instance2.getElement("menu.mods")));
+
+        final Language language = Language.getInstance();
+
+        final int spacing = 24;
+        final int topPos = this.height / 4 + spacing * 2;
+
+        this.buttons.add(new Button(1, this.width / 2 - 100, topPos, language.getElement("menu.singleplayer")));
+        this.buttons.add(this.multiplayerButton = new Button(2, this.width / 2 - 100, topPos + spacing, language.getElement("menu.multiplayer")));
+        this.buttons.add(new Button(3, this.width / 2 - 100, topPos + spacing * 2, language.getElement("menu.mods")));
+
         if (this.minecraft.appletMode) {
-            this.buttons.add(new Button(0, this.width / 2 - 100, y + 72, instance2.getElement("menu.options")));
+            this.buttons.add(new Button(0, this.width / 2 - 100, topPos + spacing * 3, language.getElement("menu.options")));
         }
         else {
-            this.buttons.add(new Button(0, this.width / 2 - 100, y + 72 + 12, 98, 20, instance2.getElement("menu.options")));
-            this.buttons.add(new Button(4, this.width / 2 + 2, y + 72 + 12, 98, 20, instance2.getElement("menu.quit")));
+            this.buttons.add(new Button(0, this.width / 2 - 100, topPos + spacing * 3 + 12, 98, 20, language.getElement("menu.options")));
+            this.buttons.add(new Button(4, this.width / 2 + 2, topPos + spacing * 3 + 12, 98, 20, language.getElement("menu.quit")));
         }
+
         if (this.minecraft.user == null) {
             this.multiplayerButton.active = false;
         }
@@ -94,48 +102,43 @@ public class TitleScreen extends Screen
     
     @Override
     protected void buttonClicked(final Button button) {
-        if (button.id == 0) {
-            this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
-        }
-        if (button.id == 1) {
-            this.minecraft.setScreen(new SelectWorldScreen(this));
-        }
-        if (button.id == 2) {
-            this.minecraft.setScreen(new JoinMultiplayerScreen(this));
-        }
-        if (button.id == 3) {
-            this.minecraft.setScreen(new TexturePackSelectScreen(this));
-        }
-        if (button.id == 4) {
-            this.minecraft.stop();
-        }
+        if (button.id == 0) this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
+        if (button.id == 1) this.minecraft.setScreen(new SelectWorldScreen(this));
+        if (button.id == 2) this.minecraft.setScreen(new JoinMultiplayerScreen(this));
+        if (button.id == 3) this.minecraft.setScreen(new TexturePackSelectScreen(this));
+        if (button.id == 4) this.minecraft.stop();
     }
     
     @Override
     public void render(final int xm, final int ym, final float a) {
         this.renderBackground();
-        final Tesselator instance = Tesselator.instance;
-        final int n = this.width / 2 - 274 / 2;
-        final int n2 = 30;
+        final Tesselator t = Tesselator.instance;
+
+        final int logoWidth = 155 + 119;
+        final int logoX = this.width / 2 - logoWidth / 2;
+        final int logoY = 30;
+
         glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/title/mclogo.png"));
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.blit(n + 0, n2 + 0, 0, 0, 155, 44);
-        this.blit(n + 155, n2 + 0, 0, 45, 155, 44);
-        instance.color(0xffffff);
+        this.blit(logoX + 0, logoY + 0, 0, 0, 155, 44);
+        this.blit(logoX + 155, logoY + 0, 0, 45, 155, 44);
+        t.color(0xffffff);
         glPushMatrix();
         glTranslatef((float)(this.width / 2 + 90), 70.0f, 0.0f);
+
         glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
-        final float n3 = (1.8f - Mth.abs(Mth.sin(System.currentTimeMillis() % 1000L / 1000.0f * Mth.PI * 2.0f) * 0.1f)) * 100.0f / (this.font.width(this.splash) + 32);
-        glScalef(n3, n3, n3);
+        float sss = (1.8f - Mth.abs(Mth.sin(System.currentTimeMillis() % 1000L / 1000.0f * Mth.PI * 2.0f) * 0.1f));
+
+        sss = sss * 100.0f / (this.font.width(this.splash) + 8 * 4);
+        glScalef(sss, sss, sss);
         this.drawCenteredString(this.font, this.splash, 0, -8, 0xffff00);
         glPopMatrix();
+
         this.drawString(this.font, Minecraft.VERSION_STRING, 2, 2, 0x505050);
-        final String s = "Copyright Mojang AB. Do not distribute.";
-        this.drawString(this.font, s, this.width - this.font.width(s) - 2, this.height - 10, 0xffffff);
+        final String msg = "Copyright Mojang AB. Do not distribute.";
+        this.drawString(this.font, msg, this.width - this.font.width(msg) - 2, this.height - 10, 0xffffff);
+
         super.render(xm, ym, a);
     }
-    
-    static {
-        random = new Random();
-    }
+
 }

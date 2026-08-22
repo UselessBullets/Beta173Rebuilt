@@ -4,6 +4,8 @@
 
 package net.minecraft.client.player;
 
+import net.minecraft.SharedConstants;
+import net.minecraft.world.phys.Vec3;
 import util.Mth;
 import net.minecraft.stats.Achievement;
 import net.minecraft.stats.Stat;
@@ -32,6 +34,7 @@ public class LocalPlayer extends Player
 {
     public Input input;
     protected Minecraft minecraft;
+    private float flyX, flyY, flyZ;
     private SmoothFloat smoothFlyX = new SmoothFloat();
     private SmoothFloat smoothFlyY = new SmoothFloat();
     private SmoothFloat smoothFlyZ = new SmoothFloat();
@@ -48,7 +51,37 @@ public class LocalPlayer extends Player
     
     @Override
     public void move(final double xa, final double ya, final double za) {
-        super.move(xa, ya, za);
+        // Useless - recovered from LCE, presumably is the usage of the flying stuff stored in option
+        if (Minecraft.DEADMAU5_CAMERA_CHEATS) {
+            if (this == this.minecraft.player && this.minecraft.options.isFlying) {
+                this.noPhysics = true;
+                float tmp = this.walkDist; // update
+                calculateFlight((float) xa, (float) ya, (float) za);
+                this.fallDistance = 0.0f;
+                this.yd = 0.0f;
+                super.move(this.flyX, this.flyY, this.flyZ);
+                this.onGround = true;
+                this.walkDist = tmp;
+            } else {
+                this.noPhysics = false;
+                super.move(xa, ya, za);
+            }
+        } else {
+            super.move(xa, ya, za);
+        }
+    }
+
+    // Useless - recovered from LCE, presumably is the usage of the flying stuff stored in option
+    private void calculateFlight(float xa, float ya, float za)
+    {
+        xa = xa * this.minecraft.options.flySpeed;
+        ya = ((this.input.jumping ? 1 : 0) + (this.input.sneaking ? -1 : 0)) * this.minecraft.options.flySpeed / 5;
+        za = za * this.minecraft.options.flySpeed;
+
+        this.flyX = this.smoothFlyX.getNewDeltaValue(xa, .35f * this.minecraft.options.sensitivity);
+        this.flyY = this.smoothFlyY.getNewDeltaValue(ya, .35f * this.minecraft.options.sensitivity);
+        this.flyZ = this.smoothFlyZ.getNewDeltaValue(za, .35f * this.minecraft.options.sensitivity);
+
     }
     
     public void updateAi() {

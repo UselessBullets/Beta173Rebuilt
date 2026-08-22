@@ -14,6 +14,7 @@ import java.awt.BorderLayout;
 import java.awt.Frame;
 import net.minecraft.Pos;
 import net.minecraft.client.player.KeyboardInput;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.chunk.ChunkSource;
@@ -21,6 +22,7 @@ import net.minecraft.client.gui.ChatScreen;
 import net.minecraft.client.gui.inventory.InventoryScreen;
 import net.minecraft.client.gui.InBedChatScreen;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import util.Mth;
 import net.minecraft.world.level.chunk.ChunkCache;
@@ -105,6 +107,7 @@ public abstract class Minecraft implements Runnable
     public static byte[] __unused_byte_buffer = new byte[10485760];
     private static Minecraft instance;
     public static final boolean FLYBY_MODE = false; // Useless - In the LCE and b1.2 leaks
+    public static final boolean DEADMAU5_CAMERA_CHEATS = false; // Useless - In the LCE leaks
     public static final String VERSION_STRING = "Minecraft " + SharedConstants.VERSION_STRING;
     public GameMode gameMode;
     private boolean fullscreen = false;
@@ -548,7 +551,7 @@ public abstract class Minecraft implements Runnable
     // Useless - Sourced from the b1.2 leak, local variable names are best guesses by me, there is no sources for that afaik
     public void generateFlyby() {
         this.gameMode = new SurvivalMode(this);
-        this.selectLevel("flyby", "flyby", 1234L); // Useless - Added second and third args, b1.2 didn't require those, seed can change what world seed is flown through though
+        this.selectLevel("flyby", "flyby", 0L); // Useless - Added second and third args, b1.2 didn't require those, seed can change what world seed is flown through though
         this.setScreen(null);
 
         double y = 0.0;
@@ -557,15 +560,15 @@ public abstract class Minecraft implements Runnable
         flybyDirectory.mkdir();
 
         // Useless - Sets the Truevision TGA image header bytes
-        byte[] headerBytes = new byte[18];
-        headerBytes[2] = 2; // Useless - Image type, 2 is "uncompressed true-color image"
-        headerBytes[12] = (byte)(this.width % 256); // Useless - Image Width Byte 1
-        headerBytes[13] = (byte)(this.width / 256); // Useless - Image Width Byte 2
-        headerBytes[14] = (byte)(this.height % 256); // Useless - Image Height Byte 1
-        headerBytes[15] = (byte)(this.height / 256); // Useless - Image Height Byte 2
-        headerBytes[16] = 24;  // Useless - Pixel Depth bits per pixel
+        byte[] header = new byte[18];
+        header[2] = 2; // Useless - Image type, 2 is "uncompressed true-color image"
+        header[12] = (byte)(this.width % 256); // Useless - Image Width Byte 1
+        header[13] = (byte)(this.width / 256); // Useless - Image Width Byte 2
+        header[14] = (byte)(this.height % 256); // Useless - Image Height Byte 1
+        header[15] = (byte)(this.height / 256); // Useless - Image Height Byte 2
+        header[16] = 24;  // Useless - Pixel Depth bits per pixel
 
-        byte[] pixelBytes = new byte[this.width * this.height * 3];
+        byte[] pb = new byte[this.width * this.height * 3];
         int frame = -20;
         short fps = 352; // Useless - Raw assumption, thinking this is the FPS notch typically had for mc, so its used to calculate how many seconds flyByLength should be
         int flybyLength = fps * 60;
@@ -641,12 +644,12 @@ public abstract class Minecraft implements Runnable
                 }
 
                 try {
-                    pixelBuffer.get(pixelBytes);
+                    pixelBuffer.get(pb);
                     File imageFile = new File(flybyDirectory, "img" + id + ".tga");
-                    DataOutputStream os = new DataOutputStream(new FileOutputStream(imageFile));
-                    os.write(headerBytes);
-                    os.write(pixelBytes);
-                    os.close();
+                    DataOutputStream dos = new DataOutputStream(new FileOutputStream(imageFile));
+                    dos.write(header);
+                    dos.write(pb);
+                    dos.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -809,81 +812,146 @@ public abstract class Minecraft implements Runnable
     }
     
     private void checkScreenshot() {
-        if (Keyboard.isKeyDown(60)) {
+        if (Keyboard.isKeyDown(Keyboard.KEY_F2)) {
             if (!this.wasDown) {
                 this.wasDown = true;
-                this.gui.addMessage(Screenshot.grab(Minecraft.workDir, this.width, this.height));
+                // Useless - b1.2 huge screenshot code, speculatively believe it was probably just commented out instead of deleted
+//                if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+//                    this.gui.addMessage(this.grabHugeScreenshot(workDir, this.width, this.height, 36450, 17700));
+//                } else {
+                    this.gui.addMessage(Screenshot.grab(Minecraft.workDir, this.width, this.height));
+//                }
             }
         }
         else {
             this.wasDown = false;
         }
     }
+
+    private String grabHugeScreenshot(File workDir, int width, int height, int ssWidth, int ssHeight) {
+        try {
+            ByteBuffer pixels = BufferUtils.createByteBuffer(width * height * 3);
+            Screenshot ss = new Screenshot(workDir, ssWidth, ssHeight, height);
+            double rawZoomW = (double)ssWidth / width;
+            double rawZoomH = (double)ssHeight / height;
+            double zoom = rawZoomW > rawZoomH ? rawZoomW : rawZoomH;
+
+            for (int yo = (ssHeight - 1) / height * height; yo >= 0; yo -= height) {
+                for (int xo = 0; xo < ssWidth; xo += width) {
+                    int rowWidth = width;
+                    int rowHeight = height;
+                    glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain.png"));
+                    double zoomX = (ssWidth - width) / 2.0 * 2.0 - xo * 2;
+                    double zoomY = (ssHeight - height) / 2.0 * 2.0 - yo * 2;
+                    zoomX /= width;
+                    zoomY /= height;
+                    this.gameRenderer.zoomRegion(zoom, zoomX, zoomY);
+                    this.gameRenderer.renderLevel(1.0F, 0);
+                    this.gameRenderer.unZoomRegion();
+                    Display.update();
+
+                    try {
+                        Thread.sleep(10L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    Display.update();
+                    pixels.clear();
+                    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                    glReadPixels(0, 0, rowWidth, rowHeight, GL12.GL_BGR, GL_UNSIGNED_BYTE, pixels);
+                    ss.addRegion(pixels, xo, yo, rowWidth, rowHeight);
+                }
+
+                ss.saveRow();
+            }
+
+            return ss.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed to save image: " + e;
+        }
+    }
     
     private void renderFpsMeter(final long tickTime) {
-        final long n = 16666666L;
+        final long nsPer60Fps = 1000000000L / 60;
         if (this.lastTimer == -1L) {
             this.lastTimer = System.nanoTime();
         }
-        final long nanoTime = System.nanoTime();
+
+        final long now = System.nanoTime();
         Minecraft.tickTimes[Minecraft.frameTimePos & Minecraft.frameTimes.length - 1] = tickTime;
-        Minecraft.frameTimes[Minecraft.frameTimePos++ & Minecraft.frameTimes.length - 1] = nanoTime - this.lastTimer;
-        this.lastTimer = nanoTime;
+        Minecraft.frameTimes[Minecraft.frameTimePos++ & Minecraft.frameTimes.length - 1] = now - this.lastTimer;
+        this.lastTimer = now;
+
         glClear(GL_DEPTH_BUFFER_BIT);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(0.0, (double)this.width, (double)this.height, 0.0, 1000.0, 3000.0);
+        glOrtho(0.0, this.width, this.height, 0.0, 1000.0, 3000.0);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         glTranslatef(0.0f, 0.0f, -2000.0f);
+
         glLineWidth(1.0f);
         glDisable(GL_TEXTURE_2D);
-        final Tesselator instance = Tesselator.instance;
-        instance.begin(GL_QUADS);
-        final int n2 = (int)(n / 200000L);
-        instance.color(0x20000000);
-        instance.vertex(0.0, this.height - n2, 0.0);
-        instance.vertex(0.0, this.height, 0.0);
-        instance.vertex(Minecraft.frameTimes.length, this.height, 0.0);
-        instance.vertex(Minecraft.frameTimes.length, this.height - n2, 0.0);
-        instance.color(0x20200000);
-        instance.vertex(0.0, this.height - n2 * 2, 0.0);
-        instance.vertex(0.0, this.height - n2, 0.0);
-        instance.vertex(Minecraft.frameTimes.length, this.height - n2, 0.0);
-        instance.vertex(Minecraft.frameTimes.length, this.height - n2 * 2, 0.0);
-        instance.end();
-        long n3 = 0L;
+        final Tesselator t = Tesselator.instance;
+        t.begin(GL_QUADS);
+        final int hh1 = (int)(nsPer60Fps / 200000L);
+        t.color(0x20000000);
+        t.vertex(0.0, this.height - hh1, 0.0);
+        t.vertex(0.0, this.height, 0.0);
+        t.vertex(Minecraft.frameTimes.length, this.height, 0.0);
+        t.vertex(Minecraft.frameTimes.length, this.height - hh1, 0.0);
+
+        t.color(0x20200000);
+        t.vertex(0.0, this.height - hh1 * 2, 0.0);
+        t.vertex(0.0, this.height - hh1, 0.0);
+        t.vertex(Minecraft.frameTimes.length, this.height - hh1, 0.0);
+        t.vertex(Minecraft.frameTimes.length, this.height - hh1 * 2, 0.0);
+
+        t.end();
+        long totalTime = 0L;
         for (int i = 0; i < Minecraft.frameTimes.length; ++i) {
-            n3 += Minecraft.frameTimes[i];
+            totalTime += Minecraft.frameTimes[i];
         }
-        final int n4 = (int)(n3 / 200000L / Minecraft.frameTimes.length);
-        instance.begin(GL_QUADS);
-        instance.color(0x20400000);
-        instance.vertex(0.0, this.height - n4, 0.0);
-        instance.vertex(0.0, this.height, 0.0);
-        instance.vertex(Minecraft.frameTimes.length, this.height, 0.0);
-        instance.vertex(Minecraft.frameTimes.length, this.height - n4, 0.0);
-        instance.end();
-        instance.begin(GL_LINES);
-        for (int j = 0; j < Minecraft.frameTimes.length; ++j) {
-            final int n5 = (j - Minecraft.frameTimePos & Minecraft.frameTimes.length - 1) * 255 / Minecraft.frameTimes.length;
-            final int n6 = n5 * n5 / 255;
-            final int n7 = n6 * n6 / 255;
-            if (Minecraft.frameTimes[j] > n) {
-                instance.color(0xff000000 + n7 * 0x10000);
+        final int hh = (int)(totalTime / 200000L / Minecraft.frameTimes.length);
+        t.begin(GL_QUADS);
+        t.color(0x20400000);
+        t.vertex(0.0, this.height - hh, 0.0);
+        t.vertex(0.0, this.height, 0.0);
+        t.vertex(Minecraft.frameTimes.length, this.height, 0.0);
+        t.vertex(Minecraft.frameTimes.length, this.height - hh, 0.0);
+        t.end();
+        t.begin(GL_LINES);
+        for (int i = 0; i < Minecraft.frameTimes.length; ++i) {
+            final int col = (i - Minecraft.frameTimePos & Minecraft.frameTimes.length - 1) * 255 / Minecraft.frameTimes.length;
+            int cc = col * col / 255;
+            cc = cc * cc / 255;
+            if (Minecraft.frameTimes[i] > nsPer60Fps) {
+                t.color(0xff000000 + cc * 0x10000);
             }
             else {
-                instance.color(0xff000000 + n7 * 0x100);
+                t.color(0xff000000 + cc * 0x100);
             }
-            final long n8 = Minecraft.frameTimes[j] / 200000L;
-            final long n9 = Minecraft.tickTimes[j] / 200000L;
-            instance.vertex(j + 0.5f, this.height - n8 + 0.5f, 0.0);
-            instance.vertex(j + 0.5f, this.height + 0.5f, 0.0);
-            instance.color(0xff000000 + n7 * 0x10000 + n7 * 0x100 + n7 * 0x1);
-            instance.vertex(j + 0.5f, this.height - n8 + 0.5f, 0.0);
-            instance.vertex(j + 0.5f, this.height - (n8 - n9) + 0.5f, 0.0);
+
+            final long time = Minecraft.frameTimes[i] / 200000L;
+            final long time2 = Minecraft.tickTimes[i] / 200000L;
+
+            t.vertex(i + 0.5f, this.height - time + 0.5f, 0.0);
+            t.vertex(i + 0.5f, this.height + 0.5f, 0.0);
+
+            // if (Minecraft.frameTimes[i]>nsPer60Fps) {
+            t.color(0xff000000 + cc * 0x10000 + cc * 0x100 + cc * 0x1);
+            // } else {
+            // t.color(0xff808080 + cc/2 * 256);
+            // }
+
+            t.vertex(i + 0.5f, this.height - time + 0.5f, 0.0);
+            t.vertex(i + 0.5f, this.height - (time - time2) + 0.5f, 0.0);
         }
-        instance.end();
+        t.end();
+
         glEnable(GL_TEXTURE_2D);
     }
     
@@ -892,12 +960,9 @@ public abstract class Minecraft implements Runnable
     }
     
     public void grabMouse() {
-        if (!Display.isActive()) {
-            return;
-        }
-        if (this.mouseGrabbed) {
-            return;
-        }
+        if (!Display.isActive()) return;
+        if (this.mouseGrabbed) return;
+
         this.mouseGrabbed = true;
         this.mouseHandler.grab();
         this.setScreen(null);
@@ -906,9 +971,8 @@ public abstract class Minecraft implements Runnable
     }
     
     public void releaseMouse() {
-        if (!this.mouseGrabbed) {
-            return;
-        }
+        if (!this.mouseGrabbed) return;
+
         if (this.player != null) {
             this.player.releaseAllKeys();
         }
@@ -917,22 +981,16 @@ public abstract class Minecraft implements Runnable
     }
     
     public void pauseGame() {
-        if (this.screen != null) {
-            return;
-        }
+        if (this.screen != null) return;
         this.setScreen(new PauseScreen());
     }
     
     private void handleMouseDown(final int button, final boolean down) {
-        if (this.gameMode.instaBuild) {
-            return;
-        }
-        if (!down) {
-            this.missTime = 0;
-        }
-        if (button == 0 && this.missTime > 0) {
-            return;
-        }
+        if (this.gameMode.instaBuild) return;
+
+        if (!down) this.missTime = 0;
+        if (button == 0 && this.missTime > 0) return;
+
         if (down && this.hitResult != null && this.hitResult.type == HitResult.Type.TILE && button == 0) {
             final int x = this.hitResult.x;
             final int y = this.hitResult.y;
@@ -946,17 +1004,15 @@ public abstract class Minecraft implements Runnable
     }
     
     private void handleMouseClick(final int button) {
-        if (button == 0 && this.missTime > 0) {
-            return;
-        }
+        if (button == 0 && this.missTime > 0) return;
+
         if (button == 0) {
             this.player.swing();
         }
-        boolean b = true;
+
+        boolean mayUse = true;
         if (this.hitResult == null) {
-            if (button == 0 && !(this.gameMode instanceof CreativeMode)) {
-                this.missTime = 10;
-            }
+            if (button == 0 && !(this.gameMode instanceof CreativeMode)) this.missTime = 10;
         }
         else if (this.hitResult.type == HitResult.Type.ENTITY) {
             if (button == 0) {
@@ -970,31 +1026,31 @@ public abstract class Minecraft implements Runnable
             final int x = this.hitResult.x;
             final int y = this.hitResult.y;
             final int z = this.hitResult.z;
-            final int f = this.hitResult.f;
+            final int face = this.hitResult.f;
             if (button == 0) {
                 this.gameMode.startDestroyBlock(x, y, z, this.hitResult.f);
             }
             else {
-                final ItemInstance selected = this.player.inventory.getSelected();
-                final int n = (selected != null) ? selected.count : 0;
-                if (this.gameMode.useItemOn(this.player, this.level, selected, x, y, z, f)) {
-                    b = false;
+                final ItemInstance item = this.player.inventory.getSelected();
+                final int oldCount = (item != null) ? item.count : 0;
+                if (this.gameMode.useItemOn(this.player, this.level, item, x, y, z, face)) {
+                    mayUse = false;
                     this.player.swing();
                 }
-                if (selected == null) {
+                if (item == null) {
                     return;
                 }
-                if (selected.count == 0) {
+                if (item.count == 0) {
                     this.player.inventory.items[this.player.inventory.selected] = null;
                 }
-                else if (selected.count != n) {
+                else if (item.count != oldCount) {
                     this.gameRenderer.itemInHandRenderer.itemPlaced();
                 }
             }
         }
-        if (b && button == 1) {
-            final ItemInstance selected2 = this.player.inventory.getSelected();
-            if (selected2 != null && this.gameMode.useItem(this.player, this.level, selected2)) {
+        if (mayUse && button == 1) {
+            final ItemInstance item = this.player.inventory.getSelected();
+            if (item != null && this.gameMode.useItem(this.player, this.level, item)) {
                 this.gameRenderer.itemInHandRenderer.itemUsed();
             }
         }
@@ -1007,12 +1063,8 @@ public abstract class Minecraft implements Runnable
                 Display.setDisplayMode(Display.getDesktopDisplayMode());
                 this.width = Display.getDisplayMode().getWidth();
                 this.height = Display.getDisplayMode().getHeight();
-                if (this.width <= 0) {
-                    this.width = 1;
-                }
-                if (this.height <= 0) {
-                    this.height = 1;
-                }
+                if (this.width <= 0) this.width = 1;
+                if (this.height <= 0) this.height = 1;
             }
             else {
                 if (this.parent != null) {
@@ -1023,12 +1075,9 @@ public abstract class Minecraft implements Runnable
                     this.width = this.orgWidth;
                     this.height = this.orgHeight;
                 }
-                if (this.width <= 0) {
-                    this.width = 1;
-                }
-                if (this.height <= 0) {
-                    this.height = 1;
-                }
+
+                if (this.width <= 0) this.width = 1;
+                if (this.height <= 0) this.height = 1;
             }
             if (this.screen != null) {
                 this.resize(this.width, this.height);
@@ -1036,38 +1085,31 @@ public abstract class Minecraft implements Runnable
             Display.setFullscreen(this.fullscreen);
             Display.update();
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
     }
     
     private void resize(int width, int height) {
-        if (width <= 0) {
-            width = 1;
-        }
-        if (height <= 0) {
-            height = 1;
-        }
+        if (width <= 0) width = 1;
+        if (height <= 0) height = 1;
         this.width = width;
         this.height = height;
+
         if (this.screen != null) {
-            final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.options, width, height);
-            this.screen.init(this, screenSizeCalculator.getWidth(), screenSizeCalculator.getHeight());
+            final ScreenSizeCalculator ssc = new ScreenSizeCalculator(this.options, width, height);
+            int screenWidth = ssc.getWidth();
+            int screenHeight = ssc.getHeight();
+            this.screen.init(this, screenWidth, screenHeight);
         }
     }
     
     private void handleGrabTexture() {
         if (this.hitResult != null) {
             int id = this.level.getTile(this.hitResult.x, this.hitResult.y, this.hitResult.z);
-            if (id == Tile.grass.id) {
-                id = Tile.dirt.id;
-            }
-            if (id == Tile.stoneSlab.id) {
-                id = Tile.stoneSlabHalf.id;
-            }
-            if (id == Tile.unbreakable.id) {
-                id = Tile.rock.id;
-            }
+            if (id == Tile.grass.id) id = Tile.dirt.id;
+            if (id == Tile.stoneSlab.id) id = Tile.stoneSlabHalf.id;
+            if (id == Tile.unbreakable.id) id = Tile.rock.id;
             this.player.inventory.grabTexture(id, this.gameMode instanceof CreativeMode);
         }
     }
@@ -1075,15 +1117,13 @@ public abstract class Minecraft implements Runnable
     private void verify() {
         new Thread(() -> {
             try {
-                final HttpURLConnection httpURLConnection = (HttpURLConnection)new URL("https://login.minecraft.net/session?name=" + user.name + "&session=" + user.sessionId).openConnection();
-                httpURLConnection.connect();
-                if (httpURLConnection.getResponseCode() == 400) {
-                    warezTime = System.currentTimeMillis();
-                }
-                httpURLConnection.disconnect();
+                final HttpURLConnection huc = (HttpURLConnection)new URL("https://login.minecraft.net/session?name=" + this.user.name + "&session=" + this.user.sessionId).openConnection();
+                huc.connect();
+                if (huc.getResponseCode() == 400) warezTime = System.currentTimeMillis();
+                huc.disconnect();
             }
-            catch (final Exception ex) {
-                ex.printStackTrace();
+            catch (final Exception e) {
+                e.printStackTrace();
             }
         }).start();
     }
@@ -1092,22 +1132,27 @@ public abstract class Minecraft implements Runnable
         if (this.ticks == 6000) {
             this.verify();
         }
+
         this.stats.tick();
         this.gui.tick();
         this.gameRenderer.pick(1.0f);
+
         if (this.player != null) {
-            final ChunkSource chunkSource = this.level.getChunkSource();
-            if (chunkSource instanceof ChunkCache) {
-                ((ChunkCache)chunkSource).centerOn(Mth.floor((float)(int)this.player.x) >> 4, Mth.floor((float)(int)this.player.z) >> 4);
+            final ChunkSource cs = this.level.getChunkSource();
+            if (cs instanceof ChunkCache) {
+                ChunkCache spcc = (ChunkCache) cs;
+
+                int xt = Mth.floor((float)(int)this.player.x) >> 4;
+                int zt = Mth.floor((float)(int)this.player.z) >> 4;
+                spcc.centerOn(xt, zt);
             }
         }
-        if (!this.pause && this.level != null) {
-            this.gameMode.tick();
-        }
+
+        if (!this.pause && this.level != null) this.gameMode.tick();
+
         glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain.png"));
-        if (!this.pause) {
-            this.textures.tick();
-        }
+        if (!this.pause) this.textures.tick();
+
         if (this.screen == null && this.player != null) {
             if (this.player.health <= 0) {
                 this.setScreen(null);
@@ -1119,10 +1164,12 @@ public abstract class Minecraft implements Runnable
         else if (this.screen != null && this.screen instanceof InBedChatScreen && !this.player.isSleeping()) {
             this.setScreen(null);
         }
+
         if (this.screen != null) {
             this.missTime = 10000;
             this.lastClickTick = this.ticks + 10000;
         }
+
         if (this.screen != null) {
             this.screen.updateEvents();
             if (this.screen != null) {
@@ -1130,25 +1177,23 @@ public abstract class Minecraft implements Runnable
                 this.screen.tick();
             }
         }
+
         if (this.screen == null || this.screen.passEvents) {
             while (Mouse.next()) {
-                if (System.currentTimeMillis() - this.lastTickTime > 200L) {
-                    continue;
-                }
-                int eventDWheel = Mouse.getEventDWheel();
-                if (eventDWheel != 0) {
-                    this.player.inventory.swapPaint(eventDWheel);
+                long passedTime = System.currentTimeMillis() - this.lastTickTime;
+                if (passedTime > 200L) continue;
+
+                int wheel = Mouse.getEventDWheel();
+                if (wheel != 0) {
+                    this.player.inventory.swapPaint(wheel);
                     if (this.options.isFlying) {
-                        if (eventDWheel > 0) {
-                            eventDWheel = 1;
-                        }
-                        if (eventDWheel < 0) {
-                            eventDWheel = -1;
-                        }
-                        final Options options = this.options;
-                        options.flySpeed += eventDWheel * 0.25f;
+                        if (wheel > 0) wheel = 1;
+                        if (wheel < 0) wheel = -1;
+
+                        this.options.flySpeed += wheel * 0.25f;
                     }
                 }
+
                 if (this.screen == null) {
                     if (!this.mouseGrabbed && Mouse.getEventButtonState()) {
                         this.grabMouse();
@@ -1167,66 +1212,95 @@ public abstract class Minecraft implements Runnable
                         }
                         this.handleGrabTexture();
                     }
-                }
-                else {
-                    if (this.screen == null) {
-                        continue;
-                    }
+                } else if (this.screen != null) {
                     this.screen.mouseEvent();
                 }
             }
-            if (this.missTime > 0) {
-                --this.missTime;
-            }
+
+            if (this.missTime > 0) --this.missTime;
+
             while (Keyboard.next()) {
                 this.player.setKey(Keyboard.getEventKey(), Keyboard.getEventKeyState());
                 if (Keyboard.getEventKeyState()) {
-                    if (Keyboard.getEventKey() == 87) {
+                    if (Keyboard.getEventKey() == Keyboard.KEY_F11) {
                         this.toggleFullScreen();
+                        continue;
+                    }
+
+                    // Useless - Below was a comment from LCE leak, presumably a quick debug way to spawn a nether portal in
+                     /*if (Keyboard.getEventKey() == Keyboard.KEY_F4) {
+                         new PortalForcer().createPortal(level, player);
+                         continue;
+                     }*/
+
+                    // Useless - Below was a comment from LCE leaks, unsure if this was for a later version or not can't actually find any references to level.pathFind() existing anywhere
+                   /* if (Keyboard.getEventKey() == Keyboard.KEY_RETURN) {
+                        level.pathFind(); continue;
+                    }*/
+
+
+                    if (this.screen != null) {
+                        this.screen.keyboardEvent();
                     }
                     else {
-                        if (this.screen != null) {
-                            this.screen.keyboardEvent();
+                        if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
+                            this.pauseGame();
                         }
-                        else {
-                            if (Keyboard.getEventKey() == 1) {
-                                this.pauseGame();
+
+                        if (Keyboard.getEventKey() == Keyboard.KEY_S && Keyboard.isKeyDown(Keyboard.KEY_F3)) {
+                            this.reloadSound();
+                        }
+
+                        if (Keyboard.getEventKey() == 59) {
+                            this.options.hideGui = !this.options.hideGui;
+                        }
+                        if (Keyboard.getEventKey() == 61) {
+                            this.options.renderDebug = !this.options.renderDebug;
+                        }
+                        if (Keyboard.getEventKey() == 63) {
+                            this.options.thirdPersonView = !this.options.thirdPersonView;
+                        }
+                        if (Keyboard.getEventKey() == 66) {
+                            this.options.smoothCamera = !this.options.smoothCamera;
+                        }
+
+                        if (DEADMAU5_CAMERA_CHEATS) {
+                            if (Keyboard.getEventKey() == Keyboard.KEY_F6) {
+                                options.isFlying = !options.isFlying;
                             }
-                            if (Keyboard.getEventKey() == 31 && Keyboard.isKeyDown(61)) {
-                                this.reloadSound();
+                            if (Keyboard.getEventKey() == Keyboard.KEY_F9) {
+                                options.fixedCamera = !options.fixedCamera;
                             }
-                            if (Keyboard.getEventKey() == 59) {
-                                this.options.hideGui = !this.options.hideGui;
+                            if (Keyboard.getEventKey() == Keyboard.KEY_ADD) {
+                                options.cameraSpeed += .1f;
                             }
-                            if (Keyboard.getEventKey() == 61) {
-                                this.options.renderDebug = !this.options.renderDebug;
-                            }
-                            if (Keyboard.getEventKey() == 63) {
-                                this.options.thirdPersonView = !this.options.thirdPersonView;
-                            }
-                            if (Keyboard.getEventKey() == 66) {
-                                this.options.smoothCamera = !this.options.smoothCamera;
-                            }
-                            if (Keyboard.getEventKey() == this.options.keyBuild.key) {
-                                this.setScreen(new InventoryScreen(this.player));
-                            }
-                            if (Keyboard.getEventKey() == this.options.keyDrop.key) {
-                                this.player.drop();
-                            }
-                            if (this.isClientSide() && Keyboard.getEventKey() == this.options.keyChat.key) {
-                                this.setScreen(new ChatScreen());
+                            if (Keyboard.getEventKey() == Keyboard.KEY_SUBTRACT) {
+                                options.cameraSpeed -= .1f;
+                                if (options.cameraSpeed < 0) {
+                                    options.cameraSpeed = 0;
+                                }
                             }
                         }
-                        for (int i = 0; i < 9; ++i) {
-                            if (Keyboard.getEventKey() == 2 + i) {
-                                this.player.inventory.selected = i;
-                            }
+
+                        if (Keyboard.getEventKey() == this.options.keyBuild.key) {
+                            this.setScreen(new InventoryScreen(this.player));
                         }
-                        if (Keyboard.getEventKey() != this.options.keyFog.key) {
-                            continue;
+                        if (Keyboard.getEventKey() == this.options.keyDrop.key) {
+                            this.player.drop();
                         }
-                        this.options.toggle(Option.RENDER_DISTANCE, (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54)) ? -1 : 1);
+                        if (this.isClientSide() && Keyboard.getEventKey() == this.options.keyChat.key) {
+                            this.setScreen(new ChatScreen());
+                        }
                     }
+                    for (int i = 0; i < 9; ++i) {
+                        if (Keyboard.getEventKey() == 2 + i) {
+                            this.player.inventory.selected = i;
+                        }
+                    }
+                    if (Keyboard.getEventKey() != this.options.keyFog.key) {
+                        continue;
+                    }
+                    this.options.toggle(Option.RENDER_DISTANCE, (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54)) ? -1 : 1);
                 }
             }
             if (this.screen == null) {
@@ -1632,7 +1706,42 @@ public abstract class Minecraft implements Runnable
     }
     
     public boolean handleClientSideCommand(final String chatMessage) {
-        if (chatMessage.startsWith("/")) {}
+        if (chatMessage.startsWith("/")) {
+            // Useless - recovered from LCE, presumably is the usage of the flying stuff stored in option
+            // Presumably why the empty if statement has existed here at all
+            if (DEADMAU5_CAMERA_CHEATS) {
+                if (chatMessage.startsWith("/follow")) {
+                    String[] tokens = chatMessage.split(" ");
+                    if (tokens.length >= 2) {
+                        String playerName = tokens[1];
+
+                        boolean found = false;
+                        for (Player player : this.level.players) {
+                            if (playerName.equalsIgnoreCase(player.name)) {
+                                this.cameraTargetPlayer = player;
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found) {
+                            try {
+                                int entityId = Integer.parseInt(playerName);
+                                for (Entity e : this.level.entities) {
+                                    if (e.entityId == entityId && e instanceof Mob) {
+                                        this.cameraTargetPlayer = (Mob) e;
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            } catch (NumberFormatException e) {}
+                        }
+                    }
+
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

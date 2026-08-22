@@ -5,6 +5,7 @@
 package net.minecraft.client.renderer;
 
 import net.minecraft.client.renderer.culling.Culler;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GLContext;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.Level;
@@ -52,7 +53,7 @@ public class GameRenderer
     private SmoothFloat smoothTurnX = new SmoothFloat();
     private SmoothFloat smoothTurnY = new SmoothFloat();
     private SmoothFloat smoothDistance = new SmoothFloat();
-    private SmoothFloat smoothRoation = new SmoothFloat();
+    private SmoothFloat smoothRotation = new SmoothFloat();
     private SmoothFloat smoothTilt = new SmoothFloat();
     private SmoothFloat smoothRoll = new SmoothFloat();
     private float thirdDistance = 4.0f;
@@ -94,6 +95,57 @@ public class GameRenderer
         this.thirdTiltO = this.thirdTilt;
         this.fovOffsetO = this.fovOffset;
         this.cameraRollO = this.cameraRoll;
+
+        if (Minecraft.DEADMAU5_CAMERA_CHEATS) {
+            if (this.mc.screen == null) {
+                float distanceDelta = 0;
+                float rotationDelta = 0;
+                float tiltDelta = 0;
+                float rollDelta = 0;
+
+                if (Keyboard.isKeyDown(Keyboard.KEY_U))
+                {
+                    distanceDelta -= .3f * this.mc.options.cameraSpeed;
+                } else if (Keyboard.isKeyDown(Keyboard.KEY_O)) {
+                    distanceDelta += .3f * this.mc.options.cameraSpeed;
+                }if (Keyboard.isKeyDown(Keyboard.KEY_J)) {
+                    rotationDelta += 8.0f * this.mc.options.cameraSpeed;
+                } else if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
+                    rotationDelta -= 8.0f * this.mc.options.cameraSpeed;
+                }if (Keyboard.isKeyDown(Keyboard.KEY_I)) {
+                    tiltDelta += 6.0f * this.mc.options.cameraSpeed;
+                } else if (Keyboard.isKeyDown(Keyboard.KEY_K)) {
+                    tiltDelta -= 6.0f * this.mc.options.cameraSpeed;
+                }
+
+                if (Keyboard.isKeyDown(Keyboard.KEY_Y) && Keyboard.isKeyDown(Keyboard.KEY_H)) {
+                    this.fovOffset = 0;
+                } else if (Keyboard.isKeyDown(Keyboard.KEY_Y)) {
+                    this.fovOffset -= 3.0f;
+                } else if (Keyboard.isKeyDown(Keyboard.KEY_H)) {
+                    this.fovOffset += 3.0f;
+                }
+
+                if (Keyboard.isKeyDown(Keyboard.KEY_N) && Keyboard.isKeyDown(Keyboard.KEY_M)) {
+                    this.cameraRoll = 0;
+                } else if (Keyboard.isKeyDown(Keyboard.KEY_N)) {
+                    rollDelta -= 8.0f * this.mc.options.cameraSpeed;
+                } else if (Keyboard.isKeyDown(Keyboard.KEY_M)) {
+                    rollDelta += 8.0f * this.mc.options.cameraSpeed;
+                }
+
+                if (this.mc.options.smoothCamera) {
+                    distanceDelta = this.smoothDistance.getNewDeltaValue(distanceDelta, .5f * this.mc.options.sensitivity);
+                    rotationDelta = this.smoothRotation.getNewDeltaValue(rotationDelta, .5f * this.mc.options.sensitivity);
+                    tiltDelta = this.smoothTilt.getNewDeltaValue(tiltDelta, .5f * this.mc.options.sensitivity);
+                    rollDelta = this.smoothRoll.getNewDeltaValue(rollDelta, .5f * this.mc.options.sensitivity);
+                }
+                this.thirdDistance += distanceDelta;
+                this.thirdRotation += rotationDelta;
+                this.thirdTilt += tiltDelta;
+                this.cameraRoll += rollDelta;
+            }
+        }
 
         if (this.mc.cameraTargetPlayer == null) {
             this.mc.cameraTargetPlayer = this.mc.player;
@@ -389,6 +441,22 @@ public class GameRenderer
 
             int yAxis = 1;
             if (this.mc.options.invertYMouse) yAxis = -1;
+
+            // Useless - recovered from LCE, presumably is the usage of the flying stuff stored in option
+            if (Minecraft.DEADMAU5_CAMERA_CHEATS) {
+                if (!mc.options.fixedCamera) {
+                    if (Keyboard.isKeyDown(Keyboard.KEY_J)) {
+                        xo = -12f * mc.options.sensitivity;
+                    } else if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
+                        xo = 12f * mc.options.sensitivity;
+                    }
+                    if (Keyboard.isKeyDown(Keyboard.KEY_I)) {
+                        yo = 12f * mc.options.sensitivity;
+                    } else if (Keyboard.isKeyDown(Keyboard.KEY_K)) {
+                        yo = -12f * mc.options.sensitivity;
+                    }
+                }
+            }
 
             if (this.mc.options.smoothCamera) {
                 xo = this.smoothTurnX.getNewDeltaValue(xo, 0.05f * sens);

@@ -15,6 +15,7 @@ public class SharedConstants
     public static final int maxChatLength = 100;
     public static final String acceptableLetters = readAcceptableChars();
     public static final char[] ILLEGAL_FILE_CHARACTERS = new char[] { '/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':' };
+    public static final int TICKS_PER_SECOND = 20;
     
     private static String readAcceptableChars() {
         StringBuilder result = new StringBuilder();

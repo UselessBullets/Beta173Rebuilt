@@ -11,8 +11,8 @@ public class FireTexture extends DynamicTexture
     protected float[] current = new float[20 * 16];
     protected float[] next = new float[20 * 16];
     
-    public FireTexture(final int tex) {
-        super(Tile.fire.tex + tex * 16);
+    public FireTexture(final int id) {
+        super(Tile.fire.tex + id * 16);
     }
     
     @Override

@@ -6,6 +6,7 @@ package net.minecraft.client;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Options.Option;
+import net.minecraft.client.gamemode.SurvivalMode;
 import net.minecraft.client.multiplayer.MultiplayerLocalPlayer;
 import net.minecraft.client.multiplayer.ClientConnection;
 
@@ -19,6 +20,8 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.client.gui.ChatScreen;
 import net.minecraft.client.gui.inventory.InventoryScreen;
 import net.minecraft.client.gui.InBedChatScreen;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL12;
 import util.Mth;
 import net.minecraft.world.level.chunk.ChunkCache;
 import net.minecraft.world.level.tile.Tile;
@@ -70,6 +73,7 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.DataOutputStream;
 import java.io.File;
 import net.minecraft.client.skins.TexturePackRepository;
 import net.minecraft.client.sound.SoundEngine;
@@ -82,8 +86,10 @@ import net.minecraft.client.gui.Screen;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.Textures;
 import java.awt.Canvas;
+import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.ByteBuffer;
 
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.world.entity.Mob;
@@ -96,96 +102,68 @@ import static org.lwjgl.opengl.GL11.*;
 
 public abstract class Minecraft implements Runnable
 {
-    public static byte[] __unused_byte_buffer;
+    public static byte[] __unused_byte_buffer = new byte[10485760];
     private static Minecraft instance;
-
+    public static final boolean FLYBY_MODE = false; // Useless - In the LCE and b1.2 leaks
     public static final String VERSION_STRING = "Minecraft " + SharedConstants.VERSION_STRING;
     public GameMode gameMode;
-    private boolean fullscreen;
-    private boolean hasCrashed;
-    public int width;
-    public int height;
+    private boolean fullscreen = false;
+    private boolean hasCrashed = false;
+    public int width, height;
     private OpenGLCapabilities openGLCapabilities;
-    private Timer timer;
+    private Timer timer = new Timer(SharedConstants.TICKS_PER_SECOND);
     public Level level;
     public LevelRenderer levelRenderer;
     public LocalPlayer player;
     public Mob cameraTargetPlayer;
     public ParticleEngine particleEngine;
-    public User user;
+    public User user = null;
     public String serverDomain;
     public Canvas parent;
-    public boolean appletMode;
-    public volatile boolean pause;
+    public boolean appletMode = true;
+    public volatile boolean pause = false;
     public Textures textures;
     public Font font;
-    public Screen screen;
-    public ProgressRenderer progressRenderer;
+    public Screen screen = null;
+    public ProgressRenderer progressRenderer = new ProgressRenderer(this);
     public GameRenderer gameRenderer;
     private BackgroundDownloader bgLoader;
-    private int ticks;
-    private int missTime;
-    private int orgWidth;
-    private int orgHeight;
-    public AchievementPopup achievementPopup;
+    private int ticks = 0;
+    private int missTime = 0;
+    private int orgWidth, orgHeight;
+    public AchievementPopup achievementPopup = new AchievementPopup(this);
     public Gui gui;
-    public boolean noRender;
-    public HumanoidModel humanoidModel;
-    public HitResult hitResult;
+    public boolean noRender = false;
+    public HumanoidModel humanoidModel = new HumanoidModel(0.0f);
+    public HitResult hitResult = null;
     public Options options;
     protected MinecraftApplet minecraftApplet;
-    public SoundEngine soundEngine;
+    public SoundEngine soundEngine = new SoundEngine();
     public MouseHandler mouseHandler;
     public TexturePackRepository skins;
     private File workingDirectory;
     private LevelStorageSource levelSource;
-    public static long[] frameTimes;
-    public static long[] tickTimes;
-    public static int frameTimePos;
-    public static long warezTime;
+    public static long[] frameTimes = new long[512];
+    public static long[] tickTimes = new long[512];
+    public static int frameTimePos = 0;
+    public static long warezTime = 0L;
     public StatsCounter stats;
     private String connectToIp;
     private int connectToPort;
-    private WaterTexture waterTexture;
-    private LavaTexture lavaTexture;
-    private static File workDir;
-    public volatile boolean running;
-    public String fpsString;
-    boolean wasDown;
-    long lastTimer;
-    public boolean mouseGrabbed;
-    private int lastClickTick;
-    public boolean isRaining;
-    long lastTickTime;
-    private int recheckPlayerIn;
+    private WaterTexture waterTexture = new WaterTexture();
+    private LavaTexture lavaTexture = new LavaTexture();
+    private static File workDir = null;
+    public volatile boolean running = true;
+    public String fpsString = "";
+    boolean wasDown = false;
+    long lastTimer = -1L;
+    public boolean mouseGrabbed = false;
+    private int lastClickTick = 0;
+    public boolean isRaining = false;
+    long lastTickTime = System.currentTimeMillis();
+    private int recheckPlayerIn = 0;
     
     public Minecraft(final Component component, final Canvas parent, final MinecraftApplet minecraftApplet, final int width, final int height, final boolean fullscreen) {
-        this.fullscreen = false;
-        this.hasCrashed = false;
-        this.timer = new Timer(20.0f);
-        this.user = null;
-        this.appletMode = true;
-        this.pause = false;
-        this.screen = null;
-        this.progressRenderer = new ProgressRenderer(this);
-        this.ticks = 0;
-        this.missTime = 0;
-        this.achievementPopup = new AchievementPopup(this);
-        this.noRender = false;
-        this.humanoidModel = new HumanoidModel(0.0f);
-        this.hitResult = null;
-        this.soundEngine = new SoundEngine();
-        this.waterTexture = new WaterTexture();
-        this.lavaTexture = new LavaTexture();
-        this.running = true;
-        this.fpsString = "";
-        this.wasDown = false;
-        this.lastTimer = -1L;
-        this.mouseGrabbed = false;
-        this.lastClickTick = 0;
-        this.isRaining = false;
-        this.lastTickTime = System.currentTimeMillis();
-        this.recheckPlayerIn = 0;
         Stats.init();
         this.orgHeight = height;
         this.fullscreen = fullscreen;
@@ -231,78 +209,126 @@ public abstract class Minecraft implements Runnable
     
     public void init() throws LWJGLException {
         if (this.parent != null) {
-            final Graphics graphics = this.parent.getGraphics();
-            if (graphics != null) {
-                graphics.setColor(Color.BLACK);
-                graphics.fillRect(0, 0, this.width, this.height);
-                graphics.dispose();
+            final Graphics g = this.parent.getGraphics();
+            if (g != null) {
+                g.setColor(Color.BLACK);
+                g.fillRect(0, 0, this.width, this.height);
+                g.dispose();
             }
             Display.setParent(this.parent);
         }
-        else if (this.fullscreen) {
-            Display.setFullscreen(true);
-            this.width = Display.getDisplayMode().getWidth();
-            this.height = Display.getDisplayMode().getHeight();
-            if (this.width <= 0) {
-                this.width = 1;
-            }
-            if (this.height <= 0) {
-                this.height = 1;
-            }
-        }
         else {
-            Display.setDisplayMode(new DisplayMode(this.width, this.height));
+            if (this.fullscreen) {
+                Display.setFullscreen(true);
+                this.width = Display.getDisplayMode().getWidth();
+                this.height = Display.getDisplayMode().getHeight();
+                if (this.width <= 0) this.width = 1;
+                if (this.height <= 0) this.height = 1;
+            } else {
+                Display.setDisplayMode(new DisplayMode(this.width, this.height));
+            }
         }
         Display.setTitle(VERSION_STRING);
         try {
             Display.create();
+            // Useless - Below commented out java code is from the LCE leak
+            /*
+             * System.out.println("LWJGL version: " + Sys.getVersion());
+             * System.out.println("GL RENDERER: " +
+             * GL11.glGetString(GL11.GL_RENDERER));
+             * System.out.println("GL VENDOR: " +
+             * GL11.glGetString(GL11.GL_VENDOR));
+             * System.out.println("GL VERSION: " +
+             * GL11.glGetString(GL11.GL_VERSION)); ContextCapabilities caps =
+             * GLContext.getCapabilities(); System.out.println("OpenGL 3.0: " +
+             * caps.OpenGL30); System.out.println("OpenGL 3.1: " +
+             * caps.OpenGL31); System.out.println("OpenGL 3.2: " +
+             * caps.OpenGL32); System.out.println("ARB_compatibility: " +
+             * caps.GL_ARB_compatibility); if (caps.OpenGL32) { IntBuffer buffer
+             * = ByteBuffer.allocateDirect(16 *
+             * 4).order(ByteOrder.nativeOrder()).asIntBuffer();
+             * GL11.glGetInteger(GL32.GL_CONTEXT_PROFILE_MASK, buffer); int
+             * profileMask = buffer.get(0); System.out.println("PROFILE MASK: "
+             * + Integer.toBinaryString(profileMask));
+             * System.out.println("CORE PROFILE: " + ((profileMask &
+             * GL32.GL_CONTEXT_CORE_PROFILE_BIT) != 0));
+             * System.out.println("COMPATIBILITY PROFILE: " + ((profileMask &
+             * GL32.GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) != 0)); }
+             */
         }
-        catch (final LWJGLException ex) {
-            ex.printStackTrace();
+        catch (final LWJGLException e) {
+            // This COULD be because of a bug! A delay followed by a new attempt
+            // is supposed to fix it.
+            e.printStackTrace();
             try {
                 Thread.sleep(1000L);
             }
             catch (final InterruptedException ex2) {}
             Display.create();
         }
+
+        // Useless - Sourced from LCE leak
+        if (Minecraft.FLYBY_MODE) {
+            glPixelStorei(GL_PACK_ALIGNMENT, 1);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        }
+
+        // glClearColor(0.2f, 0.2f, 0.2f, 1);
+
         this.workingDirectory = getWorkingDirectory();
         this.levelSource = new McRegionLevelStorageSource(new File(this.workingDirectory, "saves"));
         this.options = new Options(this, this.workingDirectory);
         this.skins = new TexturePackRepository(this, this.workingDirectory);
         this.textures = new Textures(this.skins, this.options);
+//        renderLoadingScreen();
+
         this.font = new Font(this.options, "/font/default.png", this.textures);
+
         WaterColor.init(this.textures.loadTexturePixels("/misc/watercolor.png"));
         GrassColor.init(this.textures.loadTexturePixels("/misc/grasscolor.png"));
         FoliageColor.init(this.textures.loadTexturePixels("/misc/foliagecolor.png"));
+
         this.gameRenderer = new GameRenderer(this);
         EntityRenderDispatcher.instance.itemInHandRenderer = new ItemInHandRenderer(this);
+
         this.stats = new StatsCounter(this.user, this.workingDirectory);
+
         Achievements.openInventory.setDescFormatter(i18nValue -> String.format(i18nValue, Keyboard.getKeyName(options.keyBuild.key)));
+
         this.renderLoadingScreen();
+
         Keyboard.create();
         Mouse.create();
         this.mouseHandler = new MouseHandler(this.parent);
         try {
             Controllers.create();
         }
-        catch (final Exception ex3) {
-            ex3.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
+
         this.checkGlError("Pre startup");
+
+        // width = Display.getDisplayMode().getWidth();
+        // height = Display.getDisplayMode().getHeight();
+
         glEnable(GL_TEXTURE_2D);
         glShadeModel(GL_SMOOTH);
         glClearDepth(1.0);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(516, 0.1f);
-        glCullFace(1029);
+        glAlphaFunc(GL_GREATER, 0.1f);
+        glCullFace(GL_BACK);
+
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
         this.checkGlError("Startup");
+
         this.openGLCapabilities = new OpenGLCapabilities();
         this.soundEngine.init(this.options);
+
         this.textures.addDynamicTexture(this.lavaTexture);
         this.textures.addDynamicTexture(this.waterTexture);
         this.textures.addDynamicTexture(new PortalTexture());
@@ -312,15 +338,19 @@ public abstract class Minecraft implements Runnable
         this.textures.addDynamicTexture(new LavaSideTexture());
         this.textures.addDynamicTexture(new FireTexture(0));
         this.textures.addDynamicTexture(new FireTexture(1));
+
         this.levelRenderer = new LevelRenderer(this, this.textures);
         glViewport(0, 0, this.width, this.height);
         this.particleEngine = new ParticleEngine(this.level, this.textures);
         try {
-            (this.bgLoader = new BackgroundDownloader(this.workingDirectory, this)).start();
+            this.bgLoader = new BackgroundDownloader(this.workingDirectory, this);
+            this.bgLoader.start();
         }
-        catch (final Exception ex4) {}
+        catch (final Exception e) {}
+
         this.checkGlError("Post startup");
         this.gui = new Gui(this);
+
         if (this.connectToIp != null) {
             this.setScreen(new ConnectScreen(this, this.connectToIp, this.connectToPort));
         }
@@ -330,112 +360,98 @@ public abstract class Minecraft implements Runnable
     }
     
     private void renderLoadingScreen() throws LWJGLException {
-        final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.options, this.width, this.height);
-        glClear(16640);
+        final ScreenSizeCalculator ssc = new ScreenSizeCalculator(this.options, this.width, this.height);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 1000.0, 3000.0);
+        glOrtho(0.0, ssc.rawWidth, ssc.rawHeight, 0.0, 1000.0, 3000.0);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         glTranslatef(0.0f, 0.0f, -2000.0f);
         glViewport(0, 0, this.width, this.height);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        final Tesselator instance = Tesselator.instance;
+
+        final Tesselator t = Tesselator.instance;
         glDisable(GL_LIGHTING);
         glEnable(GL_TEXTURE_2D);
         glDisable(GL_FOG);
         glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/title/mojang.png"));
-        instance.begin();
-        instance.color(0xffffff);
-        instance.vertexUV(0.0, this.height, 0.0, 0.0, 0.0);
-        instance.vertexUV(this.width, this.height, 0.0, 0.0, 0.0);
-        instance.vertexUV(this.width, 0.0, 0.0, 0.0, 0.0);
-        instance.vertexUV(0.0, 0.0, 0.0, 0.0, 0.0);
-        instance.end();
-        final int w = 256;
-        final int h = 256;
+        t.begin();
+        t.color(0xffffff);
+        t.vertexUV(0.0, this.height, 0.0, 0.0, 0.0);
+        t.vertexUV(this.width, this.height, 0.0, 0.0, 0.0);
+        t.vertexUV(this.width, 0.0, 0.0, 0.0, 0.0);
+        t.vertexUV(0.0, 0.0, 0.0, 0.0, 0.0);
+        t.end();
+
+        final int lw = 256;
+        final int lh = 256;
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        instance.color(0xffffff);
-        this.blit((screenSizeCalculator.getWidth() - w) / 2, (screenSizeCalculator.getHeight() - h) / 2, 0, 0, w, h);
+        t.color(0xffffff);
+        this.blit((ssc.getWidth() - lw) / 2, (ssc.getHeight() - lh) / 2, 0, 0, lw, lh);
         glDisable(GL_LIGHTING);
         glDisable(GL_FOG);
+
         glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(516, 0.1f);
+        glAlphaFunc(GL_GREATER, 0.1f);
+
         Display.swapBuffers();
     }
     
     public void blit(final int x, final int y, final int sx, final int sy, final int w, final int h) {
-        final float n = 0.00390625f;
-        final float n2 = 0.00390625f;
-        final Tesselator instance = Tesselator.instance;
-        instance.begin();
-        instance.vertexUV(x + 0, y + h, 0.0, (sx + 0) * n, (sy + h) * n2);
-        instance.vertexUV(x + w, y + h, 0.0, (sx + w) * n, (sy + h) * n2);
-        instance.vertexUV(x + w, y + 0, 0.0, (sx + w) * n, (sy + 0) * n2);
-        instance.vertexUV(x + 0, y + 0, 0.0, (sx + 0) * n, (sy + 0) * n2);
-        instance.end();
+        final float us = 1 / 256.0f;
+        final float vs = 1 / 256.0f;
+        final Tesselator t = Tesselator.instance;
+        t.begin();
+        t.vertexUV(x + 0, y + h, 0.0, (sx + 0) * us, (sy + h) * vs);
+        t.vertexUV(x + w, y + h, 0.0, (sx + w) * us, (sy + h) * vs);
+        t.vertexUV(x + w, y + 0, 0.0, (sx + w) * us, (sy + 0) * vs);
+        t.vertexUV(x + 0, y + 0, 0.0, (sx + 0) * us, (sy + 0) * vs);
+        t.end();
     }
     
     public static File getWorkingDirectory() {
-        if (Minecraft.workDir == null) {
-            Minecraft.workDir = getWorkingDirectory("minecraft");
-        }
+        if (Minecraft.workDir == null) Minecraft.workDir = getWorkingDirectory("minecraft");
         return Minecraft.workDir;
     }
     
     public static File getWorkingDirectory(final String applicationName) {
-        final String property = System.getProperty("user.home", ".");
-        File obj = null;
+        final String userHome = System.getProperty("user.home", ".");
+        File workingDirectory;
         switch (getPlatform()) {
             case linux:
             case solaris: {
-                obj = new File(property, '.' + applicationName + '/');
+                workingDirectory = new File(userHome, '.' + applicationName + '/');
                 break;
             }
             case windows: {
-                final String getenv = System.getenv("APPDATA");
-                if (getenv != null) {
-                    obj = new File(getenv, "." + applicationName + '/');
-                    break;
-                }
-                obj = new File(property, '.' + applicationName + '/');
+                final String applicationData = System.getenv("APPDATA");
+                if (applicationData != null) workingDirectory = new File(applicationData, "." + applicationName + '/');
+                else workingDirectory = new File(userHome, '.' + applicationName + '/');
                 break;
             }
             case macos: {
-                obj = new File(property, "Library/Application Support/" + applicationName);
+                workingDirectory = new File(userHome, "Library/Application Support/" + applicationName);
                 break;
             }
             default: {
-                obj = new File(property, applicationName + '/');
+                workingDirectory = new File(userHome, applicationName + '/');
                 break;
             }
         }
-        if (!obj.exists() && !obj.mkdirs()) {
-            throw new RuntimeException("The working directory could not be created: " + obj);
-        }
-        return obj;
+        if (!workingDirectory.exists() && !workingDirectory.mkdirs()) throw new RuntimeException("The working directory could not be created: " + workingDirectory);
+        return workingDirectory;
     }
     
     private static OS getPlatform() {
-        final String lowerCase = System.getProperty("os.name").toLowerCase();
-        if (lowerCase.contains("win")) {
-            return OS.windows;
-        }
-        if (lowerCase.contains("mac")) {
-            return OS.macos;
-        }
-        if (lowerCase.contains("solaris")) {
-            return OS.solaris;
-        }
-        if (lowerCase.contains("sunos")) {
-            return OS.solaris;
-        }
-        if (lowerCase.contains("linux")) {
-            return OS.linux;
-        }
-        if (lowerCase.contains("unix")) {
-            return OS.linux;
-        }
+        final String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("win")) return OS.windows;
+        if (osName.contains("mac")) return OS.macos;
+        if (osName.contains("solaris")) return OS.solaris;
+        if (osName.contains("sunos")) return OS.solaris;
+        if (osName.contains("linux")) return OS.linux;
+        if (osName.contains("unix")) return OS.linux;
         return OS.unknown;
     }
     
@@ -443,30 +459,36 @@ public abstract class Minecraft implements Runnable
         return this.levelSource;
     }
     
-    public void setScreen(Screen var_1_40) {
-        if (this.screen instanceof ErrorScreen) {
-            return;
-        }
+    public void setScreen(Screen screen) {
+        if (this.screen instanceof ErrorScreen) return;
+
         if (this.screen != null) {
             this.screen.removed();
         }
-        if (var_1_40 instanceof TitleScreen) {
+
+        if (screen instanceof TitleScreen) {
             this.stats.forceSend();
         }
         this.stats.forceSave();
-        if (var_1_40 == null && this.level == null) {
-            var_1_40 = new TitleScreen();
+
+        if (screen == null && this.level == null) {
+            screen = new TitleScreen();
         }
-        else if (var_1_40 == null && this.player.health <= 0) {
-            var_1_40 = new DeathScreen();
+        else if (screen == null && this.player.health <= 0) {
+            screen = new DeathScreen();
         }
-        if (var_1_40 instanceof TitleScreen) {
+
+        if (screen instanceof TitleScreen) {
             this.gui.clearMessages();
         }
-        if ((this.screen = var_1_40) != null) {
+
+        this.screen = screen;
+        if (this.screen != null) {
             this.releaseMouse();
-            final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.options, this.width, this.height);
-            var_1_40.init(this, screenSizeCalculator.getWidth(), screenSizeCalculator.getHeight());
+            final ScreenSizeCalculator ssc = new ScreenSizeCalculator(this.options, this.width, this.height);
+            int screenWidth = ssc.getWidth();
+            int screenHeight = ssc.getHeight();
+            screen.init(this, screenWidth, screenHeight);
             this.noRender = false;
         }
         else {
@@ -475,12 +497,12 @@ public abstract class Minecraft implements Runnable
     }
     
     private void checkGlError(final String str) {
-        final int glGetError = glGetError();
-        if (glGetError != 0) {
-            final String gluErrorString = GLU.gluErrorString(glGetError);
+        final int glError = glGetError();
+        if (glError != 0) {
+            final String errorString = GLU.gluErrorString(glError);
             System.out.println("########## GL ERROR ##########");
             System.out.println("@ " + str);
-            System.out.println(glGetError + ": " + gluErrorString);
+            System.out.println(glError + ": " + errorString);
         }
     }
     
@@ -488,35 +510,148 @@ public abstract class Minecraft implements Runnable
         try {
             this.stats.forceSend();
             this.stats.forceSave();
+
             if (this.minecraftApplet != null) {
                 this.minecraftApplet.clearMemory();
             }
+
             try {
                 if (this.bgLoader != null) {
                     this.bgLoader.halt();
                 }
             }
-            catch (final Exception ex) {}
+            catch (final Exception e) {}
+
             System.out.println("Stopping!");
+
             try {
                 this.setLevel(null);
             }
-            catch (final Throwable t) {}
+            catch (final Throwable e) {}
+
             try {
                 MemoryTracker.release();
             }
-            catch (final Throwable t2) {}
+            catch (final Throwable e) {}
+
             this.soundEngine.destroy();
             Mouse.destroy();
             Keyboard.destroy();
         }
         finally {
             Display.destroy();
-            if (!this.hasCrashed) {
-                System.exit(0);
-            }
+            if (!this.hasCrashed) System.exit(0);
         }
         System.gc();
+    }
+
+    // Useless - Sourced from the b1.2 leak, local variable names are best guesses by me, there is no sources for that afaik
+    public void generateFlyby() {
+        this.gameMode = new SurvivalMode(this);
+        this.selectLevel("flyby", "flyby", 1234L); // Useless - Added second and third args, b1.2 didn't require those, seed can change what world seed is flown through though
+        this.setScreen(null);
+
+        double y = 0.0;
+        ByteBuffer pixelBuffer = BufferUtils.createByteBuffer(this.width * this.height * 3);
+        File flybyDirectory = new File(getWorkingDirectory(), "flyby");
+        flybyDirectory.mkdir();
+
+        // Useless - Sets the Truevision TGA image header bytes
+        byte[] headerBytes = new byte[18];
+        headerBytes[2] = 2; // Useless - Image type, 2 is "uncompressed true-color image"
+        headerBytes[12] = (byte)(this.width % 256); // Useless - Image Width Byte 1
+        headerBytes[13] = (byte)(this.width / 256); // Useless - Image Width Byte 2
+        headerBytes[14] = (byte)(this.height % 256); // Useless - Image Height Byte 1
+        headerBytes[15] = (byte)(this.height / 256); // Useless - Image Height Byte 2
+        headerBytes[16] = 24;  // Useless - Pixel Depth bits per pixel
+
+        byte[] pixelBytes = new byte[this.width * this.height * 3];
+        int frame = -20;
+        short fps = 352; // Useless - Raw assumption, thinking this is the FPS notch typically had for mc, so its used to calculate how many seconds flyByLength should be
+        int flybyLength = fps * 60;
+        this.player.yRot = this.player.yRotO = 12.0F; // Useless - Set the angle that the flyby goes in
+        double ySin = -Math.sin(this.player.yRot * Math.PI / 180.0);
+        double yCos = Math.cos(this.player.yRot * Math.PI / 180.0);
+        // Useless - Initial position of the player for the flyby
+        this.player.x = this.player.xo = this.player.xOld = 0.0;
+        this.player.z = this.player.zo = this.player.zOld = 0.0;
+
+        // Useless - Used to be this.level.time = 0, changed to new func call
+        for (this.level.setTime(0L); frame < flybyLength; frame++) {
+            if (frame % 100 == 0) {
+                System.out.println(frame * 100.0 / flybyLength + "%, free: " + (float)(Runtime.getRuntime().freeMemory() / 1024L) / 1024.0F + " MB");
+                System.gc();
+            }
+
+            double speed = 0.125 + (double)frame / flybyLength * 5.0;
+            AABB.resetPool();
+            Vec3.resetPool();
+            if (frame < 0) {
+                this.level.setSpawnSettings(this.options.difficulty > 0, true);
+                this.level.tick();
+            }
+
+            this.gameRenderer.tick();
+            glEnable(GL_TEXTURE_2D);
+
+            while (this.level.updateLights()) {}
+
+            this.player.x = this.player.xo = this.player.xOld += ySin * speed;
+            this.player.z = this.player.zo = this.player.zOld += yCos * speed;
+            byte shiftRange = 100;
+            double highestPoint = 0.0;
+            double shiftAmount = 1.0;
+
+            // Useless - Collects a few samples along a straight line in the direction a travel to collect the heighest point
+            for (double shift = -4.0; shift < shiftRange; shift += shiftAmount) {
+                // Useless - get heighest point in a 9x9 region
+                for (int c = 0; c < 9; c++) {
+                    double xo = c % 3 / 2.0F - 0.5;
+                    double zo = c / 3 / 2.0F - 0.5;
+                    int tileX = Mth.floor(this.player.x + ySin * shift + xo);
+                    int tileZ = Mth.floor(this.player.z + yCos * shift + zo);
+                    double tileHeight = this.level.getHeightmap(tileX, tileZ);
+                    if (tileHeight > highestPoint) highestPoint = tileHeight;
+                }
+            }
+
+            double nextY = highestPoint + 4.0;
+            if (y == 0.0) {
+                y = nextY;
+            } else {
+                y += (nextY - y) * speed / shiftRange * 4.0;
+            }
+
+            this.player.xRot = this.player.xRotO = (float)(y - 64.0) / 2.0F; // Useless - makes the player look up/down based on being above or below the 64 block mark
+            this.player.y = this.player.yo = this.player.yOld = y;
+            this.gameRenderer.renderLevel(1.0F, 0L);
+            glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain.png"));
+            this.textures.tick();
+            Display.update();
+
+            pixelBuffer.clear();
+            glReadPixels(0, 0, this.width, this.height, GL12.GL_BGR, GL_UNSIGNED_BYTE, pixelBuffer);
+            pixelBuffer.clear();
+
+            if (frame >= 0) {
+                StringBuilder id = new StringBuilder("" + frame);
+
+                while (id.length() < 6) {
+                    id.insert(0, "0");
+                }
+
+                try {
+                    pixelBuffer.get(pixelBytes);
+                    File imageFile = new File(flybyDirectory, "img" + id + ".tga");
+                    DataOutputStream os = new DataOutputStream(new FileOutputStream(imageFile));
+                    os.write(headerBytes);
+                    os.write(pixelBytes);
+                    os.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
     
     public void run() {
@@ -529,19 +664,28 @@ public abstract class Minecraft implements Runnable
             this.crash(new CrashReport("Failed to start game", e));
             return;
         }
+
+        // Useless - Sourced from LCE, calls the b1.2leak flyby function
+        if (Minecraft.FLYBY_MODE) {
+            generateFlyby();
+            return;
+        }
+
         try {
-            long currentTimeMillis = System.currentTimeMillis();
-            int i = 0;
+            long lastTime = System.currentTimeMillis();
+            int frames = 0;
+
             while (this.running) {
                 try {
-                    if (this.minecraftApplet != null && !this.minecraftApplet.isActive()) {
-                        break;
-                    }
+                    if (this.minecraftApplet != null && !this.minecraftApplet.isActive()) break;
+
                     AABB.resetPool();
                     Vec3.resetPool();
+
                     if (this.parent == null && Display.isCloseRequested()) {
                         this.stop();
                     }
+
                     if (this.pause && this.level != null) {
                         final float a = this.timer.a;
                         this.timer.advanceTime();
@@ -550,92 +694,94 @@ public abstract class Minecraft implements Runnable
                     else {
                         this.timer.advanceTime();
                     }
-                    final long nanoTime = System.nanoTime();
-                    for (int j = 0; j < this.timer.ticks; ++j) {
+
+                    final long beforeTickTime = System.nanoTime();
+                    for (int i = 0; i < this.timer.ticks; ++i) {
                         ++this.ticks;
                         try {
                             this.tick();
                         }
-                        catch (final LevelStorageException ex) {
-                            this.setLevel(this.level = null);
+                        catch (final LevelStorageException e) {
+                            this.level = null;
+                            this.setLevel(this.level);
                             this.setScreen(new LevelConflictScreen());
                         }
                     }
-                    final long tickTime = System.nanoTime() - nanoTime;
+                    final long tickDuration = System.nanoTime() - beforeTickTime;
                     this.checkGlError("Pre render");
+
                     TileRenderer.fancy = this.options.fancyGraphics;
+
                     this.soundEngine.update(this.player, this.timer.a);
+
                     glEnable(GL_TEXTURE_2D);
-                    if (this.level != null) {
-                        this.level.updateLights();
-                    }
-                    if (!Keyboard.isKeyDown(65)) {
-                        Display.update();
-                    }
-                    if (this.player != null && this.player.isInWall()) {
-                        this.options.thirdPersonView = false;
-                    }
+                    if (this.level != null) this.level.updateLights();
+
+                    if (!Keyboard.isKeyDown(Keyboard.KEY_F7)) Display.update();
+
+                    if (this.player != null && this.player.isInWall()) this.options.thirdPersonView = false;
                     if (!this.noRender) {
-                        if (this.gameMode != null) {
-                            this.gameMode.render(this.timer.a);
-                        }
+                        if (this.gameMode != null) this.gameMode.render(this.timer.a);
                         this.gameRenderer.render(this.timer.a);
                     }
+
                     if (!Display.isActive()) {
                         if (this.fullscreen) {
                             this.toggleFullScreen();
                         }
                         Thread.sleep(10L);
                     }
+
                     if (this.options.renderDebug) {
-                        this.renderFpsMeter(tickTime);
+                        this.renderFpsMeter(tickDuration);
                     }
                     else {
                         this.lastTimer = System.nanoTime();
                     }
+
                     this.achievementPopup.render();
+
                     Thread.yield();
-                    if (Keyboard.isKeyDown(65)) {
-                        Display.update();
-                    }
+
+                    if (Keyboard.isKeyDown(Keyboard.KEY_F7)) Display.update();
+
                     this.checkScreenshot();
-                    if (this.parent != null && !this.fullscreen && (this.parent.getWidth() != this.width || this.parent.getHeight() != this.height)) {
-                        this.width = this.parent.getWidth();
-                        this.height = this.parent.getHeight();
-                        if (this.width <= 0) {
-                            this.width = 1;
+                    if (this.parent != null && !this.fullscreen)
+                        if (this.parent.getWidth() != this.width || this.parent.getHeight() != this.height) {
+                            this.width = this.parent.getWidth();
+                            this.height = this.parent.getHeight();
+                            if (this.width <= 0) this.width = 1;
+                            if (this.height <= 0) this.height = 1;
+                            this.resize(this.width, this.height);
                         }
-                        if (this.height <= 0) {
-                            this.height = 1;
-                        }
-                        this.resize(this.width, this.height);
-                    }
                     this.checkGlError("Post render");
-                    ++i;
-                    this.pause = (!this.isClientSide() && this.screen != null && this.screen.isPauseScreen());
-                    while (System.currentTimeMillis() >= currentTimeMillis + 1000L) {
-                        this.fpsString = i + " fps, " + Chunk.updates + " chunk updates";
+                    ++frames;
+                    this.pause = !this.isClientSide() && this.screen != null && this.screen.isPauseScreen();
+
+                    while (System.currentTimeMillis() >= lastTime + 1000L) {
+                        this.fpsString = frames + " fps, " + Chunk.updates + " chunk updates";
                         Chunk.updates = 0;
-                        currentTimeMillis += 1000L;
-                        i = 0;
+                        lastTime += 1000L;
+                        frames = 0;
                     }
                 }
-                catch (final LevelStorageException ex2) {
-                    this.setLevel(this.level = null);
+                catch (final LevelStorageException e) {
+                    this.level = null;
+                    this.setLevel(this.level);
                     this.setScreen(new LevelConflictScreen());
                 }
-                catch (final OutOfMemoryError outOfMemoryError) {
+                catch (final OutOfMemoryError e) {
                     this.emergencySave();
                     this.setScreen(new OutOfMemoryScreen());
                     System.gc();
                 }
             }
         }
-        catch (final StopGameException ex3) {}
-        catch (final Throwable e2) {
+        catch (final StopGameException e) {}
+        catch (final Throwable e) {
             this.emergencySave();
-            e2.printStackTrace();
-            this.crash(new CrashReport("Unexpected error", e2));
+            e.printStackTrace();
+            this.crash(new CrashReport("Unexpected error", e));
         }
         finally {
             this.destroy();
@@ -647,18 +793,18 @@ public abstract class Minecraft implements Runnable
             Minecraft.__unused_byte_buffer = new byte[0];
             this.levelRenderer.clear();
         }
-        catch (final Throwable t) {}
+        catch (final Throwable e) {}
         try {
             System.gc();
             AABB.clearPool();
             Vec3.clearPool();
         }
-        catch (final Throwable t2) {}
+        catch (final Throwable e) {}
         try {
             System.gc();
             this.setLevel(null);
         }
-        catch (final Throwable t3) {}
+        catch (final Throwable e) {}
         System.gc();
     }
     
@@ -1488,15 +1634,6 @@ public abstract class Minecraft implements Runnable
     public boolean handleClientSideCommand(final String chatMessage) {
         if (chatMessage.startsWith("/")) {}
         return false;
-    }
-    
-    static {
-        Minecraft.__unused_byte_buffer = new byte[10485760];
-        Minecraft.frameTimes = new long[512];
-        Minecraft.tickTimes = new long[512];
-        Minecraft.frameTimePos = 0;
-        Minecraft.warezTime = 0L;
-        Minecraft.workDir = null;
     }
 
     public enum OS

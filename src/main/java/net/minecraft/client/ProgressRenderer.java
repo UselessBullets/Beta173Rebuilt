@@ -93,7 +93,7 @@ public class ProgressRenderer implements ProgressListener
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
             glTranslatef(0.0f, 0.0f, -200.0f);
-            glClear(16640);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             final Tesselator instance = Tesselator.instance;
             glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
             final float n = 32.0f;

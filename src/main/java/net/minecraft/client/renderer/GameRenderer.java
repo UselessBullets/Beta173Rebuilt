@@ -699,7 +699,7 @@ public class GameRenderer
         glNormal3f(0.0f, 1.0f, 0.0f);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glAlphaFunc(516, 0.01f);
+        glAlphaFunc(GL_GREATER, 0.01f);
 
         glBindTexture(GL_TEXTURE_2D, this.mc.textures.loadTexture("/environment/snow.png"));
 

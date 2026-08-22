@@ -4,17 +4,14 @@
 
 package net.minecraft.isom;
 
-import java.awt.Component;
-import java.awt.LayoutManager;
 import java.awt.BorderLayout;
 import java.applet.Applet;
 
 public class IsomPreviewApplet extends Applet
 {
-    private IsomPreview isomPreview;
+    private IsomPreview isomPreview = new IsomPreview();
     
     public IsomPreviewApplet() {
-        this.isomPreview = new IsomPreview();
         this.setLayout(new BorderLayout());
         this.add(this.isomPreview, "Center");
     }

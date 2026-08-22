@@ -4,119 +4,102 @@
 
 package net.minecraft.isom;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.Rectangle;
+
 import net.minecraft.Pos;
 import java.awt.geom.AffineTransform;
-import java.awt.RenderingHints;
 import java.awt.image.BufferStrategy;
-import java.awt.Graphics2D;
-import java.awt.Graphics;
 import java.util.Random;
 import net.minecraft.world.level.storage.DirectoryLevelStorage;
-import java.awt.Color;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.io.File;
 import net.minecraft.world.level.Level;
+
+import javax.swing.*;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseListener;
 import java.awt.event.KeyListener;
-import java.awt.Canvas;
 
 public class IsomPreview extends Canvas implements KeyListener, MouseListener, MouseMotionListener, Runnable
 {
-    private int currentReader;
-    private int zoom;
-    private boolean showHelp;
+    private static final int CACHE_WIDTH = 64;
+    private static final int CACHE_HEIGHT = 64;
+    private int currentReader = 0;
+    private int zoom = 2;
+    private boolean showHelp = true;
     private Level level;
     private File workDir;
-    private boolean running;
-    private List<Zone> zonesToRender;
-    private Zone[][] zoneMap;
+    private boolean running = true;
+    private List<Zone> zonesToRender = Collections.synchronizedList(new LinkedList<>());
+    private Zone[][] zoneMap = new Zone[CACHE_WIDTH][CACHE_HEIGHT];
     private int xCam;
     private int yCam;
     private int xDrag;
     private int yDrag;
     
     public File getWorkingDirectory() {
-        if (this.workDir == null) {
-            this.workDir = this.getWorkingDirectory("minecraft");
-        }
+        if (this.workDir == null) this.workDir = this.getWorkingDirectory("minecraft");
         return this.workDir;
     }
     
     public File getWorkingDirectory(final String applicationName) {
-        final String property = System.getProperty("user.home", ".");
-        File obj = null;
+        final String userHome = System.getProperty("user.home", ".");
+        File workingDirectory;
         switch (getPlatform()) {
             case linux:
             case solaris: {
-                obj = new File(property, '.' + applicationName + '/');
+                workingDirectory = new File(userHome, '.' + applicationName + '/');
                 break;
             }
             case windows: {
                 final String getenv = System.getenv("APPDATA");
                 if (getenv != null) {
-                    obj = new File(getenv, "." + applicationName + '/');
+                    workingDirectory = new File(getenv, "." + applicationName + '/');
                     break;
                 }
-                obj = new File(property, '.' + applicationName + '/');
+                workingDirectory = new File(userHome, '.' + applicationName + '/');
                 break;
             }
             case macos: {
-                obj = new File(property, "Library/Application Support/" + applicationName);
+                workingDirectory = new File(userHome, "Library/Application Support/" + applicationName);
                 break;
             }
             default: {
-                obj = new File(property, applicationName + '/');
+                workingDirectory = new File(userHome, applicationName + '/');
                 break;
             }
         }
-        if (!obj.exists() && !obj.mkdirs()) {
-            throw new RuntimeException("The working directory could not be created: " + obj);
+        if (!workingDirectory.exists() && !workingDirectory.mkdirs()) {
+            throw new RuntimeException("The working directory could not be created: " + workingDirectory);
         }
-        return obj;
+        return workingDirectory;
     }
     
     private static OS getPlatform() {
-        final String lowerCase = System.getProperty("os.name").toLowerCase();
-        if (lowerCase.contains("win")) {
-            return OS.windows;
-        }
-        if (lowerCase.contains("mac")) {
-            return OS.macos;
-        }
-        if (lowerCase.contains("solaris")) {
-            return OS.solaris;
-        }
-        if (lowerCase.contains("sunos")) {
-            return OS.solaris;
-        }
-        if (lowerCase.contains("linux")) {
-            return OS.linux;
-        }
-        if (lowerCase.contains("unix")) {
-            return OS.linux;
-        }
+        final String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("win")) return OS.windows;
+        if (osName.contains("mac")) return OS.macos;
+        if (osName.contains("solaris")) return OS.solaris;
+        if (osName.contains("sunos")) return OS.solaris;
+        if (osName.contains("linux")) return OS.linux;
+        if (osName.contains("unix")) return OS.linux;
         return OS.unknown;
     }
     
     public IsomPreview() {
-        this.currentReader = 0;
-        this.zoom = 2;
-        this.showHelp = true;
-        this.running = true;
-        this.zonesToRender = Collections.synchronizedList(new LinkedList<>());
-        this.zoneMap = new Zone[64][64];
         this.workDir = this.getWorkingDirectory();
-        for (int i = 0; i < 64; ++i) {
-            for (int j = 0; j < 64; ++j) {
-                this.zoneMap[i][j] = new Zone(null, i, j);
+
+        for (int x = 0; x < CACHE_WIDTH; ++x) {
+            for (int y = 0; y < CACHE_HEIGHT; ++y) {
+                this.zoneMap[x][y] = new Zone(null, x, y);
             }
         }
+
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
         this.addKeyListener(this);
@@ -126,16 +109,16 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     }
     
     public void loadLevel(final String levelName) {
-        final int n = 0;
-        this.yCam = n;
-        this.xCam = n;
+        this.xCam = this.yCam = 0;
+
         this.level = new Level(new DirectoryLevelStorage(new File(this.workDir, "saves"), levelName, false), levelName, new Random().nextLong());
         this.level.skyDarken = 0;
         synchronized (this.zonesToRender) {
             this.zonesToRender.clear();
-            for (int i = 0; i < 64; ++i) {
-                for (int j = 0; j < 64; ++j) {
-                    this.zoneMap[i][j].init(this.level, i, j);
+
+            for (int x = 0; x < CACHE_WIDTH; ++x) {
+                for (int y = 0; y < CACHE_HEIGHT; ++y) {
+                    this.zoneMap[x][y].init(this.level, x, y);
                 }
             }
         }
@@ -145,9 +128,10 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
         synchronized (this.zonesToRender) {
             this.level.skyDarken = i;
             this.zonesToRender.clear();
-            for (int j = 0; j < 64; ++j) {
-                for (int k = 0; k < 64; ++k) {
-                    this.zoneMap[j][k].init(this.level, j, k);
+
+            for (int x = 0; x < CACHE_WIDTH; ++x) {
+                for (int y = 0; y < CACHE_HEIGHT; ++y) {
+                    this.zoneMap[x][y].init(this.level, x, y);
                 }
             }
         }
@@ -155,12 +139,13 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     
     public void start() {
         new Thread(() -> {
-            while (running) {
+            while (this.running) {
                 render();
+
                 try {
                     Thread.sleep(1L);
                 }
-                catch (final Exception ex) {}
+                catch (final Exception e) {}
             }
         }).start();
         for (int i = 0; i < 8; ++i) {
@@ -173,19 +158,22 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     }
     
     private Zone getZone(final int x, final int y) {
-        final Zone zone = this.zoneMap[x & 0x3F][y & 0x3F];
-        if (zone.x == x && zone.y == y) {
-            return zone;
-        }
+        int xSlot = x & (CACHE_WIDTH - 1);
+        int ySlot = y & (CACHE_HEIGHT - 1);
+        final Zone z = this.zoneMap[xSlot][ySlot];
+        if (z.x == x && z.y == y) return z;
+
         synchronized (this.zonesToRender) {
-            this.zonesToRender.remove(zone);
+            this.zonesToRender.remove(z);
         }
-        zone.init(x, y);
-        return zone;
+
+        z.init(x, y);
+        return z;
     }
     
     public void run() {
         final ZoneRenderer zoneRenderer = new ZoneRenderer();
+
         while (this.running) {
             Zone zone = null;
             synchronized (this.zonesToRender) {
@@ -193,6 +181,7 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
                     zone = this.zonesToRender.remove(0);
                 }
             }
+
             if (zone != null) {
                 if (this.currentReader - zone.lastVisible < 2) {
                     zoneRenderer.render(zone);
@@ -220,18 +209,18 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     }
     
     public void render() {
-        final BufferStrategy bufferStrategy = this.getBufferStrategy();
-        if (bufferStrategy == null) {
+        final BufferStrategy bs = this.getBufferStrategy();
+        if (bs == null) {
             this.createBufferStrategy(2);
-            return;
+        } else {
+            this.render((Graphics2D) bs.getDrawGraphics());
+            bs.show();
         }
-        this.render((Graphics2D)bufferStrategy.getDrawGraphics());
-        bufferStrategy.show();
     }
     
     public void render(final Graphics2D g) {
         ++this.currentReader;
-        final AffineTransform transform = g.getTransform();
+        final AffineTransform at = g.getTransform();
         g.setClip(0, 0, this.getWidth(), this.getHeight());
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         g.translate(this.getWidth() / 2, this.getHeight() / 2);
@@ -241,17 +230,22 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
             final Pos sharedSpawnPos = this.level.getSharedSpawnPos();
             g.translate(-(sharedSpawnPos.x + sharedSpawnPos.z), -(-sharedSpawnPos.x + sharedSpawnPos.z) + 64);
         }
+
         final Rectangle clipBounds = g.getClipBounds();
-        g.setColor(new Color(-15724512));
+        g.setColor(new Color(0xff101020));
         g.fillRect(clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height);
-        final int n = 16;
-        final int n2 = 3;
-        final int n3 = clipBounds.x / n / 2 - 2 - n2;
-        final int n4 = (clipBounds.x + clipBounds.width) / n / 2 + 1 + n2;
-        final int n5 = clipBounds.y / n - 1 - n2 * 2;
-        for (int n6 = (clipBounds.y + clipBounds.height + 16 + 128) / n + 1 + n2 * 2, i = n5; i <= n6; ++i) {
-            for (int j = n3; j <= n4; ++j) {
-                final Zone zone = this.getZone(j - (i >> 1), j + (i + 1 >> 1));
+        final int w = 16;
+        final int rr = 3;
+        final int x0 = clipBounds.x / w / 2 - 2 - rr;
+        final int x1 = (clipBounds.x + clipBounds.width) / w / 2 + 1 + rr;
+        final int y0 = clipBounds.y / w - 1 - rr * 2;
+        final int y1 = (clipBounds.y + clipBounds.height + 16 + 128) / w + 1 + rr * 2;
+
+        for (int y = y0; y <= y1; ++y) {
+            for (int x = x0; x <= x1; ++x) {
+                int xSlot = x - (y >> 1);
+                int ySlot = x + (y + 1 >> 1);
+                Zone zone = this.getZone(xSlot, ySlot);
                 zone.lastVisible = this.currentReader;
                 if (!zone.rendered) {
                     if (!zone.addedToRenderQueue) {
@@ -262,13 +256,16 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
                 else {
                     zone.addedToRenderQueue = false;
                     if (!zone.noContent) {
-                        g.drawImage(zone.image, j * n * 2 + (i & 0x1) * n, i * n - 128 - 16, null);
+                        int xp = x * w * 2 + (y & 0x1) * w;
+                        int yp = y * w - 128 - 16;
+                        g.drawImage(zone.image, xp, yp, null);
                     }
                 }
             }
         }
+
         if (this.showHelp) {
-            g.setTransform(transform);
+            g.setTransform(at);
             final int n7 = this.getHeight() - 32 - 4;
             g.setColor(new Color(Integer.MIN_VALUE, true));
             g.fillRect(4, this.getHeight() - 32 - 4, this.getWidth() - 8, 32);
@@ -276,7 +273,21 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
             final String str = "F1 - F5: load levels   |   0-9: Set time of day   |   Space: return to spawn   |   Double click: zoom   |   Escape: hide this text";
             g.drawString(str, this.getWidth() / 2 - g.getFontMetrics().stringWidth(str) / 2, n7 + 20);
         }
+
         g.dispose();
+    }
+
+    // Useless - Below method taken from b1.2 leak, presumably was just cut out since its not the main entrypoint for either client or server jar, running it as the entrypoint seems to work as intended
+    public static void main(String[] args) {
+        IsomPreview isomPreview = new IsomPreview();
+        JFrame frame = new JFrame("IsomPreview");
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+        frame.add(isomPreview, "Center");
+        frame.setSize(854, 480);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        isomPreview.start();
     }
     
     public void mouseDragged(final MouseEvent m) {
@@ -316,59 +327,25 @@ public class IsomPreview extends Canvas implements KeyListener, MouseListener, M
     }
     
     public void keyPressed(final KeyEvent ke) {
-        if (ke.getKeyCode() == 48) {
-            this.setBrightness(11);
-        }
-        if (ke.getKeyCode() == 49) {
-            this.setBrightness(10);
-        }
-        if (ke.getKeyCode() == 50) {
-            this.setBrightness(9);
-        }
-        if (ke.getKeyCode() == 51) {
-            this.setBrightness(7);
-        }
-        if (ke.getKeyCode() == 52) {
-            this.setBrightness(6);
-        }
-        if (ke.getKeyCode() == 53) {
-            this.setBrightness(5);
-        }
-        if (ke.getKeyCode() == 54) {
-            this.setBrightness(3);
-        }
-        if (ke.getKeyCode() == 55) {
-            this.setBrightness(2);
-        }
-        if (ke.getKeyCode() == 56) {
-            this.setBrightness(1);
-        }
-        if (ke.getKeyCode() == 57) {
-            this.setBrightness(0);
-        }
-        if (ke.getKeyCode() == 112) {
-            this.loadLevel("World1");
-        }
-        if (ke.getKeyCode() == 113) {
-            this.loadLevel("World2");
-        }
-        if (ke.getKeyCode() == 114) {
-            this.loadLevel("World3");
-        }
-        if (ke.getKeyCode() == 115) {
-            this.loadLevel("World4");
-        }
-        if (ke.getKeyCode() == 116) {
-            this.loadLevel("World5");
-        }
-        if (ke.getKeyCode() == 32) {
-            final int n = 0;
-            this.yCam = n;
-            this.xCam = n;
-        }
-        if (ke.getKeyCode() == 27) {
-            this.showHelp = !this.showHelp;
-        }
+        if (ke.getKeyCode() == KeyEvent.VK_0) this.setBrightness(11);
+        if (ke.getKeyCode() == KeyEvent.VK_1) this.setBrightness(10);
+        if (ke.getKeyCode() == KeyEvent.VK_2) this.setBrightness(9);
+        if (ke.getKeyCode() == KeyEvent.VK_3) this.setBrightness(7);
+        if (ke.getKeyCode() == KeyEvent.VK_4) this.setBrightness(6);
+        if (ke.getKeyCode() == KeyEvent.VK_5) this.setBrightness(5);
+        if (ke.getKeyCode() == KeyEvent.VK_6) this.setBrightness(3);
+        if (ke.getKeyCode() == KeyEvent.VK_7) this.setBrightness(2);
+        if (ke.getKeyCode() == KeyEvent.VK_8) this.setBrightness(1);
+        if (ke.getKeyCode() == KeyEvent.VK_9) this.setBrightness(0);
+
+        if (ke.getKeyCode() == KeyEvent.VK_F1) this.loadLevel("World1");
+        if (ke.getKeyCode() == KeyEvent.VK_F2) this.loadLevel("World2");
+        if (ke.getKeyCode() == KeyEvent.VK_F3) this.loadLevel("World3");
+        if (ke.getKeyCode() == KeyEvent.VK_F4) this.loadLevel("World4");
+        if (ke.getKeyCode() == KeyEvent.VK_F5) this.loadLevel("World5");
+
+        if (ke.getKeyCode() == KeyEvent.VK_SPACE) this.xCam = this.yCam = 0;
+        if (ke.getKeyCode() == KeyEvent.VK_ESCAPE) this.showHelp = !this.showHelp;
         this.repaint();
     }
     

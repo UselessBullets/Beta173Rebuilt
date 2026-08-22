@@ -12,7 +12,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Lighting
 {
-    private static FloatBuffer lb;
+    private static FloatBuffer lb = MemoryTracker.createFloatBuffer(16);
     
     public static void turnOff() {
         glDisable(GL_LIGHTING);
@@ -57,8 +57,5 @@ public class Lighting
         Lighting.lb.flip();
         return Lighting.lb;
     }
-    
-    static {
-        Lighting.lb = MemoryTracker.createFloatBuffer(16);
-    }
+
 }

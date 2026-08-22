@@ -9,9 +9,13 @@ import java.io.OutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.DataInputStream;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.net.URL;
 import java.io.File;
@@ -20,10 +24,9 @@ public class BackgroundDownloader extends Thread
 {
     public File workingDirectory;
     private Minecraft minecraft;
-    private boolean stopped;
+    private boolean stopped = false;
     
     public BackgroundDownloader(final File workDir, final Minecraft minecraft) {
-        this.stopped = false;
         this.minecraft = minecraft;
         this.setName("Resource download thread");
         this.setDaemon(true);
@@ -37,16 +40,20 @@ public class BackgroundDownloader extends Thread
     public void run() {
         try {
             final URL resourceUrl = new URL("http://s3.amazonaws.com/MinecraftResources/");
-            final NodeList elementsByTagName = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(resourceUrl.openStream()).getElementsByTagName("Contents");
-            for (int i = 0; i < 2; ++i) {
-                for (int j = 0; j < elementsByTagName.getLength(); ++j) {
-                    final Node item = elementsByTagName.item(j);
-                    if (item.getNodeType() == 1) {
-                        final Element element = (Element)item;
-                        final String nodeValue = element.getElementsByTagName("Key").item(0).getChildNodes().item(0).getNodeValue();
-                        final long long1 = Long.parseLong(element.getElementsByTagName("Size").item(0).getChildNodes().item(0).getNodeValue());
-                        if (long1 > 0L) {
-                            this.checkDownload(resourceUrl, nodeValue, long1, i);
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(resourceUrl.openStream());
+            final NodeList nodeLst = doc.getElementsByTagName("Contents");
+
+            for (int pass = 0; pass < 2; ++pass) {
+                for (int s = 0; s < nodeLst.getLength(); ++s) {
+                    final Node fstNode = nodeLst.item(s);
+                    if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+                        final Element element = (Element)fstNode;
+                        final String key = element.getElementsByTagName("Key").item(0).getChildNodes().item(0).getNodeValue();
+                        final long size = Long.parseLong(element.getElementsByTagName("Size").item(0).getChildNodes().item(0).getNodeValue());
+                        if (size > 0L) {
+                            this.checkDownload(resourceUrl, key, size, pass);
                             if (this.stopped) {
                                 return;
                             }
@@ -55,9 +62,9 @@ public class BackgroundDownloader extends Thread
                 }
             }
         }
-        catch (final Exception ex) {
+        catch (final Exception e) {
             this.loadAll(this.workingDirectory, "");
-            ex.printStackTrace();
+            e.printStackTrace();
         }
     }
     
@@ -66,17 +73,18 @@ public class BackgroundDownloader extends Thread
     }
     
     private void loadAll(final File dir, final String prefix) {
-        final File[] listFiles = dir.listFiles();
-        for (int i = 0; i < listFiles.length; ++i) {
-            if (listFiles[i].isDirectory()) {
-                this.loadAll(listFiles[i], prefix + listFiles[i].getName() + "/");
+        final File[] files = dir.listFiles();
+
+        for (int i = 0; i < files.length; ++i) {
+            if (files[i].isDirectory()) {
+                this.loadAll(files[i], prefix + files[i].getName() + "/");
             }
             else {
                 try {
-                    this.minecraft.fileDownloaded(prefix + listFiles[i].getName(), listFiles[i]);
+                    this.minecraft.fileDownloaded(prefix + files[i].getName(), files[i]);
                 }
                 catch (final Exception ex) {
-                    System.out.println("Failed to add " + prefix + listFiles[i].getName());
+                    System.out.println("Failed to add " + prefix + files[i].getName());
                 }
             }
         }
@@ -84,43 +92,48 @@ public class BackgroundDownloader extends Thread
     
     private void checkDownload(final URL resourceUrl, final String name, final long size, final int pass) {
         try {
-            final String substring = name.substring(0, name.indexOf("/"));
-            if (substring.equals("sound") || substring.equals("newsound")) {
-                if (pass != 0) {
+            int p = name.indexOf("/");
+            final String category = name.substring(0, p);
+            if (!category.equals("sound") && !category.equals("newsound")) {
+                if (pass != 1) {
                     return;
                 }
-            }
-            else if (pass != 1) {
+            } else if (pass != 0) {
                 return;
             }
-            final File file = new File(this.workingDirectory, name);
-            if (!file.exists() || file.length() != size) {
-                file.getParentFile().mkdirs();
-                this.download(new URL(resourceUrl, name.replaceAll(" ", "%20")), file, size);
+
+            final File output = new File(this.workingDirectory, name);
+            if (!output.exists() || output.length() != size) {
+                output.getParentFile().mkdirs();
+                String urlName = name.replaceAll(" ", "%20");
+                this.download(new URL(resourceUrl, urlName), output, size);
                 if (this.stopped) {
                     return;
                 }
             }
-            this.minecraft.fileDownloaded(name, file);
+
+            this.minecraft.fileDownloaded(name, output);
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
     }
     
     private void download(final URL url, final File file, final long length) throws IOException {
-        final byte[] array = new byte[4096];
-        final DataInputStream dataInputStream = new DataInputStream(url.openStream());
-        final DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));
-        int read;
-        while ((read = dataInputStream.read(array)) >= 0) {
-            dataOutputStream.write(array, 0, read);
+        final byte[] buffer = new byte[4096];
+        final DataInputStream dis = new DataInputStream(url.openStream());
+        final DataOutputStream dos = new DataOutputStream(new FileOutputStream(file));
+        int read = 0;
+
+        while ((read = dis.read(buffer)) >= 0) {
+            dos.write(buffer, 0, read);
             if (this.stopped) {
                 return;
             }
         }
-        dataInputStream.close();
-        dataOutputStream.close();
+
+        dis.close();
+        dos.close();
     }
     
     public void halt() {

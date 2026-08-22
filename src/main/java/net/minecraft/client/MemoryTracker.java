@@ -4,71 +4,82 @@
 
 package net.minecraft.client;
 
+import java.nio.*;
 import java.util.ArrayList;
-import java.nio.FloatBuffer;
-import java.nio.ByteOrder;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 
 public class MemoryTracker
 {
-    private static List<Integer> lists;
-    private static List<Integer> textures;
+    private static List<Integer> lists = new ArrayList<>();
+    private static List<Integer> textures = new ArrayList<>();
     
     public static synchronized int genLists(final int count) {
         final int glGenLists = glGenLists(count);
-        MemoryTracker.lists.add(glGenLists);
-        MemoryTracker.lists.add(count);
+        lists.add(glGenLists);
+        lists.add(count);
         return glGenLists;
     }
     
     public static synchronized void genTextures(final IntBuffer ib) {
         glGenTextures(ib);
         for (int i = ib.position(); i < ib.limit(); ++i) {
-            MemoryTracker.textures.add(ib.get(i));
+            textures.add(ib.get(i));
         }
     }
     
     public static synchronized void releaseLists(final int id) {
-        final int index = MemoryTracker.lists.indexOf(id);
-        glDeleteLists(MemoryTracker.lists.get(index), MemoryTracker.lists.get(index + 1));
-        MemoryTracker.lists.remove(index);
-        MemoryTracker.lists.remove(index);
+        final int index = lists.indexOf(id);
+        glDeleteLists(lists.get(index), lists.get(index + 1));
+        lists.remove(index);
+        lists.remove(index);
     }
     
     public static synchronized void release() {
-        for (int i = 0; i < MemoryTracker.lists.size(); i += 2) {
-            glDeleteLists(MemoryTracker.lists.get(i), MemoryTracker.lists.get(i + 1));
+        for (int i = 0; i < lists.size(); i += 2) {
+            glDeleteLists(lists.get(i), lists.get(i + 1));
         }
-        final IntBuffer intBuffer = createIntBuffer(MemoryTracker.textures.size());
-        intBuffer.flip();
-        glDeleteTextures(intBuffer);
-        for (int j = 0; j < MemoryTracker.textures.size(); ++j) {
-            intBuffer.put(MemoryTracker.textures.get(j));
+
+        final IntBuffer ib = createIntBuffer(textures.size());
+        ib.flip();
+        glDeleteTextures(ib);
+
+        for (int j = 0; j < textures.size(); ++j) {
+            ib.put(textures.get(j));
         }
-        intBuffer.flip();
-        glDeleteTextures(intBuffer);
-        MemoryTracker.lists.clear();
-        MemoryTracker.textures.clear();
+
+        ib.flip();
+        glDeleteTextures(ib);
+        lists.clear();
+        textures.clear();
     }
     
     public static synchronized ByteBuffer createByteBuffer(final int size) {
         return ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
     }
-    
-    public static IntBuffer createIntBuffer(final int size) {
+    // Useless - exists in b1.2 leak
+    public static ShortBuffer createShortBuffer(int size) {
+        return createByteBuffer(size << 1).asShortBuffer();
+    }
+    // Useless - exists in b1.2 leak
+    public static CharBuffer createCharBuffer(int size) {
+        return createByteBuffer(size << 1).asCharBuffer();
+    }
+
+    public static IntBuffer createIntBuffer(int size) {
         return createByteBuffer(size << 2).asIntBuffer();
     }
-    
-    public static FloatBuffer createFloatBuffer(final int size) {
+    // Useless - exists in b1.2 leak
+    public static LongBuffer createLongBuffer(int size) {
+        return createByteBuffer(size << 3).asLongBuffer();
+    }
+
+    public static FloatBuffer createFloatBuffer(int size) {
         return createByteBuffer(size << 2).asFloatBuffer();
     }
-    
-    static {
-        MemoryTracker.lists = new ArrayList<>();
-        MemoryTracker.textures = new ArrayList<>();
+    // Useless - exists in b1.2 leak
+    public static DoubleBuffer createDoubleBuffer(int size) {
+        return createByteBuffer(size << 3).asDoubleBuffer();
     }
 }

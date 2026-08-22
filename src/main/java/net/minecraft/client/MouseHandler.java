@@ -12,24 +12,25 @@ import java.awt.Component;
 
 public class MouseHandler
 {
+    public static final boolean USE_LWJGL_MOUSE = true;
     private Component parent;
     private Cursor invisibleCursor;
     public int xd;
     public int yd;
-    private int toSkip;
+    private int toSkip = 10;
     
     public MouseHandler(final Component parent) {
-        this.toSkip = 10;
         this.parent = parent;
-        final IntBuffer intBuffer = MemoryTracker.createIntBuffer(1);
-        intBuffer.put(0);
-        intBuffer.flip();
-        final IntBuffer intBuffer2 = MemoryTracker.createIntBuffer(1024);
+        final IntBuffer delays = MemoryTracker.createIntBuffer(1);
+        delays.put(0);
+        delays.flip();
+        final IntBuffer images = MemoryTracker.createIntBuffer(1024);
+
         try {
-            this.invisibleCursor = new Cursor(32, 32, 16, 16, 1, intBuffer2, intBuffer);
+            this.invisibleCursor = new Cursor(32, 32, 16, 16, 1, images, delays);
         }
-        catch (final LWJGLException ex) {
-            ex.printStackTrace();
+        catch (final LWJGLException e) {
+            e.printStackTrace();
         }
     }
     

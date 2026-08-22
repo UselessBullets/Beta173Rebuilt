@@ -10,18 +10,9 @@ import java.util.List;
 
 public class User
 {
-    public static List allowedTiles;
-    public String name;
-    public String sessionId;
-    public String mpPassword;
-    
-    public User(final String name, final String sessionId) {
-        this.name = name;
-        this.sessionId = sessionId;
-    }
-    
+    public static List<Tile> allowedTiles = new ArrayList<>();
     static {
-        (User.allowedTiles = new ArrayList()).add(Tile.rock);
+        User.allowedTiles.add(Tile.rock);
         User.allowedTiles.add(Tile.stoneBrick);
         User.allowedTiles.add(Tile.redBrick);
         User.allowedTiles.add(Tile.dirt);
@@ -49,5 +40,14 @@ public class User
         User.allowedTiles.add(Tile.bookshelf);
         User.allowedTiles.add(Tile.tnt);
         User.allowedTiles.add(Tile.obsidian);
+    }
+    public String name;
+    public String sessionId;
+
+    public String mpPassword;
+
+    public User(final String name, final String sessionId) {
+        this.name = name;
+        this.sessionId = sessionId;
     }
 }

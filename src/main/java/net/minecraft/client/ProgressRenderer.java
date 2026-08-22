@@ -13,17 +13,13 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class ProgressRenderer implements ProgressListener
 {
-    private String status;
+    private String status = "";
     private Minecraft minecraft;
-    private String title;
-    private long lastTime;
-    private boolean noAbort;
+    private String title = "";
+    private long lastTime = System.currentTimeMillis();
+    private boolean noAbort = false;
     
     public ProgressRenderer(final Minecraft minecraft) {
-        this.status = "";
-        this.title = "";
-        this.lastTime = System.currentTimeMillis();
-        this.noAbort = false;
         this.minecraft = minecraft;
     }
     
@@ -38,99 +34,98 @@ public class ProgressRenderer implements ProgressListener
     }
     
     public void _progressStart(final String title) {
-        if (this.minecraft.running) {
-            this.title = title;
-            final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
-            glClear(GL_DEPTH_BUFFER_BIT);
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 100.0, 300.0);
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-            glTranslatef(0.0f, 0.0f, -200.0f);
-            return;
+        if (!this.minecraft.running) {
+            if (this.noAbort) return;
+            throw new StopGameException();
         }
-        if (this.noAbort) {
-            return;
-        }
-        throw new StopGameException();
+
+        this.title = title;
+        final ScreenSizeCalculator ssc = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0.0, ssc.rawWidth, ssc.rawHeight, 0.0, 100.0, 300.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslatef(0.0f, 0.0f, -200.0f);
     }
     
     public void progressStage(final String status) {
-        if (this.minecraft.running) {
-            this.lastTime = 0L;
-            this.status = status;
-            this.progressStagePercentage(-1);
-            this.lastTime = 0L;
-            return;
+        if (!this.minecraft.running) {
+            if (this.noAbort) return;
+            throw new StopGameException();
         }
-        if (this.noAbort) {
-            return;
-        }
-        throw new StopGameException();
+        this.lastTime = 0L;
+        this.status = status;
+        this.progressStagePercentage(-1);
+        this.lastTime = 0L;
     }
     
     public void progressStagePercentage(final int i) {
         if (!this.minecraft.running) {
-            if (this.noAbort) {
-                return;
-            }
+            if (this.noAbort) return;
             throw new StopGameException();
         }
-        else {
-            final long currentTimeMillis = System.currentTimeMillis();
-            if (currentTimeMillis - this.lastTime < 20L) {
-                return;
-            }
-            this.lastTime = currentTimeMillis;
-            final ScreenSizeCalculator screenSizeCalculator = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
-            final int width = screenSizeCalculator.getWidth();
-            final int height = screenSizeCalculator.getHeight();
-            glClear(GL_DEPTH_BUFFER_BIT);
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glOrtho(0.0, screenSizeCalculator.rawWidth, screenSizeCalculator.rawHeight, 0.0, 100.0, 300.0);
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-            glTranslatef(0.0f, 0.0f, -200.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            final Tesselator instance = Tesselator.instance;
-            glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
-            final float n = 32.0f;
-            instance.begin();
-            instance.color(0x404040);
-            instance.vertexUV(0.0, height, 0.0, 0.0, height / n);
-            instance.vertexUV(width, height, 0.0, width / n, height / n);
-            instance.vertexUV(width, 0.0, 0.0, width / n, 0.0);
-            instance.vertexUV(0.0, 0.0, 0.0, 0.0, 0.0);
-            instance.end();
-            if (i >= 0) {
-                final int n2 = 100;
-                final int n3 = 2;
-                final int n4 = width / 2 - n2 / 2;
-                final int n5 = height / 2 + 16;
-                glDisable(GL_TEXTURE_2D);
-                instance.begin();
-                instance.color(0x808080);
-                instance.vertex(n4, n5, 0.0);
-                instance.vertex(n4, n5 + n3, 0.0);
-                instance.vertex(n4 + n2, n5 + n3, 0.0);
-                instance.vertex(n4 + n2, n5, 0.0);
-                instance.color(0x80ff80);
-                instance.vertex(n4, n5, 0.0);
-                instance.vertex(n4, n5 + n3, 0.0);
-                instance.vertex(n4 + i, n5 + n3, 0.0);
-                instance.vertex(n4 + i, n5, 0.0);
-                instance.end();
-                glEnable(GL_TEXTURE_2D);
-            }
-            this.minecraft.font.drawShadow(this.title, (width - this.minecraft.font.width(this.title)) / 2, height / 2 - 4 - 16, 0xffffff);
-            this.minecraft.font.drawShadow(this.status, (width - this.minecraft.font.width(this.status)) / 2, height / 2 - 4 + 8, 0xffffff);
-            Display.update();
-            try {
-                Thread.yield();
-            }
-            catch (final Exception ex) {}
+
+        final long now = System.currentTimeMillis();
+        if (now - this.lastTime < 20L) return;
+        this.lastTime = now;
+
+        final ScreenSizeCalculator ssc = new ScreenSizeCalculator(this.minecraft.options, this.minecraft.width, this.minecraft.height);
+        final int screenWidth = ssc.getWidth();
+        final int screemHeight = ssc.getHeight();
+
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0.0, ssc.rawWidth, ssc.rawHeight, 0.0, 100.0, 300.0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glTranslatef(0.0f, 0.0f, -200.0f);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        final Tesselator t = Tesselator.instance;
+        glBindTexture(GL_TEXTURE_2D, this.minecraft.textures.loadTexture("/gui/background.png"));
+        final float s = 32.0f;
+        t.begin();
+        t.color(0x404040);
+        t.vertexUV(0.0, screemHeight, 0.0, 0.0, screemHeight / s);
+        t.vertexUV(screenWidth, screemHeight, 0.0, screenWidth / s, screemHeight / s);
+        t.vertexUV(screenWidth, 0.0, 0.0, screenWidth / s, 0.0);
+        t.vertexUV(0.0, 0.0, 0.0, 0.0, 0.0);
+        t.end();
+
+        if (i >= 0) {
+            final int w = 100;
+            final int h = 2;
+            final int x = screenWidth / 2 - w / 2;
+            final int y = screemHeight / 2 + 16;
+
+            glDisable(GL_TEXTURE_2D);
+            t.begin();
+            t.color(0x808080);
+            t.vertex(x, y, 0.0);
+            t.vertex(x, y + h, 0.0);
+            t.vertex(x + w, y + h, 0.0);
+            t.vertex(x + w, y, 0.0);
+
+            t.color(0x80ff80);
+            t.vertex(x, y, 0.0);
+            t.vertex(x, y + h, 0.0);
+            t.vertex(x + i, y + h, 0.0);
+            t.vertex(x + i, y, 0.0);
+            t.end();
+            glEnable(GL_TEXTURE_2D);
         }
+
+        this.minecraft.font.drawShadow(this.title, (screenWidth - this.minecraft.font.width(this.title)) / 2, screemHeight / 2 - 4 - 16, 0xffffff);
+        this.minecraft.font.drawShadow(this.status, (screenWidth - this.minecraft.font.width(this.status)) / 2, screemHeight / 2 - 4 + 8, 0xffffff);
+        Display.update();
+
+        try {
+            Thread.yield();
+        }
+        catch (final Exception ex) {}
     }
 }

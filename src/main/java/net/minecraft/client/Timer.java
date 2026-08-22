@@ -6,6 +6,7 @@ package net.minecraft.client;
 
 public class Timer
 {
+    private static final int MAX_TICKS_PER_UPDATE = 10;
     public float ticksPerSecond;
     private double lastTime;
     public int ticks;
@@ -14,7 +15,7 @@ public class Timer
     public float passedTime = 0.0f;
     private long lastMs;
     private long lastMsSysTime;
-    private long passedMs;
+    private long accumMs;
     private double adjustTime = 1.0;
     
     public Timer(final float ticksPerSecond) {
@@ -24,42 +25,45 @@ public class Timer
     }
     
     public void advanceTime() {
-        final long currentTimeMillis = System.currentTimeMillis();
-        final long n = currentTimeMillis - this.lastMs;
-        final long n2 = System.nanoTime() / 1000000L;
-        final double lastTime = n2 / 1000.0;
-        if (n > 1000L) {
-            this.lastTime = lastTime;
+        final long nowMs = System.currentTimeMillis();
+        final long passedMs = nowMs - this.lastMs;
+        final long msSysTim = System.nanoTime() / 1000000L;
+        final double now = msSysTim / 1000.0;
+
+        if (passedMs > 1000L) {
+            this.lastTime = now;
         }
-        else if (n < 0L) {
-            this.lastTime = lastTime;
+        else if (passedMs < 0L) {
+            this.lastTime = now;
         }
         else {
-            this.passedMs += n;
-            if (this.passedMs > 1000L) {
-                this.adjustTime += (this.passedMs / (double)(n2 - this.lastMsSysTime) - this.adjustTime) * 0.2f;
-                this.lastMsSysTime = n2;
-                this.passedMs = 0L;
+            this.accumMs += passedMs;
+            if (this.accumMs > 1000L) {
+                long passedMySysTime = msSysTim - this.lastMsSysTime;
+
+                double adjustTimeT = this.accumMs / (double)passedMySysTime;
+                this.adjustTime += (adjustTimeT - this.adjustTime) * 0.2f;
+
+                this.lastMsSysTime = msSysTim;
+                this.accumMs = 0L;
             }
-            if (this.passedMs < 0L) {
-                this.lastMsSysTime = n2;
+            if (this.accumMs < 0L) {
+                this.lastMsSysTime = msSysTim;
             }
         }
-        this.lastMs = currentTimeMillis;
-        double n3 = (lastTime - this.lastTime) * this.adjustTime;
-        this.lastTime = lastTime;
-        if (n3 < 0.0) {
-            n3 = 0.0;
-        }
-        if (n3 > 1.0) {
-            n3 = 1.0;
-        }
-        this.passedTime += (float)(n3 * this.timeScale * this.ticksPerSecond);
+        this.lastMs = nowMs;
+
+        double passedSeconds = (now - this.lastTime) * this.adjustTime;
+        this.lastTime = now;
+
+        if (passedSeconds < 0.0) passedSeconds = 0.0;
+        if (passedSeconds > 1.0) passedSeconds = 1.0;
+
+        this.passedTime += (float)(passedSeconds * this.timeScale * this.ticksPerSecond);
+
         this.ticks = (int)this.passedTime;
         this.passedTime -= this.ticks;
-        if (this.ticks > 10) {
-            this.ticks = 10;
-        }
+        if (this.ticks > MAX_TICKS_PER_UPDATE) this.ticks = MAX_TICKS_PER_UPDATE;
         this.a = this.passedTime;
     }
 }

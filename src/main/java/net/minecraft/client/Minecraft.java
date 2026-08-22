@@ -1285,24 +1285,25 @@ public abstract class Minecraft implements Runnable
                         if (Keyboard.getEventKey() == this.options.keyBuild.key) {
                             this.setScreen(new InventoryScreen(this.player));
                         }
+
                         if (Keyboard.getEventKey() == this.options.keyDrop.key) {
                             this.player.drop();
                         }
+
                         if (this.isClientSide() && Keyboard.getEventKey() == this.options.keyChat.key) {
                             this.setScreen(new ChatScreen());
                         }
                     }
+
                     for (int i = 0; i < 9; ++i) {
-                        if (Keyboard.getEventKey() == 2 + i) {
-                            this.player.inventory.selected = i;
-                        }
+                        if (Keyboard.getEventKey() == Keyboard.KEY_1 + i) this.player.inventory.selected = i;
                     }
-                    if (Keyboard.getEventKey() != this.options.keyFog.key) {
-                        continue;
+                    if (Keyboard.getEventKey() == this.options.keyFog.key) {
+                        this.options.toggle(Option.RENDER_DISTANCE, (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) ? -1 : 1);
                     }
-                    this.options.toggle(Option.RENDER_DISTANCE, (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54)) ? -1 : 1);
                 }
             }
+
             if (this.screen == null) {
                 if (Mouse.isButtonDown(0) && this.ticks - this.lastClickTick >= this.timer.ticksPerSecond / 4.0f && this.mouseGrabbed) {
                     this.handleMouseClick(0);
@@ -1313,8 +1314,10 @@ public abstract class Minecraft implements Runnable
                     this.lastClickTick = this.ticks;
                 }
             }
+
             this.handleMouseDown(0, this.screen == null && Mouse.isButtonDown(0) && this.mouseGrabbed);
         }
+
         if (this.level != null) {
             if (this.player != null) {
                 ++this.recheckPlayerIn;
@@ -1323,16 +1326,15 @@ public abstract class Minecraft implements Runnable
                     this.level.ensureAdded(this.player);
                 }
             }
+
             this.level.difficulty = this.options.difficulty;
             if (this.level.isClientSide) {
                 this.level.difficulty = 3;
             }
-            if (!this.pause) {
-                this.gameRenderer.tick();
-            }
-            if (!this.pause) {
-                this.levelRenderer.tick();
-            }
+
+            if (!this.pause) this.gameRenderer.tick();
+            if (!this.pause) this.levelRenderer.tick();
+
             if (!this.pause) {
                 if (this.level.lightningBoltTime > 0) {
                     final Level level = this.level;
@@ -1340,23 +1342,23 @@ public abstract class Minecraft implements Runnable
                 }
                 this.level.tickEntities();
             }
+
             if (!this.pause || this.isClientSide()) {
                 this.level.setSpawnSettings(this.options.difficulty > 0, true);
                 this.level.tick();
             }
-            if (!this.pause && this.level != null) {
-                this.level.animateTick(Mth.floor(this.player.x), Mth.floor(this.player.y), Mth.floor(this.player.z));
-            }
-            if (!this.pause) {
-                this.particleEngine.tick();
-            }
+
+            if (!this.pause && this.level != null) this.level.animateTick(Mth.floor(this.player.x), Mth.floor(this.player.y), Mth.floor(this.player.z));
+
+            if (!this.pause) this.particleEngine.tick();
         }
         this.lastTickTime = System.currentTimeMillis();
     }
     
     private void reloadSound() {
         System.out.println("FORCING RELOAD!");
-        (this.soundEngine = new SoundEngine()).init(this.options);
+        this.soundEngine = new SoundEngine();
+        this.soundEngine.init(this.options);
         this.bgLoader.forceReload();
     }
     
@@ -1393,34 +1395,35 @@ public abstract class Minecraft implements Runnable
         else {
             this.player.dimension = -1;
         }
+
         this.level.removeEntity(this.player);
         this.player.removed = false;
-        final double x = this.player.x;
-        final double z = this.player.z;
-        final double n = 8.0;
-        double x2;
-        double z2;
+
+        double xt = this.player.x;
+        double zt = this.player.z;
+        final double scale = 8.0;
         if (this.player.dimension == -1) {
-            x2 = x / n;
-            z2 = z / n;
-            this.player.moveTo(x2, this.player.y, z2, this.player.yRot, this.player.xRot);
+            xt /= scale;
+            zt /= scale;
+            this.player.moveTo(xt, this.player.y, zt, this.player.yRot, this.player.xRot);
             if (this.player.isAlive()) {
                 this.level.tick(this.player, false);
             }
             this.setLevel(new Level(this.level, Dimension.getNew(-1)), "Entering the Nether", this.player);
         }
         else {
-            x2 = x * n;
-            z2 = z * n;
-            this.player.moveTo(x2, this.player.y, z2, this.player.yRot, this.player.xRot);
+            xt *= scale;
+            zt *= scale;
+            this.player.moveTo(xt, this.player.y, zt, this.player.yRot, this.player.xRot);
             if (this.player.isAlive()) {
                 this.level.tick(this.player, false);
             }
             this.setLevel(new Level(this.level, Dimension.getNew(0)), "Leaving the Nether", this.player);
         }
+
         this.player.level = this.level;
         if (this.player.isAlive()) {
-            this.player.moveTo(x2, this.player.y, z2, this.player.yRot, this.player.xRot);
+            this.player.moveTo(xt, this.player.y, zt, this.player.yRot, this.player.xRot);
             this.level.tick(this.player, false);
             new PortalForcer().force(this.level, this.player);
         }
@@ -1438,14 +1441,18 @@ public abstract class Minecraft implements Runnable
         this.stats.forceSend();
         this.stats.forceSave();
         this.cameraTargetPlayer = null;
+
         this.progressRenderer.progressStart(message);
         this.progressRenderer.progressStage("");
+
         this.soundEngine.playStreaming(null, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-        if (this.level != null) {
-            this.level.forceSave(this.progressRenderer);
-        }
-        if ((this.level = level) != null) {
+
+        if (this.level != null) this.level.forceSave(this.progressRenderer);
+
+        this.level = level;
+        if (level != null) {
             this.gameMode.initLevel(level);
+
             if (!this.isClientSide()) {
                 if (forceInsertPlayer == null) {
                     this.player = (LocalPlayer)level.findSubclassOf(LocalPlayer.class);
@@ -1457,32 +1464,37 @@ public abstract class Minecraft implements Runnable
                     level.addEntity(this.player);
                 }
             }
-            if (!level.isClientSide) {
-                this.prepareLevel(message);
-            }
+
+            if (!level.isClientSide) this.prepareLevel(message);
+
             if (this.player == null) {
-                (this.player = (LocalPlayer)this.gameMode.createPlayer(level)).resetPos();
+                this.player = (LocalPlayer)this.gameMode.createPlayer(level);
+                this.player.resetPos();
                 this.gameMode.initPlayer(this.player);
             }
+
             this.player.input = new KeyboardInput(this.options);
-            if (this.levelRenderer != null) {
-                this.levelRenderer.setLevel(level);
-            }
-            if (this.particleEngine != null) {
-                this.particleEngine.setLevel(level);
-            }
+
+            if (this.levelRenderer != null) this.levelRenderer.setLevel(level);
+            if (this.particleEngine != null) this.particleEngine.setLevel(level);
+
             this.gameMode.adjustPlayer(this.player);
             if (forceInsertPlayer != null) {
                 level.clearLoadedPlayerData();
             }
-            final ChunkSource chunkSource = level.getChunkSource();
-            if (chunkSource instanceof ChunkCache) {
-                ((ChunkCache)chunkSource).centerOn(Mth.floor((float)(int)this.player.x) >> 4, Mth.floor((float)(int)this.player.z) >> 4);
+
+            final ChunkSource cs = level.getChunkSource();
+            if (cs instanceof ChunkCache) {
+                ChunkCache spcc = (ChunkCache)cs;
+
+                int xt =  Mth.floor((float)(int)this.player.x) >> 4;
+                int zt = Mth.floor((float)(int)this.player.z) >> 4;
+                spcc.centerOn(xt, zt);
             }
+
             level.loadPlayer(this.player);
-            if (level.isNew) {
-                level.forceSave(this.progressRenderer);
-            }
+            if (level.isNew) level.forceSave(this.progressRenderer);
+
             this.cameraTargetPlayer = this.player;
         }
         else {
@@ -1502,48 +1514,55 @@ public abstract class Minecraft implements Runnable
     private void prepareLevel(final String title) {
         this.progressRenderer.progressStart(title);
         this.progressRenderer.progressStage("Building terrain");
-        final int n = 128;
-        int n2 = 0;
-        final int n3 = n * 2 / 16 + 1;
-        final int n4 = n3 * n3;
-        final ChunkSource chunkSource = this.level.getChunkSource();
-        final Pos sharedSpawnPos = this.level.getSharedSpawnPos();
+
+        final int r = 128;
+        int pp = 0;
+        int max = r * 2 / 16 + 1;
+        max = max * max;
+        final ChunkSource cs = this.level.getChunkSource();
+
+        final Pos spawnPos = this.level.getSharedSpawnPos();
         if (this.player != null) {
-            sharedSpawnPos.x = (int)this.player.x;
-            sharedSpawnPos.z = (int)this.player.z;
+            spawnPos.x = (int)this.player.x;
+            spawnPos.z = (int)this.player.z;
         }
-        if (chunkSource instanceof ChunkCache) {
-            ((ChunkCache)chunkSource).centerOn(sharedSpawnPos.x >> 4, sharedSpawnPos.z >> 4);
+
+        if (cs instanceof ChunkCache) {
+            ChunkCache spcc = (ChunkCache) cs;
+
+            spcc.centerOn(spawnPos.x >> 4, spawnPos.z >> 4);
         }
-        for (int i = -n; i <= n; i += 16) {
-            for (int j = -n; j <= n; j += 16) {
-                this.progressRenderer.progressStagePercentage(n2++ * 100 / n4);
-                this.level.getTile(sharedSpawnPos.x + i, 64, sharedSpawnPos.z + j);
-                while (this.level.updateLights()) {}
+
+        for (int x = -r; x <= r; x += 16) {
+            for (int y = -r; y <= r; y += 16) {
+                this.progressRenderer.progressStagePercentage(pp++ * 100 / max);
+                this.level.getTile(spawnPos.x + x, 64, spawnPos.z + y);
+                while (this.level.updateLights());
             }
         }
+
         this.progressRenderer.progressStage("Simulating world for a bit");
         this.level.prepare();
     }
     
-    public void fileDownloaded(String substring, final File file) {
-        final int index = substring.indexOf("/");
-        final String substring2 = substring.substring(0, index);
-        substring = substring.substring(index + 1);
-        if (substring2.equalsIgnoreCase("sound")) {
-            this.soundEngine.add(substring, file);
+    public void fileDownloaded(String name, final File file) {
+        final int p = name.indexOf("/");
+        final String category = name.substring(0, p);
+        name = name.substring(p + 1);
+        if (category.equalsIgnoreCase("sound")) {
+            this.soundEngine.add(name, file);
         }
-        else if (substring2.equalsIgnoreCase("newsound")) {
-            this.soundEngine.add(substring, file);
+        else if (category.equalsIgnoreCase("newsound")) {
+            this.soundEngine.add(name, file);
         }
-        else if (substring2.equalsIgnoreCase("streaming")) {
-            this.soundEngine.addStreaming(substring, file);
+        else if (category.equalsIgnoreCase("streaming")) {
+            this.soundEngine.addStreaming(name, file);
         }
-        else if (substring2.equalsIgnoreCase("music")) {
-            this.soundEngine.addMusic(substring, file);
+        else if (category.equalsIgnoreCase("music")) {
+            this.soundEngine.addMusic(name, file);
         }
-        else if (substring2.equalsIgnoreCase("newmusic")) {
-            this.soundEngine.addMusic(substring, file);
+        else if (category.equalsIgnoreCase("newmusic")) {
+            this.soundEngine.addMusic(name, file);
         }
     }
     
@@ -1568,9 +1587,8 @@ public abstract class Minecraft implements Runnable
     }
     
     public void respawnPlayer(final boolean boolean1 /*TODO Useless - find name for boolean*/, final int dimension) {
-        if (!this.level.isClientSide && !this.level.dimension.mayRespawn()) {
-            this.toggleDimension();
-        }
+        if (!this.level.isClientSide && !this.level.dimension.mayRespawn()) this.toggleDimension();
+
         Pos respawnPosition = null;
         Pos pos = null;
         boolean b = true;

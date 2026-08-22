@@ -30,7 +30,7 @@ public class TileRenderer
     private int fixedTexture = -1;
     private boolean xFlipTexture = false;
     private boolean noCulling = false;
-    public static boolean fancy;
+    public static boolean fancy = true;
     public boolean setColor = true;
     private static final int FLIP_NONE = 0, FLIP_CW = 1, FLIP_CCW = 2, FLIP_180 = 3;
     private int northFlip = FLIP_NONE;
@@ -2564,676 +2564,752 @@ public class TileRenderer
     }
     
     public void renderFaceDown(final Tile tt, final double x, final double y, final double z, int tex) {
-        final Tesselator instance = Tesselator.instance;
-        if (this.fixedTexture >= 0) {
-            tex = this.fixedTexture;
-        }
-        final int n = (tex & 0xF) << 4;
-        final int n2 = tex & 0xF0;
-        double n3 = (n + tt.xx0 * 16.0) / 256.0;
-        double n4 = (n + tt.xx1 * 16.0 - 0.01) / 256.0;
-        double n5 = (n2 + tt.zz0 * 16.0) / 256.0;
-        double n6 = (n2 + tt.zz1 * 16.0 - 0.01) / 256.0;
+        final Tesselator t = Tesselator.instance;
+
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        double u00 = (texX + tt.xx0 * 16.0) / 256.0;
+        double u11 = (texX + tt.xx1 * 16.0 - 0.01) / 256.0;
+        double v00 = (texY + tt.zz0 * 16.0) / 256.0;
+        double v11 = (texY + tt.zz1 * 16.0 - 0.01) / 256.0;
+
         if (tt.xx0 < 0.0 || tt.xx1 > 1.0) {
-            n3 = (n + 0.0f) / 256.0f;
-            n4 = (n + 15.99f) / 256.0f;
+            u00 = (texX + 0.0f) / 256.0f;
+            u11 = (texX + 15.99f) / 256.0f;
         }
         if (tt.zz0 < 0.0 || tt.zz1 > 1.0) {
-            n5 = (n2 + 0.0f) / 256.0f;
-            n6 = (n2 + 15.99f) / 256.0f;
+            v00 = (texY + 0.0f) / 256.0f;
+            v11 = (texY + 15.99f) / 256.0f;
         }
-        double n7 = n4;
-        double n8 = n3;
-        double n9 = n5;
-        double n10 = n6;
-        if (this.downFlip == 2) {
-            n3 = (n + tt.zz0 * 16.0) / 256.0;
-            final double n11 = (n2 + 16 - tt.xx1 * 16.0) / 256.0;
-            n4 = (n + tt.zz1 * 16.0) / 256.0;
-            final double n12 = (n2 + 16 - tt.xx0 * 16.0) / 256.0;
-            n9 = n11;
-            n10 = n12;
-            n7 = n3;
-            n8 = n4;
-            n5 = n12;
-            n6 = n9;
+
+        double u01 = u11, u10 = u00, v01 = v00, v10 = v11;
+        if (this.downFlip == FLIP_CCW) {
+            u00 = (texX + tt.zz0 * 16.0) / 256.0;
+            v00 = (texY + 16 - tt.xx1 * 16.0) / 256.0;
+            u11 = (texX + tt.zz1 * 16.0) / 256.0;
+            v11 = (texY + 16 - tt.xx0 * 16.0) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u01 = u00;
+            u10 = u11;
+            v00 = v11;
+            v11 = v01;
         }
-        else if (this.downFlip == 1) {
-            final double n13 = (n + 16 - tt.zz1 * 16.0) / 256.0;
-            n5 = (n2 + tt.xx0 * 16.0) / 256.0;
-            final double n14 = (n + 16 - tt.zz0 * 16.0) / 256.0;
-            n6 = (n2 + tt.xx1 * 16.0) / 256.0;
-            n7 = n14;
-            n8 = n13;
-            n3 = n7;
-            n4 = n8;
-            n9 = n6;
-            n10 = n5;
+        else if (this.downFlip == FLIP_CW) {
+            // reshape
+            u00 = (texX + 16 - tt.zz1 * 16.0) / 256.0;
+            v00 = (texY + tt.xx0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.zz0 * 16.0) / 256.0;
+            v11 = (texY + tt.xx1 * 16.0) / 256.0;
+
+            // rotate
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u00 = u01;
+            u11 = u10;
+            v01 = v11;
+            v10 = v00;
         }
-        else if (this.downFlip == 3) {
-            n3 = (n + 16 - tt.xx0 * 16.0) / 256.0;
-            n4 = (n + 16 - tt.xx1 * 16.0 - 0.01) / 256.0;
-            n5 = (n2 + 16 - tt.zz0 * 16.0) / 256.0;
-            n6 = (n2 + 16 - tt.zz1 * 16.0 - 0.01) / 256.0;
-            n7 = n4;
-            n8 = n3;
-            n9 = n5;
-            n10 = n6;
+        else if (this.downFlip == FLIP_180) {
+            u00 = (texX + 16 - tt.xx0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.xx1 * 16.0 - 0.01) / 256.0;
+            v00 = (texY + 16 - tt.zz0 * 16.0) / 256.0;
+            v11 = (texY + 16 - tt.zz1 * 16.0 - 0.01) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
         }
-        final double n15 = x + tt.xx0;
-        final double n16 = x + tt.xx1;
-        final double n17 = y + tt.yy0;
-        final double n18 = z + tt.zz0;
-        final double n19 = z + tt.zz1;
+
+        final double x0 = x + tt.xx0;
+        final double x1 = x + tt.xx1;
+        final double y0 = y + tt.yy0;
+        final double z0 = z + tt.zz0;
+        final double z1 = z + tt.zz1;
+
         if (this.applyAmbienceOcclusion) {
-            instance.color(this.c1r, this.c1g, this.c1b);
-            instance.vertexUV(n15, n17, n19, n8, n10);
-            instance.color(this.c2r, this.c2g, this.c2b);
-            instance.vertexUV(n15, n17, n18, n3, n5);
-            instance.color(this.c3r, this.c3g, this.c3b);
-            instance.vertexUV(n16, n17, n18, n7, n9);
-            instance.color(this.c4r, this.c4g, this.c4b);
-            instance.vertexUV(n16, n17, n19, n4, n6);
+            t.color(this.c1r, this.c1g, this.c1b);
+            t.vertexUV(x0, y0, z1, u10, v10);
+            t.color(this.c2r, this.c2g, this.c2b);
+            t.vertexUV(x0, y0, z0, u00, v00);
+            t.color(this.c3r, this.c3g, this.c3b);
+            t.vertexUV(x1, y0, z0, u01, v01);
+            t.color(this.c4r, this.c4g, this.c4b);
+            t.vertexUV(x1, y0, z1, u11, v11);
         }
         else {
-            instance.vertexUV(n15, n17, n19, n8, n10);
-            instance.vertexUV(n15, n17, n18, n3, n5);
-            instance.vertexUV(n16, n17, n18, n7, n9);
-            instance.vertexUV(n16, n17, n19, n4, n6);
+            t.vertexUV(x0, y0, z1, u10, v10);
+            t.vertexUV(x0, y0, z0, u00, v00);
+            t.vertexUV(x1, y0, z0, u01, v01);
+            t.vertexUV(x1, y0, z1, u11, v11);
         }
     }
     
     public void renderFaceUp(final Tile tt, final double x, final double y, final double z, int tex) {
-        final Tesselator instance = Tesselator.instance;
-        if (this.fixedTexture >= 0) {
-            tex = this.fixedTexture;
-        }
-        final int n = (tex & 0xF) << 4;
-        final int n2 = tex & 0xF0;
-        double n3 = (n + tt.xx0 * 16.0) / 256.0;
-        double n4 = (n + tt.xx1 * 16.0 - 0.01) / 256.0;
-        double n5 = (n2 + tt.zz0 * 16.0) / 256.0;
-        double n6 = (n2 + tt.zz1 * 16.0 - 0.01) / 256.0;
+        final Tesselator t = Tesselator.instance;
+
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        double u00 = (texX + tt.xx0 * 16.0) / 256.0;
+        double u11 = (texX + tt.xx1 * 16.0 - 0.01) / 256.0;
+        double v00 = (texY + tt.zz0 * 16.0) / 256.0;
+        double v11 = (texY + tt.zz1 * 16.0 - 0.01) / 256.0;
+
         if (tt.xx0 < 0.0 || tt.xx1 > 1.0) {
-            n3 = (n + 0.0f) / 256.0f;
-            n4 = (n + 15.99f) / 256.0f;
+            u00 = (texX + 0.0f) / 256.0f;
+            u11 = (texX + 15.99f) / 256.0f;
         }
         if (tt.zz0 < 0.0 || tt.zz1 > 1.0) {
-            n5 = (n2 + 0.0f) / 256.0f;
-            n6 = (n2 + 15.99f) / 256.0f;
+            v00 = (texY + 0.0f) / 256.0f;
+            v11 = (texY + 15.99f) / 256.0f;
         }
-        double n7 = n4;
-        double n8 = n3;
-        double n9 = n5;
-        double n10 = n6;
-        if (this.upFlip == 1) {
-            n3 = (n + tt.zz0 * 16.0) / 256.0;
-            final double n11 = (n2 + 16 - tt.xx1 * 16.0) / 256.0;
-            n4 = (n + tt.zz1 * 16.0) / 256.0;
-            final double n12 = (n2 + 16 - tt.xx0 * 16.0) / 256.0;
-            n9 = n11;
-            n10 = n12;
-            n7 = n3;
-            n8 = n4;
-            n5 = n12;
-            n6 = n9;
+
+        double u01 = u11, u10 = u00, v01 = v00, v10 = v11;
+        if (this.upFlip == FLIP_CW) {
+            u00 = (texX + tt.zz0 * 16.0) / 256.0;
+            v00 = (texY + 16 - tt.xx1 * 16.0) / 256.0;
+            u11 = (texX + tt.zz1 * 16.0) / 256.0;
+            v11 = (texY + 16 - tt.xx0 * 16.0) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u01 = u00;
+            u10 = u11;
+            v00 = v11;
+            v11 = v01;
         }
-        else if (this.upFlip == 2) {
-            final double n13 = (n + 16 - tt.zz1 * 16.0) / 256.0;
-            n5 = (n2 + tt.xx0 * 16.0) / 256.0;
-            final double n14 = (n + 16 - tt.zz0 * 16.0) / 256.0;
-            n6 = (n2 + tt.xx1 * 16.0) / 256.0;
-            n7 = n14;
-            n8 = n13;
-            n3 = n7;
-            n4 = n8;
-            n9 = n6;
-            n10 = n5;
+        else if (this.upFlip == FLIP_CCW) {
+            // reshape
+            u00 = (texX + 16 - tt.zz1 * 16.0) / 256.0;
+            v00 = (texY + tt.xx0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.zz0 * 16.0) / 256.0;
+            v11 = (texY + tt.xx1 * 16.0) / 256.0;
+
+            // rotate
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u00 = u01;
+            u11 = u10;
+            v01 = v11;
+            v10 = v00;
         }
-        else if (this.upFlip == 3) {
-            n3 = (n + 16 - tt.xx0 * 16.0) / 256.0;
-            n4 = (n + 16 - tt.xx1 * 16.0 - 0.01) / 256.0;
-            n5 = (n2 + 16 - tt.zz0 * 16.0) / 256.0;
-            n6 = (n2 + 16 - tt.zz1 * 16.0 - 0.01) / 256.0;
-            n7 = n4;
-            n8 = n3;
-            n9 = n5;
-            n10 = n6;
+        else if (this.upFlip == FLIP_180) {
+            u00 = (texX + 16 - tt.xx0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.xx1 * 16.0 - 0.01) / 256.0;
+            v00 = (texY + 16 - tt.zz0 * 16.0) / 256.0;
+            v11 = (texY + 16 - tt.zz1 * 16.0 - 0.01) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
         }
-        final double n15 = x + tt.xx0;
-        final double n16 = x + tt.xx1;
-        final double n17 = y + tt.yy1;
-        final double n18 = z + tt.zz0;
-        final double n19 = z + tt.zz1;
+
+        final double x0 = x + tt.xx0;
+        final double x1 = x + tt.xx1;
+        final double y1 = y + tt.yy1;
+        final double z0 = z + tt.zz0;
+        final double z1 = z + tt.zz1;
+
         if (this.applyAmbienceOcclusion) {
-            instance.color(this.c1r, this.c1g, this.c1b);
-            instance.vertexUV(n16, n17, n19, n4, n6);
-            instance.color(this.c2r, this.c2g, this.c2b);
-            instance.vertexUV(n16, n17, n18, n7, n9);
-            instance.color(this.c3r, this.c3g, this.c3b);
-            instance.vertexUV(n15, n17, n18, n3, n5);
-            instance.color(this.c4r, this.c4g, this.c4b);
-            instance.vertexUV(n15, n17, n19, n8, n10);
+            t.color(this.c1r, this.c1g, this.c1b);
+            t.vertexUV(x1, y1, z1, u11, v11);
+            t.color(this.c2r, this.c2g, this.c2b);
+            t.vertexUV(x1, y1, z0, u01, v01);
+            t.color(this.c3r, this.c3g, this.c3b);
+            t.vertexUV(x0, y1, z0, u00, v00);
+            t.color(this.c4r, this.c4g, this.c4b);
+            t.vertexUV(x0, y1, z1, u10, v10);
         }
         else {
-            instance.vertexUV(n16, n17, n19, n4, n6);
-            instance.vertexUV(n16, n17, n18, n7, n9);
-            instance.vertexUV(n15, n17, n18, n3, n5);
-            instance.vertexUV(n15, n17, n19, n8, n10);
+            t.vertexUV(x1, y1, z1, u11, v11);
+            t.vertexUV(x1, y1, z0, u01, v01);
+            t.vertexUV(x0, y1, z0, u00, v00);
+            t.vertexUV(x0, y1, z1, u10, v10);
         }
     }
     
     public void renderNorth(final Tile tt, final double x, final double y, final double z, int tex) {
-        final Tesselator instance = Tesselator.instance;
-        if (this.fixedTexture >= 0) {
-            tex = this.fixedTexture;
-        }
-        final int n = (tex & 0xF) << 4;
-        final int n2 = tex & 0xF0;
-        double n3 = (n + tt.xx0 * 16.0) / 256.0;
-        double n4 = (n + tt.xx1 * 16.0 - 0.01) / 256.0;
-        double n5 = (n2 + 16 - tt.yy1 * 16.0) / 256.0;
-        double n6 = (n2 + 16 - tt.yy0 * 16.0 - 0.01) / 256.0;
+        final Tesselator t = Tesselator.instance;
+
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        double u00 = (texX + tt.xx0 * 16.0) / 256.0;
+        double u11 = (texX + tt.xx1 * 16.0 - 0.01) / 256.0;
+        double v00 = (texY + 16 - tt.yy1 * 16.0) / 256.0;
+        double v11 = (texY + 16 - tt.yy0 * 16.0 - 0.01) / 256.0;
         if (this.xFlipTexture) {
-            final double n7 = n3;
-            n3 = n4;
-            n4 = n7;
+            final double tmp = u00;
+            u00 = u11;
+            u11 = tmp;
         }
+
         if (tt.xx0 < 0.0 || tt.xx1 > 1.0) {
-            n3 = (n + 0.0f) / 256.0f;
-            n4 = (n + 15.99f) / 256.0f;
+            u00 = (texX + 0.0f) / 256.0f;
+            u11 = (texX + 15.99f) / 256.0f;
         }
         if (tt.yy0 < 0.0 || tt.yy1 > 1.0) {
-            n5 = (n2 + 0.0f) / 256.0f;
-            n6 = (n2 + 15.99f) / 256.0f;
+            v00 = (texY + 0.0f) / 256.0f;
+            v11 = (texY + 15.99f) / 256.0f;
         }
-        double n8 = n4;
-        double n9 = n3;
-        double n10 = n5;
-        double n11 = n6;
-        if (this.northFlip == 2) {
-            n3 = (n + tt.yy0 * 16.0) / 256.0;
-            final double n12 = (n2 + 16 - tt.xx0 * 16.0) / 256.0;
-            n4 = (n + tt.yy1 * 16.0) / 256.0;
-            final double n13 = (n2 + 16 - tt.xx1 * 16.0) / 256.0;
-            n10 = n12;
-            n11 = n13;
-            n8 = n3;
-            n9 = n4;
-            n5 = n13;
-            n6 = n10;
+
+        double u01 = u11, u10 = u00, v01 = v00, v10 = v11;
+        if (this.northFlip == FLIP_CCW) {
+            u00 = (texX + tt.yy0 * 16.0) / 256.0;
+            v00 = (texY + 16 - tt.xx0 * 16.0) / 256.0;
+            u11 = (texX + tt.yy1 * 16.0) / 256.0;
+            v11 = (texY + 16 - tt.xx1 * 16.0) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u01 = u00;
+            u10 = u11;
+            v00 = v11;
+            v11 = v01;
         }
-        else if (this.northFlip == 1) {
-            final double n14 = (n + 16 - tt.yy1 * 16.0) / 256.0;
-            n5 = (n2 + tt.xx1 * 16.0) / 256.0;
-            final double n15 = (n + 16 - tt.yy0 * 16.0) / 256.0;
-            n6 = (n2 + tt.xx0 * 16.0) / 256.0;
-            n8 = n15;
-            n9 = n14;
-            n3 = n8;
-            n4 = n9;
-            n10 = n6;
-            n11 = n5;
+        else if (this.northFlip == FLIP_CW) {
+            // reshape
+            u00 = (texX + 16 - tt.yy1 * 16.0) / 256.0;
+            v00 = (texY + tt.xx1 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.yy0 * 16.0) / 256.0;
+            v11 = (texY + tt.xx0 * 16.0) / 256.0;
+
+            // rotate
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u00 = u01;
+            u11 = u10;
+            v01 = v11;
+            v10 = v00;
         }
-        else if (this.northFlip == 3) {
-            n3 = (n + 16 - tt.xx0 * 16.0) / 256.0;
-            n4 = (n + 16 - tt.xx1 * 16.0 - 0.01) / 256.0;
-            n5 = (n2 + tt.yy1 * 16.0) / 256.0;
-            n6 = (n2 + tt.yy0 * 16.0 - 0.01) / 256.0;
-            n8 = n4;
-            n9 = n3;
-            n10 = n5;
-            n11 = n6;
+        else if (this.northFlip == FLIP_180) {
+            u00 = (texX + 16 - tt.xx0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.xx1 * 16.0 - 0.01) / 256.0;
+            v00 = (texY + tt.yy1 * 16.0) / 256.0;
+            v11 = (texY + tt.yy0 * 16.0 - 0.01) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
         }
-        final double n16 = x + tt.xx0;
-        final double n17 = x + tt.xx1;
-        final double n18 = y + tt.yy0;
-        final double n19 = y + tt.yy1;
-        final double n20 = z + tt.zz0;
+
+        final double x0 = x + tt.xx0;
+        final double x1 = x + tt.xx1;
+        final double y0 = y + tt.yy0;
+        final double y1 = y + tt.yy1;
+        final double z0 = z + tt.zz0;
+
         if (this.applyAmbienceOcclusion) {
-            instance.color(this.c1r, this.c1g, this.c1b);
-            instance.vertexUV(n16, n19, n20, n8, n10);
-            instance.color(this.c2r, this.c2g, this.c2b);
-            instance.vertexUV(n17, n19, n20, n3, n5);
-            instance.color(this.c3r, this.c3g, this.c3b);
-            instance.vertexUV(n17, n18, n20, n9, n11);
-            instance.color(this.c4r, this.c4g, this.c4b);
-            instance.vertexUV(n16, n18, n20, n4, n6);
+            t.color(this.c1r, this.c1g, this.c1b);
+            t.vertexUV(x0, y1, z0, u01, v01);
+            t.color(this.c2r, this.c2g, this.c2b);
+            t.vertexUV(x1, y1, z0, u00, v00);
+            t.color(this.c3r, this.c3g, this.c3b);
+            t.vertexUV(x1, y0, z0, u10, v10);
+            t.color(this.c4r, this.c4g, this.c4b);
+            t.vertexUV(x0, y0, z0, u11, v11);
         }
         else {
-            instance.vertexUV(n16, n19, n20, n8, n10);
-            instance.vertexUV(n17, n19, n20, n3, n5);
-            instance.vertexUV(n17, n18, n20, n9, n11);
-            instance.vertexUV(n16, n18, n20, n4, n6);
+            t.vertexUV(x0, y1, z0, u01, v01);
+            t.vertexUV(x1, y1, z0, u00, v00);
+            t.vertexUV(x1, y0, z0, u10, v10);
+            t.vertexUV(x0, y0, z0, u11, v11);
         }
     }
     
     public void renderSouth(final Tile tt, final double x, final double y, final double z, int tex) {
-        final Tesselator instance = Tesselator.instance;
-        if (this.fixedTexture >= 0) {
-            tex = this.fixedTexture;
-        }
-        final int n = (tex & 0xF) << 4;
-        final int n2 = tex & 0xF0;
-        double n3 = (n + tt.xx0 * 16.0) / 256.0;
-        double n4 = (n + tt.xx1 * 16.0 - 0.01) / 256.0;
-        double n5 = (n2 + 16 - tt.yy1 * 16.0) / 256.0;
-        double n6 = (n2 + 16 - tt.yy0 * 16.0 - 0.01) / 256.0;
+        final Tesselator t = Tesselator.instance;
+
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        double u00 = (texX + tt.xx0 * 16.0) / 256.0;
+        double u11 = (texX + tt.xx1 * 16.0 - 0.01) / 256.0;
+        double v00 = (texY + 16 - tt.yy1 * 16.0) / 256.0;
+        double v11 = (texY + 16 - tt.yy0 * 16.0 - 0.01) / 256.0;
         if (this.xFlipTexture) {
-            final double n7 = n3;
-            n3 = n4;
-            n4 = n7;
+            final double tmp = u00;
+            u00 = u11;
+            u11 = tmp;
         }
+
         if (tt.xx0 < 0.0 || tt.xx1 > 1.0) {
-            n3 = (n + 0.0f) / 256.0f;
-            n4 = (n + 15.99f) / 256.0f;
+            u00 = (texX + 0.0f) / 256.0f;
+            u11 = (texX + 15.99f) / 256.0f;
         }
         if (tt.yy0 < 0.0 || tt.yy1 > 1.0) {
-            n5 = (n2 + 0.0f) / 256.0f;
-            n6 = (n2 + 15.99f) / 256.0f;
+            v00 = (texY + 0.0f) / 256.0f;
+            v11 = (texY + 15.99f) / 256.0f;
         }
-        double n8 = n4;
-        double n9 = n3;
-        double n10 = n5;
-        double n11 = n6;
-        if (this.southFlip == 1) {
-            n3 = (n + tt.yy0 * 16.0) / 256.0;
-            final double n12 = (n2 + 16 - tt.xx0 * 16.0) / 256.0;
-            n4 = (n + tt.yy1 * 16.0) / 256.0;
-            n10 = (n2 + 16 - tt.xx1 * 16.0) / 256.0;
-            n11 = n12;
-            n8 = n3;
-            n9 = n4;
-            n5 = n12;
-            n6 = n10;
+
+        double u01 = u11, u10 = u00, v01 = v00, v10 = v11;
+        if (this.southFlip == FLIP_CW) {
+            u00 = (texX + tt.yy0 * 16.0) / 256.0;
+            v11 = (texY + 16 - tt.xx0 * 16.0) / 256.0;
+            u11 = (texX + tt.yy1 * 16.0) / 256.0;
+            v00 = (texY + 16 - tt.xx1 * 16.0) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u01 = u00;
+            u10 = u11;
+            v00 = v11;
+            v11 = v01;
         }
-        else if (this.southFlip == 2) {
-            final double n13 = (n + 16 - tt.yy1 * 16.0) / 256.0;
-            n5 = (n2 + tt.xx0 * 16.0) / 256.0;
-            final double n14 = (n + 16 - tt.yy0 * 16.0) / 256.0;
-            n6 = (n2 + tt.xx1 * 16.0) / 256.0;
-            n8 = n14;
-            n9 = n13;
-            n3 = n8;
-            n4 = n9;
-            n10 = n6;
-            n11 = n5;
+        else if (this.southFlip == FLIP_CCW) {
+            // reshape
+            u00 = (texX + 16 - tt.yy1 * 16.0) / 256.0;
+            v00 = (texY + tt.xx0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.yy0 * 16.0) / 256.0;
+            v11 = (texY + tt.xx1 * 16.0) / 256.0;
+
+            // rotate
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u00 = u01;
+            u11 = u10;
+            v01 = v11;
+            v10 = v00;
         }
-        else if (this.southFlip == 3) {
-            n3 = (n + 16 - tt.xx0 * 16.0) / 256.0;
-            n4 = (n + 16 - tt.xx1 * 16.0 - 0.01) / 256.0;
-            n5 = (n2 + tt.yy1 * 16.0) / 256.0;
-            n6 = (n2 + tt.yy0 * 16.0 - 0.01) / 256.0;
-            n8 = n4;
-            n9 = n3;
-            n10 = n5;
-            n11 = n6;
+        else if (this.southFlip == FLIP_180) {
+            u00 = (texX + 16 - tt.xx0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.xx1 * 16.0 - 0.01) / 256.0;
+            v00 = (texY + tt.yy1 * 16.0) / 256.0;
+            v11 = (texY + tt.yy0 * 16.0 - 0.01) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
         }
-        final double n15 = x + tt.xx0;
-        final double n16 = x + tt.xx1;
-        final double n17 = y + tt.yy0;
-        final double n18 = y + tt.yy1;
-        final double n19 = z + tt.zz1;
+
+        final double x0 = x + tt.xx0;
+        final double x1 = x + tt.xx1;
+        final double y0 = y + tt.yy0;
+        final double y1 = y + tt.yy1;
+        final double z1 = z + tt.zz1;
+
         if (this.applyAmbienceOcclusion) {
-            instance.color(this.c1r, this.c1g, this.c1b);
-            instance.vertexUV(n15, n18, n19, n3, n5);
-            instance.color(this.c2r, this.c2g, this.c2b);
-            instance.vertexUV(n15, n17, n19, n9, n11);
-            instance.color(this.c3r, this.c3g, this.c3b);
-            instance.vertexUV(n16, n17, n19, n4, n6);
-            instance.color(this.c4r, this.c4g, this.c4b);
-            instance.vertexUV(n16, n18, n19, n8, n10);
+            t.color(this.c1r, this.c1g, this.c1b);
+            t.vertexUV(x0, y1, z1, u00, v00);
+            t.color(this.c2r, this.c2g, this.c2b);
+            t.vertexUV(x0, y0, z1, u10, v10);
+            t.color(this.c3r, this.c3g, this.c3b);
+            t.vertexUV(x1, y0, z1, u11, v11);
+            t.color(this.c4r, this.c4g, this.c4b);
+            t.vertexUV(x1, y1, z1, u01, v01);
         }
         else {
-            instance.vertexUV(n15, n18, n19, n3, n5);
-            instance.vertexUV(n15, n17, n19, n9, n11);
-            instance.vertexUV(n16, n17, n19, n4, n6);
-            instance.vertexUV(n16, n18, n19, n8, n10);
+            t.vertexUV(x0, y1, z1, u00, v00);
+            t.vertexUV(x0, y0, z1, u10, v10);
+            t.vertexUV(x1, y0, z1, u11, v11);
+            t.vertexUV(x1, y1, z1, u01, v01);
         }
     }
     
     public void renderWest(final Tile tt, final double x, final double y, final double z, int tex) {
-        final Tesselator instance = Tesselator.instance;
-        if (this.fixedTexture >= 0) {
-            tex = this.fixedTexture;
-        }
-        final int n = (tex & 0xF) << 4;
-        final int n2 = tex & 0xF0;
-        double n3 = (n + tt.zz0 * 16.0) / 256.0;
-        double n4 = (n + tt.zz1 * 16.0 - 0.01) / 256.0;
-        double n5 = (n2 + 16 - tt.yy1 * 16.0) / 256.0;
-        double n6 = (n2 + 16 - tt.yy0 * 16.0 - 0.01) / 256.0;
+        final Tesselator t = Tesselator.instance;
+
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        double u00 = (texX + tt.zz0 * 16.0) / 256.0;
+        double u11 = (texX + tt.zz1 * 16.0 - 0.01) / 256.0;
+        double v00 = (texY + 16 - tt.yy1 * 16.0) / 256.0;
+        double v11 = (texY + 16 - tt.yy0 * 16.0 - 0.01) / 256.0;
         if (this.xFlipTexture) {
-            final double n7 = n3;
-            n3 = n4;
-            n4 = n7;
+            final double tmp = u00;
+            u00 = u11;
+            u11 = tmp;
         }
+
         if (tt.zz0 < 0.0 || tt.zz1 > 1.0) {
-            n3 = (n + 0.0f) / 256.0f;
-            n4 = (n + 15.99f) / 256.0f;
+            u00 = (texX + 0.0f) / 256.0f;
+            u11 = (texX + 15.99f) / 256.0f;
         }
         if (tt.yy0 < 0.0 || tt.yy1 > 1.0) {
-            n5 = (n2 + 0.0f) / 256.0f;
-            n6 = (n2 + 15.99f) / 256.0f;
+            v00 = (texY + 0.0f) / 256.0f;
+            v11 = (texY + 15.99f) / 256.0f;
         }
-        double n8 = n4;
-        double n9 = n3;
-        double n10 = n5;
-        double n11 = n6;
-        if (this.westFlip == 1) {
-            n3 = (n + tt.yy0 * 16.0) / 256.0;
-            final double n12 = (n2 + 16 - tt.zz1 * 16.0) / 256.0;
-            n4 = (n + tt.yy1 * 16.0) / 256.0;
-            final double n13 = (n2 + 16 - tt.zz0 * 16.0) / 256.0;
-            n10 = n12;
-            n11 = n13;
-            n8 = n3;
-            n9 = n4;
-            n5 = n13;
-            n6 = n10;
+
+        double u01 = u11, u10 = u00, v01 = v00, v10 = v11;
+        if (this.westFlip == FLIP_CW) {
+            u00 = (texX + tt.yy0 * 16.0) / 256.0;
+            v00 = (texY + 16 - tt.zz1 * 16.0) / 256.0;
+            u11 = (texX + tt.yy1 * 16.0) / 256.0;
+            v11 = (texY + 16 - tt.zz0 * 16.0) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u01 = u00;
+            u10 = u11;
+            v00 = v11;
+            v11 = v01;
         }
         else if (this.westFlip == 2) {
-            final double n14 = (n + 16 - tt.yy1 * 16.0) / 256.0;
-            n5 = (n2 + tt.zz0 * 16.0) / 256.0;
-            final double n15 = (n + 16 - tt.yy0 * 16.0) / 256.0;
-            n6 = (n2 + tt.zz1 * 16.0) / 256.0;
-            n8 = n15;
-            n9 = n14;
-            n3 = n8;
-            n4 = n9;
-            n10 = n6;
-            n11 = n5;
+            // reshape
+            u00 = (texX + 16 - tt.yy1 * 16.0) / 256.0;
+            v00 = (texY + tt.zz0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.yy0 * 16.0) / 256.0;
+            v11 = (texY + tt.zz1 * 16.0) / 256.0;
+
+            // rotate
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u00 = u01;
+            u11 = u10;
+            v01 = v11;
+            v10 = v00;
         }
         else if (this.westFlip == 3) {
-            n3 = (n + 16 - tt.zz0 * 16.0) / 256.0;
-            n4 = (n + 16 - tt.zz1 * 16.0 - 0.01) / 256.0;
-            n5 = (n2 + tt.yy1 * 16.0) / 256.0;
-            n6 = (n2 + tt.yy0 * 16.0 - 0.01) / 256.0;
-            n8 = n4;
-            n9 = n3;
-            n10 = n5;
-            n11 = n6;
+            u00 = (texX + 16 - tt.zz0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.zz1 * 16.0 - 0.01) / 256.0;
+            v00 = (texY + tt.yy1 * 16.0) / 256.0;
+            v11 = (texY + tt.yy0 * 16.0 - 0.01) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
         }
-        final double n16 = x + tt.xx0;
-        final double n17 = y + tt.yy0;
-        final double n18 = y + tt.yy1;
-        final double n19 = z + tt.zz0;
-        final double n20 = z + tt.zz1;
+
+        final double x0 = x + tt.xx0;
+        final double y0 = y + tt.yy0;
+        final double y1 = y + tt.yy1;
+        final double z0 = z + tt.zz0;
+        final double z1 = z + tt.zz1;
+
         if (this.applyAmbienceOcclusion) {
-            instance.color(this.c1r, this.c1g, this.c1b);
-            instance.vertexUV(n16, n18, n20, n8, n10);
-            instance.color(this.c2r, this.c2g, this.c2b);
-            instance.vertexUV(n16, n18, n19, n3, n5);
-            instance.color(this.c3r, this.c3g, this.c3b);
-            instance.vertexUV(n16, n17, n19, n9, n11);
-            instance.color(this.c4r, this.c4g, this.c4b);
-            instance.vertexUV(n16, n17, n20, n4, n6);
+            t.color(this.c1r, this.c1g, this.c1b);
+            t.vertexUV(x0, y1, z1, u01, v01);
+            t.color(this.c2r, this.c2g, this.c2b);
+            t.vertexUV(x0, y1, z0, u00, v00);
+            t.color(this.c3r, this.c3g, this.c3b);
+            t.vertexUV(x0, y0, z0, u10, v10);
+            t.color(this.c4r, this.c4g, this.c4b);
+            t.vertexUV(x0, y0, z1, u11, v11);
         }
         else {
-            instance.vertexUV(n16, n18, n20, n8, n10);
-            instance.vertexUV(n16, n18, n19, n3, n5);
-            instance.vertexUV(n16, n17, n19, n9, n11);
-            instance.vertexUV(n16, n17, n20, n4, n6);
+            t.vertexUV(x0, y1, z1, u01, v01);
+            t.vertexUV(x0, y1, z0, u00, v00);
+            t.vertexUV(x0, y0, z0, u10, v10);
+            t.vertexUV(x0, y0, z1, u11, v11);
         }
     }
     
     public void renderEast(final Tile tt, final double x, final double y, final double z, int tex) {
-        final Tesselator instance = Tesselator.instance;
-        if (this.fixedTexture >= 0) {
-            tex = this.fixedTexture;
-        }
-        final int n = (tex & 0xF) << 4;
-        final int n2 = tex & 0xF0;
-        double n3 = (n + tt.zz0 * 16.0) / 256.0;
-        double n4 = (n + tt.zz1 * 16.0 - 0.01) / 256.0;
-        double n5 = (n2 + 16 - tt.yy1 * 16.0) / 256.0;
-        double n6 = (n2 + 16 - tt.yy0 * 16.0 - 0.01) / 256.0;
+        final Tesselator t = Tesselator.instance;
+
+        if (this.fixedTexture >= 0) tex = this.fixedTexture;
+        final int texX = (tex & 0xF) << 4;
+        final int texY = tex & 0xF0;
+        double u00 = (texX + tt.zz0 * 16.0) / 256.0;
+        double u11 = (texX + tt.zz1 * 16.0 - 0.01) / 256.0;
+        double v00 = (texY + 16 - tt.yy1 * 16.0) / 256.0;
+        double v11 = (texY + 16 - tt.yy0 * 16.0 - 0.01) / 256.0;
         if (this.xFlipTexture) {
-            final double n7 = n3;
-            n3 = n4;
-            n4 = n7;
+            final double tmp = u00;
+            u00 = u11;
+            u11 = tmp;
         }
+
         if (tt.zz0 < 0.0 || tt.zz1 > 1.0) {
-            n3 = (n + 0.0f) / 256.0f;
-            n4 = (n + 15.99f) / 256.0f;
+            u00 = (texX + 0.0f) / 256.0f;
+            u11 = (texX + 15.99f) / 256.0f;
         }
         if (tt.yy0 < 0.0 || tt.yy1 > 1.0) {
-            n5 = (n2 + 0.0f) / 256.0f;
-            n6 = (n2 + 15.99f) / 256.0f;
+            v00 = (texY + 0.0f) / 256.0f;
+            v11 = (texY + 15.99f) / 256.0f;
         }
-        double n8 = n4;
-        double n9 = n3;
-        double n10 = n5;
-        double n11 = n6;
-        if (this.eastFlip == 2) {
-            n3 = (n + tt.yy0 * 16.0) / 256.0;
-            final double n12 = (n2 + 16 - tt.zz0 * 16.0) / 256.0;
-            n4 = (n + tt.yy1 * 16.0) / 256.0;
-            final double n13 = (n2 + 16 - tt.zz1 * 16.0) / 256.0;
-            n10 = n12;
-            n11 = n13;
-            n8 = n3;
-            n9 = n4;
-            n5 = n13;
-            n6 = n10;
+
+        double u01 = u11, u10 = u00, v01 = v00, v10 = v11;
+        if (this.eastFlip == FLIP_CCW) {
+            u00 = (texX + tt.yy0 * 16.0) / 256.0;
+            v00 = (texY + 16 - tt.zz0 * 16.0) / 256.0;
+            u11 = (texX + tt.yy1 * 16.0) / 256.0;
+            v11 = (texY + 16 - tt.zz1 * 16.0) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u01 = u00;
+            u10 = u11;
+            v00 = v11;
+            v11 = v01;
         }
-        else if (this.eastFlip == 1) {
-            final double n14 = (n + 16 - tt.yy1 * 16.0) / 256.0;
-            n5 = (n2 + tt.zz1 * 16.0) / 256.0;
-            final double n15 = (n + 16 - tt.yy0 * 16.0) / 256.0;
-            n6 = (n2 + tt.zz0 * 16.0) / 256.0;
-            n8 = n15;
-            n9 = n14;
-            n3 = n8;
-            n4 = n9;
-            n10 = n6;
-            n11 = n5;
+        else if (this.eastFlip == FLIP_CW) {
+            // reshape
+            u00 = (texX + 16 - tt.yy1 * 16.0) / 256.0;
+            v00 = (texY + tt.zz1 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.yy0 * 16.0) / 256.0;
+            v11 = (texY + tt.zz0 * 16.0) / 256.0;
+
+            // rotate
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
+            u00 = u01;
+            u11 = u10;
+            v01 = v11;
+            v10 = v00;
         }
-        else if (this.eastFlip == 3) {
-            n3 = (n + 16 - tt.zz0 * 16.0) / 256.0;
-            n4 = (n + 16 - tt.zz1 * 16.0 - 0.01) / 256.0;
-            n5 = (n2 + tt.yy1 * 16.0) / 256.0;
-            n6 = (n2 + tt.yy0 * 16.0 - 0.01) / 256.0;
-            n8 = n4;
-            n9 = n3;
-            n10 = n5;
-            n11 = n6;
+        else if (this.eastFlip == FLIP_180) {
+            u00 = (texX + 16 - tt.zz0 * 16.0) / 256.0;
+            u11 = (texX + 16 - tt.zz1 * 16.0 - 0.01) / 256.0;
+            v00 = (texY + tt.yy1 * 16.0) / 256.0;
+            v11 = (texY + tt.yy0 * 16.0 - 0.01) / 256.0;
+
+            u01 = u11;
+            u10 = u00;
+            v01 = v00;
+            v10 = v11;
         }
-        final double n16 = x + tt.xx1;
-        final double n17 = y + tt.yy0;
-        final double n18 = y + tt.yy1;
-        final double n19 = z + tt.zz0;
-        final double n20 = z + tt.zz1;
+
+        final double x1 = x + tt.xx1;
+        final double y0 = y + tt.yy0;
+        final double y1 = y + tt.yy1;
+        final double z0 = z + tt.zz0;
+        final double z1 = z + tt.zz1;
+
         if (this.applyAmbienceOcclusion) {
-            instance.color(this.c1r, this.c1g, this.c1b);
-            instance.vertexUV(n16, n17, n20, n9, n11);
-            instance.color(this.c2r, this.c2g, this.c2b);
-            instance.vertexUV(n16, n17, n19, n4, n6);
-            instance.color(this.c3r, this.c3g, this.c3b);
-            instance.vertexUV(n16, n18, n19, n8, n10);
-            instance.color(this.c4r, this.c4g, this.c4b);
-            instance.vertexUV(n16, n18, n20, n3, n5);
+            t.color(this.c1r, this.c1g, this.c1b);
+            t.vertexUV(x1, y0, z1, u10, v10);
+            t.color(this.c2r, this.c2g, this.c2b);
+            t.vertexUV(x1, y0, z0, u11, v11);
+            t.color(this.c3r, this.c3g, this.c3b);
+            t.vertexUV(x1, y1, z0, u01, v01);
+            t.color(this.c4r, this.c4g, this.c4b);
+            t.vertexUV(x1, y1, z1, u00, v00);
         }
         else {
-            instance.vertexUV(n16, n17, n20, n9, n11);
-            instance.vertexUV(n16, n17, n19, n4, n6);
-            instance.vertexUV(n16, n18, n19, n8, n10);
-            instance.vertexUV(n16, n18, n20, n3, n5);
+            t.vertexUV(x1, y0, z1, u10, v10);
+            t.vertexUV(x1, y0, z0, u11, v11);
+            t.vertexUV(x1, y1, z0, u01, v01);
+            t.vertexUV(x1, y1, z1, u00, v00);
         }
     }
     
     public void renderTile(final Tile tile, int data, final float brightness) {
-        final Tesselator instance = Tesselator.instance;
+        final Tesselator t = Tesselator.instance;
+
         if (this.setColor) {
-            final int color = tile.getColor(data);
-            glColor4f((color >> 16 & 0xFF) / 255.0f * brightness, (color >> 8 & 0xFF) / 255.0f * brightness, (color & 0xFF) / 255.0f * brightness, 1.0f);
+            final int col = tile.getColor(data);
+            float red = (col >> 16 & 0xFF) / 255.0f * brightness;
+            float g = (col >> 8 & 0xFF) / 255.0f * brightness;
+            float b = (col & 0xFF) / 255.0f * brightness;
+            glColor4f(red, g, b, 1.0f);
         }
-        final int renderShape = tile.getRenderShape();
-        if (renderShape == 0 || renderShape == 16) {
-            if (renderShape == 16) {
-                data = 1;
+
+        final int shape = tile.getRenderShape();
+        if (shape == Tile.SHAPE_BLOCK || shape == Tile.SHAPE_PISTON_BASE) {
+            if (shape == Tile.SHAPE_PISTON_BASE) {
+                data = Facing.UP;
             }
+
             tile.updateDefaultShape();
             glTranslatef(-0.5f, -0.5f, -0.5f);
-            instance.begin();
-            instance.normal(0.0f, -1.0f, 0.0f);
-            this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(0, data));
-            instance.end();
-            instance.begin();
-            instance.normal(0.0f, 1.0f, 0.0f);
-            this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(1, data));
-            instance.end();
-            instance.begin();
-            instance.normal(0.0f, 0.0f, -1.0f);
-            this.renderNorth(tile, 0.0, 0.0, 0.0, tile.getTexture(2, data));
-            instance.end();
-            instance.begin();
-            instance.normal(0.0f, 0.0f, 1.0f);
-            this.renderSouth(tile, 0.0, 0.0, 0.0, tile.getTexture(3, data));
-            instance.end();
-            instance.begin();
-            instance.normal(-1.0f, 0.0f, 0.0f);
-            this.renderWest(tile, 0.0, 0.0, 0.0, tile.getTexture(4, data));
-            instance.end();
-            instance.begin();
-            instance.normal(1.0f, 0.0f, 0.0f);
-            this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(5, data));
-            instance.end();
+
+            t.begin();
+            t.normal(0.0f, -1.0f, 0.0f);
+            this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.DOWN, data));
+            t.end();
+
+            t.begin();
+            t.normal(0.0f, 1.0f, 0.0f);
+            this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.UP, data));
+            t.end();
+
+            t.begin();
+            t.normal(0.0f, 0.0f, -1.0f);
+            this.renderNorth(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.NORTH, data));
+            t.end();
+
+            t.begin();
+            t.normal(0.0f, 0.0f, 1.0f);
+            this.renderSouth(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.SOUTH, data));
+            t.end();
+
+            t.begin();
+            t.normal(-1.0f, 0.0f, 0.0f);
+            this.renderWest(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.WEST, data));
+            t.end();
+
+            t.begin();
+            t.normal(1.0f, 0.0f, 0.0f);
+            this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.EAST, data));
+            t.end();
+
             glTranslatef(0.5f, 0.5f, 0.5f);
         }
-        else if (renderShape == 1) {
-            instance.begin();
-            instance.normal(0.0f, -1.0f, 0.0f);
+        else if (shape == Tile.SHAPE_CROSS_TEXTURE) {
+            t.begin();
+            t.normal(0.0f, -1.0f, 0.0f);
             this.tesselateCrossTexture(tile, data, -0.5, -0.5, -0.5);
-            instance.end();
+            t.end();
         }
-        else if (renderShape == 13) {
+        else if (shape == Tile.SHAPE_CACTUS) {
             tile.updateDefaultShape();
             glTranslatef(-0.5f, -0.5f, -0.5f);
-            final float n = 0.0625f;
-            instance.begin();
-            instance.normal(0.0f, -1.0f, 0.0f);
-            this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
-            instance.end();
-            instance.begin();
-            instance.normal(0.0f, 1.0f, 0.0f);
-            this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(1));
-            instance.end();
-            instance.begin();
-            instance.normal(0.0f, 0.0f, -1.0f);
-            instance.addOffset(0.0f, 0.0f, n);
-            this.renderNorth(tile, 0.0, 0.0, 0.0, tile.getTexture(2));
-            instance.addOffset(0.0f, 0.0f, -n);
-            instance.end();
-            instance.begin();
-            instance.normal(0.0f, 0.0f, 1.0f);
-            instance.addOffset(0.0f, 0.0f, -n);
-            this.renderSouth(tile, 0.0, 0.0, 0.0, tile.getTexture(3));
-            instance.addOffset(0.0f, 0.0f, n);
-            instance.end();
-            instance.begin();
-            instance.normal(-1.0f, 0.0f, 0.0f);
-            instance.addOffset(n, 0.0f, 0.0f);
-            this.renderWest(tile, 0.0, 0.0, 0.0, tile.getTexture(4));
-            instance.addOffset(-n, 0.0f, 0.0f);
-            instance.end();
-            instance.begin();
-            instance.normal(1.0f, 0.0f, 0.0f);
-            instance.addOffset(-n, 0.0f, 0.0f);
-            this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(5));
-            instance.addOffset(n, 0.0f, 0.0f);
-            instance.end();
+            final float s = 1 / 16.0f;
+            t.begin();
+            t.normal(0.0f, -1.0f, 0.0f);
+            this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.DOWN));
+            t.end();
+
+            t.begin();
+            t.normal(0.0f, 1.0f, 0.0f);
+            this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.UP));
+            t.end();
+
+            t.begin();
+            t.normal(0.0f, 0.0f, -1.0f);
+            t.addOffset(0.0f, 0.0f, s);
+            this.renderNorth(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.NORTH));
+            t.addOffset(0.0f, 0.0f, -s);
+            t.end();
+
+            t.begin();
+            t.normal(0.0f, 0.0f, 1.0f);
+            t.addOffset(0.0f, 0.0f, -s);
+            this.renderSouth(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.SOUTH));
+            t.addOffset(0.0f, 0.0f, s);
+            t.end();
+
+            t.begin();
+            t.normal(-1.0f, 0.0f, 0.0f);
+            t.addOffset(s, 0.0f, 0.0f);
+            this.renderWest(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.WEST));
+            t.addOffset(-s, 0.0f, 0.0f);
+            t.end();
+
+            t.begin();
+            t.normal(1.0f, 0.0f, 0.0f);
+            t.addOffset(-s, 0.0f, 0.0f);
+            this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.EAST));
+            t.addOffset(s, 0.0f, 0.0f);
+            t.end();
+
             glTranslatef(0.5f, 0.5f, 0.5f);
         }
-        else if (renderShape == 6) {
-            instance.begin();
-            instance.normal(0.0f, -1.0f, 0.0f);
+        else if (shape == Tile.SHAPE_ROWS) {
+            t.begin();
+            t.normal(0.0f, -1.0f, 0.0f);
             this.tesselateRowTexture(tile, data, -0.5, -0.5, -0.5);
-            instance.end();
+            t.end();
         }
-        else if (renderShape == 2) {
-            instance.begin();
-            instance.normal(0.0f, -1.0f, 0.0f);
+        else if (shape == Tile.SHAPE_TORCH) {
+            t.begin();
+            t.normal(0.0f, -1.0f, 0.0f);
             this.tesselateTorch(tile, -0.5, -0.5, -0.5, 0.0, 0.0);
-            instance.end();
+            t.end();
         }
-        else if (renderShape == 10) {
+        else if (shape == Tile.SHAPE_STAIRS) {
             for (int i = 0; i < 2; ++i) {
-                if (i == 0) {
-                    tile.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);
-                }
-                if (i == 1) {
-                    tile.setShape(0.0f, 0.0f, 0.5f, 1.0f, 0.5f, 1.0f);
-                }
+                if (i == 0) tile.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);
+                if (i == 1) tile.setShape(0.0f, 0.0f, 0.5f, 1.0f, 0.5f, 1.0f);
+
                 glTranslatef(-0.5f, -0.5f, -0.5f);
-                instance.begin();
-                instance.normal(0.0f, -1.0f, 0.0f);
-                this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
-                instance.end();
-                instance.begin();
-                instance.normal(0.0f, 1.0f, 0.0f);
-                this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(1));
-                instance.end();
-                instance.begin();
-                instance.normal(0.0f, 0.0f, -1.0f);
-                this.renderNorth(tile, 0.0, 0.0, 0.0, tile.getTexture(2));
-                instance.end();
-                instance.begin();
-                instance.normal(0.0f, 0.0f, 1.0f);
-                this.renderSouth(tile, 0.0, 0.0, 0.0, tile.getTexture(3));
-                instance.end();
-                instance.begin();
-                instance.normal(-1.0f, 0.0f, 0.0f);
-                this.renderWest(tile, 0.0, 0.0, 0.0, tile.getTexture(4));
-                instance.end();
-                instance.begin();
-                instance.normal(1.0f, 0.0f, 0.0f);
-                this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(5));
-                instance.end();
+                t.begin();
+                t.normal(0.0f, -1.0f, 0.0f);
+                this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.DOWN));
+                t.end();
+
+                t.begin();
+                t.normal(0.0f, 1.0f, 0.0f);
+                this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.UP));
+                t.end();
+
+                t.begin();
+                t.normal(0.0f, 0.0f, -1.0f);
+                this.renderNorth(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.NORTH));
+                t.end();
+
+                t.begin();
+                t.normal(0.0f, 0.0f, 1.0f);
+                this.renderSouth(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.SOUTH));
+                t.end();
+
+                t.begin();
+                t.normal(-1.0f, 0.0f, 0.0f);
+                this.renderWest(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.WEST));
+                t.end();
+
+                t.begin();
+                t.normal(1.0f, 0.0f, 0.0f);
+                this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.EAST));
+                t.end();
+
                 glTranslatef(0.5f, 0.5f, 0.5f);
             }
         }
-        else if (renderShape == 11) {
-            for (int j = 0; j < 4; ++j) {
-                final float n2 = 0.125f;
-                if (j == 0) {
-                    tile.setShape(0.5f - n2, 0.0f, 0.0f, 0.5f + n2, 1.0f, n2 * 2.0f);
-                }
-                if (j == 1) {
-                    tile.setShape(0.5f - n2, 0.0f, 1.0f - n2 * 2.0f, 0.5f + n2, 1.0f, 1.0f);
-                }
-                final float n3 = 0.0625f;
-                if (j == 2) {
-                    tile.setShape(0.5f - n3, 1.0f - n3 * 3.0f, -n3 * 2.0f, 0.5f + n3, 1.0f - n3, 1.0f + n3 * 2.0f);
-                }
-                if (j == 3) {
-                    tile.setShape(0.5f - n3, 0.5f - n3 * 3.0f, -n3 * 2.0f, 0.5f + n3, 0.5f - n3, 1.0f + n3 * 2.0f);
-                }
+        else if (shape == Tile.SHAPE_FENCE) {
+            for (int i = 0; i < 4; ++i) {
+                float w = 2 / 16.0f;
+                if (i == 0) tile.setShape(0.5f - w, 0.0f, 0.0f, 0.5f + w, 1.0f, w * 2.0f);
+                if (i == 1) tile.setShape(0.5f - w, 0.0f, 1.0f - w * 2.0f, 0.5f + w, 1.0f, 1.0f);
+                w = 1 / 16.0f;
+                if (i == 2) tile.setShape(0.5f - w, 1.0f - w * 3.0f, -w * 2.0f, 0.5f + w, 1.0f - w, 1.0f + w * 2.0f);
+                if (i == 3) tile.setShape(0.5f - w, 0.5f - w * 3.0f, -w * 2.0f, 0.5f + w, 0.5f - w, 1.0f + w * 2.0f);
+
                 glTranslatef(-0.5f, -0.5f, -0.5f);
-                instance.begin();
-                instance.normal(0.0f, -1.0f, 0.0f);
-                this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
-                instance.end();
-                instance.begin();
-                instance.normal(0.0f, 1.0f, 0.0f);
-                this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(1));
-                instance.end();
-                instance.begin();
-                instance.normal(0.0f, 0.0f, -1.0f);
-                this.renderNorth(tile, 0.0, 0.0, 0.0, tile.getTexture(2));
-                instance.end();
-                instance.begin();
-                instance.normal(0.0f, 0.0f, 1.0f);
-                this.renderSouth(tile, 0.0, 0.0, 0.0, tile.getTexture(3));
-                instance.end();
-                instance.begin();
-                instance.normal(-1.0f, 0.0f, 0.0f);
-                this.renderWest(tile, 0.0, 0.0, 0.0, tile.getTexture(4));
-                instance.end();
-                instance.begin();
-                instance.normal(1.0f, 0.0f, 0.0f);
-                this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(5));
-                instance.end();
+                t.begin();
+                t.normal(0.0f, -1.0f, 0.0f);
+                this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.DOWN));
+                t.end();
+
+                t.begin();
+                t.normal(0.0f, 1.0f, 0.0f);
+                this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.UP));
+                t.end();
+
+                t.begin();
+                t.normal(0.0f, 0.0f, -1.0f);
+                this.renderNorth(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.NORTH));
+                t.end();
+
+                t.begin();
+                t.normal(0.0f, 0.0f, 1.0f);
+                this.renderSouth(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.SOUTH));
+                t.end();
+
+                t.begin();
+                t.normal(-1.0f, 0.0f, 0.0f);
+                this.renderWest(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.WEST));
+                t.end();
+
+                t.begin();
+                t.normal(1.0f, 0.0f, 0.0f);
+                this.renderEast(tile, 0.0, 0.0, 0.0, tile.getTexture(Facing.EAST));
+                t.end();
+
                 glTranslatef(0.5f, 0.5f, 0.5f);
             }
             tile.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
@@ -3241,10 +3317,11 @@ public class TileRenderer
     }
     
     public static boolean canRender(final int renderShape) {
-        return renderShape == 0 || renderShape == 13 || renderShape == 10 || renderShape == 11 || renderShape == 16;
-    }
-    
-    static {
-        TileRenderer.fancy = true;
+        if (renderShape == Tile.SHAPE_BLOCK) return true;
+        if (renderShape == Tile.SHAPE_CACTUS) return true;
+        if (renderShape == Tile.SHAPE_STAIRS) return true;
+        if (renderShape == Tile.SHAPE_FENCE) return true;
+        if (renderShape == Tile.SHAPE_PISTON_BASE) return true;
+        return false;
     }
 }

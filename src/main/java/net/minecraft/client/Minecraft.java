@@ -1589,26 +1589,29 @@ public abstract class Minecraft implements Runnable
     public void respawnPlayer(final boolean boolean1 /*TODO Useless - find name for boolean*/, final int dimension) {
         if (!this.level.isClientSide && !this.level.dimension.mayRespawn()) this.toggleDimension();
 
+        Pos bedPosition = null;
         Pos respawnPosition = null;
-        Pos pos = null;
-        boolean b = true;
+        boolean hasBed = true;
         if (this.player != null && !boolean1) {
-            respawnPosition = this.player.getRespawnPosition();
-            if (respawnPosition != null) {
-                pos = Player.checkBedValidRespawnPosition(this.level, respawnPosition);
-                if (pos == null) {
+            bedPosition = this.player.getRespawnPosition();
+            if (bedPosition != null) {
+                respawnPosition = Player.checkBedValidRespawnPosition(this.level, bedPosition);
+                if (respawnPosition == null) {
                     this.player.displayClientMessage("tile.bed.notValid");
                 }
             }
         }
-        if (pos == null) {
-            pos = this.level.getSharedSpawnPos();
-            b = false;
+        if (respawnPosition == null) {
+            respawnPosition = this.level.getSharedSpawnPos();
+            hasBed = false;
         }
-        final ChunkSource chunkSource = this.level.getChunkSource();
-        if (chunkSource instanceof ChunkCache) {
-            ((ChunkCache)chunkSource).centerOn(pos.x >> 4, pos.z >> 4);
+
+        final ChunkSource cs = this.level.getChunkSource();
+        if (cs instanceof ChunkCache) {
+            ChunkCache spcc = (ChunkCache)cs;
+            spcc.centerOn(respawnPosition.x >> 4, respawnPosition.z >> 4);
         }
+
         this.level.validateSpawn();
         this.level.removeAllPendingEntityRemovals();
         int entityId = 0;
@@ -1616,14 +1619,15 @@ public abstract class Minecraft implements Runnable
             entityId = this.player.entityId;
             this.level.removeEntity(this.player);
         }
+
         this.cameraTargetPlayer = null;
         this.player = (LocalPlayer)this.gameMode.createPlayer(this.level);
         this.player.dimension = dimension;
         this.cameraTargetPlayer = this.player;
         this.player.resetPos();
-        if (b) {
-            this.player.setRespawnPosition(respawnPosition);
-            this.player.moveTo(pos.x + 0.5f, pos.y + 0.1f, pos.z + 0.5f, 0.0f, 0.0f);
+        if (hasBed) {
+            this.player.setRespawnPosition(bedPosition);
+            this.player.moveTo(respawnPosition.x + 0.5f, respawnPosition.y + 0.1f, respawnPosition.z + 0.5f, 0.0f, 0.0f);
         }
         this.gameMode.initPlayer(this.player);
         this.level.loadPlayer(this.player);
@@ -1643,10 +1647,17 @@ public abstract class Minecraft implements Runnable
     
     public static void startAndConnectTo(final String name, final String sessionId, final String url) {
         final boolean fullscreen = false;
+
         final Frame frame = new Frame("Minecraft");
         final Canvas canvas = new Canvas();
         frame.setLayout(new BorderLayout());
+
         frame.add(canvas, "Center");
+
+        // OverlayLayout oll = new OverlayLayout(frame);
+        // oll.addLayoutComponent(canvas, BorderLayout.CENTER);
+        // oll.addLayoutComponent(new JLabel("TEST"), BorderLayout.EAST);
+
         canvas.setPreferredSize(new java.awt.Dimension(854, 480));
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -1658,8 +1669,10 @@ public abstract class Minecraft implements Runnable
                 frame.validate();
             }
         };
+
         final Thread thread = new Thread(minecraft, "Minecraft main thread");
-        thread.setPriority(10);
+        thread.setPriority(Thread.MAX_PRIORITY);
+
         minecraft.serverDomain = "www.minecraft.net";
         if (name != null && sessionId != null) {
             minecraft.user = new User(name, sessionId);
@@ -1667,10 +1680,12 @@ public abstract class Minecraft implements Runnable
         else {
             minecraft.user = new User("Player" + System.currentTimeMillis() % 1000L, "");
         }
+
         if (url != null) {
-            final String[] split = url.split(":");
-            minecraft.connectTo(split[0], Integer.parseInt(split[1]));
+            final String[] tokens = url.split(":");
+            minecraft.connectTo(tokens[0], Integer.parseInt(tokens[1]));
         }
+
         frame.setVisible(true);
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -1689,22 +1704,17 @@ public abstract class Minecraft implements Runnable
     }
     
     public ClientConnection getConnection() {
-        if (this.player instanceof MultiplayerLocalPlayer) {
-            return ((MultiplayerLocalPlayer)this.player).connection;
-        }
-        return null;
+        return this.player instanceof MultiplayerLocalPlayer ? ((MultiplayerLocalPlayer) this.player).connection : null;
     }
     
     public static void main(final String[] args) {
-        String string = "Player" + System.currentTimeMillis() % 1000L;
-        if (args.length > 0) {
-            string = args[0];
-        }
+        String name = "Player" + System.currentTimeMillis() % 1000L;
+        if (args.length > 0) name = args[0];
+
         String sessionId = "-";
-        if (args.length > 1) {
-            sessionId = args[1];
-        }
-        start(string, sessionId);
+        if (args.length > 1) sessionId = args[1];
+        
+        start(name, sessionId);
     }
     
     public static boolean renderNames() {

@@ -20,33 +20,31 @@ public class CodecMus extends CodecJOrbis
     private static class DecoderInputStream extends InputStream {
         private int seed;
         private InputStream in;
-        byte[] buff;
+        byte[] buff = new byte[1];
 
         public DecoderInputStream(URL url, InputStream in1) {
-            buff = new byte[1];
-            in = in1;
-            final String path = url.getPath();
-            this.seed = path.substring(path.lastIndexOf("/") + 1).hashCode();
+            this.in = in1;
+            String name = url.getPath();
+            name = name.substring(name.lastIndexOf("/") + 1);
+            this.seed = name.hashCode();
         }
 
         @Override
         public int read() throws IOException {
-            final int read = this.read(this.buff, 0, 1);
-            if (read < 0) {
-                return read;
-            }
-            return this.buff[0];
+            final int result = this.read(this.buff, 0, 1);
+            return result < 0 ? result : this.buff[0];
         }
 
         @Override
         public int read(final byte[] buff, final int off, int len) throws IOException {
             len = this.in.read(buff, off, len);
+
             for (int i = 0; i < len; ++i) {
-                final int n = off + i;
-                final byte b = (byte)(buff[n] ^ this.seed >> 8);
-                buff[n] = b;
-                this.seed = this.seed * 498729871 + 85731 * b;
+                final int index = off + i;
+                final byte val = buff[index] = (byte)(buff[index] ^ this.seed >> 8);
+                this.seed = this.seed * 498729871 + 85731 * val;
             }
+
             return len;
         }
     }

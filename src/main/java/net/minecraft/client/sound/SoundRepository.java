@@ -14,57 +14,45 @@ import java.util.Random;
 
 public class SoundRepository
 {
-    private Random random;
-    private Map<String, List<Sound>> urls;
-    private List<Sound> all;
-    public int count;
-    public boolean trimDigits;
-    
-    public SoundRepository() {
-        this.random = new Random();
-        this.urls = new HashMap<>();
-        this.all = new ArrayList<>();
-        this.count = 0;
-        this.trimDigits = true;
-    }
+    private Random random = new Random();
+    private Map<String, List<Sound>> urls = new HashMap<>();
+    private List<Sound> all = new ArrayList<>();
+    public int count = 0;
+    public boolean trimDigits = true;
     
     public Sound add(String name, final File file) {
         try {
-            final String name2 = name;
+            final String orgName = name;
             name = name.substring(0, name.indexOf("."));
             if (this.trimDigits) {
                 while (Character.isDigit(name.charAt(name.length() - 1))) {
                     name = name.substring(0, name.length() - 1);
                 }
             }
+
             name = name.replaceAll("/", ".");
             if (!this.urls.containsKey(name)) {
                 this.urls.put(name, new ArrayList<>());
             }
-            final Sound sound = new Sound(name2, file.toURI().toURL());
+
+            final Sound sound = new Sound(orgName, file.toURI().toURL());
             this.urls.get(name).add(sound);
             this.all.add(sound);
-            ++this.count;
+            this.count++;
             return sound;
         }
-        catch (final MalformedURLException cause) {
-            cause.printStackTrace();
-            throw new RuntimeException(cause);
+        catch (final MalformedURLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
     
     public Sound get(final String name) {
-        final List<Sound> list = this.urls.get(name);
-        if (list == null) {
-            return null;
-        }
-        return list.get(this.random.nextInt(list.size()));
+        final List<Sound> values = this.urls.get(name);
+        return values == null ? null : values.get(this.random.nextInt(values.size()));
     }
     
     public Sound any() {
-        if (this.all.size() == 0) {
-            return null;
-        }
-        return this.all.get(this.random.nextInt(this.all.size()));
+        return this.all.size() == 0 ? null : this.all.get(this.random.nextInt(this.all.size()));
     }
 }

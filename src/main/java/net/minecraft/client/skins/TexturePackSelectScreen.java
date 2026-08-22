@@ -75,7 +75,7 @@ public class TexturePackSelectScreen extends Screen
                 t.vertexUV(x + 32, y, 0.0, 1.0, 0.0);
                 t.vertexUV(x, y, 0.0, 0.0, 0.0);
                 t.end();
-                
+
                 drawString(TexturePackSelectScreen.this.font, texturePack.name, x + 32 + 2, y + 1, 0xffffff);
                 drawString(TexturePackSelectScreen.this.font, texturePack.desc1, x + 32 + 2, y + 12, 0x808080);
                 drawString(TexturePackSelectScreen.this.font, texturePack.desc2, x + 32 + 2, y + 12 + 10, 0x808080);

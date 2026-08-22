@@ -17,24 +17,16 @@ import paulscode.sound.SoundSystem;
 
 public class SoundEngine
 {
+    private static final int SOUND_DISTANCE = 16;
     private static SoundSystem soundSystem;
-    private SoundRepository sounds;
-    private SoundRepository streamingSounds;
-    private SoundRepository songs;
-    private int idCounter;
+    private SoundRepository sounds = new SoundRepository();
+    private SoundRepository streamingSounds = new SoundRepository();
+    private SoundRepository songs = new SoundRepository();
+    private int idCounter = 0;
     private Options options;
-    private static boolean loaded;
-    private Random random;
-    private int noMusicDelay;
-    
-    public SoundEngine() {
-        this.sounds = new SoundRepository();
-        this.streamingSounds = new SoundRepository();
-        this.songs = new SoundRepository();
-        this.idCounter = 0;
-        this.random = new Random();
-        this.noMusicDelay = this.random.nextInt(12000);
-    }
+    private static boolean loaded = false;
+    private Random random = new Random();
+    private int noMusicDelay = this.random.nextInt(12000);
     
     public void init(final Options options) {
         this.streamingSounds.trimDigits = false;
@@ -46,8 +38,8 @@ public class SoundEngine
     
     private void loadLibrary() {
         try {
-            final float sound = this.options.sound;
-            final float music = this.options.music;
+            final float hadSound = this.options.sound;
+            final float hadMusic = this.options.music;
             this.options.sound = 0.0f;
             this.options.music = 0.0f;
             this.options.save();
@@ -56,14 +48,15 @@ public class SoundEngine
             SoundSystemConfig.setCodec("mus", CodecMus.class);
             SoundSystemConfig.setCodec("wav", CodecWav.class);
             SoundEngine.soundSystem = new SoundSystem();
-            this.options.sound = sound;
-            this.options.music = music;
+            this.options.sound = hadSound;
+            this.options.music = hadMusic;
             this.options.save();
         }
-        catch (final Throwable t) {
-            t.printStackTrace();
+        catch (final Throwable e) {
+            e.printStackTrace();
             System.err.println("error linking with the LibraryJavaSound plug-in");
         }
+
         SoundEngine.loaded = true;
     }
     
@@ -71,6 +64,7 @@ public class SoundEngine
         if (!SoundEngine.loaded && (this.options.sound != 0.0f || this.options.music != 0.0f)) {
             this.loadLibrary();
         }
+
         if (SoundEngine.loaded) {
             if (this.options.music == 0.0f) {
                 SoundEngine.soundSystem.stop("BgMusic");
@@ -100,110 +94,111 @@ public class SoundEngine
     }
     
     public void playMusicTick() {
-        if (!SoundEngine.loaded || this.options.music == 0.0f) {
+        if (!SoundEngine.loaded || this.options.music == 0.0f) return;
+
+        if (SoundEngine.soundSystem.playing("BgMusic") || SoundEngine.soundSystem.playing("streaming")) return;
+
+        if (this.noMusicDelay > 0) {
+            --this.noMusicDelay;
             return;
         }
-        if (!SoundEngine.soundSystem.playing("BgMusic") && !SoundEngine.soundSystem.playing("streaming")) {
-            if (this.noMusicDelay > 0) {
-                --this.noMusicDelay;
-                return;
-            }
-            final Sound any = this.songs.any();
-            if (any != null) {
-                this.noMusicDelay = this.random.nextInt(12000) + 12000;
-                SoundEngine.soundSystem.backgroundMusic("BgMusic", any.url, any.name, false);
-                SoundEngine.soundSystem.setVolume("BgMusic", this.options.music);
-                SoundEngine.soundSystem.play("BgMusic");
-            }
-        }
+
+        final Sound song = this.songs.any();
+        if (song == null) return;
+
+        this.noMusicDelay = this.random.nextInt(12000) + 12000;
+        SoundEngine.soundSystem.backgroundMusic("BgMusic", song.url, song.name, false);
+        SoundEngine.soundSystem.setVolume("BgMusic", this.options.music);
+        SoundEngine.soundSystem.play("BgMusic");
     }
     
     public void update(final Mob player, final float a) {
-        if (!SoundEngine.loaded || this.options.sound == 0.0f) {
-            return;
-        }
-        if (player == null) {
-            return;
-        }
-        final float n = player.yRotO + (player.yRot - player.yRotO) * a;
-        final double n2 = player.xo + (player.x - player.xo) * a;
-        final double n3 = player.yo + (player.y - player.yo) * a;
-        final double n4 = player.zo + (player.z - player.zo) * a;
-        final float cos = Mth.cos(-n * Mth.DEGRAD - Mth.PI);
-        final float lookX = -Mth.sin(-n * Mth.DEGRAD - Mth.PI);
-        final float lookY = 0.0f;
-        final float lookZ = -cos;
-        final float upX = 0.0f;
-        final float upY = 1.0f;
-        final float upZ = 0.0f;
-        SoundEngine.soundSystem.setListenerPosition((float)n2, (float)n3, (float)n4);
-        SoundEngine.soundSystem.setListenerOrientation(lookX, lookY, lookZ, upX, upY, upZ);
+        if (!SoundEngine.loaded || this.options.sound == 0.0f) return;
+        if (player == null) return;
+
+        float yRot = player.yRotO + (player.yRot - player.yRotO) * a;
+        double x = player.xo + (player.x - player.xo) * a;
+        double y = player.yo + (player.y - player.yo) * a;
+        double z = player.zo + (player.z - player.zo) * a;
+        float yCos = Mth.cos(-yRot * Mth.DEGRAD - Mth.PI);
+        float ySin = Mth.sin(-yRot * Mth.DEGRAD - Mth.PI);
+
+        float xa = -ySin;
+        float ya = 0.0f;
+        float za = -yCos;
+
+        float xa2 = 0.0f;
+        float ya2 = 1.0f;
+        float za2 = 0.0f;
+        SoundEngine.soundSystem.setListenerPosition((float)x, (float)y, (float)z);
+        SoundEngine.soundSystem.setListenerOrientation(xa, ya, za, xa2, ya2, za2);
     }
     
     public void playStreaming(final String name, final float x, final float y, final float z, final float volume, final float pitch) {
-        if (!SoundEngine.loaded || this.options.sound == 0.0f) {
-            return;
-        }
-        final String sourcename = "streaming";
+        if (!SoundEngine.loaded || this.options.sound == 0.0f) return;
+
+        final String id = "streaming";
         if (SoundEngine.soundSystem.playing("streaming")) {
             SoundEngine.soundSystem.stop("streaming");
         }
-        if (name == null) {
-            return;
+
+        if (name == null) return;
+
+        final Sound sound = this.streamingSounds.get(name);
+        if (sound == null || volume <= 0.0f) return;
+
+        if (SoundEngine.soundSystem.playing("BgMusic")) {
+            SoundEngine.soundSystem.stop("BgMusic");
         }
-        final Sound value = this.streamingSounds.get(name);
-        if (value != null && volume > 0.0f) {
-            if (SoundEngine.soundSystem.playing("BgMusic")) {
-                SoundEngine.soundSystem.stop("BgMusic");
-            }
-            SoundEngine.soundSystem.newStreamingSource(true, sourcename, value.url, value.name, false, x, y, z, 2, 16.0f * 4.0f);
-            SoundEngine.soundSystem.setVolume(sourcename, 0.5f * this.options.sound);
-            SoundEngine.soundSystem.play(sourcename);
-        }
+
+        float dist = SOUND_DISTANCE;
+        SoundEngine.soundSystem.newStreamingSource(true, id, sound.url, sound.name, false, x, y, z, 2, dist * 4.0f);
+        SoundEngine.soundSystem.setVolume(id, 0.5f * this.options.sound);
+        SoundEngine.soundSystem.play(id);
     }
     
     public void play(final String name, final float x, final float y, final float z, float volume, final float pitch) {
-        if (!SoundEngine.loaded || this.options.sound == 0.0f) {
-            return;
+        if (!SoundEngine.loaded || this.options.sound == 0.0f) return;
+
+        final Sound sound = this.sounds.get(name);
+        if (sound == null || !(volume > 0.0f)) return;
+
+        this.idCounter = (this.idCounter + 1) % 256;
+        final String id = "sound_" + this.idCounter;
+
+        float dist = SOUND_DISTANCE;
+        if (volume > 1.0f) {
+            dist *= volume;
         }
-        final Sound value = this.sounds.get(name);
-        if (value != null && volume > 0.0f) {
-            this.idCounter = (this.idCounter + 1) % 256;
-            final String string = "sound_" + this.idCounter;
-            float distOrRoll = 16.0f;
-            if (volume > 1.0f) {
-                distOrRoll *= volume;
-            }
-            SoundEngine.soundSystem.newSource(volume > 1.0f, string, value.url, value.name, false, x, y, z, 2, distOrRoll);
-            SoundEngine.soundSystem.setPitch(string, pitch);
-            if (volume > 1.0f) {
-                volume = 1.0f;
-            }
-            SoundEngine.soundSystem.setVolume(string, volume * this.options.sound);
-            SoundEngine.soundSystem.play(string);
+
+        SoundEngine.soundSystem.newSource(volume > 1.0f, id, sound.url, sound.name, false, x, y, z, 2, dist);
+        SoundEngine.soundSystem.setPitch(id, pitch);
+        if (volume > 1.0f) {
+            volume = 1.0f;
         }
+
+        SoundEngine.soundSystem.setVolume(id, volume * this.options.sound);
+        SoundEngine.soundSystem.play(id);
     }
     
     public void playUI(final String name, float volume, final float pitch) {
-        if (!SoundEngine.loaded || this.options.sound == 0.0f) {
-            return;
+        if (!SoundEngine.loaded || this.options.sound == 0.0f) return;
+
+        final Sound sound = this.sounds.get(name);
+        if (sound == null) return;
+
+        this.idCounter = (this.idCounter + 1) % 256;
+        final String id = "sound_" + this.idCounter;
+
+        SoundEngine.soundSystem.newSource(false, id, sound.url, sound.name, false, 0.0f, 0.0f, 0.0f, 0, 0.0f);
+        if (volume > 1.0f) {
+            volume = 1.0f;
         }
-        final Sound value = this.sounds.get(name);
-        if (value != null) {
-            this.idCounter = (this.idCounter + 1) % 256;
-            final String string = "sound_" + this.idCounter;
-            SoundEngine.soundSystem.newSource(false, string, value.url, value.name, false, 0.0f, 0.0f, 0.0f, 0, 0.0f);
-            if (volume > 1.0f) {
-                volume = 1.0f;
-            }
-            volume *= 0.25f;
-            SoundEngine.soundSystem.setPitch(string, pitch);
-            SoundEngine.soundSystem.setVolume(string, volume * this.options.sound);
-            SoundEngine.soundSystem.play(string);
-        }
+
+        volume *= 0.25f;
+        SoundEngine.soundSystem.setPitch(id, pitch);
+        SoundEngine.soundSystem.setVolume(id, volume * this.options.sound);
+        SoundEngine.soundSystem.play(id);
     }
-    
-    static {
-        SoundEngine.loaded = false;
-    }
+
 }

@@ -1513,7 +1513,7 @@ public class TileRenderer
         instance.vertexUV(x1, y + 0.0, z1, u0, v1);
         instance.vertexUV(x0, y + 0.0, z1, u1, v1);
         instance.vertexUV(x0, y + 1.0, z1, u1, v0);
-        
+
         instance.vertexUV(x0, y + 1.0, z1, u0, v0);
         instance.vertexUV(x0, y + 0.0, z1, u0, v1);
         instance.vertexUV(x1, y + 0.0, z1, u1, v1);
@@ -1521,252 +1521,255 @@ public class TileRenderer
     }
     
     public boolean tesselateWaterInWorld(final Tile tt, final int x, final int y, final int z) {
-        final Tesselator instance = Tesselator.instance;
-        final int color = tt.getColor(this.level, x, y, z);
-        final float n = (color >> 16 & 0xFF) / 255.0f;
-        final float n2 = (color >> 8 & 0xFF) / 255.0f;
-        final float n3 = (color & 0xFF) / 255.0f;
-        final boolean faceVisible = tt.isFaceVisible(this.level, x, y + 1, z, 1);
-        final boolean faceVisible2 = tt.isFaceVisible(this.level, x, y - 1, z, 0);
-        final boolean[] array = { tt.isFaceVisible(this.level, x, y, z - 1, 2), tt.isFaceVisible(this.level, x, y, z + 1, 3), tt.isFaceVisible(this.level, x - 1, y, z, 4), tt.isFaceVisible(this.level, x + 1, y, z, 5) };
-        if (!faceVisible && !faceVisible2 && !array[0] && !array[1] && !array[2] && !array[3]) {
-            return false;
-        }
-        boolean b = false;
-        final float n4 = 0.5f;
-        final float n5 = 1.0f;
-        final float n6 = 0.8f;
-        final float n7 = 0.6f;
-        final double yy0 = 0.0;
-        final double yy2 = 1.0;
-        final Material material = tt.material;
+        // Useless - Source java codebase comment, according to the LCE leak
+        // TODO: This all needs to change. Somehow.
+        final Tesselator t = Tesselator.instance;
+
+        final int col = tt.getColor(this.level, x, y, z);
+        final float r = (col >> 16 & 0xFF) / 255.0f;
+        final float g = (col >> 8 & 0xFF) / 255.0f;
+        final float b = (col & 0xFF) / 255.0f;
+        final boolean up = tt.isFaceVisible(this.level, x, y + 1, z, 1);
+        final boolean down = tt.isFaceVisible(this.level, x, y - 1, z, 0);
+        final boolean[] dirs = {
+                tt.isFaceVisible(this.level, x, y, z - 1, 2),
+                tt.isFaceVisible(this.level, x, y, z + 1, 3),
+                tt.isFaceVisible(this.level, x - 1, y, z, 4),
+                tt.isFaceVisible(this.level, x + 1, y, z, 5)
+        };
+
+        if (!up && !down && !dirs[0] && !dirs[1] && !dirs[2] && !dirs[3]) return false;
+
+        boolean changed = false;
+        final float c10 = 0.5f;
+        final float c11 = 1.0f;
+        final float c2 = 0.8f;
+        final float c3 = 0.6f;
+
+        final double yo0 = 0.0;
+        final double yo1 = 1.0;
+
+        final Material m = tt.material;
         final int data = this.level.getData(x, y, z);
-        final float waterHeight = this.getWaterHeight(x, y, z, material);
-        final float waterHeight2 = this.getWaterHeight(x, y, z + 1, material);
-        final float waterHeight3 = this.getWaterHeight(x + 1, y, z + 1, material);
-        final float waterHeight4 = this.getWaterHeight(x + 1, y, z, material);
-        if (this.noCulling || faceVisible) {
-            b = true;
-            int n8 = tt.getTexture(1, data);
-            float n9 = (float)LiquidTile.getSlopeAngle(this.level, x, y, z, material);
-            if (n9 > -999.0f) {
-                n8 = tt.getTexture(2, data);
-            }
-            final int n10 = (n8 & 0xF) << 4;
-            final int n11 = n8 & 0xF0;
-            double n12 = (n10 + 8.0) / 256.0;
-            double n13 = (n11 + 8.0) / 256.0;
-            if (n9 < -999.0f) {
-                n9 = 0.0f;
+
+        final float h0 = this.getWaterHeight(x, y, z, m);
+        final float h1 = this.getWaterHeight(x, y, z + 1, m);
+        final float h2 = this.getWaterHeight(x + 1, y, z + 1, m);
+        final float h3 = this.getWaterHeight(x + 1, y, z, m);
+
+        if (this.noCulling || up) {
+            changed = true;
+            int tex = tt.getTexture(1, data);
+            float angle = (float)LiquidTile.getSlopeAngle(this.level, x, y, z, m);
+            if (angle > -999.0f) tex = tt.getTexture(2, data);
+
+            final int texX = (tex & 0xF) << 4;
+            final int texY = tex & 0xF0;
+            double uc = (texX + 8.0) / 256.0;
+            double vc = (texY + 8.0) / 256.0;
+            if (angle < -999.0f) {
+                angle = 0.0f;
             }
             else {
-                n12 = (n10 + 16) / 256.0f;
-                n13 = (n11 + 16) / 256.0f;
+                uc = (texX + 16) / 256.0f;
+                vc = (texY + 16) / 256.0f;
             }
-            final float n14 = Mth.sin(n9) * 8.0f / 256.0f;
-            final float n15 = Mth.cos(n9) * 8.0f / 256.0f;
-            final float brightness = tt.getBrightness(this.level, x, y, z);
-            instance.color(n5 * brightness * n, n5 * brightness * n2, n5 * brightness * n3);
-            instance.vertexUV(x + 0, y + waterHeight, z + 0, n12 - n15 - n14, n13 - n15 + n14);
-            instance.vertexUV(x + 0, y + waterHeight2, z + 1, n12 - n15 + n14, n13 + n15 + n14);
-            instance.vertexUV(x + 1, y + waterHeight3, z + 1, n12 + n15 + n14, n13 + n15 - n14);
-            instance.vertexUV(x + 1, y + waterHeight4, z + 0, n12 + n15 - n14, n13 - n15 - n14);
+
+            final float s = Mth.sin(angle) * 8.0f / 256.0f;
+            final float c = Mth.cos(angle) * 8.0f / 256.0f;
+            final float br = tt.getBrightness(this.level, x, y, z);
+            t.color(c11 * br * r, c11 * br * g, c11 * br * b);
+            t.vertexUV(x + 0, y + h0, z + 0, uc - c - s, vc - c + s);
+            t.vertexUV(x + 0, y + h1, z + 1, uc - c + s, vc + c + s);
+            t.vertexUV(x + 1, y + h2, z + 1, uc + c + s, vc + c - s);
+            t.vertexUV(x + 1, y + h3, z + 0, uc + c - s, vc - c - s);
         }
-        if (this.noCulling || faceVisible2) {
-            final float brightness2 = tt.getBrightness(this.level, x, y - 1, z);
-            instance.color(n4 * brightness2, n4 * brightness2, n4 * brightness2);
-            this.renderFaceUp(tt, x, y, z, tt.getTexture(0));
-            b = true;
+        if (this.noCulling || down) {
+            final float br = tt.getBrightness(this.level, x, y - 1, z);
+            t.color(c10 * br, c10 * br, c10 * br);
+            this.renderFaceDown(tt, x, y, z, tt.getTexture(0));
+            changed = true;
         }
-        for (int i = 0; i < 4; ++i) {
-            int x2 = x;
-            int z2 = z;
-            if (i == 0) {
-                --z2;
-            }
-            if (i == 1) {
-                ++z2;
-            }
-            if (i == 2) {
-                --x2;
-            }
-            if (i == 3) {
-                ++x2;
-            }
-            final int texture = tt.getTexture(i + 2, data);
-            final int n16 = (texture & 0xF) << 4;
-            final int n17 = texture & 0xF0;
-            if (this.noCulling || array[i]) {
-                float n18;
-                float n19;
-                float n20;
-                float n21;
-                float n22;
-                float n23;
-                if (i == 0) {
-                    n18 = waterHeight;
-                    n19 = waterHeight4;
-                    n20 = (float)x;
-                    n21 = (float)(x + 1);
-                    n22 = (float)z;
-                    n23 = (float)z;
+
+        for (int face = 0; face < 4; ++face) {
+            int xt = x;
+            int zt = z;
+
+            if (face == 0) --zt;
+            if (face == 1) ++zt;
+            if (face == 2) --xt;
+            if (face == 3) ++xt;
+
+            final int texture = tt.getTexture(face + 2, data);
+            final int texX = (texture & 0xF) << 4;
+            final int texY = texture & 0xF0;
+            if (this.noCulling || dirs[face]) {
+                float hh0;
+                float hh1;
+                float x0, x1, z0, z1;
+                if (face == 0) {
+                    hh0 = h0;
+                    hh1 = h3;
+                    x0 = (float)x;
+                    x1 = (float)(x + 1);
+                    z0 = (float)z;
+                    z1 = (float)z;
                 }
-                else if (i == 1) {
-                    n18 = waterHeight3;
-                    n19 = waterHeight2;
-                    n20 = (float)(x + 1);
-                    n21 = (float)x;
-                    n22 = (float)(z + 1);
-                    n23 = (float)(z + 1);
+                else if (face == 1) {
+                    hh0 = h2;
+                    hh1 = h1;
+                    x0 = (float)(x + 1);
+                    x1 = (float)x;
+                    z0 = (float)(z + 1);
+                    z1 = (float)(z + 1);
                 }
-                else if (i == 2) {
-                    n18 = waterHeight2;
-                    n19 = waterHeight;
-                    n20 = (float)x;
-                    n21 = (float)x;
-                    n22 = (float)(z + 1);
-                    n23 = (float)z;
+                else if (face == 2) {
+                    hh0 = h1;
+                    hh1 = h0;
+                    x0 = (float)x;
+                    x1 = (float)x;
+                    z0 = (float)(z + 1);
+                    z1 = (float)z;
                 }
                 else {
-                    n18 = waterHeight4;
-                    n19 = waterHeight3;
-                    n20 = (float)(x + 1);
-                    n21 = (float)(x + 1);
-                    n22 = (float)z;
-                    n23 = (float)(z + 1);
+                    hh0 = h3;
+                    hh1 = h2;
+                    x0 = (float)(x + 1);
+                    x1 = (float)(x + 1);
+                    z0 = (float)z;
+                    z1 = (float)(z + 1);
                 }
-                b = true;
-                final double n24 = (n16 + 0) / 256.0f;
-                final double n25 = (n16 + 16 - 0.01) / 256.0;
-                final double v = (n17 + (1.0f - n18) * 16.0f) / 256.0f;
-                final double v2 = (n17 + (1.0f - n19) * 16.0f) / 256.0f;
-                final double n26 = (n17 + 16 - 0.01) / 256.0;
-                final float brightness3 = tt.getBrightness(this.level, x2, y, z2);
-                float n27;
-                if (i < 2) {
-                    n27 = brightness3 * n6;
-                }
-                else {
-                    n27 = brightness3 * n7;
-                }
-                instance.color(n5 * n27 * n, n5 * n27 * n2, n5 * n27 * n3);
-                instance.vertexUV(n20, y + n18, n22, n24, v);
-                instance.vertexUV(n21, y + n19, n23, n25, v2);
-                instance.vertexUV(n21, y + 0, n23, n25, n26);
-                instance.vertexUV(n20, y + 0, n22, n24, n26);
+
+                changed = true;
+                final double u0 = (texX + 0) / 256.0f;
+                final double u1 = (texX + 16 - 0.01) / 256.0;
+                final double v01 = (texY + (1.0f - hh0) * 16.0f) / 256.0f;
+                final double v02 = (texY + (1.0f - hh1) * 16.0f) / 256.0f;
+                final double v1 = (texY + 16 - 0.01) / 256.0;
+
+                float br = tt.getBrightness(this.level, xt, y, zt);
+                if (face < 2) br *= c2;
+                else br *= c3;
+
+                t.color(c11 * br * r, c11 * br * g, c11 * br * b);
+                t.vertexUV(x0, y + hh0, z0, u0, v01);
+                t.vertexUV(x1, y + hh1, z1, u1, v02);
+                t.vertexUV(x1, y + 0, z1, u1, v1);
+                t.vertexUV(x0, y + 0, z0, u0, v1);
             }
         }
-        tt.yy0 = yy0;
-        tt.yy1 = yy2;
-        return b;
+
+        tt.yy0 = yo0;
+        tt.yy1 = yo1;
+
+        return changed;
     }
     
     private float getWaterHeight(final int x, final int y, final int z, final Material m) {
-        int n = 0;
-        float n2 = 0.0f;
+        int count = 0;
+        float h = 0.0f;
         for (int i = 0; i < 4; ++i) {
-            final int x2 = x - (i & 0x1);
-            final int z2 = z - (i >> 1 & 0x1);
-            if (this.level.getMaterial(x2, y + 1, z2) == m) {
-                return 1.0f;
-            }
-            final Material material = this.level.getMaterial(x2, y, z2);
-            if (material == m) {
-                final int data = this.level.getData(x2, y, z2);
-                if (data >= 8 || data == 0) {
-                    n2 += LiquidTile.getHeight(data) * 10.0f;
-                    n += 10;
+            final int xx = x - (i & 0x1);
+            final int yy = y;
+            final int zz = z - (i >> 1 & 0x1);
+
+            if (this.level.getMaterial(xx, yy + 1, zz) == m) return 1.0f;
+
+            final Material tm = this.level.getMaterial(xx, yy, zz);
+            if (tm == m) {
+                final int d = this.level.getData(xx, yy, zz);
+                if (d >= 8 || d == 0) {
+                    h += LiquidTile.getHeight(d) * 10.0f;
+                    count += 10;
                 }
-                n2 += LiquidTile.getHeight(data);
-                ++n;
+                h += LiquidTile.getHeight(d);
+                count++;
             }
-            else if (!material.isSolid()) {
-                ++n2;
-                ++n;
+            else if (!tm.isSolid()) {
+                h += 1;
+                count++;
             }
         }
-        return 1.0f - n2 / n;
+        return 1.0f - h / count;
     }
     
     public void renderBlock(final Tile tt, final Level level, final int x, final int y, final int z) {
-        final float n = 0.5f;
-        final float n2 = 1.0f;
-        final float n3 = 0.8f;
-        final float n4 = 0.6f;
-        final Tesselator instance = Tesselator.instance;
-        instance.begin();
-        final float brightness = tt.getBrightness(level, x, y, z);
-        float brightness2 = tt.getBrightness(level, x, y - 1, z);
-        if (brightness2 < brightness) {
-            brightness2 = brightness;
-        }
-        instance.color(n * brightness2, n * brightness2, n * brightness2);
-        this.renderFaceUp(tt, -0.5, -0.5, -0.5, tt.getTexture(0));
-        float brightness3 = tt.getBrightness(level, x, y + 1, z);
-        if (brightness3 < brightness) {
-            brightness3 = brightness;
-        }
-        instance.color(n2 * brightness3, n2 * brightness3, n2 * brightness3);
-        this.renderFaceDown(tt, -0.5, -0.5, -0.5, tt.getTexture(1));
-        float brightness4 = tt.getBrightness(level, x, y, z - 1);
-        if (brightness4 < brightness) {
-            brightness4 = brightness;
-        }
-        instance.color(n3 * brightness4, n3 * brightness4, n3 * brightness4);
-        this.renderNorth(tt, -0.5, -0.5, -0.5, tt.getTexture(2));
-        float brightness5 = tt.getBrightness(level, x, y, z + 1);
-        if (brightness5 < brightness) {
-            brightness5 = brightness;
-        }
-        instance.color(n3 * brightness5, n3 * brightness5, n3 * brightness5);
-        this.renderSouth(tt, -0.5, -0.5, -0.5, tt.getTexture(3));
-        float brightness6 = tt.getBrightness(level, x - 1, y, z);
-        if (brightness6 < brightness) {
-            brightness6 = brightness;
-        }
-        instance.color(n4 * brightness6, n4 * brightness6, n4 * brightness6);
-        this.renderWest(tt, -0.5, -0.5, -0.5, tt.getTexture(4));
-        float brightness7 = tt.getBrightness(level, x + 1, y, z);
-        if (brightness7 < brightness) {
-            brightness7 = brightness;
-        }
-        instance.color(n4 * brightness7, n4 * brightness7, n4 * brightness7);
-        this.renderEast(tt, -0.5, -0.5, -0.5, tt.getTexture(5));
-        instance.end();
+        final float c10 = 0.5f;
+        final float c11 = 1.0f;
+        final float c2 = 0.8f;
+        final float c3 = 0.6f;
+
+        final Tesselator t = Tesselator.instance;
+        t.begin();
+        final float center = tt.getBrightness(level, x, y, z);
+        float br = tt.getBrightness(level, x, y - 1, z);
+        if (br < center) br = center;
+        t.color(c10 * br, c10 * br, c10 * br);
+        this.renderFaceDown(tt, -0.5, -0.5, -0.5, tt.getTexture(Facing.DOWN));
+
+        br = tt.getBrightness(level, x, y + 1, z);
+        if (br < center) br = center;
+        t.color(c11 * br, c11 * br, c11 * br);
+        this.renderFaceUp(tt, -0.5, -0.5, -0.5, tt.getTexture(Facing.UP));
+
+        br = tt.getBrightness(level, x, y, z - 1);
+        if (br < center) br = center;
+        t.color(c2 * br, c2 * br, c2 * br);
+        this.renderNorth(tt, -0.5, -0.5, -0.5, tt.getTexture(Facing.NORTH));
+
+        br = tt.getBrightness(level, x, y, z + 1);
+        if (br < center) br = center;
+        t.color(c2 * br, c2 * br, c2 * br);
+        this.renderSouth(tt, -0.5, -0.5, -0.5, tt.getTexture(Facing.SOUTH));
+
+        br = tt.getBrightness(level, x - 1, y, z);
+        if (br < center) br = center;
+        t.color(c3 * br, c3 * br, c3 * br);
+        this.renderWest(tt, -0.5, -0.5, -0.5, tt.getTexture(Facing.WEST));
+
+        br = tt.getBrightness(level, x + 1, y, z);
+        if (br < center) br = center;
+        t.color(c3 * br, c3 * br, c3 * br);
+        this.renderEast(tt, -0.5, -0.5, -0.5, tt.getTexture(Facing.EAST));
+        t.end();
     }
     
     public boolean tesselateBlockInWorld(final Tile tt, final int x, final int y, final int z) {
-        final int color = tt.getColor(this.level, x, y, z);
-        float n = (color >> 16 & 0xFF) / 255.0f;
-        float n2 = (color >> 8 & 0xFF) / 255.0f;
-        float n3 = (color & 0xFF) / 255.0f;
+        final int col = tt.getColor(this.level, x, y, z);
+        float r = (col >> 16 & 0xFF) / 255.0f;
+        float g = (col >> 8 & 0xFF) / 255.0f;
+        float b = (col & 0xFF) / 255.0f;
+
         if (GameRenderer.anaglyph3d) {
-            final float n4 = (n * 30.0f + n2 * 59.0f + n3 * 11.0f) / 100.0f;
-            final float n5 = (n * 30.0f + n2 * 70.0f) / 100.0f;
-            final float n6 = (n * 30.0f + n3 * 70.0f) / 100.0f;
-            n = n4;
-            n2 = n5;
-            n3 = n6;
+            final float cr = (r * 30.0f + g * 59.0f + b * 11.0f) / 100.0f;
+            final float cg = (r * 30.0f + g * 70.0f) / 100.0f;
+            final float cb = (r * 30.0f + b * 70.0f) / 100.0f;
+            r = cr;
+            g = cg;
+            b = cb;
         }
+
         if (Minecraft.useAmbientOcclusion()) {
-            return this.tesselateBlockInWorldWithAmbienceOcclusionTexLighting(tt, x, y, z, n, n2, n3);
+            return this.tesselateBlockInWorldWithAmbienceOcclusionTexLighting(tt, x, y, z, r, g, b);
+        } else {
+            return this.tesselateBlockInWorld(tt, x, y, z, r, g, b);
         }
-        return this.tesselateBlockInWorld(tt, x, y, z, n, n2, n3);
     }
     
     public boolean tesselateBlockInWorldWithAmbienceOcclusionTexLighting(final Tile tt, int pX, int pY, int pZ, final float pBaseRed, final float pBaseGreen, final float pBaseBlue) {
         this.applyAmbienceOcclusion = true;
-        boolean b = false;
-        final float ll000 = this.ll000;
-        final float ll2 = this.ll000;
-        final float ll3 = this.ll000;
-        final float ll4 = this.ll000;
-        int n = 1;
-        final boolean b2 = true;
-        int n2 = 1;
-        boolean b3 = true;
-        boolean b4 = true;
-        boolean b5 = true;
+        boolean changed = false;
+        float ll1 = this.ll000;
+        float ll2 = this.ll000;
+        float ll3 = this.ll000;
+        float ll4 = this.ll000;
+        boolean tint0 = true;
+        boolean tint1 = true;
+        boolean tint2 = true;
+        boolean tint3 = true;
+        boolean tint4 = true;
+        boolean tint5 = true;
+
         this.ll000 = tt.getBrightness(this.level, pX, pY, pZ);
         this.llx00 = tt.getBrightness(this.level, pX - 1, pY, pZ);
         this.ll0y0 = tt.getBrightness(this.level, pX, pY - 1, pZ);
@@ -1774,6 +1777,7 @@ public class TileRenderer
         this.llX00 = tt.getBrightness(this.level, pX + 1, pY, pZ);
         this.ll0Y0 = tt.getBrightness(this.level, pX, pY + 1, pZ);
         this.ll00Z = tt.getBrightness(this.level, pX, pY, pZ + 1);
+
         this.llTransXY0 = Tile.transculent[this.level.getTile(pX + 1, pY + 1, pZ)];
         this.llTransXy0 = Tile.transculent[this.level.getTile(pX + 1, pY - 1, pZ)];
         this.llTransX0Z = Tile.transculent[this.level.getTile(pX + 1, pY, pZ + 1)];
@@ -1786,270 +1790,159 @@ public class TileRenderer
         this.llTrans0Yz = Tile.transculent[this.level.getTile(pX, pY + 1, pZ - 1)];
         this.llTrans0yZ = Tile.transculent[this.level.getTile(pX, pY - 1, pZ + 1)];
         this.llTrans0yz = Tile.transculent[this.level.getTile(pX, pY - 1, pZ - 1)];
-        if (tt.tex == 3) {
-            n2 = (n = ((b3 = (b4 = (b5 = false))) ? 1 : 0));
-        }
-        if (this.fixedTexture >= 0) {
-            n2 = (n = ((b3 = (b4 = (b5 = false))) ? 1 : 0));
-        }
-        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY - 1, pZ, 0)) {
-            float n3;
-            float ll0y0;
-            float n4;
-            float n5;
+
+        if (tt.tex == 3) tint0 = tint2 = tint3 = tint4 = tint5 = false;
+        if (this.fixedTexture >= 0) tint0 = tint2 = tint3 = tint4 = tint5 = false;
+
+        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY - 1, pZ, Facing.DOWN)) {
             if (this.blsmooth > 0) {
                 --pY;
                 this.llxy0 = tt.getBrightness(this.level, pX - 1, pY, pZ);
                 this.ll0yz = tt.getBrightness(this.level, pX, pY, pZ - 1);
                 this.ll0yZ = tt.getBrightness(this.level, pX, pY, pZ + 1);
                 this.llXy0 = tt.getBrightness(this.level, pX + 1, pY, pZ);
-                if (this.llTrans0yz || this.llTransxy0) {
-                    this.llxyz = tt.getBrightness(this.level, pX - 1, pY, pZ - 1);
-                }
-                else {
-                    this.llxyz = this.llxy0;
-                }
-                if (this.llTrans0yZ || this.llTransxy0) {
-                    this.llxyZ = tt.getBrightness(this.level, pX - 1, pY, pZ + 1);
-                }
-                else {
-                    this.llxyZ = this.llxy0;
-                }
-                if (this.llTrans0yz || this.llTransXy0) {
-                    this.llXyz = tt.getBrightness(this.level, pX + 1, pY, pZ - 1);
-                }
-                else {
-                    this.llXyz = this.llXy0;
-                }
-                if (this.llTrans0yZ || this.llTransXy0) {
-                    this.llXyZ = tt.getBrightness(this.level, pX + 1, pY, pZ + 1);
-                }
-                else {
-                    this.llXyZ = this.llXy0;
-                }
+
+                if (this.llTrans0yz || this.llTransxy0) this.llxyz = tt.getBrightness(this.level, pX - 1, pY, pZ - 1);
+                else this.llxyz = this.llxy0;
+
+                if (this.llTrans0yZ || this.llTransxy0) this.llxyZ = tt.getBrightness(this.level, pX - 1, pY, pZ + 1);
+                else this.llxyZ = this.llxy0;
+
+                if (this.llTrans0yz || this.llTransXy0) this.llXyz = tt.getBrightness(this.level, pX + 1, pY, pZ - 1);
+                else this.llXyz = this.llXy0;
+
+                if (this.llTrans0yZ || this.llTransXy0) this.llXyZ = tt.getBrightness(this.level, pX + 1, pY, pZ + 1);
+                else this.llXyZ = this.llXy0;
                 ++pY;
-                n3 = (this.llxyZ + this.llxy0 + this.ll0yZ + this.ll0y0) / 4.0f;
-                ll0y0 = (this.ll0yZ + this.ll0y0 + this.llXyZ + this.llXy0) / 4.0f;
-                n4 = (this.ll0y0 + this.ll0yz + this.llXy0 + this.llXyz) / 4.0f;
-                n5 = (this.llxy0 + this.llxyz + this.ll0y0 + this.ll0yz) / 4.0f;
+
+                ll1 = (this.llxyZ + this.llxy0 + this.ll0yZ + this.ll0y0) / 4.0f;
+                ll4 = (this.ll0yZ + this.ll0y0 + this.llXyZ + this.llXy0) / 4.0f;
+                ll3 = (this.ll0y0 + this.ll0yz + this.llXy0 + this.llXyz) / 4.0f;
+                ll2 = (this.llxy0 + this.llxyz + this.ll0y0 + this.ll0yz) / 4.0f;
             }
             else {
-                n5 = (n3 = (n4 = (ll0y0 = this.ll0y0)));
+                ll1 = ll2 = ll3 = ll4 = this.ll0y0;
             }
-            final float n6 = ((n != 0) ? pBaseRed : 1.0f) * 0.5f;
-            this.c4r = n6;
-            this.c3r = n6;
-            this.c2r = n6;
-            this.c1r = n6;
-            final float n7 = ((n != 0) ? pBaseGreen : 1.0f) * 0.5f;
-            this.c4g = n7;
-            this.c3g = n7;
-            this.c2g = n7;
-            this.c1g = n7;
-            final float n8 = ((n != 0) ? pBaseBlue : 1.0f) * 0.5f;
-            this.c4b = n8;
-            this.c3b = n8;
-            this.c2b = n8;
-            this.c1b = n8;
-            this.c1r *= n3;
-            this.c1g *= n3;
-            this.c1b *= n3;
-            this.c2r *= n5;
-            this.c2g *= n5;
-            this.c2b *= n5;
-            this.c3r *= n4;
-            this.c3g *= n4;
-            this.c3b *= n4;
-            this.c4r *= ll0y0;
-            this.c4g *= ll0y0;
-            this.c4b *= ll0y0;
-            this.renderFaceUp(tt, pX, pY, pZ, tt.getTexture(this.level, pX, pY, pZ, 0));
-            b = true;
+
+            this.c1r = this.c2r = this.c3r = this.c4r = (tint0 ? pBaseRed : 1.0f) * 0.5f;
+            this.c1g = this.c2g = this.c3g = this.c4g = (tint0 ? pBaseGreen : 1.0f) * 0.5f;
+            this.c1b = this.c2b = this.c3b = this.c4b = (tint0 ? pBaseBlue : 1.0f) * 0.5f;
+            this.c1r *= ll1;
+            this.c1g *= ll1;
+            this.c1b *= ll1;
+            this.c2r *= ll2;
+            this.c2g *= ll2;
+            this.c2b *= ll2;
+            this.c3r *= ll3;
+            this.c3g *= ll3;
+            this.c3b *= ll3;
+            this.c4r *= ll4;
+            this.c4g *= ll4;
+            this.c4b *= ll4;
+
+            this.renderFaceDown(tt, pX, pY, pZ, tt.getTexture(this.level, pX, pY, pZ, Facing.DOWN));
+            changed = true;
         }
-        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY + 1, pZ, 1)) {
-            float ll0Y0;
-            float n9;
-            float n10;
-            float n11;
+
+        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY + 1, pZ, Facing.UP)) {
             if (this.blsmooth > 0) {
                 ++pY;
                 this.llxY0 = tt.getBrightness(this.level, pX - 1, pY, pZ);
                 this.llXY0 = tt.getBrightness(this.level, pX + 1, pY, pZ);
                 this.ll0Yz = tt.getBrightness(this.level, pX, pY, pZ - 1);
                 this.ll0YZ = tt.getBrightness(this.level, pX, pY, pZ + 1);
-                if (this.llTrans0Yz || this.llTransxY0) {
-                    this.llxYz = tt.getBrightness(this.level, pX - 1, pY, pZ - 1);
-                }
-                else {
-                    this.llxYz = this.llxY0;
-                }
-                if (this.llTrans0Yz || this.llTransXY0) {
-                    this.llXYz = tt.getBrightness(this.level, pX + 1, pY, pZ - 1);
-                }
-                else {
-                    this.llXYz = this.llXY0;
-                }
-                if (this.llTrans0YZ || this.llTransxY0) {
-                    this.llxYZ = tt.getBrightness(this.level, pX - 1, pY, pZ + 1);
-                }
-                else {
-                    this.llxYZ = this.llxY0;
-                }
-                if (this.llTrans0YZ || this.llTransXY0) {
-                    this.llXYZ = tt.getBrightness(this.level, pX + 1, pY, pZ + 1);
-                }
-                else {
-                    this.llXYZ = this.llXY0;
-                }
+
+                if (this.llTrans0Yz || this.llTransxY0) this.llxYz = tt.getBrightness(this.level, pX - 1, pY, pZ - 1);
+                else this.llxYz = this.llxY0;
+
+                if (this.llTrans0Yz || this.llTransXY0) this.llXYz = tt.getBrightness(this.level, pX + 1, pY, pZ - 1);
+                else this.llXYz = this.llXY0;
+
+                if (this.llTrans0YZ || this.llTransxY0) this.llxYZ = tt.getBrightness(this.level, pX - 1, pY, pZ + 1);
+                else this.llxYZ = this.llxY0;
+
+                if (this.llTrans0YZ || this.llTransXY0) this.llXYZ = tt.getBrightness(this.level, pX + 1, pY, pZ + 1);
+                else this.llXYZ = this.llXY0;
                 --pY;
-                ll0Y0 = (this.llxYZ + this.llxY0 + this.ll0YZ + this.ll0Y0) / 4.0f;
-                n9 = (this.ll0YZ + this.ll0Y0 + this.llXYZ + this.llXY0) / 4.0f;
-                n10 = (this.ll0Y0 + this.ll0Yz + this.llXY0 + this.llXYz) / 4.0f;
-                n11 = (this.llxY0 + this.llxYz + this.ll0Y0 + this.ll0Yz) / 4.0f;
+
+                ll4 = (this.llxYZ + this.llxY0 + this.ll0YZ + this.ll0Y0) / 4.0f;
+                ll1 = (this.ll0YZ + this.ll0Y0 + this.llXYZ + this.llXY0) / 4.0f;
+                ll2 = (this.ll0Y0 + this.ll0Yz + this.llXY0 + this.llXYz) / 4.0f;
+                ll3 = (this.llxY0 + this.llxYz + this.ll0Y0 + this.ll0Yz) / 4.0f;
             }
             else {
-                n10 = (n9 = (n11 = (ll0Y0 = this.ll0Y0)));
+                ll1 = ll2 = ll3 = ll4 = this.ll0Y0;
             }
-            float c1r;
-            float c2r;
-            float c3r;
-            float c4r;
-            if (b2) {
-                c1r = pBaseRed;
-                c2r = pBaseRed;
-                c3r = pBaseRed;
-                c4r = pBaseRed;
-            }
-            else {
-                c3r = (c4r = (c2r = (c1r = 1.0f)));
-            }
-            this.c4r = c4r;
-            this.c3r = c3r;
-            this.c2r = c2r;
-            this.c1r = c1r;
-            float c1g;
-            float c2g;
-            float c3g;
-            float c4g;
-            if (b2) {
-                c1g = pBaseGreen;
-                c2g = pBaseGreen;
-                c3g = pBaseGreen;
-                c4g = pBaseGreen;
-            }
-            else {
-                c3g = (c4g = (c2g = (c1g = 1.0f)));
-            }
-            this.c4g = c4g;
-            this.c3g = c3g;
-            this.c2g = c2g;
-            this.c1g = c1g;
-            float c1b;
-            float c2b;
-            float c3b;
-            float c4b;
-            if (b2) {
-                c1b = pBaseBlue;
-                c2b = pBaseBlue;
-                c3b = pBaseBlue;
-                c4b = pBaseBlue;
-            }
-            else {
-                c3b = (c4b = (c2b = (c1b = 1.0f)));
-            }
-            this.c4b = c4b;
-            this.c3b = c3b;
-            this.c2b = c2b;
-            this.c1b = c1b;
-            this.c1r *= n9;
-            this.c1g *= n9;
-            this.c1b *= n9;
-            this.c2r *= n10;
-            this.c2g *= n10;
-            this.c2b *= n10;
-            this.c3r *= n11;
-            this.c3g *= n11;
-            this.c3b *= n11;
-            this.c4r *= ll0Y0;
-            this.c4g *= ll0Y0;
-            this.c4b *= ll0Y0;
-            this.renderFaceDown(tt, pX, pY, pZ, tt.getTexture(this.level, pX, pY, pZ, 1));
-            b = true;
+
+            this.c1r = this.c2r = this.c3r = this.c4r = ( tint1 ? pBaseRed : 1.0f );
+            this.c1g = this.c2g = this.c3g = this.c4g = ( tint1 ? pBaseGreen : 1.0f );
+            this.c1b = this.c2b = this.c3b = this.c4b = ( tint1 ? pBaseBlue : 1.0f );
+            this.c1r *= ll1;
+            this.c1g *= ll1;
+            this.c1b *= ll1;
+            this.c2r *= ll2;
+            this.c2g *= ll2;
+            this.c2b *= ll2;
+            this.c3r *= ll3;
+            this.c3g *= ll3;
+            this.c3b *= ll3;
+            this.c4r *= ll4;
+            this.c4g *= ll4;
+            this.c4b *= ll4;
+            this.renderFaceUp(tt, pX, pY, pZ, tt.getTexture(this.level, pX, pY, pZ, Facing.UP));
+            changed = true;
         }
-        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY, pZ - 1, 2)) {
-            float n12;
-            float n13;
-            float n14;
-            float ll00z;
+
+        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY, pZ - 1, Facing.NORTH)) {
             if (this.blsmooth > 0) {
                 --pZ;
                 this.llx0z = tt.getBrightness(this.level, pX - 1, pY, pZ);
                 this.ll0yz = tt.getBrightness(this.level, pX, pY - 1, pZ);
                 this.ll0Yz = tt.getBrightness(this.level, pX, pY + 1, pZ);
                 this.llX0z = tt.getBrightness(this.level, pX + 1, pY, pZ);
-                if (this.llTransx0z || this.llTrans0yz) {
-                    this.llxyz = tt.getBrightness(this.level, pX - 1, pY - 1, pZ);
-                }
-                else {
-                    this.llxyz = this.llx0z;
-                }
-                if (this.llTransx0z || this.llTrans0Yz) {
-                    this.llxYz = tt.getBrightness(this.level, pX - 1, pY + 1, pZ);
-                }
-                else {
-                    this.llxYz = this.llx0z;
-                }
-                if (this.llTransX0z || this.llTrans0yz) {
-                    this.llXyz = tt.getBrightness(this.level, pX + 1, pY - 1, pZ);
-                }
-                else {
-                    this.llXyz = this.llX0z;
-                }
-                if (this.llTransX0z || this.llTrans0Yz) {
-                    this.llXYz = tt.getBrightness(this.level, pX + 1, pY + 1, pZ);
-                }
-                else {
-                    this.llXYz = this.llX0z;
-                }
+
+                if (this.llTransx0z || this.llTrans0yz) this.llxyz = tt.getBrightness(this.level, pX - 1, pY - 1, pZ);
+                else this.llxyz = this.llx0z;
+
+                if (this.llTransx0z || this.llTrans0Yz) this.llxYz = tt.getBrightness(this.level, pX - 1, pY + 1, pZ);
+                else this.llxYz = this.llx0z;
+
+                if (this.llTransX0z || this.llTrans0yz) this.llXyz = tt.getBrightness(this.level, pX + 1, pY - 1, pZ);
+                else this.llXyz = this.llX0z;
+
+                if (this.llTransX0z || this.llTrans0Yz) this.llXYz = tt.getBrightness(this.level, pX + 1, pY + 1, pZ);
+                else this.llXYz = this.llX0z;
                 ++pZ;
-                n12 = (this.llx0z + this.llxYz + this.ll00z + this.ll0Yz) / 4.0f;
-                n13 = (this.ll00z + this.ll0Yz + this.llX0z + this.llXYz) / 4.0f;
-                n14 = (this.ll0yz + this.ll00z + this.llXyz + this.llX0z) / 4.0f;
-                ll00z = (this.llxyz + this.llx0z + this.ll0yz + this.ll00z) / 4.0f;
+
+                ll1 = (this.llx0z + this.llxYz + this.ll00z + this.ll0Yz) / 4.0f;
+                ll2 = (this.ll00z + this.ll0Yz + this.llX0z + this.llXYz) / 4.0f;
+                ll3 = (this.ll0yz + this.ll00z + this.llXyz + this.llX0z) / 4.0f;
+                ll4 = (this.llxyz + this.llx0z + this.ll0yz + this.ll00z) / 4.0f;
             }
             else {
-                n13 = (n12 = (n14 = (ll00z = this.ll00z)));
+                ll1 = ll2 = ll3 = ll4 = this.ll00z;
             }
-            final float n15 = ((n2 != 0) ? pBaseRed : 1.0f) * 0.8f;
-            this.c4r = n15;
-            this.c3r = n15;
-            this.c2r = n15;
-            this.c1r = n15;
-            final float n16 = ((n2 != 0) ? pBaseGreen : 1.0f) * 0.8f;
-            this.c4g = n16;
-            this.c3g = n16;
-            this.c2g = n16;
-            this.c1g = n16;
-            final float n17 = ((n2 != 0) ? pBaseBlue : 1.0f) * 0.8f;
-            this.c4b = n17;
-            this.c3b = n17;
-            this.c2b = n17;
-            this.c1b = n17;
-            this.c1r *= n12;
-            this.c1g *= n12;
-            this.c1b *= n12;
-            this.c2r *= n13;
-            this.c2g *= n13;
-            this.c2b *= n13;
-            this.c3r *= n14;
-            this.c3g *= n14;
-            this.c3b *= n14;
-            this.c4r *= ll00z;
-            this.c4g *= ll00z;
-            this.c4b *= ll00z;
-            final int texture = tt.getTexture(this.level, pX, pY, pZ, 2);
-            this.renderNorth(tt, pX, pY, pZ, texture);
-            if (TileRenderer.fancy && texture == 3 && this.fixedTexture < 0) {
+
+            this.c1r = this.c2r = this.c3r = this.c4r = (tint2 ? pBaseRed : 1.0f) * 0.8f;
+            this.c1g = this.c2g = this.c3g = this.c4g = (tint2 ? pBaseGreen : 1.0f) * 0.8f;
+            this.c1b = this.c2b = this.c3b = this.c4b = (tint2 ? pBaseBlue : 1.0f) * 0.8f;
+            this.c1r *= ll1;
+            this.c1g *= ll1;
+            this.c1b *= ll1;
+            this.c2r *= ll2;
+            this.c2g *= ll2;
+            this.c2b *= ll2;
+            this.c3r *= ll3;
+            this.c3g *= ll3;
+            this.c3b *= ll3;
+            this.c4r *= ll4;
+            this.c4g *= ll4;
+            this.c4b *= ll4;
+
+            final int tex = tt.getTexture(this.level, pX, pY, pZ, Facing.NORTH);
+            this.renderNorth(tt, pX, pY, pZ, tex);
+
+            if (TileRenderer.fancy && tex == 3 && this.fixedTexture < 0) {
                 this.c1r *= pBaseRed;
                 this.c2r *= pBaseRed;
                 this.c3r *= pBaseRed;
@@ -2064,82 +1957,58 @@ public class TileRenderer
                 this.c4b *= pBaseBlue;
                 this.renderNorth(tt, pX, pY, pZ, 38);
             }
-            b = true;
+            changed = true;
         }
-        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY, pZ + 1, 3)) {
-            float n18;
-            float ll00Z;
-            float n19;
-            float n20;
+
+        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY, pZ + 1, Facing.SOUTH)) {
             if (this.blsmooth > 0) {
                 ++pZ;
                 this.llx0Z = tt.getBrightness(this.level, pX - 1, pY, pZ);
                 this.llX0Z = tt.getBrightness(this.level, pX + 1, pY, pZ);
                 this.ll0yZ = tt.getBrightness(this.level, pX, pY - 1, pZ);
                 this.ll0YZ = tt.getBrightness(this.level, pX, pY + 1, pZ);
-                if (this.llTransx0Z || this.llTrans0yZ) {
-                    this.llxyZ = tt.getBrightness(this.level, pX - 1, pY - 1, pZ);
-                }
-                else {
-                    this.llxyZ = this.llx0Z;
-                }
-                if (this.llTransx0Z || this.llTrans0YZ) {
-                    this.llxYZ = tt.getBrightness(this.level, pX - 1, pY + 1, pZ);
-                }
-                else {
-                    this.llxYZ = this.llx0Z;
-                }
-                if (this.llTransX0Z || this.llTrans0yZ) {
-                    this.llXyZ = tt.getBrightness(this.level, pX + 1, pY - 1, pZ);
-                }
-                else {
-                    this.llXyZ = this.llX0Z;
-                }
-                if (this.llTransX0Z || this.llTrans0YZ) {
-                    this.llXYZ = tt.getBrightness(this.level, pX + 1, pY + 1, pZ);
-                }
-                else {
-                    this.llXYZ = this.llX0Z;
-                }
+
+                if (this.llTransx0Z || this.llTrans0yZ) this.llxyZ = tt.getBrightness(this.level, pX - 1, pY - 1, pZ);
+                else this.llxyZ = this.llx0Z;
+
+                if (this.llTransx0Z || this.llTrans0YZ) this.llxYZ = tt.getBrightness(this.level, pX - 1, pY + 1, pZ);
+                else this.llxYZ = this.llx0Z;
+
+                if (this.llTransX0Z || this.llTrans0yZ) this.llXyZ = tt.getBrightness(this.level, pX + 1, pY - 1, pZ);
+                else this.llXyZ = this.llX0Z;
+
+                if (this.llTransX0Z || this.llTrans0YZ) this.llXYZ = tt.getBrightness(this.level, pX + 1, pY + 1, pZ);
+                else this.llXYZ = this.llX0Z;
                 --pZ;
-                n18 = (this.llx0Z + this.llxYZ + this.ll00Z + this.ll0YZ) / 4.0f;
-                ll00Z = (this.ll00Z + this.ll0YZ + this.llX0Z + this.llXYZ) / 4.0f;
-                n19 = (this.ll0yZ + this.ll00Z + this.llXyZ + this.llX0Z) / 4.0f;
-                n20 = (this.llxyZ + this.llx0Z + this.ll0yZ + this.ll00Z) / 4.0f;
+
+                ll1 = (this.llx0Z + this.llxYZ + this.ll00Z + this.ll0YZ) / 4.0f;
+                ll4 = (this.ll00Z + this.ll0YZ + this.llX0Z + this.llXYZ) / 4.0f;
+                ll3 = (this.ll0yZ + this.ll00Z + this.llXyZ + this.llX0Z) / 4.0f;
+                ll2 = (this.llxyZ + this.llx0Z + this.ll0yZ + this.ll00Z) / 4.0f;
             }
             else {
-                n20 = (n18 = (n19 = (ll00Z = this.ll00Z)));
+                ll1 = ll2 = ll3 = ll4 = this.ll00Z;
             }
-            final float n21 = (b3 ? pBaseRed : 1.0f) * 0.8f;
-            this.c4r = n21;
-            this.c3r = n21;
-            this.c2r = n21;
-            this.c1r = n21;
-            final float n22 = (b3 ? pBaseGreen : 1.0f) * 0.8f;
-            this.c4g = n22;
-            this.c3g = n22;
-            this.c2g = n22;
-            this.c1g = n22;
-            final float n23 = (b3 ? pBaseBlue : 1.0f) * 0.8f;
-            this.c4b = n23;
-            this.c3b = n23;
-            this.c2b = n23;
-            this.c1b = n23;
-            this.c1r *= n18;
-            this.c1g *= n18;
-            this.c1b *= n18;
-            this.c2r *= n20;
-            this.c2g *= n20;
-            this.c2b *= n20;
-            this.c3r *= n19;
-            this.c3g *= n19;
-            this.c3b *= n19;
-            this.c4r *= ll00Z;
-            this.c4g *= ll00Z;
-            this.c4b *= ll00Z;
-            final int texture2 = tt.getTexture(this.level, pX, pY, pZ, 3);
-            this.renderSouth(tt, pX, pY, pZ, tt.getTexture(this.level, pX, pY, pZ, 3));
-            if (TileRenderer.fancy && texture2 == 3 && this.fixedTexture < 0) {
+
+            this.c1r = this.c2r = this.c3r = this.c4r = (tint3 ? pBaseRed : 1.0f) * 0.8f;
+            this.c1g = this.c2g = this.c3g = this.c4g = (tint3 ? pBaseGreen : 1.0f) * 0.8f;
+            this.c1b = this.c2b = this.c3b = this.c4b = (tint3 ? pBaseBlue : 1.0f) * 0.8f;
+            this.c1r *= ll1;
+            this.c1g *= ll1;
+            this.c1b *= ll1;
+            this.c2r *= ll2;
+            this.c2g *= ll2;
+            this.c2b *= ll2;
+            this.c3r *= ll3;
+            this.c3g *= ll3;
+            this.c3b *= ll3;
+            this.c4r *= ll4;
+            this.c4g *= ll4;
+            this.c4b *= ll4;
+            final int tex = tt.getTexture(this.level, pX, pY, pZ, Facing.SOUTH);
+            this.renderSouth(tt, pX, pY, pZ, tt.getTexture(this.level, pX, pY, pZ, Facing.SOUTH));
+
+            if (TileRenderer.fancy && tex == 3 && this.fixedTexture < 0) {
                 this.c1r *= pBaseRed;
                 this.c2r *= pBaseRed;
                 this.c3r *= pBaseRed;
@@ -2154,82 +2023,59 @@ public class TileRenderer
                 this.c4b *= pBaseBlue;
                 this.renderSouth(tt, pX, pY, pZ, 38);
             }
-            b = true;
+            changed = true;
         }
-        if (this.noCulling || tt.isFaceVisible(this.level, pX - 1, pY, pZ, 4)) {
-            float llx00;
-            float n24;
-            float n25;
-            float n26;
+
+        if (this.noCulling || tt.isFaceVisible(this.level, pX - 1, pY, pZ, Facing.WEST)) {
             if (this.blsmooth > 0) {
                 --pX;
                 this.llxy0 = tt.getBrightness(this.level, pX, pY - 1, pZ);
                 this.llx0z = tt.getBrightness(this.level, pX, pY, pZ - 1);
                 this.llx0Z = tt.getBrightness(this.level, pX, pY, pZ + 1);
                 this.llxY0 = tt.getBrightness(this.level, pX, pY + 1, pZ);
-                if (this.llTransx0z || this.llTransxy0) {
-                    this.llxyz = tt.getBrightness(this.level, pX, pY - 1, pZ - 1);
-                }
-                else {
-                    this.llxyz = this.llx0z;
-                }
-                if (this.llTransx0Z || this.llTransxy0) {
-                    this.llxyZ = tt.getBrightness(this.level, pX, pY - 1, pZ + 1);
-                }
-                else {
-                    this.llxyZ = this.llx0Z;
-                }
-                if (this.llTransx0z || this.llTransxY0) {
-                    this.llxYz = tt.getBrightness(this.level, pX, pY + 1, pZ - 1);
-                }
-                else {
-                    this.llxYz = this.llx0z;
-                }
-                if (this.llTransx0Z || this.llTransxY0) {
-                    this.llxYZ = tt.getBrightness(this.level, pX, pY + 1, pZ + 1);
-                }
-                else {
-                    this.llxYZ = this.llx0Z;
-                }
+
+                if (this.llTransx0z || this.llTransxy0) this.llxyz = tt.getBrightness(this.level, pX, pY - 1, pZ - 1);
+                else this.llxyz = this.llx0z;
+
+                if (this.llTransx0Z || this.llTransxy0) this.llxyZ = tt.getBrightness(this.level, pX, pY - 1, pZ + 1);
+                else this.llxyZ = this.llx0Z;
+
+                if (this.llTransx0z || this.llTransxY0) this.llxYz = tt.getBrightness(this.level, pX, pY + 1, pZ - 1);
+                else this.llxYz = this.llx0z;
+
+                if (this.llTransx0Z || this.llTransxY0) this.llxYZ = tt.getBrightness(this.level, pX, pY + 1, pZ + 1);
+                else this.llxYZ = this.llx0Z;
                 ++pX;
-                llx00 = (this.llxy0 + this.llxyZ + this.llx00 + this.llx0Z) / 4.0f;
-                n24 = (this.llx00 + this.llx0Z + this.llxY0 + this.llxYZ) / 4.0f;
-                n25 = (this.llx0z + this.llx00 + this.llxYz + this.llxY0) / 4.0f;
-                n26 = (this.llxyz + this.llxy0 + this.llx0z + this.llx00) / 4.0f;
+
+                ll4 = (this.llxy0 + this.llxyZ + this.llx00 + this.llx0Z) / 4.0f;
+                ll1 = (this.llx00 + this.llx0Z + this.llxY0 + this.llxYZ) / 4.0f;
+                ll2 = (this.llx0z + this.llx00 + this.llxYz + this.llxY0) / 4.0f;
+                ll3 = (this.llxyz + this.llxy0 + this.llx0z + this.llx00) / 4.0f;
             }
             else {
-                n25 = (n24 = (n26 = (llx00 = this.llx00)));
+                ll1 = ll2 = ll3 = ll4 = this.llx00;
             }
-            final float n27 = (b4 ? pBaseRed : 1.0f) * 0.6f;
-            this.c4r = n27;
-            this.c3r = n27;
-            this.c2r = n27;
-            this.c1r = n27;
-            final float n28 = (b4 ? pBaseGreen : 1.0f) * 0.6f;
-            this.c4g = n28;
-            this.c3g = n28;
-            this.c2g = n28;
-            this.c1g = n28;
-            final float n29 = (b4 ? pBaseBlue : 1.0f) * 0.6f;
-            this.c4b = n29;
-            this.c3b = n29;
-            this.c2b = n29;
-            this.c1b = n29;
-            this.c1r *= n24;
-            this.c1g *= n24;
-            this.c1b *= n24;
-            this.c2r *= n25;
-            this.c2g *= n25;
-            this.c2b *= n25;
-            this.c3r *= n26;
-            this.c3g *= n26;
-            this.c3b *= n26;
-            this.c4r *= llx00;
-            this.c4g *= llx00;
-            this.c4b *= llx00;
-            final int texture3 = tt.getTexture(this.level, pX, pY, pZ, 4);
-            this.renderWest(tt, pX, pY, pZ, texture3);
-            if (TileRenderer.fancy && texture3 == 3 && this.fixedTexture < 0) {
+
+            this.c1r = this.c2r = this.c3r =  this.c4r = (tint4 ? pBaseRed : 1.0f) * 0.6f;
+            this.c1g = this.c2g = this.c3g = this.c4g = (tint4 ? pBaseGreen : 1.0f) * 0.6f;
+            this.c1b = this.c2b = this.c3b = this.c4b = (tint4 ? pBaseBlue : 1.0f) * 0.6f;
+            this.c1r *= ll1;
+            this.c1g *= ll1;
+            this.c1b *= ll1;
+            this.c2r *= ll2;
+            this.c2g *= ll2;
+            this.c2b *= ll2;
+            this.c3r *= ll3;
+            this.c3g *= ll3;
+            this.c3b *= ll3;
+            this.c4r *= ll4;
+            this.c4g *= ll4;
+            this.c4b *= ll4;
+
+            final int tex = tt.getTexture(this.level, pX, pY, pZ, Facing.WEST);
+            this.renderWest(tt, pX, pY, pZ, tex);
+
+            if (TileRenderer.fancy && tex == 3 && this.fixedTexture < 0) {
                 this.c1r *= pBaseRed;
                 this.c2r *= pBaseRed;
                 this.c3r *= pBaseRed;
@@ -2244,82 +2090,59 @@ public class TileRenderer
                 this.c4b *= pBaseBlue;
                 this.renderWest(tt, pX, pY, pZ, 38);
             }
-            b = true;
+            changed = true;
         }
-        if (this.noCulling || tt.isFaceVisible(this.level, pX + 1, pY, pZ, 5)) {
-            float n30;
-            float llX00;
-            float n31;
-            float n32;
+
+        if (this.noCulling || tt.isFaceVisible(this.level, pX + 1, pY, pZ, Facing.EAST)) {
             if (this.blsmooth > 0) {
                 ++pX;
                 this.llXy0 = tt.getBrightness(this.level, pX, pY - 1, pZ);
                 this.llX0z = tt.getBrightness(this.level, pX, pY, pZ - 1);
                 this.llX0Z = tt.getBrightness(this.level, pX, pY, pZ + 1);
                 this.llXY0 = tt.getBrightness(this.level, pX, pY + 1, pZ);
-                if (this.llTransXy0 || this.llTransX0z) {
-                    this.llXyz = tt.getBrightness(this.level, pX, pY - 1, pZ - 1);
-                }
-                else {
-                    this.llXyz = this.llX0z;
-                }
-                if (this.llTransXy0 || this.llTransX0Z) {
-                    this.llXyZ = tt.getBrightness(this.level, pX, pY - 1, pZ + 1);
-                }
-                else {
-                    this.llXyZ = this.llX0Z;
-                }
-                if (this.llTransXY0 || this.llTransX0z) {
-                    this.llXYz = tt.getBrightness(this.level, pX, pY + 1, pZ - 1);
-                }
-                else {
-                    this.llXYz = this.llX0z;
-                }
-                if (this.llTransXY0 || this.llTransX0Z) {
-                    this.llXYZ = tt.getBrightness(this.level, pX, pY + 1, pZ + 1);
-                }
-                else {
-                    this.llXYZ = this.llX0Z;
-                }
+
+                if (this.llTransXy0 || this.llTransX0z) this.llXyz = tt.getBrightness(this.level, pX, pY - 1, pZ - 1);
+                else this.llXyz = this.llX0z;
+
+                if (this.llTransXy0 || this.llTransX0Z) this.llXyZ = tt.getBrightness(this.level, pX, pY - 1, pZ + 1);
+                else this.llXyZ = this.llX0Z;
+
+                if (this.llTransXY0 || this.llTransX0z) this.llXYz = tt.getBrightness(this.level, pX, pY + 1, pZ - 1);
+                else this.llXYz = this.llX0z;
+
+                if (this.llTransXY0 || this.llTransX0Z) this.llXYZ = tt.getBrightness(this.level, pX, pY + 1, pZ + 1);
+                else this.llXYZ = this.llX0Z;
                 --pX;
-                n30 = (this.llXy0 + this.llXyZ + this.llX00 + this.llX0Z) / 4.0f;
-                llX00 = (this.llX00 + this.llX0Z + this.llXY0 + this.llXYZ) / 4.0f;
-                n31 = (this.llX0z + this.llX00 + this.llXYz + this.llXY0) / 4.0f;
-                n32 = (this.llXyz + this.llXy0 + this.llX0z + this.llX00) / 4.0f;
+
+                ll1 = (this.llXy0 + this.llXyZ + this.llX00 + this.llX0Z) / 4.0f;
+                ll4 = (this.llX00 + this.llX0Z + this.llXY0 + this.llXYZ) / 4.0f;
+                ll3 = (this.llX0z + this.llX00 + this.llXYz + this.llXY0) / 4.0f;
+                ll2 = (this.llXyz + this.llXy0 + this.llX0z + this.llX00) / 4.0f;
             }
             else {
-                n32 = (n30 = (n31 = (llX00 = this.llX00)));
+                ll1 = ll2 = ll3 = ll4 = this.llX00;
             }
-            final float n33 = (b5 ? pBaseRed : 1.0f) * 0.6f;
-            this.c4r = n33;
-            this.c3r = n33;
-            this.c2r = n33;
-            this.c1r = n33;
-            final float n34 = (b5 ? pBaseGreen : 1.0f) * 0.6f;
-            this.c4g = n34;
-            this.c3g = n34;
-            this.c2g = n34;
-            this.c1g = n34;
-            final float n35 = (b5 ? pBaseBlue : 1.0f) * 0.6f;
-            this.c4b = n35;
-            this.c3b = n35;
-            this.c2b = n35;
-            this.c1b = n35;
-            this.c1r *= n30;
-            this.c1g *= n30;
-            this.c1b *= n30;
-            this.c2r *= n32;
-            this.c2g *= n32;
-            this.c2b *= n32;
-            this.c3r *= n31;
-            this.c3g *= n31;
-            this.c3b *= n31;
-            this.c4r *= llX00;
-            this.c4g *= llX00;
-            this.c4b *= llX00;
-            final int texture4 = tt.getTexture(this.level, pX, pY, pZ, 5);
-            this.renderEast(tt, pX, pY, pZ, texture4);
-            if (TileRenderer.fancy && texture4 == 3 && this.fixedTexture < 0) {
+
+            this.c1r = this.c2r = this.c3r = this.c4r = (tint5 ? pBaseRed : 1.0f) * 0.6f;
+            this.c1g = this.c2g = this.c3g = this.c4g = (tint5 ? pBaseGreen : 1.0f) * 0.6f;
+            this.c1b = this.c2b = this.c3b = this.c4b = (tint5 ? pBaseBlue : 1.0f) * 0.6f;
+            this.c1r *= ll1;
+            this.c1g *= ll1;
+            this.c1b *= ll1;
+            this.c2r *= ll2;
+            this.c2g *= ll2;
+            this.c2b *= ll2;
+            this.c3r *= ll3;
+            this.c3g *= ll3;
+            this.c3b *= ll3;
+            this.c4r *= ll4;
+            this.c4g *= ll4;
+            this.c4b *= ll4;
+
+            final int tex = tt.getTexture(this.level, pX, pY, pZ, Facing.EAST);
+            this.renderEast(tt, pX, pY, pZ, tex);
+
+            if (TileRenderer.fancy && tex == 3 && this.fixedTexture < 0) {
                 this.c1r *= pBaseRed;
                 this.c2r *= pBaseRed;
                 this.c3r *= pBaseRed;
@@ -2334,10 +2157,11 @@ public class TileRenderer
                 this.c4b *= pBaseBlue;
                 this.renderEast(tt, pX, pY, pZ, 38);
             }
-            b = true;
+            changed = true;
         }
         this.applyAmbienceOcclusion = false;
-        return b;
+
+        return changed;
     }
     
     public boolean tesselateBlockInWorld(final Tile tt, final int x, final int y, final int z, final float r, final float g, final float b) {
@@ -2375,7 +2199,7 @@ public class TileRenderer
         if (this.noCulling || tt.isFaceVisible(this.level, x, y - 1, z, 0)) {
             final float brightness2 = tt.getBrightness(this.level, x, y - 1, z);
             instance.color(n8 * brightness2, n11 * brightness2, n14 * brightness2);
-            this.renderFaceUp(tt, x, y, z, tt.getTexture(this.level, x, y, z, 0));
+            this.renderFaceDown(tt, x, y, z, tt.getTexture(this.level, x, y, z, 0));
             b2 = true;
         }
         if (this.noCulling || tt.isFaceVisible(this.level, x, y + 1, z, 1)) {
@@ -2384,7 +2208,7 @@ public class TileRenderer
                 brightness3 = brightness;
             }
             instance.color(n5 * brightness3, n6 * brightness3, n7 * brightness3);
-            this.renderFaceDown(tt, x, y, z, tt.getTexture(this.level, x, y, z, 1));
+            this.renderFaceUp(tt, x, y, z, tt.getTexture(this.level, x, y, z, 1));
             b2 = true;
         }
         if (this.noCulling || tt.isFaceVisible(this.level, x, y, z - 1, 2)) {
@@ -2486,7 +2310,7 @@ public class TileRenderer
         if (this.noCulling || tt.isFaceVisible(this.level, x, y - 1, z, 0)) {
             final float brightness2 = tt.getBrightness(this.level, x, y - 1, z);
             instance.color(n5 * brightness2, n9 * brightness2, n13 * brightness2);
-            this.renderFaceUp(tt, x, y, z, tt.getTexture(this.level, x, y, z, 0));
+            this.renderFaceDown(tt, x, y, z, tt.getTexture(this.level, x, y, z, 0));
             b2 = true;
         }
         if (this.noCulling || tt.isFaceVisible(this.level, x, y + 1, z, 1)) {
@@ -2495,7 +2319,7 @@ public class TileRenderer
                 brightness3 = brightness;
             }
             instance.color(n6 * brightness3, n10 * brightness3, n14 * brightness3);
-            this.renderFaceDown(tt, x, y, z, tt.getTexture(this.level, x, y, z, 1));
+            this.renderFaceUp(tt, x, y, z, tt.getTexture(this.level, x, y, z, 1));
             b2 = true;
         }
         if (this.noCulling || tt.isFaceVisible(this.level, x, y, z - 1, 2)) {
@@ -2651,7 +2475,7 @@ public class TileRenderer
             brightness2 = 1.0f;
         }
         instance.color(n * brightness2, n * brightness2, n * brightness2);
-        this.renderFaceUp(tt, x, y, z, tt.getTexture(this.level, x, y, z, 0));
+        this.renderFaceDown(tt, x, y, z, tt.getTexture(this.level, x, y, z, 0));
         float brightness3 = tt.getBrightness(this.level, x, y + 1, z);
         if (doorTile.yy1 < 1.0) {
             brightness3 = brightness;
@@ -2660,7 +2484,7 @@ public class TileRenderer
             brightness3 = 1.0f;
         }
         instance.color(n2 * brightness3, n2 * brightness3, n2 * brightness3);
-        this.renderFaceDown(tt, x, y, z, tt.getTexture(this.level, x, y, z, 1));
+        this.renderFaceUp(tt, x, y, z, tt.getTexture(this.level, x, y, z, 1));
         float brightness4 = tt.getBrightness(this.level, x, y, z - 1);
         if (doorTile.zz0 > 0.0) {
             brightness4 = brightness;
@@ -2725,7 +2549,7 @@ public class TileRenderer
         return b;
     }
     
-    public void renderFaceUp(final Tile tt, final double x, final double y, final double z, int tex) {
+    public void renderFaceDown(final Tile tt, final double x, final double y, final double z, int tex) {
         final Tesselator instance = Tesselator.instance;
         if (this.fixedTexture >= 0) {
             tex = this.fixedTexture;
@@ -2805,7 +2629,7 @@ public class TileRenderer
         }
     }
     
-    public void renderFaceDown(final Tile tt, final double x, final double y, final double z, int tex) {
+    public void renderFaceUp(final Tile tt, final double x, final double y, final double z, int tex) {
         final Tesselator instance = Tesselator.instance;
         if (this.fixedTexture >= 0) {
             tex = this.fixedTexture;
@@ -3239,11 +3063,11 @@ public class TileRenderer
             glTranslatef(-0.5f, -0.5f, -0.5f);
             instance.begin();
             instance.normal(0.0f, -1.0f, 0.0f);
-            this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(0, data));
+            this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(0, data));
             instance.end();
             instance.begin();
             instance.normal(0.0f, 1.0f, 0.0f);
-            this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(1, data));
+            this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(1, data));
             instance.end();
             instance.begin();
             instance.normal(0.0f, 0.0f, -1.0f);
@@ -3275,11 +3099,11 @@ public class TileRenderer
             final float n = 0.0625f;
             instance.begin();
             instance.normal(0.0f, -1.0f, 0.0f);
-            this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
+            this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
             instance.end();
             instance.begin();
             instance.normal(0.0f, 1.0f, 0.0f);
-            this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(1));
+            this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(1));
             instance.end();
             instance.begin();
             instance.normal(0.0f, 0.0f, -1.0f);
@@ -3330,11 +3154,11 @@ public class TileRenderer
                 glTranslatef(-0.5f, -0.5f, -0.5f);
                 instance.begin();
                 instance.normal(0.0f, -1.0f, 0.0f);
-                this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
+                this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
                 instance.end();
                 instance.begin();
                 instance.normal(0.0f, 1.0f, 0.0f);
-                this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(1));
+                this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(1));
                 instance.end();
                 instance.begin();
                 instance.normal(0.0f, 0.0f, -1.0f);
@@ -3374,11 +3198,11 @@ public class TileRenderer
                 glTranslatef(-0.5f, -0.5f, -0.5f);
                 instance.begin();
                 instance.normal(0.0f, -1.0f, 0.0f);
-                this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
+                this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(0));
                 instance.end();
                 instance.begin();
                 instance.normal(0.0f, 1.0f, 0.0f);
-                this.renderFaceDown(tile, 0.0, 0.0, 0.0, tile.getTexture(1));
+                this.renderFaceUp(tile, 0.0, 0.0, 0.0, tile.getTexture(1));
                 instance.end();
                 instance.begin();
                 instance.normal(0.0f, 0.0f, -1.0f);

@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public class Language
 {
-    private static Language singleton;
+    private static Language singleton = new Language();
     private Properties languageRepository;
     
     private Language() {
@@ -18,8 +18,8 @@ public class Language
             this.languageRepository.load(Language.class.getResourceAsStream("/lang/en_US.lang"));
             this.languageRepository.load(Language.class.getResourceAsStream("/lang/stats_US.lang"));
         }
-        catch (final IOException ex) {
-            ex.printStackTrace();
+        catch (final IOException e) {
+            e.printStackTrace();
         }
     }
     
@@ -38,8 +38,5 @@ public class Language
     public String getElementName(final String elementId) {
         return this.languageRepository.getProperty(elementId + ".name", "");
     }
-    
-    static {
-        Language.singleton = new Language();
-    }
+
 }

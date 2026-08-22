@@ -6,7 +6,7 @@ package net.minecraft.locale.language;
 
 public class I18n
 {
-    private static Language lang;
+    private static Language lang = Language.getInstance();
     
     public static String get(final String id) {
         return I18n.lang.getElement(id);
@@ -15,8 +15,5 @@ public class I18n
     public static String get(final String id, final Object... args) {
         return I18n.lang.getElement(id, args);
     }
-    
-    static {
-        I18n.lang = Language.getInstance();
-    }
+
 }

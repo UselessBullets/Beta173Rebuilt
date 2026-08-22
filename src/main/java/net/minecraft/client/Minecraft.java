@@ -1713,7 +1713,7 @@ public abstract class Minecraft implements Runnable
 
         String sessionId = "-";
         if (args.length > 1) sessionId = args[1];
-        
+
         start(name, sessionId);
     }
     

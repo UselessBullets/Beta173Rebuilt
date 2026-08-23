@@ -29,12 +29,8 @@ public class AddEntityPacket extends Packet
     public static final int FISH_HOOK = 90;
 
     public int id;
-    public int x;
-    public int y;
-    public int z;
-    public int xa;
-    public int ya;
-    public int za;
+    public int x, y, z;
+    public int xa, ya, za;
     public int type;
     public int data;
 
@@ -56,25 +52,13 @@ public class AddEntityPacket extends Packet
             double xd = e.xd;
             double yd = e.yd;
             double zd = e.zd;
-            final double n = 3.9;
-            if (xd < -n) {
-                xd = -n;
-            }
-            if (yd < -n) {
-                yd = -n;
-            }
-            if (zd < -n) {
-                zd = -n;
-            }
-            if (xd > n) {
-                xd = n;
-            }
-            if (yd > n) {
-                yd = n;
-            }
-            if (zd > n) {
-                zd = n;
-            }
+            final double m = 3.9;
+            if (xd < -m) xd = -m;
+            if (yd < -m) yd = -m;
+            if (zd < -m) zd = -m;
+            if (xd > m) xd = m;
+            if (yd > m) yd = m;
+            if (zd > m) zd = m;
             this.xa = (int)(xd * 8000.0);
             this.ya = (int)(yd * 8000.0);
             this.za = (int)(zd * 8000.0);

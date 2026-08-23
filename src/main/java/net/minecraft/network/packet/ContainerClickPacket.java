@@ -43,13 +43,9 @@ public class ContainerClickPacket extends Packet
         this.buttonNum = dis.readByte();
         this.uid = dis.readShort();
         this.quickKey = dis.readBoolean();
-        final short short1 = dis.readShort();
-        if (short1 >= 0) {
-            this.item = new ItemInstance(short1, dis.readByte(), dis.readShort());
-        }
-        else {
-            this.item = null;
-        }
+
+        final short id = dis.readShort();
+        this.item = id >= 0 ? new ItemInstance(id, dis.readByte(), dis.readShort()) : null;
     }
     
     @Override
@@ -59,6 +55,7 @@ public class ContainerClickPacket extends Packet
         dos.writeByte(this.buttonNum);
         dos.writeShort(this.uid);
         dos.writeBoolean(this.quickKey);
+
         if (this.item == null) {
             dos.writeShort(-1);
         }
@@ -71,6 +68,6 @@ public class ContainerClickPacket extends Packet
     
     @Override
     public int getEstimatedSize() {
-        return 11;
+        return 4 + 4 + 2 + 1;
     }
 }

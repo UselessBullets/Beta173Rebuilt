@@ -14,11 +14,7 @@ public class EntityActionAtPositionPacket extends Packet
 {
     public static final int START_SLEEP = 0;
 
-    public int id;
-    public int x;
-    public int y;
-    public int z;
-    public int action;
+    public int id, x, y, z, action;
 
     public EntityActionAtPositionPacket() {
     }

@@ -23,20 +23,20 @@ public class ContainerSetContentPacket extends Packet
         this.containerId = containerId;
         this.items = new ItemInstance[newItems.size()];
         for (int i = 0; i < this.items.length; ++i) {
-            final ItemInstance itemInstance = newItems.get(i);
-            this.items[i] = ((itemInstance == null) ? null : itemInstance.copy());
+            final ItemInstance item = newItems.get(i);
+            this.items[i] = item == null ? null : item.copy();
         }
     }
 
     @Override
     public void read(final DataInputStream dis) throws IOException {
         this.containerId = dis.readByte();
-        final short short1 = dis.readShort();
-        this.items = new ItemInstance[short1];
-        for (short n = 0; n < short1; ++n) {
-            final short short2 = dis.readShort();
-            if (short2 >= 0) {
-                this.items[n] = new ItemInstance(short2, dis.readByte(), dis.readShort());
+        final short count = dis.readShort();
+        this.items = new ItemInstance[count];
+        for (short n = 0; n < count; ++n) {
+            final short id = dis.readShort();
+            if (id >= 0) {
+                this.items[n] = new ItemInstance(id, dis.readByte(), dis.readShort());
             }
         }
     }

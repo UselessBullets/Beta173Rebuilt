@@ -37,6 +37,7 @@ public class ComplexItemDataPacket extends Packet
         dos.writeShort(this.itemType);
         dos.writeShort(this.itemId);
         dos.writeByte(this.data.length);
+
         dos.write(this.data);
     }
     

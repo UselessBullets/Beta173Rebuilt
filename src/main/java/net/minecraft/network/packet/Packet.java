@@ -4,6 +4,8 @@
 
 package net.minecraft.network.packet;
 
+import net.minecraft.client.Minecraft;
+
 import java.util.HashSet;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -18,23 +20,15 @@ public abstract class Packet
     private static Map<Class<? extends Packet>, Integer> classToIdMap;
     private static Set<Integer> clientReceivedPackets;
     private static Set<Integer> serverReceivedPackets;
-    public final long createTime;
-    public boolean shouldDelay;
-    private static HashMap<Integer, PacketStatistics> packetStatistics;
-    private static int readCounter;
-    
-    public Packet() {
-        this.createTime = System.currentTimeMillis();
-        this.shouldDelay = false;
-    }
+    public final long createTime = System.currentTimeMillis();
+    public boolean shouldDelay = false;
+    private static HashMap<Integer, PacketStatistics> packetStatistics = new HashMap<>();
+    private static int readCounter = 0;
     
     static void map(final int id, final boolean receiveOnClient, final boolean receiveOnServer, final Class<? extends Packet> clazz) {
-        if (Packet.idToClassMap.containsKey(id)) {
-            throw new IllegalArgumentException("Duplicate packet id:" + id);
-        }
-        if (Packet.classToIdMap.containsKey(clazz)) {
-            throw new IllegalArgumentException("Duplicate packet class:" + clazz);
-        }
+        if (Packet.idToClassMap.containsKey(id)) throw new IllegalArgumentException("Duplicate packet id:" + id);
+        if (Packet.classToIdMap.containsKey(clazz)) throw new IllegalArgumentException("Duplicate packet class:" + clazz);
+
         Packet.idToClassMap.put(id, clazz);
         Packet.classToIdMap.put(clazz, id);
         if (receiveOnClient) {
@@ -48,13 +42,11 @@ public abstract class Packet
     public static Packet getPacket(final int id) {
         try {
             final Class<? extends Packet> clazz = Packet.idToClassMap.get(id);
-            if (clazz == null) {
-                return null;
-            }
+            if (clazz == null) return null;
             return clazz.newInstance();
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
             System.out.println("Skipping packet with id " + id);
             return null;
         }
@@ -65,34 +57,37 @@ public abstract class Packet
     }
     
     public static Packet readPacket(final DataInputStream dis, final boolean isServer) {
-        int read;
+        int id;
         Packet packet;
         try {
-            read = dis.read();
-            if (read == -1) {
-                return null;
+            id = dis.read();
+            if (id == -1) return null;
+
+            if ((isServer && !Packet.serverReceivedPackets.contains(id)) || (!isServer && !Packet.clientReceivedPackets.contains(id))) {
+                throw new IOException("Bad packet id " + id);
             }
-            if ((isServer && !Packet.serverReceivedPackets.contains(read)) || (!isServer && !Packet.clientReceivedPackets.contains(read))) {
-                throw new IOException("Bad packet id " + read);
-            }
-            packet = getPacket(read);
-            if (packet == null) {
-                throw new IOException("Bad packet id " + read);
-            }
+
+            packet = getPacket(id);
+            if (packet == null) throw new IOException("Bad packet id " + id);
+
             packet.read(dis);
         }
-        catch (final IOException ex) {
+        catch (final IOException e) {
             System.out.println("Reached end of stream");
             return null;
         }
-        PacketStatistics value = Packet.packetStatistics.get(read);
-        if (value == null) {
-            value = new PacketStatistics();
-            Packet.packetStatistics.put(read, value);
+
+        PacketStatistics packetStatistics = Packet.packetStatistics.get(id);
+        if (packetStatistics == null) {
+            packetStatistics = new PacketStatistics();
+            Packet.packetStatistics.put(id, packetStatistics);
         }
-        value.addPacket(packet.getEstimatedSize());
+        packetStatistics.addPacket(packet.getEstimatedSize());
+
         ++Packet.readCounter;
-        if (Packet.readCounter % 1000 == 0) {}
+        if (Packet.readCounter % 1000 == 0) {
+            // Useless - Presumably the packet statistics would be displayed or printed out to console here, somehow
+        }
         return packet;
     }
     
@@ -194,8 +189,6 @@ public abstract class Packet
         map(131, true, false, ComplexItemDataPacket.class);
         map(200, true, false, AwardStatPacket.class);
         map(255, true, true, DisconnectPacket.class);
-        Packet.packetStatistics = new HashMap<>();
-        Packet.readCounter = 0;
     }
 
     static class PacketStatistics
@@ -203,12 +196,19 @@ public abstract class Packet
         private int count;
         private long totalSize;
 
-        private PacketStatistics() {
-        }
-
         public void addPacket(final int bytes) {
             ++this.count;
             this.totalSize += bytes;
+        }
+
+        // Useless - methods existed in LCE and would make sense to exist for b1.7.3
+        public int getCount() {
+            return this.count;
+        }
+
+        public double getAverageSize() {
+            if (this.count == 0) return 0;
+            return (double) this.totalSize / this.count;
         }
     }
 }

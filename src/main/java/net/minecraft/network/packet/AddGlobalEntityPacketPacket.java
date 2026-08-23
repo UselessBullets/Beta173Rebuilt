@@ -17,9 +17,7 @@ public class AddGlobalEntityPacketPacket extends Packet
     public static final int LIGHTNING = 1;
 
     public int id;
-    public int x;
-    public int y;
-    public int z;
+    public int x, y, z;
     public int type;
     
     public AddGlobalEntityPacketPacket() {

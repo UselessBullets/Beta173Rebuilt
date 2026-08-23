@@ -13,8 +13,7 @@ import java.io.IOException;
 
 public class ChunkTilesUpdatePacket extends Packet
 {
-    public int xc;
-    public int zc;
+    public int xc, zc;
     public short[] positions;
     public byte[] blocks;
     public byte[] data;
@@ -30,16 +29,18 @@ public class ChunkTilesUpdatePacket extends Packet
         this.zc = zc;
         this.count = count;
         this.positions = new short[count];
+
         this.blocks = new byte[count];
         this.data = new byte[count];
-        final LevelChunk chunk = level.getChunk(xc, zc);
+        final LevelChunk levelChunk = level.getChunk(xc, zc);
         for (int i = 0; i < count; ++i) {
-            final int n = positions[i] >> 12 & 0xF;
-            final int n2 = positions[i] >> 8 & 0xF;
-            final int n3 = positions[i] & 0xFF;
+            final int x = positions[i] >> 12 & 0xF;
+            final int z = positions[i] >> 8 & 0xF;
+            final int y = positions[i] & 0xFF;
+
             this.positions[i] = positions[i];
-            this.blocks[i] = (byte)chunk.getTile(n, n3, n2);
-            this.data[i] = (byte)chunk.getData(n, n3, n2);
+            this.blocks[i] = (byte)levelChunk.getTile(x, y, z);
+            this.data[i] = (byte)levelChunk.getData(x, y, z);
         }
     }
     
@@ -47,10 +48,13 @@ public class ChunkTilesUpdatePacket extends Packet
     public void read(final DataInputStream dis) throws IOException {
         this.xc = dis.readInt();
         this.zc = dis.readInt();
+
         this.count = (dis.readShort() & 0xFFFF);
+
         this.positions = new short[this.count];
         this.blocks = new byte[this.count];
         this.data = new byte[this.count];
+
         for (int i = 0; i < this.count; ++i) {
             this.positions[i] = dis.readShort();
         }

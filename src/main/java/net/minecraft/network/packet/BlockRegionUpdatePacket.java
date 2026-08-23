@@ -15,12 +15,8 @@ import java.io.DataInputStream;
 
 public class BlockRegionUpdatePacket extends Packet
 {
-    public int x;
-    public int y;
-    public int z;
-    public int xs;
-    public int ys;
-    public int zs;
+    public int x, y, z;
+    public int xs, ys, zs;
     public byte[] buffer;
     private int size;
     
@@ -36,6 +32,7 @@ public class BlockRegionUpdatePacket extends Packet
         this.xs = xs;
         this.ys = ys;
         this.zs = zs;
+
         final byte[] blocksAndData = level.getBlocksAndData(x, y, z, xs, ys, zs);
         final Deflater deflater = new Deflater(-1);
         try {
@@ -57,12 +54,14 @@ public class BlockRegionUpdatePacket extends Packet
         this.xs = dis.read() + 1;
         this.ys = dis.read() + 1;
         this.zs = dis.read() + 1;
+
         this.size = dis.readInt();
-        final byte[] array = new byte[this.size];
-        dis.readFully(array);
+        final byte[] compressedBuffer = new byte[this.size];
+        dis.readFully(compressedBuffer);
+
         this.buffer = new byte[this.xs * this.ys * this.zs * 5 / 2];
         final Inflater inflater = new Inflater();
-        inflater.setInput(array);
+        inflater.setInput(compressedBuffer);
         try {
             inflater.inflate(this.buffer);
         }

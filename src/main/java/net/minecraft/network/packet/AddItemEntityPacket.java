@@ -14,12 +14,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 public class AddItemEntityPacket extends Packet
 {
     public int id;
-    public int x;
-    public int y;
-    public int z;
-    public byte xa;
-    public byte ya;
-    public byte za;
+    public int x, y, z;
+    public byte xa, ya, za;
     public int itemId;
     public int itemCount;
     public int auxValue;

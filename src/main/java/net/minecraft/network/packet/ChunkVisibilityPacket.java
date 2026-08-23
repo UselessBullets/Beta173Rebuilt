@@ -10,8 +10,7 @@ import java.io.IOException;
 
 public class ChunkVisibilityPacket extends Packet
 {
-    public int x;
-    public int y;
+    public int x, y;
     public boolean visible;
     
     public ChunkVisibilityPacket() {
@@ -29,7 +28,7 @@ public class ChunkVisibilityPacket extends Packet
     public void read(final DataInputStream dis) throws IOException {
         this.x = dis.readInt();
         this.y = dis.readInt();
-        this.visible = (dis.read() != 0);
+        this.visible = dis.read() != 0;
     }
     
     @Override

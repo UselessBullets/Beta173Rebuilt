@@ -32,7 +32,7 @@ public class ContainerAckPacket extends Packet
     public void read(final DataInputStream dis) throws IOException {
         this.containerId = dis.readByte();
         this.uid = dis.readShort();
-        this.accepted = (dis.readByte() != 0);
+        this.accepted = dis.readByte() != 0;
     }
     
     @Override

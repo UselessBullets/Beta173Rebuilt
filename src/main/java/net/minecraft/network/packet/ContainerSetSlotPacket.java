@@ -12,6 +12,11 @@ import net.minecraft.world.item.ItemInstance;
 
 public class ContainerSetSlotPacket extends Packet
 {
+    // Useless - these below constants exist both in the LCE and b1.2 leaks, they seem to be mistaken duplicates of ContainerOpenPacket's equivalents?
+    public static final int CONTAINER = 0;
+    public static final int WORKBENCH = 1;
+    public static final int FURNACE = 2;
+
     public int containerId;
     public int slot;
     public ItemInstance item;
@@ -22,7 +27,7 @@ public class ContainerSetSlotPacket extends Packet
     public ContainerSetSlotPacket(final int containerId, final int slot, final ItemInstance item) {
         this.containerId = containerId;
         this.slot = slot;
-        this.item = ((item == null) ? item : item.copy());
+        this.item = item == null ? null : item.copy();
     }
 
     @Override
@@ -34,9 +39,9 @@ public class ContainerSetSlotPacket extends Packet
     public void read(final DataInputStream dis) throws IOException {
         this.containerId = dis.readByte();
         this.slot = dis.readShort();
-        final short short1 = dis.readShort();
-        if (short1 >= 0) {
-            this.item = new ItemInstance(short1, dis.readByte(), dis.readShort());
+        final short id = dis.readShort();
+        if (id >= 0) {
+            this.item = new ItemInstance(id, dis.readByte(), dis.readShort());
         }
         else {
             this.item = null;
@@ -59,6 +64,6 @@ public class ContainerSetSlotPacket extends Packet
     
     @Override
     public int getEstimatedSize() {
-        return 8;
+        return 3 + 5;
     }
 }

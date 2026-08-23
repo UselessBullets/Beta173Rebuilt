@@ -41,7 +41,7 @@ import net.minecraft.world.entity.Mob;
 
 public abstract class Player extends Mob
 {
-    public static final int MAX_NAME_LENGTH = 16 + 4;
+    public static final int MAX_NAME_LENGTH = 16; // Useless - Was "16 + 4" in LCE leak, however the numeric values where the constant was used in b1.7.3 show that it was actually 16
     public static final int MAX_HEALTH = 20;
     public static final int SWING_DURATION = 6;
     public static final int SLEEP_DURATION = 100;

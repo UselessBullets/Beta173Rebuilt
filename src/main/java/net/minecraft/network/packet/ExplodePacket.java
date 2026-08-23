@@ -14,9 +14,7 @@ import java.util.Set;
 
 public class ExplodePacket extends Packet
 {
-    public double x;
-    public double y;
-    public double z;
+    public double x, y, z;
     public float r;
     public Set<TilePos> toBlow;
 
@@ -37,13 +35,17 @@ public class ExplodePacket extends Packet
         this.y = dis.readDouble();
         this.z = dis.readDouble();
         this.r = dis.readFloat();
-        final int int1 = dis.readInt();
+        final int count = dis.readInt();
+
         this.toBlow = new HashSet<>();
-        final int n = (int)this.x;
-        final int n2 = (int)this.y;
-        final int n3 = (int)this.z;
-        for (int i = 0; i < int1; ++i) {
-            this.toBlow.add(new TilePos(dis.readByte() + n, dis.readByte() + n2, dis.readByte() + n3));
+        final int xp = (int)this.x;
+        final int yp = (int)this.y;
+        final int zp = (int)this.z;
+        for (int i = 0; i < count; ++i) {
+            int xx = dis.readByte() + xp;
+            int yy = dis.readByte() + yp;
+            int zz = dis.readByte() + zp;
+            this.toBlow.add(new TilePos(xx, yy, zz));
         }
     }
     
@@ -54,16 +56,17 @@ public class ExplodePacket extends Packet
         dos.writeDouble(this.z);
         dos.writeFloat(this.r);
         dos.writeInt(this.toBlow.size());
-        final int n = (int)this.x;
-        final int n2 = (int)this.y;
-        final int n3 = (int)this.z;
-        for (final TilePos tilePos : this.toBlow) {
-            final int v = tilePos.x - n;
-            final int v2 = tilePos.y - n2;
-            final int v3 = tilePos.z - n3;
-            dos.writeByte(v);
-            dos.writeByte(v2);
-            dos.writeByte(v3);
+
+        final int xp = (int)this.x;
+        final int yp = (int)this.y;
+        final int zp = (int)this.z;
+        for (final TilePos tp : this.toBlow) {
+            final int xx = tp.x - xp;
+            final int yy = tp.y - yp;
+            final int zz = tp.z - zp;
+            dos.writeByte(xx);
+            dos.writeByte(yy);
+            dos.writeByte(zz);
         }
     }
     
@@ -74,6 +77,6 @@ public class ExplodePacket extends Packet
     
     @Override
     public int getEstimatedSize() {
-        return 32 + this.toBlow.size() * 3;
+        return 8 * 3 + 4 + 4 + this.toBlow.size() * 3;
     }
 }

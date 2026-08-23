@@ -13,9 +13,7 @@ import net.minecraft.world.entity.Painting;
 public class AddPaintingPacket extends Packet
 {
     public int id;
-    public int x;
-    public int y;
-    public int z;
+    public int x, y, z;
     public int dir;
     public String motive;
     

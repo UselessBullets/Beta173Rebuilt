@@ -18,11 +18,8 @@ public class AddMobPacket extends Packet
 {
     public int id;
     public byte type;
-    public int x;
-    public int y;
-    public int z;
-    public byte yRot;
-    public byte xRot;
+    public int x, y, z;
+    public byte yRot, xRot;
     private SynchedEntityData entityData;
     private List<SynchedEntityData.DataItem> unpack;
     
@@ -31,12 +28,14 @@ public class AddMobPacket extends Packet
     
     public AddMobPacket(final Mob mob) {
         this.id = mob.entityId;
+
         this.type = (byte)EntityIO.getId(mob);
         this.x = Mth.floor(mob.x * 32.0);
         this.y = Mth.floor(mob.y * 32.0);
         this.z = Mth.floor(mob.z * 32.0);
         this.yRot = (byte)(mob.yRot * 256.0f / 360.0f);
         this.xRot = (byte)(mob.xRot * 256.0f / 360.0f);
+
         this.entityData = mob.getEntityData();
     }
     

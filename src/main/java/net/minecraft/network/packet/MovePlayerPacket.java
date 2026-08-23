@@ -10,15 +10,10 @@ import java.io.IOException;
 
 public class MovePlayerPacket extends Packet
 {
-    public double x;
-    public double y;
-    public double z;
-    public double yView;
-    public float yRot;
-    public float xRot;
+    public double x, y, z, yView;
+    public float yRot, xRot;
     public boolean onGround;
-    public boolean hasPos;
-    public boolean hasRot;
+    public boolean hasPos, hasRot;
     
     public MovePlayerPacket() {
     }

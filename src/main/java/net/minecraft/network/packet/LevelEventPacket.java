@@ -12,9 +12,7 @@ public class LevelEventPacket extends Packet
 {
     public int type;
     public int data;
-    public int x;
-    public int y;
-    public int z;
+    public int x, y, z;
 
     public LevelEventPacket() {
     }
@@ -52,6 +50,6 @@ public class LevelEventPacket extends Packet
     
     @Override
     public int getEstimatedSize() {
-        return 20;
+        return 4 * 5;
     }
 }

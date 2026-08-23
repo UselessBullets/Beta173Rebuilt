@@ -4,6 +4,8 @@
 
 package net.minecraft.network.packet;
 
+import net.minecraft.SharedConstants;
+
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -21,7 +23,7 @@ public class DisconnectPacket extends Packet
     
     @Override
     public void read(final DataInputStream dis) throws IOException {
-        this.reason = Packet.readUTF(dis, 100);
+        this.reason = Packet.readUTF(dis, SharedConstants.maxChatLength);
     }
     
     @Override

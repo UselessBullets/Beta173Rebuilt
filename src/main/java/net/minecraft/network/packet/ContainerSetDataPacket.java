@@ -44,6 +44,6 @@ public class ContainerSetDataPacket extends Packet
     
     @Override
     public int getEstimatedSize() {
-        return 5;
+        return 1 + 4;
     }
 }

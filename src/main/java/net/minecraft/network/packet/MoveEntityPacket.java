@@ -11,11 +11,7 @@ import java.io.IOException;
 public class MoveEntityPacket extends Packet
 {
     public int id;
-    public byte xa;
-    public byte ya;
-    public byte za;
-    public byte yRot;
-    public byte xRot;
+    public byte xa, ya, za, yRot, xRot;
     public boolean hasRot;
     
     public MoveEntityPacket() {

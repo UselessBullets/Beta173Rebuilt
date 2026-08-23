@@ -4,6 +4,7 @@
 
 package net.minecraft.world.entity.monster;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.world.item.Item;
 import util.Mth;
 import net.minecraft.world.level.Level;
@@ -20,9 +21,9 @@ public class Zombie extends Monster
     @Override
     public void aiStep() {
         if (this.level.isDay()) {
-            final float brightness = this.getBrightness(1.0f);
-            if (brightness > 0.5f && this.level.canSeeSky(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z)) && this.random.nextFloat() * 30.0f < (brightness - 0.4f) * 2.0f) {
-                this.onFire = 300;
+            final float br = this.getBrightness(1.0f);
+            if (br > 0.5f && this.level.canSeeSky(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z)) && this.random.nextFloat() * 30.0f < (br - 0.4f) * 2.0f) {
+                this.onFire = 8 * SharedConstants.TICKS_PER_SECOND;
             }
         }
         super.aiStep();

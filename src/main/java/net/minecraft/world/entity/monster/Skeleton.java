@@ -4,9 +4,9 @@
 
 package net.minecraft.world.entity.monster;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.world.item.Item;
 import com.mojang.nbt.CompoundTag;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.Entity;
 import util.Mth;
@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemInstance;
 
 public class Skeleton extends Monster
 {
-    private static final ItemInstance bow;
+    private static final ItemInstance bow = new ItemInstance(Item.bow, 1);
     
     public Skeleton(final Level level) {
         super(level);
@@ -40,31 +40,37 @@ public class Skeleton extends Monster
     @Override
     public void aiStep() {
         if (this.level.isDay()) {
-            final float brightness = this.getBrightness(1.0f);
-            if (brightness > 0.5f && this.level.canSeeSky(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z)) && this.random.nextFloat() * 30.0f < (brightness - 0.4f) * 2.0f) {
-                this.onFire = 300;
-            }
+            final float br = this.getBrightness(1.0f);
+            if (br > 0.5f)
+                if (this.level.canSeeSky(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z)) && this.random.nextFloat() * 30.0f < (br - 0.4f) * 2.0f) {
+                    this.onFire = 8 * SharedConstants.TICKS_PER_SECOND;
+                }
         }
+
         super.aiStep();
     }
     
     @Override
     protected void checkHurtTarget(final Entity target, final float distance) {
         if (distance < 10.0f) {
-            final double n = target.x - this.x;
-            final double n2 = target.z - this.z;
+            final double xd = target.x - this.x;
+            final double zd = target.z - this.z;
             if (this.attackTime == 0) {
-                final Arrow arrow;
-                final Arrow e = arrow = new Arrow(this.level, this);
-                arrow.y += 1.399999976158142;
-                final double n3 = target.y + target.getHeadHeight() - 0.2f - e.y;
-                final float n4 = Mth.sqrt(n * n + n2 * n2) * 0.2f;
+                final Arrow arrow = new Arrow(this.level, this);
+
+                arrow.y += 1.4f;
+                final double yd = target.y + target.getHeadHeight() - 0.2f - arrow.y;
+
+                float sd = Mth.sqrt(xd * xd + zd * zd);
+                final float yo = sd * 0.2f;
+
                 this.level.playSound(this, "random.bow", 1.0f, 1.0f / (this.random.nextFloat() * 0.4f + 0.8f));
-                this.level.addEntity(e);
-                e.shoot(n, n3 + n4, n2, 0.6f, 12.0f);
+                this.level.addEntity(arrow);
+
+                arrow.shoot(xd, yd + yo, zd, 0.6f, 12.0f);
                 this.attackTime = 30;
             }
-            this.yRot = (float)(Math.atan2(n2, n) * 180.0 / Math.PI) - 90.0f;
+            this.yRot = (float)(Math.atan2(zd, xd) * 180.0 / Math.PI) - 90.0f;
             this.holdGround = true;
         }
     }
@@ -86,10 +92,14 @@ public class Skeleton extends Monster
     
     @Override
     protected void dropDeathLoot() {
-        for (int nextInt = this.random.nextInt(3), i = 0; i < nextInt; ++i) {
+        // drop some arrows
+        int count = this.random.nextInt(3);
+        for (int i = 0; i < count; ++i) {
             this.spawnAtLocation(Item.arrow.id, 1);
         }
-        for (int nextInt2 = this.random.nextInt(3), j = 0; j < nextInt2; ++j) {
+        // and some bones
+        count = this.random.nextInt(3);
+        for (int i = 0; i < count; ++i) {
             this.spawnAtLocation(Item.bone.id, 1);
         }
     }
@@ -98,8 +108,5 @@ public class Skeleton extends Monster
     public ItemInstance getCarriedItem() {
         return Skeleton.bow;
     }
-    
-    static {
-        bow = new ItemInstance(Item.bow, 1);
-    }
+
 }

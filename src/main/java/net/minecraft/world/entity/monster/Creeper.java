@@ -12,8 +12,11 @@ import net.minecraft.world.level.Level;
 
 public class Creeper extends Monster
 {
+    public static final int DATA_SWELL_DIR = 16;
+    public static final int DATA_IS_POWERED = 17;
     int swell;
     int oldSwell;
+    public static final int MAX_SWELL = 30;
     
     public Creeper(final Level level) {
         super(level);
@@ -23,32 +26,29 @@ public class Creeper extends Monster
     @Override
     protected void definedSynchedData() {
         super.definedSynchedData();
-        this.entityData.define(16, (byte)-1);
-        this.entityData.define(17, (byte)0);
+        this.entityData.define(DATA_SWELL_DIR, (byte)-1);
+        this.entityData.define(DATA_IS_POWERED, (byte)0);
     }
     
     @Override
     public void addAdditionalSaveData(final CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        if (this.entityData.getByte(17) == 1) {
-            compoundTag.putBoolean("powered", true);
-        }
+        if (this.entityData.getByte(DATA_IS_POWERED) == 1) compoundTag.putBoolean("powered", true);
     }
     
     @Override
     public void readAdditionalSaveData(final CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
-        this.entityData.set(17, (byte)(byte)(compoundTag.getBoolean("powered") ? 1 : 0));
+        this.entityData.set(DATA_IS_POWERED, (byte)(compoundTag.getBoolean("powered") ? 1 : 0));
     }
     
     @Override
     protected void cantSeeTarget(final Entity target, final float distance) {
-        if (this.level.isClientSide) {
-            return;
-        }
+        if (this.level.isClientSide) return;
+
         if (this.swell > 0) {
             this.setSwellDir(-1);
-            --this.swell;
+            this.swell--;
             if (this.swell < 0) {
                 this.swell = 0;
             }
@@ -64,20 +64,16 @@ public class Creeper extends Monster
                 this.level.playSound(this, "random.fuse", 1.0f, 0.5f);
             }
             this.swell += swellDir;
-            if (this.swell < 0) {
-                this.swell = 0;
-            }
-            if (this.swell >= 30) {
-                this.swell = 30;
-            }
+            if (this.swell < 0) this.swell = 0;
+            if (this.swell >= MAX_SWELL) this.swell = MAX_SWELL;
         }
+
         super.tick();
+
         if (this.attackTarget == null && this.swell > 0) {
             this.setSwellDir(-1);
-            --this.swell;
-            if (this.swell < 0) {
-                this.swell = 0;
-            }
+            this.swell--;
+            if (this.swell < 0) this.swell = 0;
         }
     }
     
@@ -94,6 +90,7 @@ public class Creeper extends Monster
     @Override
     public void die(final Entity source) {
         super.die(source);
+
         if (source instanceof Skeleton) {
             this.spawnAtLocation(Item.record_01.id + this.random.nextInt(2), 1);
         }
@@ -101,30 +98,24 @@ public class Creeper extends Monster
     
     @Override
     protected void checkHurtTarget(final Entity target, final float distance) {
-        if (this.level.isClientSide) {
-            return;
-        }
+        if (this.level.isClientSide) return;
+
         final int swellDir = this.getSwellDir();
-        if ((swellDir <= 0 && distance < 3.0f) || (swellDir > 0 && distance < 7.0f)) {
+        if (swellDir <= 0 && distance < 3.0f || swellDir > 0 && distance < 7.0f) {
             if (this.swell == 0) {
                 this.level.playSound(this, "random.fuse", 1.0f, 0.5f);
             }
             this.setSwellDir(1);
-            ++this.swell;
-            if (this.swell >= 30) {
-                if (this.isPowered()) {
-                    this.level.explode(this, this.x, this.y, this.z, 6.0f);
-                }
-                else {
-                    this.level.explode(this, this.x, this.y, this.z, 3.0f);
-                }
+            this.swell++;
+            if (this.swell >= MAX_SWELL) {
+                if (this.isPowered()) this.level.explode(this, this.x, this.y, this.z, 6.0f);
+                else this.level.explode(this, this.x, this.y, this.z, 3.0f);
                 this.remove();
             }
             this.holdGround = true;
-        }
-        else {
+        } else {
             this.setSwellDir(-1);
-            --this.swell;
+            this.swell--;
             if (this.swell < 0) {
                 this.swell = 0;
             }
@@ -132,11 +123,11 @@ public class Creeper extends Monster
     }
     
     public boolean isPowered() {
-        return this.entityData.getByte(17) == 1;
+        return this.entityData.getByte(DATA_IS_POWERED) == 1;
     }
     
     public float getSwelling(final float a) {
-        return (this.oldSwell + (this.swell - this.oldSwell) * a) / 28.0f;
+        return (this.oldSwell + (this.swell - this.oldSwell) * a) / (MAX_SWELL - 2);
     }
     
     @Override
@@ -145,16 +136,16 @@ public class Creeper extends Monster
     }
     
     private int getSwellDir() {
-        return this.entityData.getByte(16);
+        return this.entityData.getByte(DATA_SWELL_DIR);
     }
     
     private void setSwellDir(final int dir) {
-        this.entityData.set(16, (byte)dir);
+        this.entityData.set(DATA_SWELL_DIR, (byte)dir);
     }
     
     @Override
     public void thunderHit(final LightningBolt lightningBolt) {
         super.thunderHit(lightningBolt);
-        this.entityData.set(17, 1);
+        this.entityData.set(DATA_IS_POWERED, 1);
     }
 }

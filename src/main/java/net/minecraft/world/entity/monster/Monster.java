@@ -14,51 +14,47 @@ import net.minecraft.world.entity.PathfinderMob;
 
 public class Monster extends PathfinderMob implements Enemy
 {
-    protected int attackDamage;
+    protected int attackDamage = 2;
     
     public Monster(final Level level) {
         super(level);
-        this.attackDamage = 2;
         this.health = 20;
     }
     
     @Override
     public void aiStep() {
-        if (this.getBrightness(1.0f) > 0.5f) {
+        float br = this.getBrightness(1.0f);
+        if (br > 0.5f) {
             this.noActionTime += 2;
         }
+
         super.aiStep();
     }
     
     @Override
     public void tick() {
         super.tick();
-        if (!this.level.isClientSide && this.level.difficulty == 0) {
-            this.remove();
-        }
+        if (!this.level.isClientSide && this.level.difficulty == 0) this.remove();
     }
     
     @Override
     protected Entity findAttackTarget() {
-        final Player nearestPlayer = this.level.getNearestPlayer(this, 16.0);
-        if (nearestPlayer != null && this.canSee(nearestPlayer)) {
-            return nearestPlayer;
-        }
+        final Player player = this.level.getNearestPlayer(this, 16.0);
+        if (player != null && this.canSee(player)) return player;
         return null;
     }
     
     @Override
     public boolean hurt(final Entity source, final int dmg) {
-        if (!super.hurt(source, dmg)) {
-            return false;
-        }
-        if (this.rider == source || this.riding == source) {
+        if (super.hurt(source, dmg)) {
+            if (this.rider == source || this.riding == source) return true;
+
+            if (source != this) {
+                this.attackTarget = source;
+            }
             return true;
         }
-        if (source != this) {
-            this.attackTarget = source;
-        }
-        return true;
+        return false;
     }
     
     @Override
@@ -86,19 +82,20 @@ public class Monster extends PathfinderMob implements Enemy
     
     @Override
     public boolean canSpawn() {
-        final int floor = Mth.floor(this.x);
-        final int floor2 = Mth.floor(this.bb.y0);
-        final int floor3 = Mth.floor(this.z);
-        if (this.level.getBrightness(LightLayer.Sky, floor, floor2, floor3) > this.random.nextInt(32)) {
-            return false;
-        }
-        int n = this.level.getRawBrightness(floor, floor2, floor3);
+        final int xt = Mth.floor(this.x);
+        final int yt = Mth.floor(this.bb.y0);
+        final int zt = Mth.floor(this.z);
+        if (this.level.getBrightness(LightLayer.Sky, xt, yt, zt) > this.random.nextInt(32)) return false;
+
+        int br = this.level.getRawBrightness(xt, yt, zt);
+
         if (this.level.isThundering()) {
-            final int skyDarken = this.level.skyDarken;
+            final int tmp = this.level.skyDarken;
             this.level.skyDarken = 10;
-            n = this.level.getRawBrightness(floor, floor2, floor3);
-            this.level.skyDarken = skyDarken;
+            br = this.level.getRawBrightness(xt, yt, zt);
+            this.level.skyDarken = tmp;
         }
-        return n <= this.random.nextInt(8) && super.canSpawn();
+
+        return br <= this.random.nextInt(8) && super.canSpawn();
     }
 }

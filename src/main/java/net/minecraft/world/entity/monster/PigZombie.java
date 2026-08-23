@@ -14,14 +14,12 @@ import net.minecraft.world.item.ItemInstance;
 
 public class PigZombie extends Zombie
 {
-    private int angryTime;
-    private int playAngrySoundIn;
-    private static final ItemInstance sword;
+    private int angryTime = 0;
+    private int playAngrySoundIn = 0;
+    private static final ItemInstance sword = new ItemInstance(Item.sword_gold, 1);
     
     public PigZombie(final Level level) {
         super(level);
-        this.angryTime = 0;
-        this.playAngrySoundIn = 0;
         this.textureName = "/mob/pigzombie.png";
         this.runSpeed = 0.5f;
         this.attackDamage = 5;
@@ -30,10 +28,11 @@ public class PigZombie extends Zombie
     
     @Override
     public void tick() {
-        this.runSpeed = ((this.attackTarget != null) ? 0.95f : 0.5f);
-        if (this.playAngrySoundIn > 0 && --this.playAngrySoundIn == 0) {
-            this.level.playSound(this, "mob.zombiepig.zpigangry", this.getSoundVolume() * 2.0f, ((this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f) * 1.8f);
-        }
+        this.runSpeed = this.attackTarget != null ? 0.95f : 0.5f;
+        if (this.playAngrySoundIn > 0)
+            if (--this.playAngrySoundIn == 0) {
+                this.level.playSound(this, "mob.zombiepig.zpigangry", this.getSoundVolume() * 2.0f, ((this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f) * 1.8f);
+            }
         super.tick();
     }
     
@@ -56,9 +55,7 @@ public class PigZombie extends Zombie
     
     @Override
     protected Entity findAttackTarget() {
-        if (this.angryTime == 0) {
-            return null;
-        }
+        if (this.angryTime == 0) return null;
         return super.findAttackTarget();
     }
     
@@ -70,11 +67,12 @@ public class PigZombie extends Zombie
     @Override
     public boolean hurt(final Entity source, final int dmg) {
         if (source instanceof Player) {
-            final List<Entity> entities = this.level.getEntities(this, this.bb.grow(32.0, 32.0, 32.0));
-            for (int i = 0; i < entities.size(); ++i) {
-                final Entity entity = entities.get(i);
-                if (entity instanceof PigZombie) {
-                    ((PigZombie)entity).alert(source);
+            final List<Entity> nearby = this.level.getEntities(this, this.bb.grow(32.0, 32.0, 32.0));
+            for (int i = 0; i < nearby.size(); ++i) {
+                final Entity e = nearby.get(i);
+                if (e instanceof PigZombie) {
+                    PigZombie pigZombie = (PigZombie) e;
+                    pigZombie.alert(source);
                 }
             }
             this.alert(source);
@@ -84,8 +82,8 @@ public class PigZombie extends Zombie
     
     private void alert(final Entity target) {
         this.attackTarget = target;
-        this.angryTime = 400 + this.random.nextInt(400);
-        this.playAngrySoundIn = this.random.nextInt(40);
+        this.angryTime = 20 * 20 + this.random.nextInt(20 * 20);
+        this.playAngrySoundIn = this.random.nextInt(20 * 2);
     }
     
     @Override
@@ -112,8 +110,5 @@ public class PigZombie extends Zombie
     public ItemInstance getCarriedItem() {
         return PigZombie.sword;
     }
-    
-    static {
-        sword = new ItemInstance(Item.sword_gold, 1);
-    }
+
 }

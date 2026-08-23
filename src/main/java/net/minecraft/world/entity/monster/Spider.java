@@ -31,8 +31,10 @@ public class Spider extends Monster
     
     @Override
     protected Entity findAttackTarget() {
-        if (this.getBrightness(1.0f) < 0.5f) {
-            return this.level.getNearestPlayer(this, 16.0);
+        float br = this.getBrightness(1.0f);
+        if (br < 0.5f) {
+            double maxDist = 16;
+            return this.level.getNearestPlayer(this, maxDist);
         }
         return null;
     }
@@ -53,23 +55,25 @@ public class Spider extends Monster
     }
     
     @Override
-    protected void checkHurtTarget(final Entity target, final float distance) {
-        if (this.getBrightness(1.0f) > 0.5f && this.random.nextInt(100) == 0) {
+    protected void checkHurtTarget(final Entity target, final float d) {
+        float br = this.getBrightness(1.0f);
+        if (br > 0.5f && this.random.nextInt(100) == 0) {
             this.attackTarget = null;
             return;
         }
-        if (distance > 2.0f && distance < 6.0f && this.random.nextInt(10) == 0) {
+
+        if (d > 2.0f && d < 6.0f && this.random.nextInt(10) == 0) {
             if (this.onGround) {
-                final double n = target.x - this.x;
-                final double n2 = target.z - this.z;
-                final float sqrt = Mth.sqrt(n * n + n2 * n2);
-                this.xd = n / sqrt * 0.5 * 0.8f + this.xd * 0.2f;
-                this.zd = n2 / sqrt * 0.5 * 0.8f + this.zd * 0.2f;
+                final double xdd = target.x - this.x;
+                final double zdd = target.z - this.z;
+                final float dd = Mth.sqrt(xdd * xdd + zdd * zdd);
+                this.xd = xdd / dd * 0.5 * 0.8f + this.xd * 0.2f;
+                this.zd = zdd / dd * 0.5 * 0.8f + this.zd * 0.2f;
                 this.yd = 0.4f;
             }
         }
         else {
-            super.checkHurtTarget(target, distance);
+            super.checkHurtTarget(target, d);
         }
     }
     

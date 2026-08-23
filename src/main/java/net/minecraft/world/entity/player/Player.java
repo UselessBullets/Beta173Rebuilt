@@ -4,6 +4,7 @@
 
 package net.minecraft.world.entity.player;
 
+import net.minecraft.Direction;
 import net.minecraft.SharedConstants;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.animal.Pig;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.item.Boat;
 import net.minecraft.stats.Achievements;
 import net.minecraft.world.entity.item.Minecart;
 import net.minecraft.stats.Stat;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.tile.BedTile;
 import net.minecraft.world.level.tile.entity.SignTileEntity;
@@ -397,33 +399,31 @@ public abstract class Player extends Mob
     @Override
     public boolean hurt(final Entity source, int dmg) {
         this.noActionTime = 0;
-        if (this.health <= 0) {
-            return false;
-        }
+        if (this.health <= 0) return false;
+
         if (this.isSleeping() && !this.level.isClientSide) {
             this.stopSleepInBed(true, true, false);
         }
+
         if (source instanceof Monster || source instanceof Arrow) {
-            if (this.level.difficulty == 0) {
-                dmg = 0;
+            if (this.level.difficulty == Difficulty.PEACEFUL) dmg = 0;
+            if (this.level.difficulty == Difficulty.EASY) dmg = dmg / 3 + 1;
+            if (this.level.difficulty == Difficulty.HARD) dmg = dmg * 3 / 2;
+        }
+
+        if (dmg == 0) return false;
+
+        Entity attacker = source;
+        if (attacker instanceof Arrow) {
+            if (((Arrow) attacker).owner != null) {
+                attacker = ((Arrow) attacker).owner;
             }
-            if (this.level.difficulty == 1) {
-                dmg = dmg / 3 + 1;
-            }
-            if (this.level.difficulty == 3) {
-                dmg = dmg * 3 / 2;
-            }
         }
-        if (dmg == 0) {
-            return false;
+        if (attacker instanceof Mob) {
+            // aggreviate all pet wolves nearby
+            this.directAllTameWolvesOnTarget((Mob)attacker, false);
         }
-        Entity owner = source;
-        if (owner instanceof Arrow && ((Arrow)owner).owner != null) {
-            owner = ((Arrow)owner).owner;
-        }
-        if (owner instanceof Mob) {
-            this.directAllTameWolvesOnTarget((Mob)owner, false);
-        }
+
         this.awardStat(Stats.damageTaken, dmg);
         return super.hurt(source, dmg);
     }
@@ -433,32 +433,40 @@ public abstract class Player extends Mob
     }
     
     protected void directAllTameWolvesOnTarget(final Mob target, final boolean skipSitting) {
+        // filter un-attackable mobs
         if (target instanceof Creeper || target instanceof Ghast) {
             return;
         }
+
+        // never target wolves that has this player as owner
         if (target instanceof Wolf) {
-            final Wolf wolf = (Wolf)target;
-            if (wolf.isTame() && this.name.equals(wolf.getOwner())) {
+            final Wolf wolfTarget = (Wolf)target;
+            if (wolfTarget.isTame() && this.name.equals(wolfTarget.getOwner())) {
                 return;
             }
         }
         if (target instanceof Player && !this.isPlayerVersusPlayer()) {
+            // pvp is off
             return;
         }
-        for (final Wolf wolf2 : this.level.getEntitiesOfClass(Wolf.class, AABB.newTemp(this.x, this.y, this.z, this.x + 1.0, this.y + 1.0, this.z + 1.0).grow(16.0, 4.0, 16.0))) {
-            if (wolf2.isTame() && wolf2.getAttackTarget() == null && this.name.equals(wolf2.getOwner()) && (!skipSitting || !wolf2.isSitting())) {
-                wolf2.setSitting(false);
-                wolf2.setAttackTarget(target);
-            }
+
+        List<Wolf> nearbyWolves = this.level.getEntitiesOfClass(Wolf.class, AABB.newTemp(this.x, this.y, this.z, this.x + 1.0, this.y + 1.0, this.z + 1.0).grow(16.0, 4.0, 16.0));
+        for (final Wolf wolf : nearbyWolves) {
+            if (wolf.isTame() && wolf.getAttackTarget() == null && this.name.equals(wolf.getOwner()))
+                if (!skipSitting || !wolf.isSitting()) {
+                    wolf.setSitting(false);
+                    wolf.setAttackTarget(target);
+                }
         }
     }
     
     @Override
     protected void actuallyHurt(int dmg) {
-        final int n = dmg * (25 - this.inventory.getArmorValue()) + this.dmgSpill;
+        final int absorb = 25 - this.inventory.getArmorValue();
+        final int v = dmg * absorb + this.dmgSpill;
         this.inventory.hurtArmor(dmg);
-        dmg = n / 25;
-        this.dmgSpill = n % 25;
+        dmg = v / 25;
+        this.dmgSpill = v % 25;
         super.actuallyHurt(dmg);
     }
     
@@ -472,14 +480,12 @@ public abstract class Player extends Mob
     }
     
     public void interact(final Entity entity) {
-        if (entity.interact(this)) {
-            return;
-        }
-        final ItemInstance selectedItem = this.getSelectedItem();
-        if (selectedItem != null && entity instanceof Mob) {
-            selectedItem.interactEnemy((Mob)entity);
-            if (selectedItem.count <= 0) {
-                selectedItem.snap(this);
+        if (entity.interact(this)) return;
+        final ItemInstance item = this.getSelectedItem();
+        if (item != null && entity instanceof Mob) {
+            item.interactEnemy((Mob)entity);
+            if (item.count <= 0) {
+                item.snap(this);
                 this.removeSelectedItem();
             }
         }
@@ -504,17 +510,18 @@ public abstract class Player extends Mob
     }
     
     public void attack(final Entity entity) {
-        int attackDamage = this.inventory.getAttackDamage(entity);
-        if (attackDamage > 0) {
+        int dmg = this.inventory.getAttackDamage(entity);
+        if (dmg > 0) {
             if (this.yd < 0.0) {
-                ++attackDamage;
+                ++dmg;
             }
-            entity.hurt(this, attackDamage);
-            final ItemInstance selectedItem = this.getSelectedItem();
-            if (selectedItem != null && entity instanceof Mob) {
-                selectedItem.hurtEnemy((Mob)entity, this);
-                if (selectedItem.count <= 0) {
-                    selectedItem.snap(this);
+
+            entity.hurt(this, dmg);
+            final ItemInstance item = this.getSelectedItem();
+            if (item != null && entity instanceof Mob) {
+                item.hurtEnemy((Mob)entity, this);
+                if (item.count <= 0) {
+                    item.snap(this);
                     this.removeSelectedItem();
                 }
             }
@@ -522,9 +529,14 @@ public abstract class Player extends Mob
                 if (entity.isAlive()) {
                     this.directAllTameWolvesOnTarget((Mob)entity, true);
                 }
-                this.awardStat(Stats.damageDealt, attackDamage);
+                this.awardStat(Stats.damageDealt, dmg);
             }
         }
+    }
+
+    // Useless - In b1.2 and LCE leaks
+    public Slot getInventorySlot(int slotId) {
+        return null;
     }
     
     public void respawn() {
@@ -565,76 +577,81 @@ public abstract class Player extends Mob
             if (this.isSleeping() || !this.isAlive()) {
                 return BedSleepingResult.OTHER_PROBLEM;
             }
+
             if (this.level.dimension.foggy) {
                 return BedSleepingResult.NOT_POSSIBLE_HERE;
             }
+
             if (this.level.isDay()) {
                 return BedSleepingResult.NOT_POSSIBLE_NOW;
             }
+
             if (Math.abs(this.x - x) > 3.0 || Math.abs(this.y - y) > 2.0 || Math.abs(this.z - z) > 3.0) {
                 return BedSleepingResult.TOO_FAR_AWAY;
             }
         }
+
         this.setSize(0.2f, 0.2f);
         this.heightOffset = 0.2f;
         if (this.level.hasChunkAt(x, y, z)) {
-            final int direction = BedTile.getDirection(this.level.getData(x, y, z));
-            float n = 0.5f;
-            float n2 = 0.5f;
+            int data = this.level.getData(x, y, z);
+            final int direction = BedTile.getDirection(data);
+            float xo = 0.5f, zo = 0.5f;
+
             switch (direction) {
-                case 0: {
-                    n2 = 0.9f;
+                case Direction.SOUTH: {
+                    zo = 0.9f;
                     break;
                 }
-                case 2: {
-                    n2 = 0.1f;
+                case Direction.NORTH: {
+                    zo = 0.1f;
                     break;
                 }
-                case 1: {
-                    n = 0.1f;
+                case Direction.WEST: {
+                    xo = 0.1f;
                     break;
                 }
-                case 3: {
-                    n = 0.9f;
+                case Direction.EAST: {
+                    xo = 0.9f;
                     break;
                 }
             }
             this.setBedOffset(direction);
-            this.setPos(x + n, y + 0.9375f, z + n2);
+            this.setPos(x + xo, y + 15.0f / 16.0f, z + zo);
         }
         else {
-            this.setPos(x + 0.5f, y + 0.9375f, z + 0.5f);
+            this.setPos(x + 0.5f, y + 15.0f / 16.0f, z + 0.5f);
         }
         this.isSleeping = true;
         this.sleepCounter = 0;
         this.bedPosition = new Pos(x, y, z);
-        final double xd = 0.0;
-        this.yd = xd;
-        this.zd = xd;
-        this.xd = xd;
+        this.xd = this.zd = this.yd = 0.0;
+
         if (!this.level.isClientSide) {
             this.level.updateSleepingPlayerList();
         }
+
         return BedSleepingResult.OK;
     }
     
     private void setBedOffset(final int bedDirection) {
+        // place position on pillow and feet at bottom
         this.bedOffsetX = 0.0f;
         this.bedOffsetZ = 0.0f;
         switch (bedDirection) {
-            case 0: {
+            case Direction.SOUTH: {
                 this.bedOffsetZ = -1.8f;
                 break;
             }
-            case 2: {
+            case Direction.NORTH: {
                 this.bedOffsetZ = 1.8f;
                 break;
             }
-            case 1: {
+            case Direction.WEST: {
                 this.bedOffsetX = 1.8f;
                 break;
             }
-            case 3: {
+            case Direction.EAST: {
                 this.bedOffsetX = -1.8f;
                 break;
             }
@@ -644,16 +661,19 @@ public abstract class Player extends Mob
     public void stopSleepInBed(final boolean forcefulWakeUp, final boolean updateLevelList, final boolean saveRespawnPoint) {
         this.setSize(0.6f, 1.8f);
         this.setDefaultHeadHeight();
-        final Pos bedPosition = this.bedPosition;
-        final Pos bedPosition2 = this.bedPosition;
-        if (bedPosition != null && this.level.getTile(bedPosition.x, bedPosition.y, bedPosition.z) == Tile.bed.id) {
-            BedTile.setOccupied(this.level, bedPosition.x, bedPosition.y, bedPosition.z, false);
-            Pos standUpPosition = BedTile.findStandUpPosition(this.level, bedPosition.x, bedPosition.y, bedPosition.z, 0);
-            if (standUpPosition == null) {
-                standUpPosition = new Pos(bedPosition.x, bedPosition.y + 1, bedPosition.z);
+
+        Pos pos = this.bedPosition;
+        Pos standUp = this.bedPosition;
+        if (pos != null && this.level.getTile(pos.x, pos.y, pos.z) == Tile.bed.id) {
+            BedTile.setOccupied(this.level, pos.x, pos.y, pos.z, false);
+
+            standUp = BedTile.findStandUpPosition(this.level, pos.x, pos.y, pos.z, 0);
+            if (standUp == null) {
+                standUp = new Pos(pos.x, pos.y + 1, pos.z);
             }
-            this.setPos(standUpPosition.x + 0.5f, standUpPosition.y + this.heightOffset + 0.1f, standUpPosition.z + 0.5f);
+            this.setPos(standUp.x + 0.5f, standUp.y + this.heightOffset + 0.1f, standUp.z + 0.5f);
         }
+
         this.isSleeping = false;
         if (!this.level.isClientSide && updateLevelList) {
             this.level.updateSleepingPlayerList();
@@ -662,7 +682,7 @@ public abstract class Player extends Mob
             this.sleepCounter = 0;
         }
         else {
-            this.sleepCounter = 100;
+            this.sleepCounter = SLEEP_DURATION;
         }
         if (saveRespawnPoint) {
             this.setRespawnPosition(this.bedPosition);
@@ -674,32 +694,30 @@ public abstract class Player extends Mob
     }
     
     public static Pos checkBedValidRespawnPosition(final Level level, final Pos pos) {
+        // make sure the chunks around the bed exist
         final ChunkSource chunkSource = level.getChunkSource();
         chunkSource.create(pos.x - 3 >> 4, pos.z - 3 >> 4);
         chunkSource.create(pos.x + 3 >> 4, pos.z - 3 >> 4);
         chunkSource.create(pos.x - 3 >> 4, pos.z + 3 >> 4);
         chunkSource.create(pos.x + 3 >> 4, pos.z + 3 >> 4);
+
+        // make sure the bed is still standing
         if (level.getTile(pos.x, pos.y, pos.z) != Tile.bed.id) {
             return null;
         }
+        // make sure the bed still has a stand-up position
         return BedTile.findStandUpPosition(level, pos.x, pos.y, pos.z, 0);
     }
     
     public float getSleepRotation() {
         if (this.bedPosition != null) {
-            switch (BedTile.getDirection(this.level.getData(this.bedPosition.x, this.bedPosition.y, this.bedPosition.z))) {
-                case 0: {
-                    return 90.0f;
-                }
-                case 1: {
-                    return 0.0f;
-                }
-                case 2: {
-                    return 270.0f;
-                }
-                case 3: {
-                    return 180.0f;
-                }
+            int data = this.level.getData(this.bedPosition.x, this.bedPosition.y, this.bedPosition.z);
+            int direction = BedTile.getDirection(data);
+            switch (direction) {
+                case Direction.SOUTH: return 90.0f;
+                case Direction.WEST: return 0.0f;
+                case Direction.NORTH: return 270.0f;
+                case Direction.EAST: return 180.0f;
             }
         }
         return 0.0f;
@@ -711,7 +729,7 @@ public abstract class Player extends Mob
     }
     
     public boolean isSleepingLongEnough() {
-        return this.isSleeping && this.sleepCounter >= 100;
+        return this.isSleeping && this.sleepCounter >= SLEEP_DURATION;
     }
     
     public int getSleepTimer() {
@@ -749,27 +767,26 @@ public abstract class Player extends Mob
     
     @Override
     public void travel(final float xa, final float ya) {
-        final double x = this.x;
-        final double y = this.y;
-        final double z = this.z;
+        final double preX = this.x, preY = this.y, preZ = this.z;
+
         super.travel(xa, ya);
-        this.checkMovementStatistiscs(this.x - x, this.y - y, this.z - z);
+
+        this.checkMovementStatistiscs(this.x - preX, this.y - preY, this.z - preZ);
     }
     
     private void checkMovementStatistiscs(final double dx, final double dy, final double dz) {
-        if (this.riding != null) {
-            return;
-        }
+        if (this.riding != null) return;
+
         if (this.isUnderLiquid(Material.water)) {
-            final int round = Math.round(Mth.sqrt(dx * dx + dy * dy + dz * dz) * 100.0f);
-            if (round > 0) {
-                this.awardStat(Stats.diveOneCm, round);
+            final int distance = Math.round(Mth.sqrt(dx * dx + dy * dy + dz * dz) * 100.0f);
+            if (distance > 0) {
+                this.awardStat(Stats.diveOneCm, distance);
             }
         }
         else if (this.isInWater()) {
-            final int round2 = Math.round(Mth.sqrt(dx * dx + dz * dz) * 100.0f);
-            if (round2 > 0) {
-                this.awardStat(Stats.swimOneCm, round2);
+            final int horizontalDistance = Math.round(Mth.sqrt(dx * dx + dz * dz) * 100.0f);
+            if (horizontalDistance > 0) {
+                this.awardStat(Stats.swimOneCm, horizontalDistance);
             }
         }
         else if (this.onLadder()) {
@@ -778,25 +795,25 @@ public abstract class Player extends Mob
             }
         }
         else if (this.onGround) {
-            final int round3 = Math.round(Mth.sqrt(dx * dx + dz * dz) * 100.0f);
-            if (round3 > 0) {
-                this.awardStat(Stats.walkOneCm, round3);
+            final int horizontalDistance = Math.round(Mth.sqrt(dx * dx + dz * dz) * 100.0f);
+            if (horizontalDistance > 0) {
+                this.awardStat(Stats.walkOneCm, horizontalDistance);
             }
         }
         else {
-            final int round4 = Math.round(Mth.sqrt(dx * dx + dz * dz) * 100.0f);
-            if (round4 > 25) {
-                this.awardStat(Stats.flyOneCm, round4);
+            final int horizontalDistance = Math.round(Mth.sqrt(dx * dx + dz * dz) * 100.0f);
+            if (horizontalDistance > 25) {
+                this.awardStat(Stats.flyOneCm, horizontalDistance);
             }
         }
     }
     
     private void checkRidingStatistiscs(final double dx, final double dy, final double dz) {
         if (this.riding != null) {
-            final int round = Math.round(Mth.sqrt(dx * dx + dy * dy + dz * dz) * 100.0f);
-            if (round > 0) {
+            final int distance = Math.round(Mth.sqrt(dx * dx + dy * dy + dz * dz) * 100.0f);
+            if (distance > 0) {
                 if (this.riding instanceof Minecart) {
-                    this.awardStat(Stats.minecartOneCm, round);
+                    this.awardStat(Stats.minecartOneCm, distance);
                     if (this.minecartAchievementPos == null) {
                         this.minecartAchievementPos = new Pos(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z));
                     }
@@ -805,10 +822,10 @@ public abstract class Player extends Mob
                     }
                 }
                 else if (this.riding instanceof Boat) {
-                    this.awardStat(Stats.boatOneCm, round);
+                    this.awardStat(Stats.boatOneCm, distance);
                 }
                 else if (this.riding instanceof Pig) {
-                    this.awardStat(Stats.pigOneCm, round);
+                    this.awardStat(Stats.pigOneCm, distance);
                 }
             }
         }
@@ -831,11 +848,11 @@ public abstract class Player extends Mob
     
     @Override
     public int getItemInHandIcon(final ItemInstance item) {
-        int itemInHandIcon = super.getItemInHandIcon(item);
+        int icon = super.getItemInHandIcon(item);
         if (item.id == Item.fishingRod.id && this.fishing != null) {
-            itemInHandIcon = item.getIcon() + 16;
+            icon = item.getIcon() + 16;
         }
-        return itemInHandIcon;
+        return icon;
     }
     
     @Override

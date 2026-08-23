@@ -150,9 +150,9 @@ public class LocalPlayer extends Player
     }
     
     @Override
-    public void readAdditionalSaveData(final CompoundTag compoundTag) {
-        super.readAdditionalSaveData(compoundTag);
-        this.score = compoundTag.getInt("Score");
+    public void readAdditionalSaveData(final CompoundTag entityTag) {
+        super.readAdditionalSaveData(entityTag);
+        this.score = entityTag.getInt("Score");
     }
     
     public void closeContainer() {

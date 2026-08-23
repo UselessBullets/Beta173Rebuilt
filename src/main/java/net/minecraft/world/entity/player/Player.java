@@ -4,6 +4,8 @@
 
 package net.minecraft.world.entity.player;
 
+import net.minecraft.SharedConstants;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.item.Boat;
 import net.minecraft.stats.Achievements;
@@ -51,56 +53,41 @@ public abstract class Player extends Mob
     public static final int CHAT_VISIBILITY_SYSTEM = 1;
     public static final int CHAT_VISIBILITY_HIDDEN = 2;
 
-    public Inventory inventory;
+    private static final int DATA_PLAYER_FLAGS_ID = 16;
+
+    public Inventory inventory = new Inventory(this);
     public AbstractContainerMenu inventoryMenu;
     public AbstractContainerMenu containerMenu;
-    public byte userType;
-    public int score;
-    public float oBob;
-    public float bob;
-    public boolean swinging;
-    public int swingTime;
+    public byte userType = 0;
+    public int score = 0;
+    public float oBob, bob;
+    public boolean swinging = false;
+    public int swingTime = 0;
     public String name;
     public int dimension;
     public String cloakTexture;
-    public double xCloakO;
-    public double yCloakO;
-    public double zCloakO;
-    public double xCloak;
-    public double yCloak;
-    public double zCloak;
+    public double xCloakO, yCloakO, zCloakO;
+    public double xCloak, yCloak, zCloak;
     protected boolean isSleeping;
     public Pos bedPosition;
     private int sleepCounter;
-    public float bedOffsetX;
-    public float bedOffsetY;
-    public float bedOffsetZ;
+    public float bedOffsetX, bedOffsetY, bedOffsetZ;
     private Pos respawnPosition;
     private Pos minecartAchievementPos;
-    public int changingDimensionDelay;
-    protected boolean isInsidePortal;
-    public float portalTime;
-    public float oPortalTime;
-    private int dmgSpill;
-    public FishingHook fishing;
+    public int changingDimensionDelay = 20;
+    protected boolean isInsidePortal = false;
+    public float portalTime, oPortalTime;
+    private int dmgSpill = 0;
+    public FishingHook fishing = null;
     
     public Player(final Level level) {
         super(level);
-        this.inventory = new Inventory(this);
-        this.userType = 0;
-        this.score = 0;
-        this.swinging = false;
-        this.swingTime = 0;
-        this.changingDimensionDelay = 20;
-        this.isInsidePortal = false;
-        this.dmgSpill = 0;
-        this.fishing = null;
         this.inventoryMenu = new InventoryMenu(this.inventory, !level.isClientSide);
         this.containerMenu = this.inventoryMenu;
         this.heightOffset = 1.62f;
-        final Pos sharedSpawnPos = level.getSharedSpawnPos();
-        this.moveTo(sharedSpawnPos.x + 0.5, sharedSpawnPos.y + 1, sharedSpawnPos.z + 0.5, 0.0f, 0.0f);
-        this.health = 20;
+        final Pos spawnPos = level.getSharedSpawnPos();
+        this.moveTo(spawnPos.x + 0.5, spawnPos.y + 1, spawnPos.z + 0.5, 0.0f, 0.0f);
+        this.health = MAX_HEALTH;
         this.modelName = "humanoid";
         this.rotOffs = 180.0f;
         this.flameTime = 20;
@@ -110,16 +97,17 @@ public abstract class Player extends Mob
     @Override
     protected void definedSynchedData() {
         super.definedSynchedData();
-        this.entityData.define(16, 0);
+        this.entityData.define(DATA_PLAYER_FLAGS_ID, 0);
     }
     
     @Override
     public void tick() {
         if (this.isSleeping()) {
-            ++this.sleepCounter;
-            if (this.sleepCounter > 100) {
-                this.sleepCounter = 100;
+            this.sleepCounter++;
+            if (this.sleepCounter > SLEEP_DURATION) {
+                this.sleepCounter = SLEEP_DURATION;
             }
+
             if (!this.level.isClientSide) {
                 if (!this.checkBed()) {
                     this.stopSleepInBed(true, true, false);
@@ -130,57 +118,42 @@ public abstract class Player extends Mob
             }
         }
         else if (this.sleepCounter > 0) {
-            ++this.sleepCounter;
-            if (this.sleepCounter >= 110) {
+            this.sleepCounter++;
+            if (this.sleepCounter >= (SLEEP_DURATION + WAKE_UP_DURATION)) {
                 this.sleepCounter = 0;
             }
         }
+
         super.tick();
-        if (!this.level.isClientSide && this.containerMenu != null && !this.containerMenu.stillValid(this)) {
-            this.closeContainer();
-            this.containerMenu = this.inventoryMenu;
+
+        if (!this.level.isClientSide) {
+            if (this.containerMenu != null && !this.containerMenu.stillValid(this)) {
+                this.closeContainer();
+                this.containerMenu = this.inventoryMenu;
+            }
         }
         this.xCloakO = this.xCloak;
         this.yCloakO = this.yCloak;
         this.zCloakO = this.zCloak;
-        final double n = this.x - this.xCloak;
-        final double n2 = this.y - this.yCloak;
-        final double n3 = this.z - this.zCloak;
-        final double n4 = 10.0;
-        if (n > n4) {
-            final double x = this.x;
-            this.xCloak = x;
-            this.xCloakO = x;
-        }
-        if (n3 > n4) {
-            final double z = this.z;
-            this.zCloak = z;
-            this.zCloakO = z;
-        }
-        if (n2 > n4) {
-            final double y = this.y;
-            this.yCloak = y;
-            this.yCloakO = y;
-        }
-        if (n < -n4) {
-            final double x2 = this.x;
-            this.xCloak = x2;
-            this.xCloakO = x2;
-        }
-        if (n3 < -n4) {
-            final double z2 = this.z;
-            this.zCloak = z2;
-            this.zCloakO = z2;
-        }
-        if (n2 < -n4) {
-            final double y2 = this.y;
-            this.yCloak = y2;
-            this.yCloakO = y2;
-        }
-        this.xCloak += n * 0.25;
-        this.zCloak += n3 * 0.25;
-        this.yCloak += n2 * 0.25;
+
+        final double xca = this.x - this.xCloak;
+        final double yca = this.y - this.yCloak;
+        final double zca = this.z - this.zCloak;
+
+        final double m = 10.0;
+        if (xca > m) this.xCloakO = this.xCloak = this.x;
+        if (zca > m) this.zCloakO = this.zCloak = this.z;
+        if (yca > m) this.yCloakO = this.yCloak = this.y;
+        if (xca < -m) this.xCloakO = this.xCloak = this.x;
+        if (zca < -m) this.zCloakO = this.zCloak = this.z;
+        if (yca < -m) this.yCloakO = this.yCloak = this.y;
+
+        this.xCloak += xca * 0.25;
+        this.zCloak += zca * 0.25;
+        this.yCloak += yca * 0.25;
+
         this.awardStat(Stats.playOneMinute, 1);
+
         if (this.riding == null) {
             this.minecartAchievementPos = null;
         }
@@ -203,20 +176,19 @@ public abstract class Player extends Mob
     
     @Override
     public void rideTick() {
-        final double x = this.x;
-        final double y = this.y;
-        final double z = this.z;
+        final double preX = this.x, preY = this.y, preZ = this.z;
+
         super.rideTick();
         this.oBob = this.bob;
         this.bob = 0.0f;
-        this.checkRidingStatistiscs(this.x - x, this.y - y, this.z - z);
+        this.checkRidingStatistiscs(this.x - preX, this.y - preY, this.z - preZ);
     }
     
     public void resetPos() {
         this.heightOffset = 1.62f;
         this.setSize(0.6f, 1.8f);
         super.resetPos();
-        this.health = 20;
+        this.health = MAX_HEALTH;
         this.deathTime = 0;
     }
     
@@ -237,32 +209,31 @@ public abstract class Player extends Mob
     
     @Override
     public void aiStep() {
-        if (this.level.difficulty == 0 && this.health < 20 && this.tickCount % 20 * 12 == 0) {
-            this.heal(1);
+        if (this.level.difficulty == Difficulty.PEACEFUL && this.health < MAX_HEALTH) {
+            if (this.tickCount % 20 * 12 == 0) this.heal(1);
         }
         this.inventory.tick();
         this.oBob = this.bob;
+
         super.aiStep();
-        float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
-        float n = (float)Math.atan(-this.yd * 0.2f) * 15.0f;
-        if (sqrt > 0.1f) {
-            sqrt = 0.1f;
-        }
-        if (!this.onGround || this.health <= 0) {
-            sqrt = 0.0f;
-        }
-        if (this.onGround || this.health <= 0) {
-            n = 0.0f;
-        }
-        this.bob += (sqrt - this.bob) * 0.4f;
-        this.tilt += (n - this.tilt) * 0.8f;
+
+        float tBob = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
+        float tTilt = (float)Math.atan(-this.yd * 0.2f) * 15.0f;
+        if (tBob > 0.1f) tBob = 0.1f;
+        if (!this.onGround || this.health <= 0) tBob = 0.0f;
+        if (this.onGround || this.health <= 0) tTilt = 0.0f;
+
+        this.bob += (tBob - this.bob) * 0.4f;
+
+        this.tilt += (tTilt - this.tilt) * 0.8f;
+
         if (this.health > 0) {
             final List<Entity> entities = this.level.getEntities(this, this.bb.grow(1.0, 0.0, 1.0));
             if (entities != null) {
                 for (int i = 0; i < entities.size(); ++i) {
-                    final Entity entity = entities.get(i);
-                    if (!entity.removed) {
-                        this.touch(entity);
+                    final Entity e = entities.get(i);
+                    if (!e.removed) {
+                        this.touch(e);
                     }
                 }
             }
@@ -272,7 +243,11 @@ public abstract class Player extends Mob
     private void touch(final Entity entity) {
         entity.playerTouch(this);
     }
-    
+
+    // Useless - existed in b1.2 leak and was commented out of LCE leak (removed in 1.0.1 according to LCE so would be here in b1.7.3)
+    public boolean addResource(int resource) {
+        return this.inventory.add(new ItemInstance(resource, 1, 0));
+    }
     public int getScore() {
         return this.score;
     }
@@ -283,18 +258,18 @@ public abstract class Player extends Mob
         this.setSize(0.2f, 0.2f);
         this.setPos(this.x, this.y, this.z);
         this.yd = 0.1f;
+
         if (this.name.equals("Notch")) {
             this.drop(new ItemInstance(Item.apple, 1), true);
         }
         this.inventory.dropAll();
+
         if (source != null) {
             this.xd = -Mth.cos((this.hurtDir + this.yRot) * Mth.DEGRAD) * 0.1f;
             this.zd = -Mth.sin((this.hurtDir + this.yRot) * Mth.DEGRAD) * 0.1f;
         }
         else {
-            final double n = 0.0;
-            this.zd = n;
-            this.xd = n;
+            this.xd = this.zd = 0;
         }
         this.heightOffset = 0.1f;
         this.awardStat(Stats.deaths, 1);
@@ -320,34 +295,34 @@ public abstract class Player extends Mob
     }
     
     public void drop(final ItemInstance item, final boolean randomly) {
-        if (item == null) {
-            return;
-        }
-        final ItemEntity itemEntity = new ItemEntity(this.level, this.x, this.y - 0.3f + this.getHeadHeight(), this.z, item);
-        itemEntity.throwTime = 40;
+        if (item == null) return;
+
+        final ItemEntity thrownItem = new ItemEntity(this.level, this.x, this.y - 0.3f + this.getHeadHeight(), this.z, item);
+        thrownItem.throwTime = SharedConstants.TICKS_PER_SECOND * 2;
+
+        float pow = 0.1f;
         if (randomly) {
-            final float n = this.random.nextFloat() * 0.5f;
-            final float n2 = this.random.nextFloat() * Mth.PI * 2.0f;
-            itemEntity.xd = -Mth.sin(n2) * n;
-            itemEntity.zd = Mth.cos(n2) * n;
-            itemEntity.yd = 0.2f;
+            final float _pow = this.random.nextFloat() * 0.5f;
+            final float dir = this.random.nextFloat() * Mth.PI * 2.0f;
+            thrownItem.xd = -Mth.sin(dir) * _pow;
+            thrownItem.zd = Mth.cos(dir) * _pow;
+            thrownItem.yd = 0.2f;
         }
         else {
-            final float n3 = 0.3f;
-            itemEntity.xd = -Mth.sin(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * n3;
-            itemEntity.zd = Mth.cos(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * n3;
-            itemEntity.yd = -Mth.sin(this.xRot / 180.0f * Mth.PI) * n3 + 0.1f;
-            final float n4 = 0.02f;
-            final float n5 = this.random.nextFloat() * Mth.PI * 2.0f;
-            final float n6 = n4 * this.random.nextFloat();
-            final ItemEntity itemEntity2 = itemEntity;
-            itemEntity2.xd += Math.cos(n5) * n6;
-            final ItemEntity itemEntity3 = itemEntity;
-            itemEntity3.yd += (this.random.nextFloat() - this.random.nextFloat()) * 0.1f;
-            final ItemEntity itemEntity4 = itemEntity;
-            itemEntity4.zd += Math.sin(n5) * n6;
+            pow = 0.3f;
+            thrownItem.xd = -Mth.sin(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * pow;
+            thrownItem.zd = Mth.cos(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * pow;
+            thrownItem.yd = -Mth.sin(this.xRot / 180.0f * Mth.PI) * pow + 0.1f;
+            pow = 0.02f;
+
+            final float dir = this.random.nextFloat() * Mth.PI * 2.0f;
+            pow *= this.random.nextFloat();
+            thrownItem.xd += Math.cos(dir) * pow;
+            thrownItem.yd += (this.random.nextFloat() - this.random.nextFloat()) * 0.1f;
+            thrownItem.zd += Math.sin(dir) * pow;
         }
-        this.reallyDrop(itemEntity);
+        this.reallyDrop(thrownItem);
+
         this.awardStat(Stats.itemsDropped, 1);
     }
     
@@ -356,14 +331,12 @@ public abstract class Player extends Mob
     }
     
     public float getDestroySpeed(final Tile tile) {
-        float destroySpeed = this.inventory.getDestroySpeed(tile);
-        if (this.isUnderLiquid(Material.water)) {
-            destroySpeed /= 5.0f;
-        }
-        if (!this.onGround) {
-            destroySpeed /= 5.0f;
-        }
-        return destroySpeed;
+        float speed = this.inventory.getDestroySpeed(tile);
+
+        if (this.isUnderLiquid(Material.water)) speed /= 5.0f;
+        if (!this.onGround) speed /= 5.0f;
+
+        return speed;
     }
     
     public boolean canDestroy(final Tile tile) {
@@ -371,28 +344,31 @@ public abstract class Player extends Mob
     }
     
     @Override
-    public void readAdditionalSaveData(final CompoundTag compoundTag) {
-        super.readAdditionalSaveData(compoundTag);
-        this.inventory.load(compoundTag.getList("Inventory"));
-        this.dimension = compoundTag.getInt("Dimension");
-        this.isSleeping = compoundTag.getBoolean("Sleeping");
-        this.sleepCounter = compoundTag.getShort("SleepTimer");
+    public void readAdditionalSaveData(final CompoundTag entityTag) {
+        super.readAdditionalSaveData(entityTag);
+        this.inventory.load((ListTag<CompoundTag>) entityTag.getList("Inventory"));
+        this.dimension = entityTag.getInt("Dimension");
+        this.isSleeping = entityTag.getBoolean("Sleeping");
+        this.sleepCounter = entityTag.getShort("SleepTimer");
+
         if (this.isSleeping) {
             this.bedPosition = new Pos(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z));
             this.stopSleepInBed(true, true, false);
         }
-        if (compoundTag.contains("SpawnX") && compoundTag.contains("SpawnY") && compoundTag.contains("SpawnZ")) {
-            this.respawnPosition = new Pos(compoundTag.getInt("SpawnX"), compoundTag.getInt("SpawnY"), compoundTag.getInt("SpawnZ"));
+
+        if (entityTag.contains("SpawnX") && entityTag.contains("SpawnY") && entityTag.contains("SpawnZ")) {
+            this.respawnPosition = new Pos(entityTag.getInt("SpawnX"), entityTag.getInt("SpawnY"), entityTag.getInt("SpawnZ"));
         }
     }
     
     @Override
     public void addAdditionalSaveData(final CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.put("Inventory", this.inventory.save(new ListTag()));
+        compoundTag.put("Inventory", this.inventory.save(new ListTag<>()));
         compoundTag.putInt("Dimension", this.dimension);
         compoundTag.putBoolean("Sleeping", this.isSleeping);
         compoundTag.putShort("SleepTimer", (short)this.sleepCounter);
+
         if (this.respawnPosition != null) {
             compoundTag.putInt("SpawnX", this.respawnPosition.x);
             compoundTag.putInt("SpawnY", this.respawnPosition.y);

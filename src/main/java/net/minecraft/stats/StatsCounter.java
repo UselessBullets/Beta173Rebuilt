@@ -15,31 +15,28 @@ import java.io.File;
 import net.minecraft.client.User;
 import java.util.Map;
 
+// Useless - Theres very little on the local variable names and method structures of this class, alot of it will be guesses
 public class StatsCounter
 {
-    private Map<Stat, Integer> stats;
-    private Map<Stat, Integer> unsentStats;
-    private boolean requiresSave;
+    private Map<Stat, Integer> stats = new HashMap<>();
+    private Map<Stat, Integer> unsentStats = new HashMap<>();
+    private boolean requiresSave = false;
     private StatsSyncher statsSyncher;
     
     public StatsCounter(final User user, final File workDir) {
-        this.stats = new HashMap();
-        this.unsentStats = new HashMap();
-        this.requiresSave = false;
-        final File file = new File(workDir, "stats");
-        if (!file.exists()) {
-            file.mkdir();
-        }
-        for (final File file2 : workDir.listFiles()) {
-            if (file2.getName().startsWith("stats_") && file2.getName().endsWith(".dat")) {
-                final File dest = new File(file, file2.getName());
+        final File statsFile = new File(workDir, "stats");
+        if (!statsFile.exists()) statsFile.mkdir();
+
+        for (final File file : workDir.listFiles()) {
+            if (file.getName().startsWith("stats_") && file.getName().endsWith(".dat")) {
+                final File dest = new File(statsFile, file.getName());
                 if (!dest.exists()) {
-                    System.out.println("Relocating " + file2.getName());
-                    file2.renameTo(dest);
+                    System.out.println("Relocating " + file.getName());
+                    file.renameTo(dest);
                 }
             }
         }
-        this.statsSyncher = new StatsSyncher(user, this, file);
+        this.statsSyncher = new StatsSyncher(user, this, statsFile);
     }
     
     public void award(final Stat stat, final int count) {
@@ -49,108 +46,110 @@ public class StatsCounter
     }
     
     private void add(final Map<Stat, Integer> statMap, final Stat stat, final int count) {
-        final Integer n = statMap.get(stat);
-        statMap.put(stat, ((n == null) ? 0 : n) + count);
+        final Integer value = statMap.get(stat);
+        statMap.put(stat, (value == null ? 0 : value) + count);
     }
     
-    public Map getUnsent() {
-        return new HashMap(this.unsentStats);
+    public Map<Stat, Integer> getUnsent() {
+        return new HashMap<>(this.unsentStats);
     }
     
     public void loadStats(final Map<Stat, Integer> statMap) {
-        if (statMap == null) {
-            return;
-        }
+        if (statMap == null) return;
+
         this.requiresSave = true;
         for (final Stat stat : statMap.keySet()) {
-            this.add(this.unsentStats, stat, (int)statMap.get(stat));
-            this.add(this.stats, stat, (int)statMap.get(stat));
+            this.add(this.unsentStats, stat, statMap.get(stat));
+            this.add(this.stats, stat, statMap.get(stat));
         }
     }
     
     public void mergeStats(final Map<Stat, Integer> statMap) {
-        if (statMap == null) {
-            return;
-        }
+        if (statMap == null) return;
+
         for (final Stat stat : statMap.keySet()) {
-            final Integer n = this.unsentStats.get(stat);
-            this.stats.put(stat, statMap.get(stat) + ((n == null) ? 0 : n));
+            final Integer change = this.unsentStats.get(stat);
+            this.stats.put(stat, statMap.get(stat) + (change == null ? 0 : change));
         }
     }
     
     public void queueStats(final Map<Stat, Integer> statMap) {
-        if (statMap == null) {
-            return;
-        }
+        if (statMap == null) return;
+
         this.requiresSave = true;
         for (final Stat stat : statMap.keySet()) {
-            this.add(this.unsentStats, stat, (int)statMap.get(stat));
+            this.add(this.unsentStats, stat, statMap.get(stat));
         }
     }
     
     public static Map<Stat, Integer> loadStatsFromString(final String statsString) {
-        final HashMap<Stat, Integer> hashMap = new HashMap<>();
+        final HashMap<Stat, Integer> statMap = new HashMap<>();
         try {
-            final String salt = "local";
-            final StringBuilder sb = new StringBuilder();
+            // Useless - Since this is loading from a file it uses "local" as the source instead of the session id
+            final String source = "local";
+            final StringBuilder data = new StringBuilder();
             final JsonRootNode parse = new JdomParser().parse(statsString);
-            final Iterator iterator = parse.getArrayNode("stats-change").iterator();
-            while (iterator.hasNext()) {
-                final Map.Entry<JsonStringNode, JsonNode> entry = ((JsonNode)iterator.next()).getFields().entrySet().iterator().next();
-                final int int1 = Integer.parseInt(entry.getKey().getText());
-                final int int2 = Integer.parseInt(((JsonNode)entry.getValue()).getText());
-                final Stat stat = Stats.getStat(int1);
+            for (JsonNode jsonNode : parse.getArrayNode("stats-change")) {
+                final Map.Entry<JsonStringNode, JsonNode> entry = jsonNode.getFields().entrySet().iterator().next();
+                final int statId = Integer.parseInt(entry.getKey().getText());
+                final int value = Integer.parseInt(entry.getValue().getText());
+                final Stat stat = Stats.getStat(statId);
                 if (stat == null) {
-                    System.out.println(int1 + " is not a valid stat");
-                }
-                else {
-                    sb.append(Stats.getStat(int1).guid).append(",");
-                    sb.append(int2).append(",");
-                    hashMap.put(stat, int2);
+                    System.out.println(statId + " is not a valid stat");
+                } else {
+                    data.append(Stats.getStat(statId).guid).append(",");
+                    data.append(value).append(",");
+                    statMap.put(stat, value);
                 }
             }
-            if (!new Hasher(salt).getHash(sb.toString()).equals(parse.getStringValue("checksum"))) {
+
+            final Hasher hasher = new Hasher(source);
+            if (!hasher.getHash(data.toString()).equals(parse.getStringValue("checksum"))) {
                 System.out.println("CHECKSUM MISMATCH");
                 return null;
             }
         }
-        catch (final InvalidSyntaxException ex) {
-            ex.printStackTrace();
+        catch (final InvalidSyntaxException e) {
+            e.printStackTrace();
         }
-        return hashMap;
+        return statMap;
     }
     
     public static String saveStatsToString(final String name, final String sessionId, final Map<Stat, Integer> stats) {
-        final StringBuilder sb = new StringBuilder();
-        final StringBuilder sb2 = new StringBuilder();
-        int n = 1;
-        sb.append("{\r\n");
+        // Useless - Session Id used as the source, presumably this is a way for the server to validate the stats came from a valid game session for synching with a global stats board
+        final String source = sessionId;
+        final StringBuilder out = new StringBuilder();
+        final StringBuilder data = new StringBuilder();
+
+        boolean start = true;
+        out.append("{\r\n");
         if (name != null && sessionId != null) {
-            sb.append("  \"user\":{\r\n");
-            sb.append("    \"name\":\"").append(name).append("\",\r\n");
-            sb.append("    \"sessionid\":\"").append(sessionId).append("\"\r\n");
-            sb.append("  },\r\n");
+            out.append("  \"user\":{\r\n");
+            out.append("    \"name\":\"").append(name).append("\",\r\n");
+            out.append("    \"sessionid\":\"").append(sessionId).append("\"\r\n");
+            out.append("  },\r\n");
         }
-        sb.append("  \"stats-change\":[");
+        out.append("  \"stats-change\":[");
         for (final Stat stat : stats.keySet()) {
-            if (n == 0) {
-                sb.append("},");
+            if (!start) {
+                out.append("},");
             }
             else {
-                n = 0;
+                start = false;
             }
-            sb.append("\r\n    {\"").append(stat.id).append("\":").append(stats.get(stat));
-            sb2.append(stat.guid).append(",");
-            sb2.append(stats.get(stat)).append(",");
+            out.append("\r\n    {\"").append(stat.id).append("\":").append(stats.get(stat));
+            data.append(stat.guid).append(",");
+            data.append(stats.get(stat)).append(",");
         }
-        if (n == 0) {
-            sb.append("}");
+        if (!start) {
+            out.append("}");
         }
-        final Hasher hasher = new Hasher(sessionId);
-        sb.append("\r\n  ],\r\n");
-        sb.append("  \"checksum\":\"").append(hasher.getHash(sb2.toString())).append("\"\r\n");
-        sb.append("}");
-        return sb.toString();
+
+        final Hasher hasher = new Hasher(source);
+        out.append("\r\n  ],\r\n");
+        out.append("  \"checksum\":\"").append(hasher.getHash(data.toString())).append("\"\r\n");
+        out.append("}");
+        return out.toString();
     }
     
     public boolean hasTaken(final Achievement ach) {
@@ -162,11 +161,12 @@ public class StatsCounter
     }
     
     public int getValue(final Stat stat) {
-        final Integer n = this.stats.get(stat);
-        return (n == null) ? 0 : n;
+        final Integer value = this.stats.get(stat);
+        return value == null ? 0 : value;
     }
     
     public void forceSend() {
+//        this.statsSyncher.forceSendUnsent(this.getUnsent()); // Useless - Theoretically what would have been here in source, matches formatting of StatsCounter.forceSave
     }
     
     public void forceSave() {
@@ -177,6 +177,7 @@ public class StatsCounter
         if (this.requiresSave && this.statsSyncher.maySave()) {
             this.statsSyncher.saveUnsent(this.getUnsent());
         }
+        
         this.statsSyncher.tick();
     }
 }

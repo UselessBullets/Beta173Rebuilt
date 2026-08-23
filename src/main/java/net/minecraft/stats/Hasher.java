@@ -18,13 +18,13 @@ public class Hasher
     
     public String getHash(final String name) {
         try {
-            final String string = this.salt + name;
-            final MessageDigest instance = MessageDigest.getInstance("MD5");
-            instance.update(string.getBytes(), 0, string.length());
-            return new BigInteger(1, instance.digest()).toString(16);
+            String s = this.salt + name;
+            MessageDigest m = MessageDigest.getInstance("MD5");
+            m.update(s.getBytes(), 0, s.length());
+            return new BigInteger(1, m.digest()).toString(16);
         }
-        catch (final NoSuchAlgorithmException cause) {
-            throw new RuntimeException(cause);
+        catch (final NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 }

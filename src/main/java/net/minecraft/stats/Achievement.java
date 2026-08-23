@@ -12,8 +12,7 @@ import net.minecraft.client.DescFormatter;
 
 public class Achievement extends Stat
 {
-    public final int x;
-    public final int y;
+    public final int x, y;
     public final Achievement requires;
     private final String desc;
     private DescFormatter descFormatter;
@@ -34,18 +33,10 @@ public class Achievement extends Stat
         this.desc = I18n.get("achievement." + name + ".desc");
         this.x = x;
         this.y = y;
-        if (x < Achievements.xMin) {
-            Achievements.xMin = x;
-        }
-        if (y < Achievements.yMin) {
-            Achievements.yMin = y;
-        }
-        if (x > Achievements.xMax) {
-            Achievements.xMax = x;
-        }
-        if (y > Achievements.yMax) {
-            Achievements.yMax = y;
-        }
+        if (x < Achievements.xMin) Achievements.xMin = x;
+        if (y < Achievements.yMin) Achievements.yMin = y;
+        if (x > Achievements.xMax) Achievements.xMax = x;
+        if (y > Achievements.yMax) Achievements.yMax = y;
         this.requires = requires;
     }
     
@@ -73,9 +64,7 @@ public class Achievement extends Stat
     }
     
     public String getDescription() {
-        if (this.descFormatter != null) {
-            return this.descFormatter.format(this.desc);
-        }
+        if (this.descFormatter != null) return this.descFormatter.format(this.desc);
         return this.desc;
     }
     

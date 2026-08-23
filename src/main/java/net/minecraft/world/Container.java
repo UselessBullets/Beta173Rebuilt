@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemInstance;
 
 public interface Container
 {
+    int LARGE_MAX_STACK_SIZE = 64;
     int getContainerSize();
     
     ItemInstance getItem(final int slot);

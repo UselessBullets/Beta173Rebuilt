@@ -15,7 +15,6 @@ public class PrimedTnt extends Entity
     
     public PrimedTnt(final Level level) {
         super(level);
-        this.life = 0;
         this.blocksBuilding = true;
         this.setSize(0.98f, 0.98f);
         this.heightOffset = this.bbHeight / 2.0f;
@@ -23,11 +22,14 @@ public class PrimedTnt extends Entity
     
     public PrimedTnt(final Level level, final double xo, final double yo, final double zo) {
         this(level);
+
         this.setPos(xo, yo, zo);
-        final float n = (float)(Math.random() * Math.PI * 2.0);
-        this.xd = -Mth.sin(n * Mth.DEGRAD) * 0.02f;
+
+        final float rot = (float)(Math.random() * Math.PI * 2.0);
+        this.xd = -Mth.sin(rot * Mth.DEGRAD) * 0.02f;
         this.yd = 0.2f;
-        this.zd = -Mth.cos(n * Mth.DEGRAD) * 0.02f;
+        this.zd = -Mth.cos(rot * Mth.DEGRAD) * 0.02f;
+
         this.life = 80;
         this.xo = xo;
         this.yo = yo;
@@ -53,23 +55,23 @@ public class PrimedTnt extends Entity
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
+
         this.yd -= 0.04f;
         this.move(this.xd, this.yd, this.zd);
         this.xd *= 0.98f;
         this.yd *= 0.98f;
         this.zd *= 0.98f;
+
         if (this.onGround) {
             this.xd *= 0.7f;
             this.zd *= 0.7f;
             this.yd *= -0.5;
         }
+
         if (this.life-- <= 0) {
+            this.remove();
             if (!this.level.isClientSide) {
-                this.remove();
                 this.explode();
-            }
-            else {
-                this.remove();
             }
         }
         else {
@@ -78,7 +80,8 @@ public class PrimedTnt extends Entity
     }
     
     private void explode() {
-        this.level.explode(null, this.x, this.y, this.z, 4.0f);
+        float r = 4.0f;
+        this.level.explode(null, this.x, this.y, this.z, r);
     }
     
     @Override

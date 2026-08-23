@@ -177,7 +177,7 @@ public class StatsCounter
         if (this.requiresSave && this.statsSyncher.maySave()) {
             this.statsSyncher.saveUnsent(this.getUnsent());
         }
-        
+
         this.statsSyncher.tick();
     }
 }

@@ -17,7 +17,7 @@ public class WaterAnimal extends PathfinderMob implements Creature
     
     @Override
     public boolean isWaterMob() {
-        return true;
+        return true; //prevent drowning
     }
     
     @Override
@@ -37,6 +37,6 @@ public class WaterAnimal extends PathfinderMob implements Creature
     
     @Override
     public int getAmbientSoundInterval() {
-        return 120;
+        return 20 * 6;
     }
 }

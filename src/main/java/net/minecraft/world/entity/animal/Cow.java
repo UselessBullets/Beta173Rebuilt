@@ -55,8 +55,8 @@ public class Cow extends Animal
     
     @Override
     public boolean interact(final Player player) {
-        final ItemInstance selected = player.inventory.getSelected();
-        if (selected != null && selected.id == Item.bucket_empty.id) {
+        final ItemInstance item = player.inventory.getSelected();
+        if (item != null && item.id == Item.bucket_empty.id) {
             player.inventory.setItem(player.inventory.selected, new ItemInstance(Item.milk));
             return true;
         }

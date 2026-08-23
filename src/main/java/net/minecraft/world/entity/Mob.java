@@ -461,7 +461,7 @@ public abstract class Mob extends Entity
             this.yd *= 0.8f;
             this.zd *= 0.8f;
             this.yd -= 0.02;
-            if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6000000238418579 - this.y + y, this.zd)) {
+            if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6f - this.y + y, this.zd)) {
                 this.yd = 0.3f;
             }
         }
@@ -473,7 +473,7 @@ public abstract class Mob extends Entity
             this.yd *= 0.5;
             this.zd *= 0.5;
             this.yd -= 0.02;
-            if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6000000238418579 - this.y + y2, this.zd)) {
+            if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6f - this.y + y2, this.zd)) {
                 this.yd = 0.3f;
             }
         }

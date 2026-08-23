@@ -7,6 +7,7 @@ package net.minecraft.world.entity.animal;
 import java.util.Random;
 import com.mojang.nbt.CompoundTag;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.DyePowderItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemInstance;
@@ -16,7 +17,25 @@ import net.minecraft.world.level.Level;
 
 public class Sheep extends Animal
 {
-    public static final float[][] COLOR;
+    private static final int DATA_WOOL_ID = 16;
+    public static final float[][] COLOR = new float[][] {
+            { 1.0f, 1.0f, 1.0f },  // white
+            { 0.95f, 0.7f, 0.2f }, // orange
+            { 0.9f, 0.5f, 0.85f }, // magenta
+            { 0.6f, 0.7f, 0.95f }, // light blue
+            { 0.9f, 0.9f, 0.2f }, // yellow
+            { 0.5f, 0.8f, 0.1f }, // light green
+            { 0.95f, 0.7f, 0.8f }, // pink
+            { 0.3f, 0.3f, 0.3f }, // gray
+            { 0.6f, 0.6f, 0.6f }, // silver
+            { 0.3f, 0.6f, 0.7f }, // cyan
+            { 0.7f, 0.4f, 0.9f }, // purple
+            { 0.2f, 0.4f, 0.8f }, // blue
+            { 0.5f, 0.4f, 0.3f }, // brown
+            { 0.4f, 0.5f, 0.2f }, // green
+            { 0.8f, 0.3f, 0.3f }, // red
+            { 0.1f, 0.1f, 0.1f }, // black
+    };
     
     public Sheep(final Level level) {
         super(level);
@@ -27,7 +46,9 @@ public class Sheep extends Animal
     @Override
     protected void definedSynchedData() {
         super.definedSynchedData();
-        this.entityData.define(16, new Byte((byte)0));
+
+        // sheared and color share a byte
+        this.entityData.define(DATA_WOOL_ID, (byte) 0);
     }
     
     @Override
@@ -38,6 +59,7 @@ public class Sheep extends Animal
     @Override
     protected void dropDeathLoot() {
         if (!this.isSheared()) {
+            // killing a non-sheared sheep will drop a single block of cloth
             this.spawnAtLocation(new ItemInstance(Tile.cloth.id, 1, this.getColor()), 0.0f);
         }
     }
@@ -49,18 +71,19 @@ public class Sheep extends Animal
     
     @Override
     public boolean interact(final Player player) {
-        final ItemInstance selected = player.inventory.getSelected();
-        if (selected != null && selected.id == Item.shears.id && !this.isSheared()) {
+        final ItemInstance item = player.inventory.getSelected();
+        if (item != null && item.id == Item.shears.id && !this.isSheared()) {
             if (!this.level.isClientSide) {
                 this.setSheared(true);
-                for (int n = 2 + this.random.nextInt(3), i = 0; i < n; ++i) {
+                int count = 2 + this.random.nextInt(3);
+                for (int i = 0; i < count; ++i) {
                     final ItemEntity ie = this.spawnAtLocation(new ItemInstance(Tile.cloth.id, 1, this.getColor()), 1.0f);
                     ie.yd += this.random.nextFloat() * 0.05f;
                     ie.xd += (this.random.nextFloat() - this.random.nextFloat()) * 0.1f;
                     ie.zd += (this.random.nextFloat() - this.random.nextFloat()) * 0.1f;
                 }
             }
-            selected.hurt(1, player);
+            item.hurt(1, player);
         }
         return false;
     }
@@ -95,48 +118,35 @@ public class Sheep extends Animal
     }
     
     public int getColor() {
-        return this.entityData.getByte(16) & 0xF;
+        return this.entityData.getByte(DATA_WOOL_ID) & 0xF;
     }
     
     public void setColor(final int color) {
-        this.entityData.set(16, (byte)((this.entityData.getByte(16) & 0xF0) | (color & 0xF)));
+        this.entityData.set(DATA_WOOL_ID, (byte)((this.entityData.getByte(DATA_WOOL_ID) & 0xF0) | (color & 0xF)));
     }
     
     public boolean isSheared() {
-        return (this.entityData.getByte(16) & 0x10) != 0x0;
+        return (this.entityData.getByte(DATA_WOOL_ID) & 0x10) != 0x0;
     }
     
     public void setSheared(final boolean value) {
-        final byte byte1 = this.entityData.getByte(16);
+        final byte current = this.entityData.getByte(DATA_WOOL_ID);
         if (value) {
-            this.entityData.set(16, (byte)(byte1 | 0x10));
+            this.entityData.set(DATA_WOOL_ID, (byte)(current | 0x10));
         }
         else {
-            this.entityData.set(16, (byte)(byte1 & 0xFFFFFFEF));
+            this.entityData.set(DATA_WOOL_ID, (byte)(current & ~0x10));
         }
     }
     
     public static int getSheepColor(final Random random) {
         final int nextInt = random.nextInt(100);
-        if (nextInt < 5) {
-            return 15;
-        }
-        if (nextInt < 10) {
-            return 7;
-        }
-        if (nextInt < 15) {
-            return 8;
-        }
-        if (nextInt < 18) {
-            return 12;
-        }
-        if (random.nextInt(500) == 0) {
-            return 6;
-        }
+        if (nextInt < 5) return 15 - DyePowderItem.BLACK;
+        if (nextInt < 10) return 15 - DyePowderItem.GRAY;
+        if (nextInt < 15) return 15 - DyePowderItem.SILVER;
+        if (nextInt < 18) return 15 - DyePowderItem.BROWN;
+        if (random.nextInt(500) == 0) return 15 - DyePowderItem.PINK;
         return 0;
     }
-    
-    static {
-        COLOR = new float[][] { { 1.0f, 1.0f, 1.0f }, { 0.95f, 0.7f, 0.2f }, { 0.9f, 0.5f, 0.85f }, { 0.6f, 0.7f, 0.95f }, { 0.9f, 0.9f, 0.2f }, { 0.5f, 0.8f, 0.1f }, { 0.95f, 0.7f, 0.8f }, { 0.3f, 0.3f, 0.3f }, { 0.6f, 0.6f, 0.6f }, { 0.3f, 0.6f, 0.7f }, { 0.7f, 0.4f, 0.9f }, { 0.2f, 0.4f, 0.8f }, { 0.5f, 0.4f, 0.3f }, { 0.4f, 0.5f, 0.2f }, { 0.8f, 0.3f, 0.3f }, { 0.1f, 0.1f, 0.1f } };
-    }
+
 }

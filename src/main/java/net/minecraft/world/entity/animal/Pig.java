@@ -4,18 +4,17 @@
 
 package net.minecraft.world.entity.animal;
 
-import net.minecraft.stats.Stat;
 import net.minecraft.stats.Achievements;
 import net.minecraft.world.entity.monster.PigZombie;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import com.mojang.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 
 public class Pig extends Animal
 {
+    private static final int DATA_SADDLE_ID = 16;
     public Pig(final Level level) {
         super(level);
         this.textureName = "/mob/pig.png";
@@ -24,7 +23,7 @@ public class Pig extends Animal
     
     @Override
     protected void definedSynchedData() {
-        this.entityData.define(16, (byte) 0);
+        this.entityData.define(DATA_SADDLE_ID, (byte) 0);
     }
     
     @Override
@@ -65,33 +64,29 @@ public class Pig extends Animal
     
     @Override
     protected int getDeathLoot() {
-        if (this.onFire > 0) {
-            return Item.porkChop_cooked.id;
-        }
+        if (this.onFire > 0) return Item.porkChop_cooked.id;
         return Item.porkChop_raw.id;
     }
     
     public boolean hasSaddle() {
-        return (this.entityData.getByte(16) & 0x1) != 0x0;
+        return (this.entityData.getByte(DATA_SADDLE_ID) & 0x1) != 0x0;
     }
     
     public void setSaddle(final boolean value) {
         if (value) {
-            this.entityData.set(16, (byte)1);
+            this.entityData.set(DATA_SADDLE_ID, (byte)1);
         }
         else {
-            this.entityData.set(16, (byte)0);
+            this.entityData.set(DATA_SADDLE_ID, (byte)0);
         }
     }
     
     @Override
     public void thunderHit(final LightningBolt lightningBolt) {
-        if (this.level.isClientSide) {
-            return;
-        }
-        final PigZombie e = new PigZombie(this.level);
-        e.moveTo(this.x, this.y, this.z, this.yRot, this.xRot);
-        this.level.addEntity(e);
+        if (this.level.isClientSide) return;
+        final PigZombie pz = new PigZombie(this.level);
+        pz.moveTo(this.x, this.y, this.z, this.yRot, this.xRot);
+        this.level.addEntity(pz);
         this.remove();
     }
     

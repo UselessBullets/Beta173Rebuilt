@@ -4,6 +4,7 @@
 
 package net.minecraft.world.entity.animal;
 
+import net.minecraft.world.item.DyePowderItem;
 import util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.material.Material;
@@ -15,37 +16,19 @@ import net.minecraft.world.level.Level;
 
 public class Squid extends WaterAnimal
 {
-    public float xBodyRot;
-    public float xBodyRotO;
-    public float zBodyRot;
-    public float zBodyRotO;
-    public float tentacleMovement;
-    public float oldTentacleMovement;
-    public float tentacleAngle;
-    public float oldTentacleAngle;
-    private float speed;
-    private float tentacleSpeed;
-    private float rotateSpeed;
-    private float tx;
-    private float ty;
-    private float tz;
+    public float xBodyRot = 0.0f, xBodyRotO = 0.0f;
+    public float zBodyRot = 0.0f, zBodyRotO = 0.0f;
+
+    public float tentacleMovement = 0.0f, oldTentacleMovement = 0.0f;
+    public float tentacleAngle = 0.0f, oldTentacleAngle = 0.0f;
+
+    private float speed = 0.0f;
+    private float tentacleSpeed = 0.0f;
+    private float rotateSpeed = 0.0f;
+    private float tx = 0.0f, ty = 0.0f, tz = 0.0f;
     
     public Squid(final Level level) {
         super(level);
-        this.xBodyRot = 0.0f;
-        this.xBodyRotO = 0.0f;
-        this.zBodyRot = 0.0f;
-        this.zBodyRotO = 0.0f;
-        this.tentacleMovement = 0.0f;
-        this.oldTentacleMovement = 0.0f;
-        this.tentacleAngle = 0.0f;
-        this.oldTentacleAngle = 0.0f;
-        this.speed = 0.0f;
-        this.tentacleSpeed = 0.0f;
-        this.rotateSpeed = 0.0f;
-        this.tx = 0.0f;
-        this.ty = 0.0f;
-        this.tz = 0.0f;
         this.textureName = "/mob/squid.png";
         this.setSize(0.95f, 0.95f);
         this.tentacleSpeed = 1.0f / (this.random.nextFloat() + 1.0f) * 0.2f;
@@ -88,8 +71,9 @@ public class Squid extends WaterAnimal
     
     @Override
     protected void dropDeathLoot() {
-        for (int n = this.random.nextInt(3) + 1, i = 0; i < n; ++i) {
-            this.spawnAtLocation(new ItemInstance(Item.dye_powder, 1, 0), 0.0f);
+        int count = this.random.nextInt(3) + 1;
+        for (int i = 0; i < count; ++i) {
+            this.spawnAtLocation(new ItemInstance(Item.dye_powder, 1, DyePowderItem.BLACK), 0.0f);
         }
     }
     
@@ -100,28 +84,33 @@ public class Squid extends WaterAnimal
     
     @Override
     public boolean isInWater() {
-        return this.level.checkAndHandleWater(this.bb.grow(0.0, -0.6000000238418579, 0.0), Material.water, this);
+        return this.level.checkAndHandleWater(this.bb.grow(0.0, -0.6f, 0.0), Material.water, this);
     }
     
     @Override
     public void aiStep() {
         super.aiStep();
+
         this.xBodyRotO = this.xBodyRot;
         this.zBodyRotO = this.zBodyRot;
+
         this.oldTentacleMovement = this.tentacleMovement;
         this.oldTentacleAngle = this.tentacleAngle;
         this.tentacleMovement += this.tentacleSpeed;
-        if (this.tentacleMovement > 6.2831855f) {
-            this.tentacleMovement -= 6.2831855f;
+
+        if (this.tentacleMovement > Mth.PI * 2) {
+            this.tentacleMovement -= Mth.PI * 2;
             if (this.random.nextInt(10) == 0) {
                 this.tentacleSpeed = 1.0f / (this.random.nextFloat() + 1.0f) * 0.2f;
             }
         }
+
         if (this.isInWater()) {
             if (this.tentacleMovement < Mth.PI) {
-                final float n = this.tentacleMovement / Mth.PI;
-                this.tentacleAngle = Mth.sin(n * n * Mth.PI) * Mth.PI * 0.25f;
-                if (n > 0.75) {
+                final float tentacleScale = this.tentacleMovement / Mth.PI;
+                this.tentacleAngle = Mth.sin(tentacleScale * tentacleScale * Mth.PI) * Mth.PI * 0.25f;
+
+                if (tentacleScale > 0.75) {
                     this.speed = 1.0f;
                     this.rotateSpeed = 1.0f;
                 }
@@ -134,25 +123,32 @@ public class Squid extends WaterAnimal
                 this.speed *= 0.9f;
                 this.rotateSpeed *= 0.99f;
             }
+
             if (!this.interpolateOnly) {
                 this.xd = this.tx * this.speed;
                 this.yd = this.ty * this.speed;
                 this.zd = this.tz * this.speed;
             }
-            final float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
+
+            final float horizontalMovement = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
+
             this.yBodyRot += (-(float)Math.atan2(this.xd, this.zd) * Mth.RADDEG - this.yBodyRot) * 0.1f;
             this.yRot = this.yBodyRot;
             this.zBodyRot += Mth.PI * this.rotateSpeed * 1.5f;
-            this.xBodyRot += (-(float)Math.atan2(sqrt, this.yd) * Mth.RADDEG - this.xBodyRot) * 0.1f;
+            this.xBodyRot += (-(float)Math.atan2(horizontalMovement, this.yd) * Mth.RADDEG - this.xBodyRot) * 0.1f;
         }
         else {
             this.tentacleAngle = Mth.abs(Mth.sin(this.tentacleMovement)) * Mth.PI * 0.25f;
+
             if (!this.interpolateOnly) {
+                // unable to move, apply gravity
                 this.xd = 0.0;
                 this.yd -= 0.08;
                 this.yd *= 0.98f;
                 this.zd = 0.0;
             }
+
+            // fall over
             this.xBodyRot += (float)((-90.0f - this.xBodyRot) * 0.02);
         }
     }
@@ -164,11 +160,12 @@ public class Squid extends WaterAnimal
     
     @Override
     protected void updateAi() {
+        // ridiculous simple movement ai
         if (this.random.nextInt(50) == 0 || !this.wasInWater || (this.tx == 0.0f && this.ty == 0.0f && this.tz == 0.0f)) {
-            final float n = this.random.nextFloat() * Mth.PI * 2.0f;
-            this.tx = Mth.cos(n) * 0.2f;
+            final float angle = this.random.nextFloat() * Mth.PI * 2.0f;
+            this.tx = Mth.cos(angle) * 0.2f;
             this.ty = -0.1f + this.random.nextFloat() * 0.2f;
-            this.tz = Mth.sin(n) * 0.2f;
+            this.tz = Mth.sin(angle) * 0.2f;
         }
         this.checkDespawn();
     }

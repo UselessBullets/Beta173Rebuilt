@@ -4,15 +4,15 @@
 
 package net.minecraft.network.packet;
 
+import net.minecraft.world.level.tile.entity.SignTileEntity;
+
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
 public class SignUpdatePacket extends Packet
 {
-    public int x;
-    public int y;
-    public int z;
+    public int x, y, z;
     public String[] lines;
     
     public SignUpdatePacket() {
@@ -32,9 +32,9 @@ public class SignUpdatePacket extends Packet
         this.x = dis.readInt();
         this.y = dis.readShort();
         this.z = dis.readInt();
-        this.lines = new String[4];
-        for (int i = 0; i < 4; ++i) {
-            this.lines[i] = Packet.readUTF(dis, 15);
+        this.lines = new String[SignTileEntity.MAX_SIGN_LINES];
+        for (int i = 0; i < SignTileEntity.MAX_SIGN_LINES; ++i) {
+            this.lines[i] = Packet.readUTF(dis, SignTileEntity.MAX_LINE_LENGTH);
         }
     }
     
@@ -43,7 +43,7 @@ public class SignUpdatePacket extends Packet
         dos.writeInt(this.x);
         dos.writeShort(this.y);
         dos.writeInt(this.z);
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < SignTileEntity.MAX_SIGN_LINES; ++i) {
             Packet.writeUTF(this.lines[i], dos);
         }
     }
@@ -55,10 +55,10 @@ public class SignUpdatePacket extends Packet
     
     @Override
     public int getEstimatedSize() {
-        int n = 0;
-        for (int i = 0; i < 4; ++i) {
-            n += this.lines[i].length();
+        int l = 0;
+        for (int i = 0; i < SignTileEntity.MAX_SIGN_LINES; ++i) {
+            l += this.lines[i].length();
         }
-        return n;
+        return l;
     }
 }

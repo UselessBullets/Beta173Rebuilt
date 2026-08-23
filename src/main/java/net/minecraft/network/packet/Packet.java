@@ -16,122 +16,16 @@ import java.util.Map;
 
 public abstract class Packet
 {
-    private static Map<Integer, Class<? extends Packet>> idToClassMap;
-    private static Map<Class<? extends Packet>, Integer> classToIdMap;
-    private static Set<Integer> clientReceivedPackets;
-    private static Set<Integer> serverReceivedPackets;
+    private static Map<Integer, Class<? extends Packet>> idToClassMap = new HashMap<>();
+    private static Map<Class<? extends Packet>, Integer> classToIdMap = new HashMap<>();
+    private static Set<Integer> clientReceivedPackets = new HashSet<>();
+    private static Set<Integer> serverReceivedPackets = new HashSet<>();
     public final long createTime = System.currentTimeMillis();
     public boolean shouldDelay = false;
     private static HashMap<Integer, PacketStatistics> packetStatistics = new HashMap<>();
     private static int readCounter = 0;
-    
-    static void map(final int id, final boolean receiveOnClient, final boolean receiveOnServer, final Class<? extends Packet> clazz) {
-        if (Packet.idToClassMap.containsKey(id)) throw new IllegalArgumentException("Duplicate packet id:" + id);
-        if (Packet.classToIdMap.containsKey(clazz)) throw new IllegalArgumentException("Duplicate packet class:" + clazz);
 
-        Packet.idToClassMap.put(id, clazz);
-        Packet.classToIdMap.put(clazz, id);
-        if (receiveOnClient) {
-            Packet.clientReceivedPackets.add(id);
-        }
-        if (receiveOnServer) {
-            Packet.serverReceivedPackets.add(id);
-        }
-    }
-    
-    public static Packet getPacket(final int id) {
-        try {
-            final Class<? extends Packet> clazz = Packet.idToClassMap.get(id);
-            if (clazz == null) return null;
-            return clazz.newInstance();
-        }
-        catch (final Exception e) {
-            e.printStackTrace();
-            System.out.println("Skipping packet with id " + id);
-            return null;
-        }
-    }
-    
-    public final int getId() {
-        return Packet.classToIdMap.get(this.getClass());
-    }
-    
-    public static Packet readPacket(final DataInputStream dis, final boolean isServer) {
-        int id;
-        Packet packet;
-        try {
-            id = dis.read();
-            if (id == -1) return null;
-
-            if ((isServer && !Packet.serverReceivedPackets.contains(id)) || (!isServer && !Packet.clientReceivedPackets.contains(id))) {
-                throw new IOException("Bad packet id " + id);
-            }
-
-            packet = getPacket(id);
-            if (packet == null) throw new IOException("Bad packet id " + id);
-
-            packet.read(dis);
-        }
-        catch (final IOException e) {
-            System.out.println("Reached end of stream");
-            return null;
-        }
-
-        PacketStatistics packetStatistics = Packet.packetStatistics.get(id);
-        if (packetStatistics == null) {
-            packetStatistics = new PacketStatistics();
-            Packet.packetStatistics.put(id, packetStatistics);
-        }
-        packetStatistics.addPacket(packet.getEstimatedSize());
-
-        ++Packet.readCounter;
-        if (Packet.readCounter % 1000 == 0) {
-            // Useless - Presumably the packet statistics would be displayed or printed out to console here, somehow
-        }
-        return packet;
-    }
-    
-    public static void writePacket(final Packet packet, final DataOutputStream dos) throws IOException {
-        dos.write(packet.getId());
-        packet.write(dos);
-    }
-    
-    public static void writeUTF(final String value, final DataOutputStream dos) throws IOException {
-        if (value.length() > 32767) {
-            throw new IOException("String too big");
-        }
-        dos.writeShort(value.length());
-        dos.writeChars(value);
-    }
-    
-    public static String readUTF(final DataInputStream dis, final int maxLength) throws IOException {
-        final short short1 = dis.readShort();
-        if (short1 > maxLength) {
-            throw new IOException("Received string length longer than maximum allowed (" + short1 + " > " + maxLength + ")");
-        }
-        if (short1 < 0) {
-            throw new IOException("Received string length is less than zero! Weird string!");
-        }
-        final StringBuilder sb = new StringBuilder();
-        for (short n = 0; n < short1; ++n) {
-            sb.append(dis.readChar());
-        }
-        return sb.toString();
-    }
-    
-    public abstract void read(final DataInputStream dis) throws IOException;
-    
-    public abstract void write(final DataOutputStream dos) throws IOException;
-    
-    public abstract void handle(final PacketListener listener);
-    
-    public abstract int getEstimatedSize();
-    
     static {
-        Packet.idToClassMap = new HashMap<>();
-        Packet.classToIdMap = new HashMap<>();
-        Packet.clientReceivedPackets = new HashSet<>();
-        Packet.serverReceivedPackets = new HashSet<>();
         map(0, true, true, KeepAlivePacket.class);
         map(1, true, true, LoginPacket.class);
         map(2, true, true, PreLoginPacket.class);
@@ -190,6 +84,108 @@ public abstract class Packet
         map(200, true, false, AwardStatPacket.class);
         map(255, true, true, DisconnectPacket.class);
     }
+
+    static void map(final int id, final boolean receiveOnClient, final boolean receiveOnServer, final Class<? extends Packet> clazz) {
+        if (Packet.idToClassMap.containsKey(id)) throw new IllegalArgumentException("Duplicate packet id:" + id);
+        if (Packet.classToIdMap.containsKey(clazz)) throw new IllegalArgumentException("Duplicate packet class:" + clazz);
+
+        Packet.idToClassMap.put(id, clazz);
+        Packet.classToIdMap.put(clazz, id);
+        if (receiveOnClient) {
+            Packet.clientReceivedPackets.add(id);
+        }
+        if (receiveOnServer) {
+            Packet.serverReceivedPackets.add(id);
+        }
+    }
+
+    public static Packet getPacket(final int id) {
+        try {
+            final Class<? extends Packet> clazz = Packet.idToClassMap.get(id);
+            if (clazz == null) return null;
+            return clazz.newInstance();
+        }
+        catch (final Exception e) {
+            e.printStackTrace();
+            System.out.println("Skipping packet with id " + id);
+            return null;
+        }
+    }
+
+    public final int getId() {
+        return Packet.classToIdMap.get(this.getClass());
+    }
+
+    public static Packet readPacket(final DataInputStream dis, final boolean isServer) {
+        int id;
+        Packet packet;
+        try {
+            id = dis.read();
+            if (id == -1) return null;
+
+            if ((isServer && !Packet.serverReceivedPackets.contains(id)) || (!isServer && !Packet.clientReceivedPackets.contains(id))) {
+                throw new IOException("Bad packet id " + id);
+            }
+
+            packet = getPacket(id);
+            if (packet == null) throw new IOException("Bad packet id " + id);
+
+            packet.read(dis);
+        }
+        catch (final IOException e) {
+            System.out.println("Reached end of stream");
+            return null;
+        }
+
+        PacketStatistics packetStatistics = Packet.packetStatistics.get(id);
+        if (packetStatistics == null) {
+            packetStatistics = new PacketStatistics();
+            Packet.packetStatistics.put(id, packetStatistics);
+        }
+        packetStatistics.addPacket(packet.getEstimatedSize());
+
+        ++Packet.readCounter;
+        if (Packet.readCounter % 1000 == 0) {
+            // Useless - Presumably the packet statistics would be displayed or printed out to console here, somehow
+        }
+        return packet;
+    }
+
+    public static void writePacket(final Packet packet, final DataOutputStream dos) throws IOException {
+        dos.write(packet.getId());
+        packet.write(dos);
+    }
+
+    public static void writeUTF(final String value, final DataOutputStream dos) throws IOException {
+        if (value.length() > 32767) {
+            throw new IOException("String too big");
+        }
+        dos.writeShort(value.length());
+        dos.writeChars(value);
+    }
+
+    public static String readUTF(final DataInputStream dis, final int maxLength) throws IOException {
+        final short short1 = dis.readShort();
+        if (short1 > maxLength) {
+            throw new IOException("Received string length longer than maximum allowed (" + short1 + " > " + maxLength + ")");
+        }
+        if (short1 < 0) {
+            throw new IOException("Received string length is less than zero! Weird string!");
+        }
+        final StringBuilder sb = new StringBuilder();
+        for (short n = 0; n < short1; ++n) {
+            sb.append(dis.readChar());
+        }
+        return sb.toString();
+    }
+
+    public abstract void read(final DataInputStream dis) throws IOException;
+
+    public abstract void write(final DataOutputStream dos) throws IOException;
+
+    public abstract void handle(final PacketListener listener);
+
+    public abstract int getEstimatedSize();
 
     static class PacketStatistics
     {

@@ -10,11 +10,7 @@ import java.io.IOException;
 
 public class TileEventPacket extends Packet
 {
-    public int x;
-    public int y;
-    public int z;
-    public int b0;
-    public int b1;
+    public int x, y, z, b0, b1;
 
     public TileEventPacket() {
     }
@@ -52,6 +48,6 @@ public class TileEventPacket extends Packet
     
     @Override
     public int getEstimatedSize() {
-        return 12;
+        return 2 * 4 + 2 + 2;
     }
 }

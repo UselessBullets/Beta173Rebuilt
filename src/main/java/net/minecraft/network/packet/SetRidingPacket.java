@@ -12,8 +12,7 @@ import java.io.IOException;
 
 public class SetRidingPacket extends Packet
 {
-    public int riderId;
-    public int riddenId;
+    public int riderId, riddenId;
 
     public SetRidingPacket() {
     }

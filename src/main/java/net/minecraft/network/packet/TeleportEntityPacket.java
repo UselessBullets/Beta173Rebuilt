@@ -14,11 +14,8 @@ import net.minecraft.world.entity.Entity;
 public class TeleportEntityPacket extends Packet
 {
     public int id;
-    public int x;
-    public int y;
-    public int z;
-    public byte yRot;
-    public byte xRot;
+    public int x, y, z;
+    public byte yRot, xRot;
     
     public TeleportEntityPacket() {
     }

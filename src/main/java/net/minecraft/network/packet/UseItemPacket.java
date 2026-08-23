@@ -12,10 +12,7 @@ import net.minecraft.world.item.ItemInstance;
 
 public class UseItemPacket extends Packet
 {
-    public int x;
-    public int y;
-    public int z;
-    public int face;
+    public int x, y, z, face;
     public ItemInstance item;
     
     public UseItemPacket() {
@@ -35,13 +32,8 @@ public class UseItemPacket extends Packet
         this.y = dis.read();
         this.z = dis.readInt();
         this.face = dis.read();
-        final short short1 = dis.readShort();
-        if (short1 >= 0) {
-            this.item = new ItemInstance(short1, dis.readByte(), dis.readShort());
-        }
-        else {
-            this.item = null;
-        }
+        final short id = dis.readShort();
+        this.item = id >= 0 ? new ItemInstance(id, dis.readByte(), dis.readShort()) : null;
     }
     
     @Override
@@ -50,6 +42,7 @@ public class UseItemPacket extends Packet
         dos.write(this.y);
         dos.writeInt(this.z);
         dos.write(this.face);
+
         if (this.item == null) {
             dos.writeShort(-1);
         }

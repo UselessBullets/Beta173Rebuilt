@@ -13,9 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class SetEntityMotionPacket extends Packet
 {
     public int id;
-    public int xa;
-    public int ya;
-    public int za;
+    public int xa, ya, za;
     
     public SetEntityMotionPacket() {
     }
@@ -26,25 +24,13 @@ public class SetEntityMotionPacket extends Packet
     
     public SetEntityMotionPacket(final int id, double xd, double yd, double zd) {
         this.id = id;
-        final double n = 3.9;
-        if (xd < -n) {
-            xd = -n;
-        }
-        if (yd < -n) {
-            yd = -n;
-        }
-        if (zd < -n) {
-            zd = -n;
-        }
-        if (xd > n) {
-            xd = n;
-        }
-        if (yd > n) {
-            yd = n;
-        }
-        if (zd > n) {
-            zd = n;
-        }
+        final double m = 3.9;
+        if (xd < -m) xd = -m;
+        if (yd < -m) yd = -m;
+        if (zd < -m) zd = -m;
+        if (xd > m) xd = m;
+        if (yd > m) yd = m;
+        if (zd > m) zd = m;
         this.xa = (int)(xd * 8000.0);
         this.ya = (int)(yd * 8000.0);
         this.za = (int)(zd * 8000.0);

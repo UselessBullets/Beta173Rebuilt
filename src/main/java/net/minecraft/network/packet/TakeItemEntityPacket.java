@@ -10,8 +10,7 @@ import java.io.IOException;
 
 public class TakeItemEntityPacket extends Packet
 {
-    public int itemId;
-    public int playerId;
+    public int itemId, playerId;
 
     public TakeItemEntityPacket() {
     }

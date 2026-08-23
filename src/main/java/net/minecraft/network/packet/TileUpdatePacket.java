@@ -12,11 +12,8 @@ import java.io.IOException;
 
 public class TileUpdatePacket extends Packet
 {
-    public int x;
-    public int y;
-    public int z;
-    public int block;
-    public int data;
+    public int x, y, z;
+    public int block, data;
 
     public TileUpdatePacket() {
         this.shouldDelay = true;

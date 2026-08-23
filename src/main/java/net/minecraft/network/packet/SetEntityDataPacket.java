@@ -47,7 +47,7 @@ public class SetEntityDataPacket extends Packet
         return 5;
     }
     
-    public List getUnpackedData() {
+    public List<DataItem> getUnpackedData() {
         return this.packedItems;
     }
 }

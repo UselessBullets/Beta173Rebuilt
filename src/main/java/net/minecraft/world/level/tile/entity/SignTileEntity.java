@@ -11,6 +11,7 @@ import net.minecraft.network.packet.SignUpdatePacket;
 public class SignTileEntity extends TileEntity
 {
     public static final int MAX_SIGN_LINES = 4;
+    public static final int MAX_LINE_LENGTH = 15;
     public String[] messages = new String[] { "", "", "", "" };
     public int selectedLine = -1;
     private boolean isEditable = true;

@@ -23,6 +23,7 @@ public class SetEquippedItemPacket extends Packet
     public SetEquippedItemPacket(final int entity, final int slot, final ItemInstance item) {
         this.entity = entity;
         this.slot = slot;
+
         if (item == null) {
             this.item = -1;
             this.auxValue = 0;
@@ -56,6 +57,6 @@ public class SetEquippedItemPacket extends Packet
     
     @Override
     public int getEstimatedSize() {
-        return 8;
+        return 4 + 2 * 2;
     }
 }

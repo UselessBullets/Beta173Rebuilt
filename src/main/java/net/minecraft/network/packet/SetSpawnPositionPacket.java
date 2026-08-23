@@ -10,9 +10,7 @@ import java.io.IOException;
 
 public class SetSpawnPositionPacket extends Packet
 {
-    public int x;
-    public int y;
-    public int z;
+    public int x, y, z;
 
     public SetSpawnPositionPacket() {
     }
@@ -44,6 +42,6 @@ public class SetSpawnPositionPacket extends Packet
     
     @Override
     public int getEstimatedSize() {
-        return 12;
+        return 3 * 4;
     }
 }

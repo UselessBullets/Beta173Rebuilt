@@ -608,10 +608,10 @@ public abstract class Mob extends Entity
         final boolean inLava = this.isInLava();
         if (this.jumping) {
             if (inWater) {
-                this.yd += 0.03999999910593033;
+                this.yd += 0.04f;
             }
             else if (inLava) {
-                this.yd += 0.03999999910593033;
+                this.yd += 0.04f;
             }
             else if (this.onGround) {
                 this.jumpFromGround();

@@ -4,8 +4,8 @@
 
 package net.minecraft.world.entity.item;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.world.item.Item;
-import net.minecraft.stats.Stat;
 import net.minecraft.stats.Achievements;
 import net.minecraft.world.entity.player.Player;
 import com.mojang.nbt.CompoundTag;
@@ -18,23 +18,24 @@ import net.minecraft.world.entity.Entity;
 
 public class ItemEntity extends Entity
 {
+    private static final int LIFETIME = 5 * 60 * SharedConstants.TICKS_PER_SECOND; // Five miniutes.
     public ItemInstance item;
-    private int tickCount2;
-    public int age;
+    private int tickCount;
+    public int age = 0;
     public int throwTime;
-    private int health;
-    public float bobOffs;
+    private int health = 5;
+    public float bobOffs = (float)(Math.random() * Math.PI * 2.0);
     
     public ItemEntity(final Level level, final double x, final double y, final double z, final ItemInstance item) {
         super(level);
-        this.age = 0;
-        this.health = 5;
-        this.bobOffs = (float)(Math.random() * Math.PI * 2.0);
+
         this.setSize(0.25f, 0.25f);
         this.heightOffset = this.bbHeight / 2.0f;
         this.setPos(x, y, z);
+
         this.item = item;
         this.yRot = (float)(Math.random() * 360.0);
+
         this.xd = (float)(Math.random() * 0.2f - 0.1f);
         this.yd = 0.2f;
         this.zd = (float)(Math.random() * 0.2f - 0.1f);
@@ -47,9 +48,6 @@ public class ItemEntity extends Entity
     
     public ItemEntity(final Level level) {
         super(level);
-        this.age = 0;
-        this.health = 5;
-        this.bobOffs = (float)(Math.random() * Math.PI * 2.0);
         this.setSize(0.25f, 0.25f);
         this.heightOffset = this.bbHeight / 2.0f;
     }
@@ -61,38 +59,44 @@ public class ItemEntity extends Entity
     @Override
     public void tick() {
         super.tick();
-        if (this.throwTime > 0) {
-            --this.throwTime;
-        }
+
+        if (this.throwTime > 0) this.throwTime--;
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
-        this.yd -= 0.03999999910593033;
+
+        this.yd -= 0.04f;
+
         if (this.level.getMaterial(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z)) == Material.lava) {
             this.yd = 0.2f;
             this.xd = (this.random.nextFloat() - this.random.nextFloat()) * 0.2f;
             this.zd = (this.random.nextFloat() - this.random.nextFloat()) * 0.2f;
             this.level.playSound(this, "random.fizz", 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
         }
+
         this.checkInTile(this.x, (this.bb.y0 + this.bb.y1) / 2.0, this.z);
         this.move(this.xd, this.yd, this.zd);
-        float n = 0.98f;
+
+        float friction = 0.98f;
         if (this.onGround) {
-            n = 0.58800006f;
-            final int tile = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
-            if (tile > 0) {
-                n = Tile.tiles[tile].friction * 0.98f;
+            friction = 0.6f * 0.98f;
+            final int t = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
+            if (t > 0) {
+                friction = Tile.tiles[t].friction * 0.98f;
             }
         }
-        this.xd *= n;
+
+        this.xd *= friction;
         this.yd *= 0.98f;
-        this.zd *= n;
+        this.zd *= friction;
+
         if (this.onGround) {
             this.yd *= -0.5;
         }
-        ++this.tickCount2;
-        ++this.age;
-        if (this.age >= 6000) {
+
+        this.tickCount++;
+        this.age++;
+        if (this.age >= LIFETIME) {
             this.remove();
         }
     }
@@ -131,22 +135,16 @@ public class ItemEntity extends Entity
     
     @Override
     public void playerTouch(final Player player) {
-        if (this.level.isClientSide) {
-            return;
-        }
-        final int count = this.item.count;
+        if (this.level.isClientSide) return;
+
+        final int orgCount = this.item.count;
         if (this.throwTime == 0 && player.inventory.add(this.item)) {
-            if (this.item.id == Tile.treeTrunk.id) {
-                player.awardStat(Achievements.mineWood);
-            }
-            if (this.item.id == Item.leather.id) {
-                player.awardStat(Achievements.killCow);
-            }
+            if (this.item.id == Tile.treeTrunk.id) player.awardStat(Achievements.mineWood);
+            if (this.item.id == Item.leather.id) player.awardStat(Achievements.killCow);
+
             this.level.playSound(this, "random.pop", 0.2f, ((this.random.nextFloat() - this.random.nextFloat()) * 0.7f + 1.0f) * 2.0f);
-            player.take(this, count);
-            if (this.item.count <= 0) {
-                this.remove();
-            }
+            player.take(this, orgCount);
+            if (this.item.count <= 0) this.remove();
         }
     }
 }

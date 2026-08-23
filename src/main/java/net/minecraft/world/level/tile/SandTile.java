@@ -4,7 +4,6 @@
 
 package net.minecraft.world.level.tile;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.FallingTile;
 import java.util.Random;
 import net.minecraft.world.level.Level;
@@ -12,7 +11,7 @@ import net.minecraft.world.level.material.Material;
 
 public class SandTile extends Tile
 {
-    public static boolean instaFall;
+    public static boolean instaFall = false;
     
     public SandTile(final int id, final int tex) {
         super(id, tex, Material.sand);
@@ -68,8 +67,5 @@ public class SandTile extends Tile
         final Material material = Tile.tiles[tile].material;
         return material == Material.water || material == Material.lava;
     }
-    
-    static {
-        SandTile.instaFall = false;
-    }
+
 }

@@ -53,7 +53,7 @@ public class PrimedTnt extends Entity
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
-        this.yd -= 0.03999999910593033;
+        this.yd -= 0.04f;
         this.move(this.xd, this.yd, this.zd);
         this.xd *= 0.98f;
         this.yd *= 0.98f;

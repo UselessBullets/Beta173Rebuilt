@@ -213,7 +213,7 @@ public class Minecart extends Entity implements Container
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
-        this.yd -= 0.03999999910593033;
+        this.yd -= 0.04f;
         final int floor = Mth.floor(this.x);
         int floor2 = Mth.floor(this.y);
         final int floor3 = Mth.floor(this.z);
@@ -427,9 +427,9 @@ public class Minecart extends Entity implements Container
             }
             this.move(this.xd, this.yd, this.zd);
             if (!this.onGround) {
-                this.xd *= 0.949999988079071;
-                this.yd *= 0.949999988079071;
-                this.zd *= 0.949999988079071;
+                this.xd *= 0.95f;
+                this.yd *= 0.95f;
+                this.zd *= 0.95f;
             }
         }
         this.xRot = 0.0f;

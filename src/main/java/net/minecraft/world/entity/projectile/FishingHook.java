@@ -300,7 +300,7 @@ public class FishingHook extends Entity
         if (this.nibble > 0) {
             this.yd -= this.random.nextFloat() * this.random.nextFloat() * this.random.nextFloat() * 0.2;
         }
-        this.yd += 0.03999999910593033 * (n6 * 2.0 - 1.0);
+        this.yd += 0.04f * (n6 * 2.0 - 1.0);
         if (n6 > 0.0) {
             n4 *= (float)0.9;
             this.yd *= 0.8;

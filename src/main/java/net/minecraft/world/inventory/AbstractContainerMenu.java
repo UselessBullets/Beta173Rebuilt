@@ -17,28 +17,14 @@ public abstract class AbstractContainerMenu
 {
     public static final int CLICKED_OUTSIDE = -999;
 
-    public static final int CLICK_PICKUP = 0;
-    public static final int CLICK_QUICK_MOVE = 1;
-    public static final int CLICK_SWAP = 2;
-    public static final int CLICK_CLONE = 3;
-
     public static final int CONTAINER_ID_CARRIED = -1;
     public static final int CONTAINER_ID_INVENTORY = 0;
-    public List<ItemInstance> lastSlots;
-    public List<Slot> slots;
-    public int containerId;
-    private short changeUid;
-    protected List<ContainerListener> containerListeners;
-    private Set<Player> unSynchedPlayers;
-    
-    public AbstractContainerMenu() {
-        this.lastSlots = new ArrayList<>();
-        this.slots = new ArrayList<>();
-        this.containerId = 0;
-        this.changeUid = 0;
-        this.containerListeners = new ArrayList<>();
-        this.unSynchedPlayers = new HashSet<>();
-    }
+    public List<ItemInstance> lastSlots = new ArrayList<>();
+    public List<Slot> slots = new ArrayList<>();
+    public int containerId = 0;
+    private short changeUid = 0;
+    protected List<ContainerListener> containerListeners = new ArrayList<>();
+    private Set<Player> unSynchedPlayers = new HashSet<>();
     
     protected void addSlot(final Slot slot) {
         slot.index = this.slots.size();
@@ -47,39 +33,47 @@ public abstract class AbstractContainerMenu
     }
 
     public void addSlotListener(final ContainerListener listener) {
-        if (this.containerListeners.contains(listener)) {
-            throw new IllegalArgumentException("Listener already listening");
-        }
+        if (this.containerListeners.contains(listener)) throw new IllegalArgumentException("Listener already listening");
+
         this.containerListeners.add(listener);
         listener.refreshContainer(this, this.getItems());
         this.broadcastChanges();
     }
 
     public List<ItemInstance> getItems() {
-        final ArrayList<ItemInstance> list = new ArrayList<>();
+        final ArrayList<ItemInstance> items = new ArrayList<>();
         for (int i = 0; i < this.slots.size(); ++i) {
-            list.add(this.slots.get(i).getItem());
+            items.add(this.slots.get(i).getItem());
         }
-        return list;
+        return items;
+    }
+
+    // Useless - In b1.2 and LCE leaks
+    public void sendData(int id, int value) {
+        for (int i = 0; i < this.containerListeners.size(); i++) {
+            this.containerListeners.get(i).setContainerData(this, id, value);
+        }
     }
     
     public void broadcastChanges() {
         for (int i = 0; i < this.slots.size(); ++i) {
-            final ItemInstance item = this.slots.get(i).getItem();
-            if (!ItemInstance.matches(this.lastSlots.get(i), item)) {
-                final ItemInstance item2 = (item == null) ? null : item.copy();
-                this.lastSlots.set(i, item2);
+            ItemInstance current = this.slots.get(i).getItem();
+            ItemInstance expected = this.lastSlots.get(i);
+            if (!ItemInstance.matches(expected, current)) {
+                expected = current == null ? null : current.copy();
+                this.lastSlots.set(i, expected);
+
                 for (int j = 0; j < this.containerListeners.size(); ++j) {
-                    this.containerListeners.get(j).slotChanged(this, i, item2);
+                    this.containerListeners.get(j).slotChanged(this, i, expected);
                 }
             }
         }
     }
 
-    public Slot getSlotFor(final Container container, final int index) {
+    public Slot getSlotFor(final Container c, final int index) {
         for (int i = 0; i < this.slots.size(); ++i) {
             final Slot slot = this.slots.get(i);
-            if (slot.isAt(container, index)) {
+            if (slot.isAt(c, index)) {
                 return slot;
             }
         }
@@ -98,103 +92,114 @@ public abstract class AbstractContainerMenu
         return null;
     }
     
-    public ItemInstance clicked(final int slotIndex, final int buttonNum, final boolean clickType, final Player player) {
-        ItemInstance itemInstance = null;
+    public ItemInstance clicked(final int slotIndex, final int buttonNum, final boolean quickMove, final Player player) {
+        ItemInstance clickedEntity = null;
+
         if (buttonNum == 0 || buttonNum == 1) {
             final Inventory inventory = player.inventory;
-            if (slotIndex == -999) {
-                if (inventory.getCarried() != null && slotIndex == -999) {
-                    if (buttonNum == 0) {
-                        player.drop(inventory.getCarried());
-                        inventory.setCarried(null);
-                    }
-                    if (buttonNum == 1) {
-                        player.drop(inventory.getCarried().remove(1));
-                        if (inventory.getCarried().count == 0) {
+            if (slotIndex == CLICKED_OUTSIDE) {
+                if (inventory.getCarried() != null)
+                    if (slotIndex == CLICKED_OUTSIDE) {
+                        if (buttonNum == 0) {
+                            player.drop(inventory.getCarried());
                             inventory.setCarried(null);
+                        }
+                        if (buttonNum == 1) {
+                            player.drop(inventory.getCarried().remove(1));
+                            if (inventory.getCarried().count == 0) inventory.setCarried(null);
+                        }
+                    }
+            }
+            else if (quickMove) {
+                final ItemInstance piiClicked = this.quickMoveStack(slotIndex);
+                if (piiClicked != null) {
+                    final int oldSize = piiClicked.count;
+
+                    clickedEntity = piiClicked.copy();
+
+                    final Slot slot = this.slots.get(slotIndex);
+                    if (slot != null) {
+                        if (slot.getItem() != null && slot.getItem().count < oldSize) {
+                            this.clicked(slotIndex, buttonNum, quickMove, player);
                         }
                     }
                 }
             }
-            else if (clickType) {
-                final ItemInstance quickMoveStack = this.quickMoveStack(slotIndex);
-                if (quickMoveStack != null) {
-                    final int count = quickMoveStack.count;
-                    itemInstance = quickMoveStack.copy();
-                    final Slot slot = this.slots.get(slotIndex);
-                    if (slot != null && slot.getItem() != null && slot.getItem().count < count) {
-                        this.clicked(slotIndex, buttonNum, clickType, player);
-                    }
-                }
-            }
             else {
-                final Slot slot2 = this.slots.get(slotIndex);
-                if (slot2 != null) {
-                    slot2.setChanged();
-                    final ItemInstance item = slot2.getItem();
+                final Slot slot = this.slots.get(slotIndex);
+                if (slot != null) {
+                    slot.setChanged();
+                    final ItemInstance clicked = slot.getItem();
                     final ItemInstance carried = inventory.getCarried();
-                    if (item != null) {
-                        itemInstance = item.copy();
+
+                    if (clicked != null) {
+                        clickedEntity = clicked.copy();
                     }
-                    if (item == null) {
-                        if (carried != null && slot2.mayPlace(carried)) {
-                            int maxStackSize = (buttonNum == 0) ? carried.count : 1;
-                            if (maxStackSize > slot2.getMaxStackSize()) {
-                                maxStackSize = slot2.getMaxStackSize();
+
+                    if (clicked == null) {
+                        if (carried != null && slot.mayPlace(carried)) {
+                            int c = buttonNum == 0 ? carried.count : 1;
+                            if (c > slot.getMaxStackSize()) {
+                                c = slot.getMaxStackSize();
                             }
-                            slot2.set(carried.remove(maxStackSize));
+                            slot.set(carried.remove(c));
                             if (carried.count == 0) {
                                 inventory.setCarried(null);
                             }
                         }
                     }
                     else if (carried == null) {
-                        inventory.setCarried(slot2.remove((buttonNum == 0) ? item.count : ((item.count + 1) / 2)));
-                        if (item.count == 0) {
-                            slot2.set(null);
+                        // pick up to empty hand
+                        int c = buttonNum == 0 ? clicked.count : (clicked.count + 1) / 2;
+                        ItemInstance removed = slot.remove(c);
+
+                        inventory.setCarried(removed);
+                        if (clicked.count == 0) {
+                            slot.set(null);
                         }
-                        slot2.onTake(inventory.getCarried());
+                        slot.onTake(inventory.getCarried());
                     }
-                    else if (slot2.mayPlace(carried)) {
-                        if (item.id != carried.id || (item.isStackedByData() && item.getAuxValue() != carried.getAuxValue())) {
-                            if (carried.count <= slot2.getMaxStackSize()) {
-                                final ItemInstance carried2 = item;
-                                slot2.set(carried);
-                                inventory.setCarried(carried2);
+                    else if (slot.mayPlace(carried)) {
+                        // put down and/or pick up
+                        if (clicked.id != carried.id || (clicked.isStackedByData() && clicked.getAuxValue() != carried.getAuxValue())) {
+                            // no match, replace
+                            if (carried.count <= slot.getMaxStackSize()) {
+                                slot.set(carried);
+                                inventory.setCarried(clicked);
                             }
                         }
                         else {
-                            int count2 = (buttonNum == 0) ? carried.count : 1;
-                            if (count2 > slot2.getMaxStackSize() - item.count) {
-                                count2 = slot2.getMaxStackSize() - item.count;
+                            // match, attempt to fill slot
+                            int c = (buttonNum == 0) ? carried.count : 1;
+                            if (c > slot.getMaxStackSize() - clicked.count) {
+                                c = slot.getMaxStackSize() - clicked.count;
                             }
-                            if (count2 > carried.getMaxStackSize() - item.count) {
-                                count2 = carried.getMaxStackSize() - item.count;
+                            if (c > carried.getMaxStackSize() - clicked.count) {
+                                c = carried.getMaxStackSize() - clicked.count;
                             }
-                            carried.remove(count2);
+                            carried.remove(c);
                             if (carried.count == 0) {
                                 inventory.setCarried(null);
                             }
-                            final ItemInstance itemInstance2 = item;
-                            itemInstance2.count += count2;
+                            clicked.count += c;
                         }
                     }
-                    else if (item.id == carried.id && carried.getMaxStackSize() > 1 && (!item.isStackedByData() || item.getAuxValue() == carried.getAuxValue())) {
-                        final int count3 = item.count;
-                        if (count3 > 0 && count3 + carried.count <= carried.getMaxStackSize()) {
-                            final ItemInstance itemInstance3 = carried;
-                            itemInstance3.count += count3;
-                            item.remove(count3);
-                            if (item.count == 0) {
-                                slot2.set(null);
+                    else {
+                        // pick up to non-empty hand
+                        if (clicked.id == carried.id && carried.getMaxStackSize() > 1 && (!clicked.isStackedByData() || clicked.getAuxValue() == carried.getAuxValue())) {
+                            final int c = clicked.count;
+                            if (c > 0 && c + carried.count <= carried.getMaxStackSize()) {
+                                carried.count += c;
+                                clicked.remove(c);
+                                if (clicked.count == 0) slot.set(null);
+                                slot.onTake(inventory.getCarried());
                             }
-                            slot2.onTake(inventory.getCarried());
                         }
                     }
                 }
             }
         }
-        return itemInstance;
+        return clickedEntity;
     }
     
     public void removed(final Player player) {
@@ -236,7 +241,8 @@ public abstract class AbstractContainerMenu
     }
     
     public short backup(final Inventory inventory) {
-        return (short)(++this.changeUid);
+        this.changeUid++;
+        return this.changeUid;
     }
     
     public void deleteBackup(final short uid) {
@@ -248,56 +254,64 @@ public abstract class AbstractContainerMenu
     public abstract boolean stillValid(final Player player);
     
     protected void moveItemStackTo(final ItemInstance itemStack, final int startSlot, final int endSlot, final boolean backwards) {
-        int n = startSlot;
+        int destSlot = startSlot;
         if (backwards) {
-            n = endSlot - 1;
+            destSlot = endSlot - 1;
         }
+
+        // find stackable slots first
         if (itemStack.isStackable()) {
-            while (itemStack.count > 0 && ((!backwards && n < endSlot) || (backwards && n >= startSlot))) {
-                final Slot slot = this.slots.get(n);
-                final ItemInstance item = slot.getItem();
-                if (item != null && item.id == itemStack.id && (!itemStack.isStackedByData() || itemStack.getAuxValue() == item.getAuxValue())) {
-                    final int count = item.count + itemStack.count;
-                    if (count <= itemStack.getMaxStackSize()) {
+            while (itemStack.count > 0 && ((!backwards && destSlot < endSlot) || (backwards && destSlot >= startSlot))) {
+                final Slot slot = this.slots.get(destSlot);
+                final ItemInstance target = slot.getItem();
+                if (target != null && target.id == itemStack.id && (!itemStack.isStackedByData() || itemStack.getAuxValue() == target.getAuxValue())) {
+                    final int totalStack = target.count + itemStack.count;
+                    if (totalStack <= itemStack.getMaxStackSize()) {
                         itemStack.count = 0;
-                        item.count = count;
+                        target.count = totalStack;
                         slot.setChanged();
                     }
-                    else if (item.count < itemStack.getMaxStackSize()) {
-                        itemStack.count -= itemStack.getMaxStackSize() - item.count;
-                        item.count = itemStack.getMaxStackSize();
+                    else if (target.count < itemStack.getMaxStackSize()) {
+                        itemStack.count -= itemStack.getMaxStackSize() - target.count;
+                        target.count = itemStack.getMaxStackSize();
                         slot.setChanged();
                     }
                 }
+
                 if (backwards) {
-                    --n;
+                    destSlot--;
                 }
                 else {
-                    ++n;
+                    destSlot++;
                 }
             }
         }
+
+        // find empty slot
         if (itemStack.count > 0) {
-            int n2;
             if (backwards) {
-                n2 = endSlot - 1;
+                destSlot = endSlot - 1;
             }
             else {
-                n2 = startSlot;
+                destSlot = startSlot;
             }
-            while ((!backwards && n2 < endSlot) || (backwards && n2 >= startSlot)) {
-                final Slot slot2 = this.slots.get(n2);
-                if (slot2.getItem() == null) {
-                    slot2.set(itemStack.copy());
-                    slot2.setChanged();
+
+            while ((!backwards && destSlot < endSlot) || (backwards && destSlot >= startSlot)) {
+                final Slot slot = this.slots.get(destSlot);
+                ItemInstance target = slot.getItem();
+
+                if (target == null) {
+                    slot.set(itemStack.copy());
+                    slot.setChanged();
                     itemStack.count = 0;
                     break;
                 }
+
                 if (backwards) {
-                    --n2;
+                    --destSlot;
                 }
                 else {
-                    ++n2;
+                    ++destSlot;
                 }
             }
         }

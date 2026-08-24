@@ -158,11 +158,11 @@ public class DispenserTile extends EntityTile
                 e4.yd = 0.2f;
                 e4.zd = n2 * n5;
                 final ItemEntity itemEntity = e4;
-                itemEntity.xd += random.nextGaussian() * 0.007499999832361937 * 6.0;
+                itemEntity.xd += random.nextGaussian() * 0.0075f * 6.0;
                 final ItemEntity itemEntity2 = e4;
-                itemEntity2.yd += random.nextGaussian() * 0.007499999832361937 * 6.0;
+                itemEntity2.yd += random.nextGaussian() * 0.0075f * 6.0;
                 final ItemEntity itemEntity3 = e4;
-                itemEntity3.zd += random.nextGaussian() * 0.007499999832361937 * 6.0;
+                itemEntity3.zd += random.nextGaussian() * 0.0075f * 6.0;
                 level.addEntity(e4);
                 level.levelEvent(1000, x, y, z, 0);
             }

@@ -4,11 +4,14 @@
 
 package net.minecraft.world.entity.projectile;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.entity.player.Player;
 import com.mojang.nbt.CompoundTag;
 import java.util.List;
+
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import util.Mth;
@@ -18,25 +21,18 @@ import net.minecraft.world.entity.Entity;
 
 public class Snowball extends Entity
 {
-    private int xTile;
-    private int yTile;
-    private int zTile;
-    private int lastTile;
-    private boolean inGround;
-    public int shakeTime;
+    private int xTile = -1;
+    private int yTile = -1;
+    private int zTile = -1;
+    private int lastTile = 0;
+    private boolean inGround = false;
+    public int shakeTime = 0;
     private Mob owner;
     private int life;
-    private int flightTime;
+    private int flightTime = 0;
     
     public Snowball(final Level level) {
         super(level);
-        this.xTile = -1;
-        this.yTile = -1;
-        this.zTile = -1;
-        this.lastTile = 0;
-        this.inGround = false;
-        this.shakeTime = 0;
-        this.flightTime = 0;
         this.setSize(0.25f, 0.25f);
     }
     
@@ -46,70 +42,65 @@ public class Snowball extends Entity
     
     @Override
     public boolean shouldRenderAtSqrDistance(final double distance) {
-        final double n = this.bb.getSize() * 4.0 * 64.0;
-        return distance < n * n;
+        double size = this.bb.getSize() * 4.0;
+        size *= 64.0;
+        return distance < size * size;
     }
     
     public Snowball(final Level level, final Mob mob) {
         super(level);
-        this.xTile = -1;
-        this.yTile = -1;
-        this.zTile = -1;
-        this.lastTile = 0;
-        this.inGround = false;
-        this.shakeTime = 0;
-        this.flightTime = 0;
         this.owner = mob;
-        this.setSize(0.25f, 0.25f);
+
+        this.setSize(4 / 16.0f, 4 / 16.0f);
+
         this.moveTo(mob.x, mob.y + mob.getHeadHeight(), mob.z, mob.yRot, mob.xRot);
+
         this.x -= Mth.cos(this.yRot / 180.0f * Mth.PI) * 0.16f;
         this.y -= 0.1f;
         this.z -= Mth.sin(this.yRot / 180.0f * Mth.PI) * 0.16f;
         this.setPos(this.x, this.y, this.z);
         this.heightOffset = 0.0f;
-        final float n = 0.4f;
-        this.xd = -Mth.sin(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * n;
-        this.zd = Mth.cos(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * n;
-        this.yd = -Mth.sin(this.xRot / 180.0f * Mth.PI) * n;
+
+        final float speed = 0.4f;
+        this.xd = -Mth.sin(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * speed;
+        this.zd = Mth.cos(this.yRot / 180.0f * Mth.PI) * Mth.cos(this.xRot / 180.0f * Mth.PI) * speed;
+        this.yd = -Mth.sin(this.xRot / 180.0f * Mth.PI) * speed;
+
         this.shoot(this.xd, this.yd, this.zd, 1.5f, 1.0f);
     }
     
     public Snowball(final Level level, final double x, final double y, final double z) {
         super(level);
-        this.xTile = -1;
-        this.yTile = -1;
-        this.zTile = -1;
-        this.lastTile = 0;
-        this.inGround = false;
-        this.shakeTime = 0;
-        this.flightTime = 0;
         this.life = 0;
+
         this.setSize(0.25f, 0.25f);
+
         this.setPos(x, y, z);
         this.heightOffset = 0.0f;
     }
     
     public void shoot(double xd, double yd, double zd, final float pow, final float uncertainty) {
-        final float sqrt = Mth.sqrt(xd * xd + yd * yd + zd * zd);
-        xd /= sqrt;
-        yd /= sqrt;
-        zd /= sqrt;
-        xd += this.random.nextGaussian() * 0.007499999832361937 * uncertainty;
-        yd += this.random.nextGaussian() * 0.007499999832361937 * uncertainty;
-        zd += this.random.nextGaussian() * 0.007499999832361937 * uncertainty;
+        final float dist = Mth.sqrt(xd * xd + yd * yd + zd * zd);
+
+        xd /= dist;
+        yd /= dist;
+        zd /= dist;
+
+        xd += this.random.nextGaussian() * 0.0075f * uncertainty;
+        yd += this.random.nextGaussian() * 0.0075f * uncertainty;
+        zd += this.random.nextGaussian() * 0.0075f * uncertainty;
+
         xd *= pow;
         yd *= pow;
         zd *= pow;
+
         this.xd = xd;
         this.yd = yd;
         this.zd = zd;
-        final float sqrt2 = Mth.sqrt(xd * xd + zd * zd);
-        final float n = (float)(Math.atan2(xd, zd) * 180.0 / Math.PI);
-        this.yRot = n;
-        this.yRotO = n;
-        final float n2 = (float)(Math.atan2(yd, sqrt2) * 180.0 / Math.PI);
-        this.xRot = n2;
-        this.xRotO = n2;
+
+        final float sd = Mth.sqrt(xd * xd + zd * zd);
+        this.yRotO = this.yRot = (float)(Math.atan2(xd, zd) * 180.0 / Math.PI);
+        this.xRotO = this.xRot = (float)(Math.atan2(yd, sd) * 180.0 / Math.PI);
         this.life = 0;
     }
     
@@ -119,13 +110,9 @@ public class Snowball extends Entity
         this.yd = yd;
         this.zd = zd;
         if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
-            final float sqrt = Mth.sqrt(xd * xd + zd * zd);
-            final float n = (float)(Math.atan2(xd, zd) * 180.0 / Math.PI);
-            this.yRot = n;
-            this.yRotO = n;
-            final float n2 = (float)(Math.atan2(yd, sqrt) * 180.0 / Math.PI);
-            this.xRot = n2;
-            this.xRotO = n2;
+            final float sd = Mth.sqrt(xd * xd + zd * zd);
+            this.yRotO = this.yRot = (float)(Math.atan2(xd, zd) * 180.0 / Math.PI);
+            this.xRotO = this.xRot = (float)(Math.atan2(yd, sd) * 180.0 / Math.PI);
         }
     }
     
@@ -135,60 +122,67 @@ public class Snowball extends Entity
         this.yOld = this.y;
         this.zOld = this.z;
         super.tick();
-        if (this.shakeTime > 0) {
-            --this.shakeTime;
-        }
+
+        if (this.shakeTime > 0) this.shakeTime--;
+
         if (this.inGround) {
-            if (this.level.getTile(this.xTile, this.yTile, this.zTile) == this.lastTile) {
-                ++this.life;
-                if (this.life == 1200) {
-                    this.remove();
-                }
+            int tile = this.level.getTile(this.xTile, this.yTile, this.zTile);
+            if (tile == this.lastTile) {
+                this.life++;
+                if (this.life == SharedConstants.TICKS_PER_SECOND * 60) this.remove();
                 return;
+            } else {
+                this.inGround = false;
+
+                this.xd *= this.random.nextFloat() * 0.2f;
+                this.yd *= this.random.nextFloat() * 0.2f;
+                this.zd *= this.random.nextFloat() * 0.2f;
+                this.life = 0;
+                this.flightTime = 0;
             }
-            this.inGround = false;
-            this.xd *= this.random.nextFloat() * 0.2f;
-            this.yd *= this.random.nextFloat() * 0.2f;
-            this.zd *= this.random.nextFloat() * 0.2f;
-            this.life = 0;
-            this.flightTime = 0;
         }
         else {
-            ++this.flightTime;
+            this.flightTime++;
         }
-        HitResult clip = this.level.clip(Vec3.newTemp(this.x, this.y, this.z), Vec3.newTemp(this.x + this.xd, this.y + this.yd, this.z + this.zd));
-        final Vec3 temp = Vec3.newTemp(this.x, this.y, this.z);
-        Vec3 b = Vec3.newTemp(this.x + this.xd, this.y + this.yd, this.z + this.zd);
-        if (clip != null) {
-            b = Vec3.newTemp(clip.pos.x, clip.pos.y, clip.pos.z);
+
+        Vec3 from = Vec3.newTemp(this.x, this.y, this.z);
+        Vec3 to = Vec3.newTemp(this.x + this.xd, this.y + this.yd, this.z + this.zd);
+        HitResult res = this.level.clip(from, to);
+
+        from = Vec3.newTemp(this.x, this.y, this.z);
+        to = Vec3.newTemp(this.x + this.xd, this.y + this.yd, this.z + this.zd);
+        if (res != null) {
+            to = Vec3.newTemp(res.pos.x, res.pos.y, res.pos.z);
         }
+
         if (!this.level.isClientSide) {
-            Entity entity = null;
-            final List<Entity> entities = this.level.getEntities(this, this.bb.expand(this.xd, this.yd, this.zd).grow(1.0, 1.0, 1.0));
-            double n = 0.0;
-            for (int i = 0; i < entities.size(); ++i) {
-                final Entity entity2 = entities.get(i);
-                if (entity2.isPickable()) {
-                    if (entity2 != this.owner || this.flightTime >= 5) {
-                        final float n2 = 0.3f;
-                        final HitResult clip2 = entity2.bb.grow(n2, n2, n2).clip(temp, b);
-                        if (clip2 != null) {
-                            final double distanceTo = temp.distanceTo(clip2.pos);
-                            if (distanceTo < n || n == 0.0) {
-                                entity = entity2;
-                                n = distanceTo;
-                            }
-                        }
+            Entity hitEntity = null;
+            final List<Entity> objects = this.level.getEntities(this, this.bb.expand(this.xd, this.yd, this.zd).grow(1.0, 1.0, 1.0));
+            double nearest = 0.0;
+            for (int i = 0; i < objects.size(); ++i) {
+                final Entity e = objects.get(i);
+                if (!e.isPickable() || e == this.owner && this.flightTime < 5) continue;
+
+                final float rr = 0.3f;
+                AABB bb = e.bb.grow(rr, rr, rr);
+                final HitResult p = bb.clip(from, to);
+                if (p != null) {
+                    final double dd = from.distanceTo(p.pos);
+                    if (dd < nearest || nearest == 0.0) {
+                        hitEntity = e;
+                        nearest = dd;
                     }
                 }
             }
-            if (entity != null) {
-                clip = new HitResult(entity);
+
+            if (hitEntity != null) {
+                res = new HitResult(hitEntity);
             }
         }
-        if (clip != null) {
-            if (clip.entity == null || clip.entity.hurt(this.owner, 0)) {}
-            for (int j = 0; j < 8; ++j) {
+
+        if (res != null) {
+            if (res.entity == null || res.entity.hurt(this.owner, 0)) {}
+            for (int i = 0; i < 8; ++i) {
                 this.level.addParticle("snowballpoof", this.x, this.y, this.z, 0.0, 0.0, 0.0);
             }
             this.remove();
@@ -196,36 +190,35 @@ public class Snowball extends Entity
         this.x += this.xd;
         this.y += this.yd;
         this.z += this.zd;
-        final float sqrt = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
+
+        final float sd = Mth.sqrt(this.xd * this.xd + this.zd * this.zd);
         this.yRot = (float)(Math.atan2(this.xd, this.zd) * 180.0 / Math.PI);
-        this.xRot = (float)(Math.atan2(this.yd, sqrt) * 180.0 / Math.PI);
-        while (this.xRot - this.xRotO < -180.0f) {
-            this.xRotO -= 360.0f;
-        }
-        while (this.xRot - this.xRotO >= 180.0f) {
-            this.xRotO += 360.0f;
-        }
-        while (this.yRot - this.yRotO < -180.0f) {
-            this.yRotO -= 360.0f;
-        }
-        while (this.yRot - this.yRotO >= 180.0f) {
-            this.yRotO += 360.0f;
-        }
+        this.xRot = (float)(Math.atan2(this.yd, sd) * 180.0 / Math.PI);
+
+        while (this.xRot - this.xRotO < -180.0f) this.xRotO -= 360.0f;
+        while (this.xRot - this.xRotO >= 180.0f) this.xRotO += 360.0f;
+        while (this.yRot - this.yRotO < -180.0f) this.yRotO -= 360.0f;
+        while (this.yRot - this.yRotO >= 180.0f) this.yRotO += 360.0f;
+
         this.xRot = this.xRotO + (this.xRot - this.xRotO) * 0.2f;
         this.yRot = this.yRotO + (this.yRot - this.yRotO) * 0.2f;
-        float n3 = 0.99f;
-        final float n4 = 0.03f;
+
+        float inertia = 0.99f;
+        final float gravity = 0.03f;
+
         if (this.isInWater()) {
-            for (int k = 0; k < 4; ++k) {
-                final float n5 = 0.25f;
-                this.level.addParticle("bubble", this.x - this.xd * n5, this.y - this.yd * n5, this.z - this.zd * n5, this.xd, this.yd, this.zd);
+            for (int i = 0; i < 4; ++i) {
+                final float s = 1 / 4.0f;
+                this.level.addParticle("bubble", this.x - this.xd * s, this.y - this.yd * s, this.z - this.zd * s, this.xd, this.yd, this.zd);
             }
-            n3 = 0.8f;
+            inertia = 0.8f;
         }
-        this.xd *= n3;
-        this.yd *= n3;
-        this.zd *= n3;
-        this.yd -= n4;
+
+        this.xd *= inertia;
+        this.yd *= inertia;
+        this.zd *= inertia;
+        this.yd -= gravity;
+
         this.setPos(this.x, this.y, this.z);
     }
     
@@ -249,7 +242,9 @@ public class Snowball extends Entity
     
     @Override
     public void playerTouch(final Player player) {
-        if (this.inGround && this.owner == player && this.shakeTime <= 0 && player.inventory.add(new ItemInstance(Item.arrow, 1))) {
+        if (!this.inGround || this.owner != player || this.shakeTime > 0) return;
+
+        if (player.inventory.add(new ItemInstance(Item.arrow, 1))) {
             this.level.playSound(this, "random.pop", 0.2f, ((this.random.nextFloat() - this.random.nextFloat()) * 0.7f + 1.0f) * 2.0f);
             player.take(this, 1);
             this.remove();

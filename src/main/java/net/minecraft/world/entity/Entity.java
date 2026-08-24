@@ -302,7 +302,7 @@ public abstract class Entity
         if (this.isStuckInWeb) {
             this.isStuckInWeb = false;
             xa *= 0.25;
-            ya *= 0.05000000074505806;
+            ya *= 0.05f;
             za *= 0.25;
             this.xd = 0.0;
             this.yd = 0.0;
@@ -678,8 +678,8 @@ public abstract class Entity
             }
             final double n5 = n2 * n4;
             final double n6 = n3 * n4;
-            final double n7 = n5 * 0.05000000074505806;
-            final double n8 = n6 * 0.05000000074505806;
+            final double n7 = n5 * 0.05f;
+            final double n8 = n6 * 0.05f;
             final double xa = n7 * (1.0f - this.pushthrough);
             final double za = n8 * (1.0f - this.pushthrough);
             this.push(-xa, 0.0, -za);

@@ -76,7 +76,7 @@ public class BiomeSource
             result = new Biome[w * h];
         }
         this.temperatures = this.temperatureMap.getRegion(this.temperatures, x, z, w, w, 0.02500000037252903, 0.02500000037252903, 0.25);
-        this.downfalls = this.downfallMap.getRegion(this.downfalls, x, z, w, w, 0.05000000074505806, 0.05000000074505806, 0.3333333333333333);
+        this.downfalls = this.downfallMap.getRegion(this.downfalls, x, z, w, w, 0.05f, 0.05f, 0.3333333333333333);
         this.noises = this.noiseMap.getRegion(this.noises, x, z, w, w, 0.25, 0.25, 0.5882352941176471);
         int n = 0;
         for (int i = 0; i < w; ++i) {

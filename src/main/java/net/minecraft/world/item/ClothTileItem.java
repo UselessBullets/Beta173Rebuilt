@@ -4,6 +4,7 @@
 
 package net.minecraft.world.item;
 
+import net.minecraft.Facing;
 import net.minecraft.world.level.tile.ClothTile;
 import net.minecraft.world.level.tile.Tile;
 
@@ -17,7 +18,7 @@ public class ClothTileItem extends TileItem
     
     @Override
     public int getIcon(final int auxValue) {
-        return Tile.cloth.getTexture(2, ClothTile.getTileDataForItemAuxValue(auxValue));
+        return Tile.cloth.getTexture(Facing.NORTH, ClothTile.getTileDataForItemAuxValue(auxValue));
     }
     
     @Override

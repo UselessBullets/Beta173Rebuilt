@@ -11,13 +11,12 @@ import net.minecraft.world.level.tile.Tile;
 public class DiggerItem extends Item
 {
     private Tile[] tiles;
-    private float speed;
+    private float speed = 4.0f;
     private int attackDamage;
     protected Tier tier;
     
     protected DiggerItem(final int id, final int attackDamage, final Tier tier, final Tile[] tiles) {
         super(id);
-        this.speed = 4.0f;
         this.tier = tier;
         this.tiles = tiles;
         this.maxStackSize = 1;
@@ -29,9 +28,7 @@ public class DiggerItem extends Item
     @Override
     public float getDestroySpeed(final ItemInstance itemInstance, final Tile tile) {
         for (int i = 0; i < this.tiles.length; ++i) {
-            if (this.tiles[i] == tile) {
-                return this.speed;
-            }
+            if (this.tiles[i] == tile) return this.speed;
         }
         return 1.0f;
     }

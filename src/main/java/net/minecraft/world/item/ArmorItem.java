@@ -6,8 +6,12 @@ package net.minecraft.world.item;
 
 public class ArmorItem extends Item
 {
-    private static final int[] defensePerSlot;
-    private static final int[] healthPerSlot;
+    public static final int SLOT_HEAD = 0;
+    public static final int SLOT_TORSO = 1;
+    public static final int SLOT_LEGS = 2;
+    public static final int SLOT_FEET = 3;
+    private static final int[] defensePerSlot = new int[] { 3, 8, 6, 3 };
+    private static final int[] healthPerSlot = new int[] { 11, 16, 15, 13 };
     public final int tier;
     public final int slot;
     public final int defense;
@@ -22,9 +26,5 @@ public class ArmorItem extends Item
         this.setMaxDamage(ArmorItem.healthPerSlot[slot] * 3 << tier);
         this.maxStackSize = 1;
     }
-    
-    static {
-        defensePerSlot = new int[] { 3, 8, 6, 3 };
-        healthPerSlot = new int[] { 11, 16, 15, 13 };
-    }
+
 }

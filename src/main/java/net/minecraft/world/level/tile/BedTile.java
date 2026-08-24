@@ -16,7 +16,11 @@ import net.minecraft.world.level.material.Material;
 
 public class BedTile extends Tile
 {
-    public static final int[][] HEAD_DIRECTION_OFFSETS;
+    private static final int PART_FOOT = 0;
+    private static final int PART_HEAD = 1;
+    public static final int HEAD_PIECE_DATA = 0x8;
+    public static final int OCCUPIED_DATA = 0x4;
+    public static final int[][] HEAD_DIRECTION_OFFSETS = new int[][] { { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 0 } };
     
     public BedTile(final int id) {
         super(id, 134, Material.cloth);
@@ -214,8 +218,5 @@ public class BedTile extends Tile
     public int getPistonPushReaction() {
         return 1;
     }
-    
-    static {
-        HEAD_DIRECTION_OFFSETS = new int[][] { { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 0 } };
-    }
+
 }

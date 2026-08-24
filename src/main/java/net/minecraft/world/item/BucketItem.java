@@ -4,6 +4,7 @@
 
 package net.minecraft.world.item;
 
+import net.minecraft.Facing;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.level.tile.Tile;
@@ -25,80 +26,81 @@ public class BucketItem extends Item
     
     @Override
     public ItemInstance use(final ItemInstance itemInstance, final Level level, final Player player) {
-        final float n = 1.0f;
-        final float n2 = player.xRotO + (player.xRot - player.xRotO) * n;
-        final float n3 = player.yRotO + (player.yRot - player.yRotO) * n;
-        final double x = player.xo + (player.x - player.xo) * n;
-        final double y = player.yo + (player.y - player.yo) * n + 1.62 - player.heightOffset;
-        final double z = player.zo + (player.z - player.zo) * n;
-        final Vec3 temp = Vec3.newTemp(x, y, z);
-        final float cos = Mth.cos(-n3 * Mth.DEGRAD - Mth.PI);
-        final float sin = Mth.sin(-n3 * Mth.DEGRAD - Mth.PI);
-        final float n4 = -Mth.cos(-n2 * Mth.DEGRAD);
-        final float sin2 = Mth.sin(-n2 * Mth.DEGRAD);
-        final float n5 = sin * n4;
-        final float n6 = sin2;
-        final float n7 = cos * n4;
-        final double n8 = 5.0;
-        final HitResult clip = level.clip(temp, temp.add(n5 * n8, n6 * n8, n7 * n8), this.content == 0);
-        if (clip == null) {
-            return itemInstance;
-        }
-        if (clip.type == HitResult.Type.TILE) {
-            int x2 = clip.x;
-            int y2 = clip.y;
-            int z2 = clip.z;
-            if (!level.mayInteract(player, x2, y2, z2)) {
-                return itemInstance;
-            }
+        final float a = 1.0f;
+
+        final float xRot = player.xRotO + (player.xRot - player.xRotO) * a;
+        final float yRot = player.yRotO + (player.yRot - player.yRotO) * a;
+
+        final double x = player.xo + (player.x - player.xo) * a;
+        final double y = player.yo + (player.y - player.yo) * a + 1.62 - player.heightOffset;
+        final double z = player.zo + (player.z - player.zo) * a;
+
+        final Vec3 from = Vec3.newTemp(x, y, z);
+
+        final float yCos = Mth.cos(-yRot * Mth.DEGRAD - Mth.PI);
+        final float ySin = Mth.sin(-yRot * Mth.DEGRAD - Mth.PI);
+        final float xCos = -Mth.cos(-xRot * Mth.DEGRAD);
+        final float xSin = Mth.sin(-xRot * Mth.DEGRAD);
+
+        final float xa = ySin * xCos;
+        final float ya = xSin;
+        final float za = yCos * xCos;
+
+        final double range = 5.0;
+        Vec3 to = from.add(xa * range, ya * range, za * range);
+        boolean pickLiquid = this.content == 0;
+        final HitResult hr = level.clip(from, to, pickLiquid);
+        if (hr == null) return itemInstance;
+
+        if (hr.type == HitResult.Type.TILE) {
+            int xt = hr.x;
+            int yt = hr.y;
+            int zt = hr.z;
+
+            if (!level.mayInteract(player, xt, yt, zt)) return itemInstance;
+
             if (this.content == 0) {
-                if (level.getMaterial(x2, y2, z2) == Material.water && level.getData(x2, y2, z2) == 0) {
-                    level.setTile(x2, y2, z2, 0);
+                if (level.getMaterial(xt, yt, zt) == Material.water && level.getData(xt, yt, zt) == 0) {
+                    level.setTile(xt, yt, zt, 0);
                     return new ItemInstance(Item.bucket_water);
                 }
-                if (level.getMaterial(x2, y2, z2) == Material.lava && level.getData(x2, y2, z2) == 0) {
-                    level.setTile(x2, y2, z2, 0);
+                if (level.getMaterial(xt, yt, zt) == Material.lava && level.getData(xt, yt, zt) == 0) {
+                    level.setTile(xt, yt, zt, 0);
                     return new ItemInstance(Item.bucket_lava);
                 }
             }
             else {
-                if (this.content < 0) {
-                    return new ItemInstance(Item.bucket_empty);
-                }
-                if (clip.f == 0) {
-                    --y2;
-                }
-                if (clip.f == 1) {
-                    ++y2;
-                }
-                if (clip.f == 2) {
-                    --z2;
-                }
-                if (clip.f == 3) {
-                    ++z2;
-                }
-                if (clip.f == 4) {
-                    --x2;
-                }
-                if (clip.f == 5) {
-                    ++x2;
-                }
-                if (level.isEmptyTile(x2, y2, z2) || !level.getMaterial(x2, y2, z2).isSolid()) {
+                if (this.content < 0) return new ItemInstance(Item.bucket_empty);
+
+                if (hr.f == Facing.DOWN) --yt;
+                if (hr.f == Facing.UP) ++yt;
+                if (hr.f == Facing.NORTH) --zt;
+                if (hr.f == Facing.SOUTH) ++zt;
+                if (hr.f == Facing.WEST) --xt;
+                if (hr.f == Facing.EAST) ++xt;
+
+                if (level.isEmptyTile(xt, yt, zt) || !level.getMaterial(xt, yt, zt).isSolid()) {
                     if (level.dimension.ultraWarm && this.content == Tile.water.id) {
                         level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.fizz", 0.5f, 2.6f + (level.random.nextFloat() - level.random.nextFloat()) * 0.8f);
+
                         for (int i = 0; i < 8; ++i) {
-                            level.addParticle("largesmoke", x2 + Math.random(), y2 + Math.random(), z2 + Math.random(), 0.0, 0.0, 0.0);
+                            level.addParticle("largesmoke", xt + Math.random(), yt + Math.random(), zt + Math.random(), 0.0, 0.0, 0.0);
                         }
                     }
                     else {
-                        level.setTileAndData(x2, y2, z2, this.content, 0);
+                        level.setTileAndData(xt, yt, zt, this.content, 0);
                     }
+
                     return new ItemInstance(Item.bucket_empty);
                 }
             }
         }
-        else if (this.content == 0 && clip.entity instanceof Cow) {
-            return new ItemInstance(Item.milk);
+        else {
+            if (this.content == 0) {
+                if (hr.entity instanceof Cow) {
+                    return new ItemInstance(Item.milk);
+                }
+            }
         }
         return itemInstance;
     }

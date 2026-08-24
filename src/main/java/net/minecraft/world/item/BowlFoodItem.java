@@ -16,6 +16,7 @@ public class BowlFoodItem extends FoodItem
     @Override
     public ItemInstance use(final ItemInstance itemInstance, final Level level, final Player player) {
         super.use(itemInstance, level, player);
+
         return new ItemInstance(Item.bowl);
     }
 }

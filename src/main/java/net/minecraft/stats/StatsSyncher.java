@@ -10,7 +10,6 @@ import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import net.minecraft.client.User;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.util.Map;
@@ -103,7 +102,7 @@ public class StatsSyncher
 
     protected Map<Stat, Integer> doGetStats() {
         // Useless - Known to exist from LCE StatsSyncher header file, but method contents are unknown
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
     
     public void getStatsFromServer() {

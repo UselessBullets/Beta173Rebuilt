@@ -20,7 +20,7 @@ public enum MobCategory
     private final Material spawnPositionMaterial;
     private final boolean isFriendly;
     
-    private MobCategory(final Class<?> base, final int max, final Material spawnPositionMaterial, final boolean isFriendly) {
+    MobCategory(final Class<?> base, final int max, final Material spawnPositionMaterial, final boolean isFriendly) {
         this.base = base;
         this.max = max;
         this.spawnPositionMaterial = spawnPositionMaterial;

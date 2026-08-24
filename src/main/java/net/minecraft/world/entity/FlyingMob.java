@@ -35,37 +35,39 @@ public class FlyingMob extends Mob
             this.zd *= 0.5;
         }
         else {
-            float n = 0.91f;
+            float friction = 0.91f;
             if (this.onGround) {
-                n = 0.54600006f;
-                final int tile = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
-                if (tile > 0) {
-                    n = Tile.tiles[tile].friction * 0.91f;
+                friction = 0.6f * 0.91f;
+                final int t = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
+                if (t > 0) {
+                    friction = Tile.tiles[t].friction * 0.91f;
                 }
             }
-            final float n2 = 0.16277136f / (n * n * n);
-            this.moveRelative(xa, ya, this.onGround ? (0.1f * n2) : 0.02f);
-            float n3 = 0.91f;
+
+            final float friction2 = (0.6f * 0.6f * 0.91f * 0.91f * 0.6f * 0.91f) / (friction * friction * friction);
+            this.moveRelative(xa, ya, this.onGround ? (0.1f * friction2) : 0.02f);
+
+            friction = 0.91f;
             if (this.onGround) {
-                n3 = 0.54600006f;
-                final int tile2 = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
-                if (tile2 > 0) {
-                    n3 = Tile.tiles[tile2].friction * 0.91f;
+                friction = 0.6f * 0.91f;
+                final int t = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
+                if (t > 0) {
+                    friction = Tile.tiles[t].friction * 0.91f;
                 }
             }
+
             this.move(this.xd, this.yd, this.zd);
-            this.xd *= n3;
-            this.yd *= n3;
-            this.zd *= n3;
+
+            this.xd *= friction;
+            this.yd *= friction;
+            this.zd *= friction;
         }
         this.walkAnimSpeedO = this.walkAnimSpeed;
-        final double n4 = this.x - this.xo;
-        final double n5 = this.z - this.zo;
-        float n6 = Mth.sqrt(n4 * n4 + n5 * n5) * 4.0f;
-        if (n6 > 1.0f) {
-            n6 = 1.0f;
-        }
-        this.walkAnimSpeed += (n6 - this.walkAnimSpeed) * 0.4f;
+        final double xxd = this.x - this.xo;
+        final double zzd = this.z - this.zo;
+        float wst = Mth.sqrt(xxd * xxd + zzd * zzd) * 4.0f;
+        if (wst > 1.0f) wst = 1.0f;
+        this.walkAnimSpeed += (wst - this.walkAnimSpeed) * 0.4f;
         this.walkAnimPos += this.walkAnimSpeed;
     }
     

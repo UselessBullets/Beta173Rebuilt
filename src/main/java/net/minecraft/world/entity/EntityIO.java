@@ -33,82 +33,19 @@ import java.util.Map;
 
 public class EntityIO
 {
-    private static Map<String, Class<? extends Entity>> idClassMap;
-    private static Map<Class<? extends Entity>, String> classIdMap;
-    private static Map<Integer, Class<? extends Entity>> numClassMap;
-    private static Map<Class<? extends Entity>, Integer> classNumMap;
-    
+    private static Map<String, Class<? extends Entity>> idClassMap = new HashMap<>();
+    private static Map<Class<? extends Entity>, String> classIdMap = new HashMap<>();
+    private static Map<Integer, Class<? extends Entity>> numClassMap = new HashMap<>();
+    private static Map<Class<? extends Entity>, Integer> classNumMap = new HashMap<>();
+
     private static void setId(final Class<? extends Entity> clazz, final String id, final int idNum) {
         EntityIO.idClassMap.put(id, clazz);
         EntityIO.classIdMap.put(clazz, id);
         EntityIO.numClassMap.put(idNum, clazz);
         EntityIO.classNumMap.put(clazz, idNum);
     }
-    
-    public static Entity newEntity(final String id, final Level level) {
-        Entity entity = null;
-        try {
-            final Class<? extends Entity> clazz = EntityIO.idClassMap.get(id);
-            if (clazz != null) {
-                entity = clazz.getConstructor(Level.class).newInstance(level);
-            }
-        }
-        catch (final Exception ex) {
-            ex.printStackTrace();
-        }
-        return entity;
-    }
-    
-    public static Entity loadStatic(final CompoundTag tag, final Level level) {
-        Entity entity = null;
-        try {
-            final Class<? extends Entity> clazz = EntityIO.idClassMap.get(tag.getString("id"));
-            if (clazz != null) {
-                entity = clazz.getConstructor(Level.class).newInstance(level);
-            }
-        }
-        catch (final Exception ex) {
-            ex.printStackTrace();
-        }
-        if (entity != null) {
-            entity.load(tag);
-        }
-        else {
-            System.out.println("Skipping Entity with id " + tag.getString("id"));
-        }
-        return entity;
-    }
-    
-    public static Entity newById(final int id, final Level level) {
-        Entity entity = null;
-        try {
-            final Class<? extends Entity> clazz = EntityIO.numClassMap.get(id);
-            if (clazz != null) {
-                entity = clazz.getConstructor(Level.class).newInstance(level);
-            }
-        }
-        catch (final Exception ex) {
-            ex.printStackTrace();
-        }
-        if (entity == null) {
-            System.out.println("Skipping Entity with id " + id);
-        }
-        return entity;
-    }
-    
-    public static int getId(final Entity entity) {
-        return EntityIO.classNumMap.get(entity.getClass());
-    }
-    
-    public static String getEncodeId(final Entity entity) {
-        return EntityIO.classIdMap.get(entity.getClass());
-    }
-    
+
     static {
-        EntityIO.idClassMap = new HashMap<>();
-        EntityIO.classIdMap = new HashMap<>();
-        EntityIO.numClassMap = new HashMap<>();
-        EntityIO.classNumMap = new HashMap<>();
         setId(Arrow.class, "Arrow", 10);
         setId(Snowball.class, "Snowball", 11);
         setId(ItemEntity.class, "Item", 1);
@@ -133,5 +70,51 @@ public class EntityIO
         setId(FallingTile.class, "FallingSand", 21);
         setId(Minecart.class, "Minecart", 40);
         setId(Boat.class, "Boat", 41);
+    }
+
+    public static Entity newEntity(final String id, final Level level) {
+        Entity entity = null;
+        try {
+            final Class<? extends Entity> clazz = EntityIO.idClassMap.get(id);
+            if (clazz != null) entity = clazz.getConstructor(Level.class).newInstance(level);
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+        return entity;
+    }
+
+    public static Entity loadStatic(final CompoundTag tag, final Level level) {
+        Entity entity = null;
+        try {
+            final Class<? extends Entity> clazz = EntityIO.idClassMap.get(tag.getString("id"));
+            if (clazz != null) entity = clazz.getConstructor(Level.class).newInstance(level);
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+
+        if (entity != null) entity.load(tag);
+        else System.out.println("Skipping Entity with id " + tag.getString("id"));
+        return entity;
+    }
+
+    public static Entity newById(final int id, final Level level) {
+        Entity entity = null;
+        try {
+            final Class<? extends Entity> clazz = EntityIO.numClassMap.get(id);
+            if (clazz != null) entity = clazz.getConstructor(Level.class).newInstance(level);
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+
+        if (entity == null) System.out.println("Skipping Entity with id " + id);
+        return entity;
+    }
+
+    public static int getId(final Entity entity) {
+        return EntityIO.classNumMap.get(entity.getClass());
+    }
+
+    public static String getEncodeId(final Entity entity) {
+        return EntityIO.classIdMap.get(entity.getClass());
     }
 }

@@ -6,6 +6,8 @@ package net.minecraft.world.entity;
 
 import com.mojang.nbt.CompoundTag;
 import java.util.List;
+
+import net.minecraft.SharedConstants;
 import net.minecraft.world.level.material.Material;
 import util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -16,17 +18,13 @@ import net.minecraft.world.level.Level;
 
 public class Painting extends Entity
 {
-    private int checkInterval;
-    public int dir;
-    public int xTile;
-    public int yTile;
-    public int zTile;
+    private int checkInterval = 0;
+    public int dir = 0;
+    public int xTile, yTile, zTile;
     public Motive motive;
     
     public Painting(final Level level) {
         super(level);
-        this.checkInterval = 0;
-        this.dir = 0;
         this.heightOffset = 0.0f;
         this.setSize(0.5f, 0.5f);
     }
@@ -36,16 +34,17 @@ public class Painting extends Entity
         this.xTile = xTile;
         this.yTile = yTile;
         this.zTile = zTile;
-        final ArrayList list = new ArrayList();
+
+        List<Motive> survivableMotives = new ArrayList<>();
         for (final Motive motive : Motive.values()) {
             this.motive = motive;
             this.setDir(dir);
             if (this.survives()) {
-                list.add(motive);
+                survivableMotives.add(motive);
             }
         }
-        if (list.size() > 0) {
-            this.motive = (Motive)list.get(this.random.nextInt(list.size()));
+        if (!survivableMotives.isEmpty()) {
+            this.motive = survivableMotives.get(this.random.nextInt(survivableMotives.size()));
         }
         this.setDir(dir);
     }
@@ -55,6 +54,7 @@ public class Painting extends Entity
         this.xTile = x;
         this.yTile = y;
         this.zTile = z;
+
         for (final Motive motive : Motive.values()) {
             if (motive.name.equals(motiveName)) {
                 this.motive = motive;
@@ -70,68 +70,62 @@ public class Painting extends Entity
     
     public void setDir(final int dir) {
         this.dir = dir;
-        final float n = (float)(dir * 90);
-        this.yRot = n;
-        this.yRotO = n;
-        float n2 = (float)this.motive.w;
-        final float n3 = (float)this.motive.h;
-        float n4 = (float)this.motive.w;
+        this.yRotO = this.yRot = (float)(dir * 90);
+
+        float w = (float)this.motive.w;
+        float h = (float)this.motive.h;
+        float d = (float)this.motive.w;
+
         if (dir == 0 || dir == 2) {
-            n4 = 0.5f;
+            d = 0.5f;
         }
         else {
-            n2 = 0.5f;
+            w = 0.5f;
         }
-        final float n5 = n2 / 32.0f;
-        final float n6 = n3 / 32.0f;
-        final float n7 = n4 / 32.0f;
-        float n8 = this.xTile + 0.5f;
-        final float n9 = this.yTile + 0.5f;
-        float n10 = this.zTile + 0.5f;
-        final float n11 = 0.5625f;
-        if (dir == 0) {
-            n10 -= n11;
-        }
-        if (dir == 1) {
-            n8 -= n11;
-        }
-        if (dir == 2) {
-            n10 += n11;
-        }
-        if (dir == 3) {
-            n8 += n11;
-        }
-        if (dir == 0) {
-            n8 -= this.offs(this.motive.w);
-        }
-        if (dir == 1) {
-            n10 += this.offs(this.motive.w);
-        }
-        if (dir == 2) {
-            n8 += this.offs(this.motive.w);
-        }
-        if (dir == 3) {
-            n10 -= this.offs(this.motive.w);
-        }
-        final float n12 = n9 + this.offs(this.motive.h);
-        this.setPos(n8, n12, n10);
-        final float n13 = -0.00625f;
-        this.bb.set(n8 - n5 - n13, n12 - n6 - n13, n10 - n7 - n13, n8 + n5 + n13, n12 + n6 + n13, n10 + n7 + n13);
+
+        w /= 32.0f;
+        h /= 32.0f;
+        d /= 32.0f;
+
+        float x = this.xTile + 0.5f;
+        float y = this.yTile + 0.5f;
+        float z = this.zTile + 0.5f;
+
+        final float fOffs = 0.5f + 1.0f / 16.0f;
+
+        if (dir == 0) z -= fOffs;
+        if (dir == 1) x -= fOffs;
+        if (dir == 2) z += fOffs;
+        if (dir == 3) x += fOffs;
+
+        if (dir == 0) x -= this.offs(this.motive.w);
+        if (dir == 1) z += this.offs(this.motive.w);
+        if (dir == 2) x += this.offs(this.motive.w);
+        if (dir == 3) z -= this.offs(this.motive.w);
+        y += this.offs(this.motive.h);
+
+        this.setPos(x, y, z);
+
+        final float ss = -(0.1f / 16.0f);
+
+        double x0 = x - w - ss;
+        double x1 = x + w + ss;
+        double y0 = y - h - ss;
+        double y1 = y + h + ss;
+        double z0 = z - d - ss;
+        double z1 = z + d + ss;
+        this.bb.set(x0, y0, z0, x1, y1, z1);
     }
     
     private float offs(final int w) {
-        if (w == 32) {
-            return 0.5f;
-        }
-        if (w == 64) {
-            return 0.5f;
-        }
+        if (w == 32) return 0.5f;
+        if (w == 64) return 0.5f;
         return 0.0f;
     }
     
     @Override
     public void tick() {
-        if (this.checkInterval++ == 100 && !this.level.isClientSide) {
+        if (this.checkInterval++ == SharedConstants.TICKS_PER_SECOND * 5 && !this.level.isClientSide) {
             this.checkInterval = 0;
             if (!this.survives()) {
                 this.remove();
@@ -141,44 +135,39 @@ public class Painting extends Entity
     }
     
     public boolean survives() {
-        if (this.level.getCubes(this, this.bb).size() > 0) {
-            return false;
-        }
-        final int n = this.motive.w / 16;
-        final int n2 = this.motive.h / 16;
-        int n3 = this.xTile;
-        final int yTile = this.yTile;
-        int n4 = this.zTile;
-        if (this.dir == 0) {
-            n3 = Mth.floor(this.x - this.motive.w / 32.0f);
-        }
-        if (this.dir == 1) {
-            n4 = Mth.floor(this.z - this.motive.w / 32.0f);
-        }
-        if (this.dir == 2) {
-            n3 = Mth.floor(this.x - this.motive.w / 32.0f);
-        }
-        if (this.dir == 3) {
-            n4 = Mth.floor(this.z - this.motive.w / 32.0f);
-        }
-        final int floor = Mth.floor(this.y - this.motive.h / 32.0f);
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n2; ++j) {
-                Material material;
+        if (!this.level.getCubes(this, this.bb).isEmpty()) return false;
+
+        final int ws = this.motive.w / 16;
+        final int hs = this.motive.h / 16;
+
+        int xt = this.xTile;
+        int yt = this.yTile;
+        int zt = this.zTile;
+        if (this.dir == 0) xt = Mth.floor(this.x - this.motive.w / 32.0f);
+        if (this.dir == 1) zt = Mth.floor(this.z - this.motive.w / 32.0f);
+        if (this.dir == 2) xt = Mth.floor(this.x - this.motive.w / 32.0f);
+        if (this.dir == 3) zt = Mth.floor(this.z - this.motive.w / 32.0f);
+        yt = Mth.floor(this.y - this.motive.h / 32.0f);
+
+        for (int ss = 0; ss < ws; ++ss) {
+            for (int yy = 0; yy < hs; ++yy) {
+                Material m;
                 if (this.dir == 0 || this.dir == 2) {
-                    material = this.level.getMaterial(n3 + i, floor + j, this.zTile);
+                    m = this.level.getMaterial(xt + ss, yt + yy, this.zTile);
                 }
                 else {
-                    material = this.level.getMaterial(this.xTile, floor + j, n4 + i);
+                    m = this.level.getMaterial(this.xTile, yt + yy, zt + ss);
                 }
-                if (!material.isSolid()) {
+                if (!m.isSolid()) {
                     return false;
                 }
             }
         }
-        final List entities = this.level.getEntities(this, this.bb);
-        for (int k = 0; k < entities.size(); ++k) {
-            if (entities.get(k) instanceof Painting) {
+
+        final List<Entity> entities = this.level.getEntities(this, this.bb);
+        for (int i = 0; i < entities.size(); ++i) {
+            Entity e = entities.get(i);
+            if (e instanceof Painting) {
                 return false;
             }
         }
@@ -213,15 +202,13 @@ public class Painting extends Entity
         this.xTile = compoundTag.getInt("TileX");
         this.yTile = compoundTag.getInt("TileY");
         this.zTile = compoundTag.getInt("TileZ");
-        final String string = compoundTag.getString("Motive");
+        final String motiveName = compoundTag.getString("Motive");
         for (final Motive motive : Motive.values()) {
-            if (motive.name.equals(string)) {
+            if (motive.name.equals(motiveName)) {
                 this.motive = motive;
             }
         }
-        if (this.motive == null) {
-            this.motive = Motive.Kebab;
-        }
+        if (this.motive == null) this.motive = Motive.Kebab;
         this.setDir(this.dir);
     }
     
@@ -269,23 +256,17 @@ public class Painting extends Entity
         Skeleton("Skeleton", 64, 48, 192, 64),
         DonkeyKong("DonkeyKong", 64, 48, 192, 112);
 
-        public static final int MAX_MOTIVE_NAME_LENGTH;
+        public static final int MAX_MOTIVE_NAME_LENGTH = "SkullAndRoses".length();
         public final String name;
-        public final int w;
-        public final int h;
-        public final int uo;
-        public final int vo;
+        public final int w, h;
+        public final int uo, vo;
 
-        private Motive(final String name, final int w, final int h, final int uo, final int vo) {
+        Motive(final String name, final int w, final int h, final int uo, final int vo) {
             this.name = name;
             this.w = w;
             this.h = h;
             this.uo = uo;
             this.vo = vo;
-        }
-
-        static {
-            MAX_MOTIVE_NAME_LENGTH = "SkullAndRoses".length();
         }
     }
 }

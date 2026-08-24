@@ -4,6 +4,7 @@
 
 package net.minecraft.world.entity;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.entity.player.Player;
@@ -18,93 +19,60 @@ import net.minecraft.world.level.Level;
 
 public abstract class Mob extends Entity
 {
-    public int invulnerableDuration;
+    public int invulnerableDuration = 20;
     public float timeOffs;
     public float rotA;
-    public float yBodyRot;
-    public float yBodyRotO;
-    protected float oRun;
-    protected float run;
-    protected float animStep;
-    protected float animStepO;
-    protected boolean hasHair;
-    protected String textureName;
-    protected boolean allowAlpha;
-    protected float rotOffs;
-    protected String modelName;
-    protected float bobStrength;
-    protected int deathScore;
-    protected float renderOffset;
-    public boolean interpolateOnly;
-    public float oAttackAnim;
-    public float attackAnim;
+    public float yBodyRot = 0.0f, yBodyRotO = 0.0f;
+    protected float oRun, run;
+    protected float animStep, animStepO;
+    protected boolean hasHair = true;
+    protected String textureName = "/mob/char.png";
+    protected boolean allowAlpha = true;
+    protected float rotOffs = 0.0f;
+    protected String modelName = null;
+    protected float bobStrength = 1.0f;
+    protected int deathScore = 0;
+    protected float renderOffset = 0.0f;
+    public boolean interpolateOnly = false;
+    public float oAttackAnim, attackAnim;
     public int health;
     public int lastHealth;
     private int ambientSoundTime;
     public int hurtTime;
     public int hurtDuration;
-    public float hurtDir;
-    public int deathTime;
-    public int attackTime;
-    public float oTilt;
-    public float tilt;
-    protected boolean dead;
-    public int modelNum;
-    public float animSpeed;
+    public float hurtDir = 0.0f;
+    public int deathTime = 0;
+    public int attackTime = 0;
+    public float oTilt, tilt;
+    protected boolean dead = false;
+    public int modelNum = -1;
+    public float animSpeed = (float)(Math.random() * 0.90f + 0.1f);
     public float walkAnimSpeedO;
     public float walkAnimSpeed;
     public float walkAnimPos;
     protected int lSteps;
-    protected double lx;
-    protected double ly;
-    protected double lz;
-    protected double lyr;
-    protected double lxr;
-    float fallTime;
-    protected int lastHurt;
-    protected int noActionTime;
-    protected float xxa;
-    protected float yya;
-    protected float yRotA;
-    protected boolean jumping;
-    protected float defaultLookAngle;
-    protected float runSpeed;
+    protected double lx, ly, lz, lyr, lxr;
+    float fallTime = 0.0f;
+    protected int lastHurt = 0;
+    protected int noActionTime = 0;
+    protected float xxa, yya, yRotA;
+    protected boolean jumping = false;
+    protected float defaultLookAngle = 0.0f;
+    protected float runSpeed = 0.7f;
     private Entity lookingAt;
-    protected int lookTime;
+    protected int lookTime = 0;
     
     public Mob(final Level level) {
         super(level);
-        this.invulnerableDuration = 20;
-        this.yBodyRot = 0.0f;
-        this.yBodyRotO = 0.0f;
-        this.hasHair = true;
-        this.textureName = "/mob/char.png";
-        this.allowAlpha = true;
-        this.rotOffs = 0.0f;
-        this.modelName = null;
-        this.bobStrength = 1.0f;
-        this.deathScore = 0;
-        this.renderOffset = 0.0f;
-        this.interpolateOnly = false;
-        this.hurtDir = 0.0f;
-        this.deathTime = 0;
-        this.attackTime = 0;
-        this.dead = false;
-        this.modelNum = -1;
-        this.animSpeed = (float)(Math.random() * 0.90f + 0.1f);
-        this.fallTime = 0.0f;
-        this.lastHurt = 0;
-        this.noActionTime = 0;
-        this.jumping = false;
-        this.defaultLookAngle = 0.0f;
-        this.runSpeed = 0.7f;
-        this.lookTime = 0;
         this.health = 10;
+
         this.blocksBuilding = true;
+
         this.rotA = (float)(Math.random() + 1.0) * 0.01f;
         this.setPos(this.x, this.y, this.z);
         this.timeOffs = (float)Math.random() * 12398.0f;
         this.yRot = (float)(Math.random() * Math.PI * 2.0);
+
         this.footSize = 0.5f;
     }
     
@@ -137,13 +105,13 @@ public abstract class Mob extends Entity
     }
     
     public int getAmbientSoundInterval() {
-        return 80;
+        return SharedConstants.TICKS_PER_SECOND * 4;
     }
     
     public void playAmbientSound() {
-        final String ambientSound = this.getAmbientSound();
-        if (ambientSound != null) {
-            this.level.playSound(this, ambientSound, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
+        final String ambient = this.getAmbientSound();
+        if (ambient != null) {
+            this.level.playSound(this, ambient, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
         }
     }
     
@@ -151,51 +119,58 @@ public abstract class Mob extends Entity
     public void baseTick() {
         this.oAttackAnim = this.attackAnim;
         super.baseTick();
+
         if (this.random.nextInt(1000) < this.ambientSoundTime++) {
             this.ambientSoundTime = -this.getAmbientSoundInterval();
             this.playAmbientSound();
         }
+
         if (this.isAlive() && this.isInWall()) {
             this.hurt(null, 1);
         }
-        if (this.fireImmune || this.level.isClientSide) {
-            this.onFire = 0;
-        }
+
+        if (this.fireImmune || this.level.isClientSide) this.onFire = 0;
+
         if (this.isAlive() && this.isUnderLiquid(Material.water) && !this.isWaterMob()) {
-            --this.airSupply;
+            this.airSupply--;
             if (this.airSupply == -20) {
                 this.airSupply = 0;
                 for (int i = 0; i < 8; ++i) {
-                    this.level.addParticle("bubble", this.x + (this.random.nextFloat() - this.random.nextFloat()), this.y + (this.random.nextFloat() - this.random.nextFloat()), this.z + (this.random.nextFloat() - this.random.nextFloat()), this.xd, this.yd, this.zd);
+                    float xo = this.random.nextFloat() - this.random.nextFloat();
+                    float yo = this.random.nextFloat() - this.random.nextFloat();
+                    float zo = this.random.nextFloat() - this.random.nextFloat();
+                    this.level.addParticle("bubble", this.x + xo, this.y + yo, this.z + zo, this.xd, this.yd, this.zd);
                 }
                 this.hurt(null, 2);
             }
+
             this.onFire = 0;
         }
         else {
             this.airSupply = this.airCapacity;
         }
+
         this.oTilt = this.tilt;
-        if (this.attackTime > 0) {
-            --this.attackTime;
-        }
-        if (this.hurtTime > 0) {
-            --this.hurtTime;
-        }
-        if (this.invulnerableTime > 0) {
-            --this.invulnerableTime;
-        }
+
+        if (this.attackTime > 0) this.attackTime--;
+        if (this.hurtTime > 0) this.hurtTime--;
+        if (this.invulnerableTime > 0) this.invulnerableTime--;
         if (this.health <= 0) {
-            ++this.deathTime;
+            this.deathTime++;
             if (this.deathTime > 20) {
                 this.beforeRemove();
                 this.remove();
-                for (int j = 0; j < 20; ++j) {
-                    this.level.addParticle("explode", this.x + this.random.nextFloat() * this.bbWidth * 2.0f - this.bbWidth, this.y + this.random.nextFloat() * this.bbHeight, this.z + this.random.nextFloat() * this.bbWidth * 2.0f - this.bbWidth, this.random.nextGaussian() * 0.02, this.random.nextGaussian() * 0.02, this.random.nextGaussian() * 0.02);
+                for (int i = 0; i < 20; ++i) {
+                    double xa = this.random.nextGaussian() * 0.02;
+                    double ya = this.random.nextGaussian() * 0.02;
+                    double za = this.random.nextGaussian() * 0.02;
+                    this.level.addParticle("explode", this.x + this.random.nextFloat() * this.bbWidth * 2.0f - this.bbWidth, this.y + this.random.nextFloat() * this.bbHeight, this.z + this.random.nextFloat() * this.bbWidth * 2.0f - this.bbWidth, xa, ya, za);
                 }
             }
         }
+
         this.animStepO = this.animStep;
+
         this.yBodyRotO = this.yBodyRot;
         this.yRotO = this.yRot;
         this.xRotO = this.xRot;
@@ -203,11 +178,11 @@ public abstract class Mob extends Entity
     
     public void spawnAnim() {
         for (int i = 0; i < 20; ++i) {
-            final double xd = this.random.nextGaussian() * 0.02;
-            final double yd = this.random.nextGaussian() * 0.02;
-            final double zd = this.random.nextGaussian() * 0.02;
-            final double n = 10.0;
-            this.level.addParticle("explode", this.x + this.random.nextFloat() * this.bbWidth * 2.0f - this.bbWidth - xd * n, this.y + this.random.nextFloat() * this.bbHeight - yd * n, this.z + this.random.nextFloat() * this.bbWidth * 2.0f - this.bbWidth - zd * n, xd, yd, zd);
+            final double xa = this.random.nextGaussian() * 0.02;
+            final double ya = this.random.nextGaussian() * 0.02;
+            final double za = this.random.nextGaussian() * 0.02;
+            final double dd = 10.0;
+            this.level.addParticle("explode", this.x + this.random.nextFloat() * this.bbWidth * 2.0f - this.bbWidth - xa * dd, this.y + this.random.nextFloat() * this.bbHeight - ya * dd, this.z + this.random.nextFloat() * this.bbWidth * 2.0f - this.bbWidth - za * dd, xa, ya, za);
         }
     }
     
@@ -226,76 +201,71 @@ public abstract class Mob extends Entity
         this.lz = z;
         this.lyr = yRot;
         this.lxr = xRot;
+
         this.lSteps = steps;
     }
     
     @Override
     public void tick() {
         super.tick();
+
         this.aiStep();
-        final double x = this.x - this.xo;
-        final double y = this.z - this.zo;
-        final float sqrt = Mth.sqrt(x * x + y * y);
-        float n = this.yBodyRot;
-        float n2 = 0.0f;
+
+        final double xd = this.x - this.xo;
+        final double zd = this.z - this.zo;
+
+        final float sideDist = Mth.sqrt(xd * xd + zd * zd);
+
+        float yBodyRotT = this.yBodyRot;
+
+        float walkSpeed = 0.0f;
         this.oRun = this.run;
-        float n3 = 0.0f;
-        if (sqrt > 0.05f) {
-            n3 = 1.0f;
-            n2 = sqrt * 3.0f;
-            n = (float)Math.atan2(y, x) * Mth.RADDEG - 90.0f;
+        float tRun = 0.0f;
+        if (sideDist > 0.05f) {
+            tRun = 1.0f;
+            walkSpeed = sideDist * 3.0f;
+            yBodyRotT = (float)Math.atan2(zd, xd) * Mth.RADDEG - 90.0f;
         }
         if (this.attackAnim > 0.0f) {
-            n = this.yRot;
+            yBodyRotT = this.yRot;
         }
         if (!this.onGround) {
-            n3 = 0.0f;
+            tRun = 0.0f;
         }
-        this.run += (n3 - this.run) * 0.3f;
-        float n4;
-        for (n4 = n - this.yBodyRot; n4 < -180.0f; n4 += 360.0f) {}
-        while (n4 >= 180.0f) {
-            n4 -= 360.0f;
+        this.run += (tRun - this.run) * 0.3f;
+
+        float yBodyRotD = yBodyRotT - this.yBodyRot;
+        while (yBodyRotD < -180.0f) yBodyRotD += 360.0f;
+        while (yBodyRotD >= 180.0f) yBodyRotD -= 360.0f;
+        this.yBodyRot += yBodyRotD * 0.3f;
+
+        float headDiff = this.yRot - this.yBodyRot;
+        while (headDiff < -180.0f) headDiff += 360.0f;
+        while (headDiff >= 180.0f) headDiff -= 360.0f;
+
+        final boolean behind = headDiff < -90.0f || headDiff >= 90.0f;
+        if (headDiff < -75.0f) headDiff = -75.0f;
+        if (headDiff >= 75.0f) headDiff = 75.0f;
+
+        this.yBodyRot = this.yRot - headDiff;
+        if (headDiff * headDiff > 2500.0f) {
+            this.yBodyRot += headDiff * 0.2f;
         }
-        this.yBodyRot += n4 * 0.3f;
-        float n5;
-        for (n5 = this.yRot - this.yBodyRot; n5 < -180.0f; n5 += 360.0f) {}
-        while (n5 >= 180.0f) {
-            n5 -= 360.0f;
+
+        if (behind) {
+            walkSpeed *= -1.0f;
         }
-        final boolean b = n5 < -90.0f || n5 >= 90.0f;
-        if (n5 < -75.0f) {
-            n5 = -75.0f;
-        }
-        if (n5 >= 75.0f) {
-            n5 = 75.0f;
-        }
-        this.yBodyRot = this.yRot - n5;
-        if (n5 * n5 > 2500.0f) {
-            this.yBodyRot += n5 * 0.2f;
-        }
-        if (b) {
-            n2 *= -1.0f;
-        }
-        while (this.yRot - this.yRotO < -180.0f) {
-            this.yRotO -= 360.0f;
-        }
-        while (this.yRot - this.yRotO >= 180.0f) {
-            this.yRotO += 360.0f;
-        }
-        while (this.yBodyRot - this.yBodyRotO < -180.0f) {
-            this.yBodyRotO -= 360.0f;
-        }
-        while (this.yBodyRot - this.yBodyRotO >= 180.0f) {
-            this.yBodyRotO += 360.0f;
-        }
-        while (this.xRot - this.xRotO < -180.0f) {
-            this.xRotO -= 360.0f;
-        }
-        while (this.xRot - this.xRotO >= 180.0f) {
-            this.xRotO += 360.0f;
-        }
-        this.animStep += n2;
+
+        while (this.yRot - this.yRotO < -180.0f) this.yRotO -= 360.0f;
+        while (this.yRot - this.yRotO >= 180.0f) this.yRotO += 360.0f;
+
+        while (this.yBodyRot - this.yBodyRotO < -180.0f) this.yBodyRotO -= 360.0f;
+        while (this.yBodyRot - this.yBodyRotO >= 180.0f) this.yBodyRotO += 360.0f;
+
+        while (this.xRot - this.xRotO < -180.0f) this.xRotO -= 360.0f;
+        while (this.xRot - this.xRotO >= 180.0f) this.xRotO += 360.0f;
+
+        this.animStep += walkSpeed;
     }
     
     @Override
@@ -304,76 +274,69 @@ public abstract class Mob extends Entity
     }
     
     public void heal(final int heal) {
-        if (this.health <= 0) {
-            return;
-        }
+        if (this.health <= 0) return;
         this.health += heal;
-        if (this.health > 20) {
-            this.health = 20;
-        }
+        if (this.health > 20) this.health = 20;
         this.invulnerableTime = this.invulnerableDuration / 2;
     }
     
     @Override
     public boolean hurt(final Entity source, final int dmg) {
-        if (this.level.isClientSide) {
-            return false;
-        }
+        if (this.level.isClientSide) return false;
         this.noActionTime = 0;
-        if (this.health <= 0) {
-            return false;
-        }
+        if (this.health <= 0) return false;
+
         this.walkAnimSpeed = 1.5f;
-        boolean b = true;
+
+        boolean sound = true;
         if (this.invulnerableTime > this.invulnerableDuration / 2.0f) {
-            if (dmg <= this.lastHurt) {
-                return false;
-            }
+            if (dmg <= this.lastHurt) return false;
             this.actuallyHurt(dmg - this.lastHurt);
             this.lastHurt = dmg;
-            b = false;
+            sound = false;
         }
         else {
             this.lastHurt = dmg;
             this.lastHealth = this.health;
             this.invulnerableTime = this.invulnerableDuration;
             this.actuallyHurt(dmg);
-            final int n = 10;
-            this.hurtDuration = n;
-            this.hurtTime = n;
+            this.hurtTime = this.hurtDuration = 10;
         }
+
         this.hurtDir = 0.0f;
-        if (b) {
-            this.level.broadcastEntityEvent(this, (byte)2);
+
+        if (sound) {
+            this.level.broadcastEntityEvent(this, EntityEvent.HURT);
             this.markHurt();
             if (source != null) {
-                double n2;
-                double n3;
-                for (n2 = source.x - this.x, n3 = source.z - this.z; n2 * n2 + n3 * n3 < 1.0E-4; n2 = (Math.random() - Math.random()) * 0.01, n3 = (Math.random() - Math.random()) * 0.01) {}
-                this.hurtDir = (float)(Math.atan2(n3, n2) * 180.0 / Math.PI) - this.yRot;
-                this.knockback(source, dmg, n2, n3);
+                double xd = source.x - this.x;
+                double zd = source.z - this.z;
+                while (xd * xd + zd * zd < 0.0001) {
+                    xd = (Math.random() - Math.random()) * 0.01;
+                    zd = (Math.random() - Math.random()) * 0.01;
+                }
+                this.hurtDir = (float)(Math.atan2(zd, xd) * 180.0 / Math.PI) - this.yRot;
+                this.knockback(source, dmg, xd, zd);
             }
             else {
                 this.hurtDir = (float)((int)(Math.random() * 2.0) * 180);
             }
         }
+
         if (this.health <= 0) {
-            if (b) {
-                this.level.playSound(this, this.getDeathSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
-            }
+            if (sound) this.level.playSound(this, this.getDeathSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
             this.die(source);
         }
-        else if (b) {
-            this.level.playSound(this, this.getHurtSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
+        else {
+            if (sound) this.level.playSound(this, this.getHurtSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
         }
+
         return true;
     }
     
     @Override
     public void animateHurt() {
-        final int n = 10;
-        this.hurtDuration = n;
-        this.hurtTime = n;
+        this.hurtTime = this.hurtDuration = 10;
         this.hurtDir = 0.0f;
     }
     
@@ -398,39 +361,38 @@ public abstract class Mob extends Entity
     }
     
     public void knockback(final Entity source, final int dmg, final double xd, final double zd) {
-        final float sqrt = Mth.sqrt(xd * xd + zd * zd);
-        final float n = 0.4f;
+        final float dd = Mth.sqrt(xd * xd + zd * zd);
+        final float pow = 0.4f;
+
         this.xd /= 2.0;
         this.yd /= 2.0;
         this.zd /= 2.0;
-        this.xd -= xd / sqrt * n;
+
+        this.xd -= xd / dd * pow;
         this.yd += 0.4f;
-        this.zd -= zd / sqrt * n;
-        if (this.yd > 0.4f) {
-            this.yd = 0.4f;
-        }
+        this.zd -= zd / dd * pow;
+
+        if (this.yd > 0.4f) this.yd = 0.4f;
     }
     
     public void die(final Entity source) {
-        if (this.deathScore >= 0 && source != null) {
-            source.awardKillScore(this, this.deathScore);
-        }
-        if (source != null) {
-            source.killed(this);
-        }
+        if (this.deathScore >= 0 && source != null) source.awardKillScore(this, this.deathScore);
+
+        if (source != null) source.killed(this);
+
         this.dead = true;
         if (!this.level.isClientSide) {
             this.dropDeathLoot();
         }
-        this.level.broadcastEntityEvent(this, (byte)3);
+
+        this.level.broadcastEntityEvent(this, EntityEvent.DEATH);
     }
     
     protected void dropDeathLoot() {
-        final int deathLoot = this.getDeathLoot();
-        if (deathLoot > 0) {
-            for (int nextInt = this.random.nextInt(3), i = 0; i < nextInt; ++i) {
-                this.spawnAtLocation(deathLoot, 1);
-            }
+        final int loot = this.getDeathLoot();
+        if (loot > 0) {
+            int count = this.random.nextInt(3);
+            for (int i = 0; i < count; ++i) this.spawnAtLocation(loot, 1);
         }
     }
     
@@ -444,9 +406,9 @@ public abstract class Mob extends Entity
         final int dmg = (int)Math.ceil(distance - 3.0f);
         if (dmg > 0) {
             this.hurt(null, dmg);
-            final int tile = this.level.getTile(Mth.floor(this.x), Mth.floor(this.y - 0.2f - this.heightOffset), Mth.floor(this.z));
-            if (tile > 0) {
-                final Tile.SoundType soundType = Tile.tiles[tile].soundType;
+            final int t = this.level.getTile(Mth.floor(this.x), Mth.floor(this.y - 0.2f - this.heightOffset), Mth.floor(this.z));
+            if (t > 0) {
+                final Tile.SoundType soundType = Tile.tiles[t].soundType;
                 this.level.playSound(this, soundType.getStepSound(), soundType.getVolume() * 0.5f, soundType.getPitch() * 0.75f);
             }
         }
@@ -454,92 +416,92 @@ public abstract class Mob extends Entity
     
     public void travel(final float xa, final float ya) {
         if (this.isInWater()) {
-            final double y = this.y;
+            final double yo = this.y;
             this.moveRelative(xa, ya, 0.02f);
             this.move(this.xd, this.yd, this.zd);
+
             this.xd *= 0.8f;
             this.yd *= 0.8f;
             this.zd *= 0.8f;
             this.yd -= 0.02;
-            if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6f - this.y + y, this.zd)) {
+
+            if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6f - this.y + yo, this.zd)) {
                 this.yd = 0.3f;
             }
         }
         else if (this.isInLava()) {
-            final double y2 = this.y;
+            final double yo = this.y;
             this.moveRelative(xa, ya, 0.02f);
             this.move(this.xd, this.yd, this.zd);
             this.xd *= 0.5;
             this.yd *= 0.5;
             this.zd *= 0.5;
             this.yd -= 0.02;
-            if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6f - this.y + y2, this.zd)) {
+
+            if (this.horizontalCollision && this.isFree(this.xd, this.yd + 0.6f - this.y + yo, this.zd)) {
                 this.yd = 0.3f;
             }
         }
         else {
-            float n = 0.91f;
+            float friction = 0.91f;
             if (this.onGround) {
-                n = 0.54600006f;
-                final int tile = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
-                if (tile > 0) {
-                    n = Tile.tiles[tile].friction * 0.91f;
+                friction = 0.546f;
+                final int t = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
+                if (t > 0) {
+                    friction = Tile.tiles[t].friction * 0.91f;
                 }
             }
-            final float n2 = 0.16277136f / (n * n * n);
-            this.moveRelative(xa, ya, this.onGround ? (0.1f * n2) : 0.02f);
-            float n3 = 0.91f;
+
+            final float friction2 = (0.6f * 0.6f * 0.91f * 0.91f * 0.6f * 0.91f) / (friction * friction * friction);
+
+            this.moveRelative(xa, ya, this.onGround ? (0.1f * friction2) : 0.02f);
+
+            friction = 0.91f;
             if (this.onGround) {
-                n3 = 0.54600006f;
-                final int tile2 = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
-                if (tile2 > 0) {
-                    n3 = Tile.tiles[tile2].friction * 0.91f;
+                friction = 0.6f * 0.91f;
+                final int t = this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0) - 1, Mth.floor(this.z));
+                if (t > 0) {
+                    friction = Tile.tiles[t].friction * 0.91f;
                 }
             }
             if (this.onLadder()) {
-                final float n4 = 0.15f;
-                if (this.xd < -n4) {
-                    this.xd = -n4;
-                }
-                if (this.xd > n4) {
-                    this.xd = n4;
-                }
-                if (this.zd < -n4) {
-                    this.zd = -n4;
-                }
-                if (this.zd > n4) {
-                    this.zd = n4;
-                }
+                final float max = 0.15f;
+                if (this.xd < -max) this.xd = -max;
+                if (this.xd > max) this.xd = max;
+                if (this.zd < -max) this.zd = -max;
+                if (this.zd > max) this.zd = max;
                 this.fallDistance = 0.0f;
-                if (this.yd < -0.15) {
-                    this.yd = -0.15;
-                }
-                if (this.isSneaking() && this.yd < 0.0) {
-                    this.yd = 0.0;
-                }
+                if (this.yd < -0.15) this.yd = -0.15;
+                if (this.isSneaking() && this.yd < 0.0) this.yd = 0.0;
             }
+
             this.move(this.xd, this.yd, this.zd);
+
             if (this.horizontalCollision && this.onLadder()) {
                 this.yd = 0.2;
             }
+
             this.yd -= 0.08;
             this.yd *= 0.98f;
-            this.xd *= n3;
-            this.zd *= n3;
+            this.xd *= friction;
+            this.zd *= friction;
         }
+
         this.walkAnimSpeedO = this.walkAnimSpeed;
-        final double n5 = this.x - this.xo;
-        final double n6 = this.z - this.zo;
-        float n7 = Mth.sqrt(n5 * n5 + n6 * n6) * 4.0f;
-        if (n7 > 1.0f) {
-            n7 = 1.0f;
-        }
-        this.walkAnimSpeed += (n7 - this.walkAnimSpeed) * 0.4f;
+        final double xxd = this.x - this.xo;
+        final double zzd = this.z - this.zo;
+        float wst = Mth.sqrt(xxd * xxd + zzd * zzd) * 4.0f;
+        if (wst > 1.0f) wst = 1.0f;
+        this.walkAnimSpeed += (wst - this.walkAnimSpeed) * 0.4f;
         this.walkAnimPos += this.walkAnimSpeed;
     }
     
     public boolean onLadder() {
-        return this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0), Mth.floor(this.z)) == Tile.ladder.id;
+        int xt = Mth.floor(this.x);
+        int yt = Mth.floor(this.bb.y0);
+        int zt = Mth.floor(this.z);
+
+        return this.level.getTile(xt, yt, zt) == Tile.ladder.id;
     }
 
     @Override
@@ -557,9 +519,7 @@ public abstract class Mob extends Entity
     
     public void readAdditionalSaveData(final CompoundTag compoundTag) {
         this.health = compoundTag.getShort("Health");
-        if (!compoundTag.contains("Health")) {
-            this.health = 10;
-        }
+        if (!compoundTag.contains("Health")) this.health = 10;
         this.hurtTime = compoundTag.getShort("HurtTime");
         this.deathTime = compoundTag.getShort("DeathTime");
         this.attackTime = compoundTag.getShort("AttackTime");
@@ -576,31 +536,36 @@ public abstract class Mob extends Entity
     
     public void aiStep() {
         if (this.lSteps > 0) {
-            final double n = this.x + (this.lx - this.x) / this.lSteps;
-            final double y = this.y + (this.ly - this.y) / this.lSteps;
-            final double n2 = this.z + (this.lz - this.z) / this.lSteps;
-            double n3;
-            for (n3 = this.lyr - this.yRot; n3 < -180.0; n3 += 360.0) {}
-            while (n3 >= 180.0) {
-                n3 -= 360.0;
-            }
-            this.yRot += (float)(n3 / this.lSteps);
-            this.xRot += (float)((this.lxr - this.xRot) / this.lSteps);
-            --this.lSteps;
-            this.setPos(n, y, n2);
+            double xt = this.x + (this.lx - this.x) / this.lSteps;
+            double yt = this.y + (this.ly - this.y) / this.lSteps;
+            double zt = this.z + (this.lz - this.z) / this.lSteps;
+
+            double yrd = this.lyr - this.yRot;
+            while (yrd < -180.0) yrd += 360.0;
+            while (yrd >= 180.0) yrd -= 360.0;
+            double xrd = this.lxr - this.xRot;
+
+            this.yRot += (float)(yrd / this.lSteps);
+            this.xRot += (float)(xrd / this.lSteps);
+
+            this.lSteps--;
+            this.setPos(xt, yt, zt);
             this.setRot(this.yRot, this.xRot);
-            final List<AABB> cubes = this.level.getCubes(this, this.bb.shrink(0.03125, 0.0, 0.03125));
-            if (cubes.size() > 0) {
-                double y2 = 0.0;
-                for (int i = 0; i < cubes.size(); ++i) {
-                    final AABB aabb = cubes.get(i);
-                    if (aabb.y1 > y2) {
-                        y2 = aabb.y1;
-                    }
+
+            AABB shrinkbb = this.bb.shrink(1 / 32.0, 0.0, 1 / 32.0);
+            final List<AABB> collisions = this.level.getCubes(this, shrinkbb);
+            if (collisions.size() > 0) {
+                double yTop = 0.0;
+                for (int i = 0; i < collisions.size(); ++i) {
+                    final AABB ab = collisions.get(i);
+                    if (ab.y1 > yTop) yTop = ab.y1;
                 }
-                this.setPos(n, y + (y2 - this.bb.y0), n2);
+
+                yt += (yTop - this.bb.y0);
+                this.setPos(xt, yt, zt);
             }
         }
+
         if (this.isImmobile()) {
             this.jumping = false;
             this.xxa = 0.0f;
@@ -610,6 +575,7 @@ public abstract class Mob extends Entity
         else if (!this.interpolateOnly) {
             this.updateAi();
         }
+
         final boolean inWater = this.isInWater();
         final boolean inLava = this.isInLava();
         if (this.jumping) {
@@ -623,17 +589,17 @@ public abstract class Mob extends Entity
                 this.jumpFromGround();
             }
         }
+
         this.xxa *= 0.98f;
         this.yya *= 0.98f;
         this.yRotA *= 0.9f;
+
         this.travel(this.xxa, this.yya);
         final List<Entity> entities = this.level.getEntities(this, this.bb.grow(0.2f, 0.0, 0.2f));
         if (entities != null && entities.size() > 0) {
-            for (int j = 0; j < entities.size(); ++j) {
-                final Entity entity = entities.get(j);
-                if (entity.isPushable()) {
-                    entity.push(this);
-                }
+            for (int i = 0; i < entities.size(); ++i) {
+                final Entity e = entities.get(i);
+                if (e.isPushable()) e.push(this);
             }
         }
     }
@@ -643,7 +609,7 @@ public abstract class Mob extends Entity
     }
     
     protected void jumpFromGround() {
-        this.yd = 0.41999998688697815;
+        this.yd = 0.42f;
     }
     
     protected boolean removeWhenFarAway() {
@@ -651,17 +617,18 @@ public abstract class Mob extends Entity
     }
     
     protected void checkDespawn() {
-        final Player nearestPlayer = this.level.getNearestPlayer(this, -1.0);
-        if (this.removeWhenFarAway() && nearestPlayer != null) {
-            final double n = nearestPlayer.x - this.x;
-            final double n2 = nearestPlayer.y - this.y;
-            final double n3 = nearestPlayer.z - this.z;
-            final double n4 = n * n + n2 * n2 + n3 * n3;
-            if (n4 > 16384.0) {
+        final Player player = this.level.getNearestPlayer(this, -1.0);
+        if (this.removeWhenFarAway() && player != null) {
+            final double xd = player.x - this.x;
+            final double yd = player.y - this.y;
+            final double zd = player.z - this.z;
+            final double sd = xd * xd + yd * yd + zd * zd;
+            if (sd > 128 * 128) {
                 this.remove();
             }
-            if (this.noActionTime > 600 && this.random.nextInt(800) == 0) {
-                if (n4 < 1024.0) {
+
+            if (this.noActionTime > SharedConstants.TICKS_PER_SECOND * 30 && this.random.nextInt(800) == 0) {
+                if (sd < 32 * 32) {
                     this.noActionTime = 0;
                 }
                 else {
@@ -672,25 +639,29 @@ public abstract class Mob extends Entity
     }
     
     protected void updateAi() {
-        ++this.noActionTime;
+        this.noActionTime++;
+
         this.level.getNearestPlayer(this, -1.0);
         this.checkDespawn();
+
         this.xxa = 0.0f;
         this.yya = 0.0f;
-        final float n = 8.0f;
+
+        final float lookDistance = 8.0f;
         if (this.random.nextFloat() < 0.02f) {
-            final Player nearestPlayer = this.level.getNearestPlayer(this, n);
-            if (nearestPlayer != null) {
-                this.lookingAt = nearestPlayer;
+            final Player player = this.level.getNearestPlayer(this, lookDistance);
+            if (player != null) {
+                this.lookingAt = player;
                 this.lookTime = 10 + this.random.nextInt(20);
             }
             else {
                 this.yRotA = (this.random.nextFloat() - 0.5f) * 20.0f;
             }
         }
+
         if (this.lookingAt != null) {
             this.lookAt(this.lookingAt, 10.0f, (float)this.getMaxHeadXRot());
-            if (this.lookTime-- <= 0 || this.lookingAt.removed || this.lookingAt.distanceToSqr(this) > n * n) {
+            if (this.lookTime-- <= 0 || this.lookingAt.removed || this.lookingAt.distanceToSqr(this) > lookDistance * lookDistance) {
                 this.lookingAt = null;
             }
         }
@@ -701,11 +672,10 @@ public abstract class Mob extends Entity
             this.yRot += this.yRotA;
             this.xRot = this.defaultLookAngle;
         }
+
         final boolean inWater = this.isInWater();
         final boolean inLava = this.isInLava();
-        if (inWater || inLava) {
-            this.jumping = (this.random.nextFloat() < 0.8f);
-        }
+        if (inWater || inLava) this.jumping = (this.random.nextFloat() < 0.8f);
     }
     
     protected int getMaxHeadXRot() {
@@ -713,20 +683,24 @@ public abstract class Mob extends Entity
     }
     
     public void lookAt(final Entity e, final float yMax, final float xMax) {
-        final double x = e.x - this.x;
-        final double y = e.z - this.z;
-        double y2;
+        double xd = e.x - this.x;
+        double yd;
+        double zd = e.z - this.z;
+
         if (e instanceof Mob) {
             final Mob mob = (Mob)e;
-            y2 = this.y + this.getHeadHeight() - (mob.y + mob.getHeadHeight());
+            yd = this.y + this.getHeadHeight() - (mob.y + mob.getHeadHeight());
         }
         else {
-            y2 = (e.bb.y0 + e.bb.y1) / 2.0 - (this.y + this.getHeadHeight());
+            yd = (e.bb.y0 + e.bb.y1) / 2.0 - (this.y + this.getHeadHeight());
         }
-        final double x2 = Mth.sqrt(x * x + y * y);
-        final float b = (float)(Math.atan2(y, x) * 180.0 / Math.PI) - 90.0f;
-        this.xRot = -this.rotLerp(this.xRot, (float)(-(Math.atan2(y2, x2) * 180.0 / Math.PI)), xMax);
-        this.yRot = this.rotLerp(this.yRot, b, yMax);
+
+        final double sd = Mth.sqrt(xd * xd + zd * zd);
+
+        float yRotD = (float)(Math.atan2(zd, xd) * 180.0 / Math.PI) - 90.0f;
+        float xRotD = (float)(-(Math.atan2(yd, sd) * 180.0 / Math.PI));
+        this.xRot = -this.rotLerp(this.xRot, xRotD, xMax);
+        this.yRot = this.rotLerp(this.yRot, yRotD, yMax);
     }
     
     public boolean isLookingAtAnEntity() {
@@ -738,25 +712,20 @@ public abstract class Mob extends Entity
     }
     
     private float rotLerp(final float a, final float b, final float max) {
-        float n;
-        for (n = b - a; n < -180.0f; n += 360.0f) {}
-        while (n >= 180.0f) {
-            n -= 360.0f;
-        }
-        if (n > max) {
-            n = max;
-        }
-        if (n < -max) {
-            n = -max;
-        }
-        return a + n;
+        float diff = b - a;
+        while (diff < -180.0f) diff += 360.0f;
+        while (diff >= 180.0f) diff -= 360.0f;
+
+        if (diff > max) diff = max;
+        if (diff < -max) diff = -max;
+        return a + diff;
     }
     
     public void beforeRemove() {
     }
     
     public boolean canSpawn() {
-        return this.level.isUnobstructed(this.bb) && this.level.getCubes(this, this.bb).size() == 0 && !this.level.containsAnyLiquid(this.bb);
+        return this.level.isUnobstructed(this.bb) && this.level.getCubes(this, this.bb).isEmpty() && !this.level.containsAnyLiquid(this.bb);
     }
     
     @Override
@@ -765,18 +734,19 @@ public abstract class Mob extends Entity
     }
     
     public float getAttackAnim(final float a) {
-        float n = this.attackAnim - this.oAttackAnim;
-        if (n < 0.0f) {
-            ++n;
-        }
-        return this.oAttackAnim + n * a;
+        float diff = this.attackAnim - this.oAttackAnim;
+        if (diff < 0.0f) diff += 1;
+        return this.oAttackAnim + diff * a;
     }
     
     public Vec3 getPos(final float a) {
-        if (a == 1.0f) {
-            return Vec3.newTemp(this.x, this.y, this.z);
-        }
-        return Vec3.newTemp(this.xo + (this.x - this.xo) * a, this.yo + (this.y - this.yo) * a, this.zo + (this.z - this.zo) * a);
+        if (a == 1.0f) return Vec3.newTemp(this.x, this.y, this.z);
+
+        double x = this.xo + (this.x - this.xo) * a;
+        double y = this.yo + (this.y - this.yo) * a;
+        double z = this.zo + (this.z - this.zo) * a;
+
+        return Vec3.newTemp(x, y, z);
     }
     
     @Override
@@ -786,23 +756,29 @@ public abstract class Mob extends Entity
     
     public Vec3 getViewVector(final float a) {
         if (a == 1.0f) {
-            final float cos = Mth.cos(-this.yRot * Mth.DEGRAD - Mth.PI);
-            final float sin = Mth.sin(-this.yRot * Mth.DEGRAD - Mth.PI);
-            final float n = -Mth.cos(-this.xRot * Mth.DEGRAD);
-            return Vec3.newTemp(sin * n, Mth.sin(-this.xRot * Mth.DEGRAD), cos * n);
+            final float yCos = Mth.cos(-this.yRot * Mth.DEGRAD - Mth.PI);
+            final float ySin = Mth.sin(-this.yRot * Mth.DEGRAD - Mth.PI);
+            final float xCos = -Mth.cos(-this.xRot * Mth.DEGRAD);
+            final float xSin = Mth.sin(-this.xRot * Mth.DEGRAD);
+
+            return Vec3.newTemp(ySin * xCos, xSin, yCos * xCos);
         }
-        final float n2 = this.xRotO + (this.xRot - this.xRotO) * a;
-        final float n3 = this.yRotO + (this.yRot - this.yRotO) * a;
-        final float cos2 = Mth.cos(-n3 * Mth.DEGRAD - Mth.PI);
-        final float sin2 = Mth.sin(-n3 * Mth.DEGRAD - Mth.PI);
-        final float n4 = -Mth.cos(-n2 * Mth.DEGRAD);
-        return Vec3.newTemp(sin2 * n4, Mth.sin(-n2 * Mth.DEGRAD), cos2 * n4);
+        final float xRot = this.xRotO + (this.xRot - this.xRotO) * a;
+        final float yRot = this.yRotO + (this.yRot - this.yRotO) * a;
+
+        final float yCos = Mth.cos(-yRot * Mth.DEGRAD - Mth.PI);
+        final float ySin = Mth.sin(-yRot * Mth.DEGRAD - Mth.PI);
+        final float xCos = -Mth.cos(-xRot * Mth.DEGRAD);
+        final float xSin = Mth.sin(-xRot * Mth.DEGRAD);
+
+        return Vec3.newTemp(ySin * xCos, xSin, yCos * xCos);
     }
     
     public HitResult pick(final double range, final float a) {
-        final Vec3 pos = this.getPos(a);
-        final Vec3 viewVector = this.getViewVector(a);
-        return this.level.clip(pos, pos.add(viewVector.x * range, viewVector.y * range, viewVector.z * range));
+        Vec3 from = this.getPos(a);
+        Vec3 b = this.getViewVector(a);
+        Vec3 to = from.add(b.x * range, b.y * range, b.z * range);
+        return this.level.clip(from, to);
     }
     
     public int getMaxSpawnClusterSize() {
@@ -815,17 +791,17 @@ public abstract class Mob extends Entity
     
     @Override
     public void handleEntityEvent(final byte id) {
-        if (id == 2) {
+        if (id == EntityEvent.HURT) {
             this.walkAnimSpeed = 1.5f;
+
             this.invulnerableTime = this.invulnerableDuration;
-            final int n = 10;
-            this.hurtDuration = n;
-            this.hurtTime = n;
+            this.hurtTime = this.hurtDuration = 10;
             this.hurtDir = 0.0f;
+
             this.level.playSound(this, this.getHurtSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
             this.hurt(null, 0);
         }
-        else if (id == 3) {
+        else if (id == EntityEvent.DEATH) {
             this.level.playSound(this, this.getDeathSound(), this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
             this.health = 0;
             this.die(null);

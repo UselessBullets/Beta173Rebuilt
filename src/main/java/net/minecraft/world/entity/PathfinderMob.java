@@ -11,13 +11,13 @@ import net.minecraft.world.level.pathfinder.Path;
 
 public class PathfinderMob extends Mob
 {
+    private static final int MAX_TURN = 30;
     private Path path;
     protected Entity attackTarget;
-    protected boolean holdGround;
+    protected boolean holdGround = false;
     
     public PathfinderMob(final Level level) {
         super(level);
-        this.holdGround = false;
     }
     
     protected boolean shouldHoldGround() {
@@ -27,32 +27,37 @@ public class PathfinderMob extends Mob
     @Override
     protected void updateAi() {
         this.holdGround = this.shouldHoldGround();
-        final float n = 16.0f;
+        final float maxDist = 16.0f;
+
         if (this.attackTarget == null) {
             this.attackTarget = this.findAttackTarget();
             if (this.attackTarget != null) {
-                this.path = this.level.findPath(this, this.attackTarget, n);
+                this.path = this.level.findPath(this, this.attackTarget, maxDist);
             }
-        }
-        else if (!this.attackTarget.isAlive()) {
-            this.attackTarget = null;
         }
         else {
-            final float distanceTo = this.attackTarget.distanceTo(this);
-            if (this.canSee(this.attackTarget)) {
-                this.checkHurtTarget(this.attackTarget, distanceTo);
-            }
-            else {
-                this.cantSeeTarget(this.attackTarget, distanceTo);
+            if (this.attackTarget.isAlive()) {
+                final float d = this.attackTarget.distanceTo(this);
+                if (this.canSee(this.attackTarget)) {
+                    this.checkHurtTarget(this.attackTarget, d);
+                }
+                else {
+                    this.cantSeeTarget(this.attackTarget, d);
+                }
+            } else {
+                this.attackTarget = null;
             }
         }
+
         if (!this.holdGround && this.attackTarget != null && (this.path == null || this.random.nextInt(20) == 0)) {
-            this.path = this.level.findPath(this, this.attackTarget, n);
+            this.path = this.level.findPath(this, this.attackTarget, maxDist);
         }
         else if (!this.holdGround && ((this.path == null && this.random.nextInt(80) == 0) || this.random.nextInt(80) == 0)) {
             this.findRandomStrollLocation();
         }
-        final int floor = Mth.floor(this.bb.y0 + 0.5);
+
+        final int yFloor = Mth.floor(this.bb.y0 + 0.5);
+
         final boolean inWater = this.isInWater();
         final boolean inLava = this.isInLava();
         this.xRot = 0.0f;
@@ -61,82 +66,79 @@ public class PathfinderMob extends Mob
             this.path = null;
             return;
         }
-        Vec3 vec3 = this.path.current(this);
-        final double n2 = this.bbWidth * 2.0f;
-        while (vec3 != null && vec3.distanceToSqr(this.x, vec3.y, this.z) < n2 * n2) {
+
+        Vec3 target = this.path.current(this);
+        final double r = this.bbWidth * 2.0f;
+        while (target != null && target.distanceToSqr(this.x, target.y, this.z) < r * r) {
             this.path.next();
             if (this.path.isDone()) {
-                vec3 = null;
+                target = null;
                 this.path = null;
             }
-            else {
-                vec3 = this.path.current(this);
-            }
+            else target = this.path.current(this);
         }
+
         this.jumping = false;
-        if (vec3 != null) {
-            final double x = vec3.x - this.x;
-            final double y = vec3.z - this.z;
-            final double n3 = vec3.y - floor;
-            float n4 = (float)(Math.atan2(y, x) * 180.0 / Math.PI) - 90.0f - this.yRot;
+        if (target != null) {
+            final double xd = target.x - this.x;
+            final double zd = target.z - this.z;
+            final double yd = target.y - yFloor;
+            float yRotD = (float)(Math.atan2(zd, xd) * 180.0 / Math.PI) - 90.0f;
+            float rotDiff = yRotD - this.yRot;
             this.yya = this.runSpeed;
-            while (n4 < -180.0f) {
-                n4 += 360.0f;
+            while (rotDiff < -180.0f) rotDiff += 360.0f;
+            while (rotDiff >= 180.0f) rotDiff -= 360.0f;
+
+            if (rotDiff > MAX_TURN) rotDiff = MAX_TURN;
+            if (rotDiff < -MAX_TURN) rotDiff = -MAX_TURN;
+            this.yRot += rotDiff;
+
+            if (this.holdGround) {
+                if (this.attackTarget != null) {
+                    final double xd2 = this.attackTarget.x - this.x;
+                    final double zd2 = this.attackTarget.z - this.z;
+
+                    final float oldyRot = this.yRot;
+                    this.yRot = (float) (Math.atan2(zd2, xd2) * 180.0 / Math.PI) - 90.0f;
+
+                    rotDiff = (oldyRot - this.yRot + 90.0f) * Mth.DEGRAD;
+                    this.xxa = -Mth.sin(rotDiff) * this.yya * 1.0f;
+                    this.yya = Mth.cos(rotDiff) * this.yya * 1.0f;
+                }
             }
-            while (n4 >= 180.0f) {
-                n4 -= 360.0f;
-            }
-            if (n4 > 30.0f) {
-                n4 = 30.0f;
-            }
-            if (n4 < -30.0f) {
-                n4 = -30.0f;
-            }
-            this.yRot += n4;
-            if (this.holdGround && this.attackTarget != null) {
-                final double x2 = this.attackTarget.x - this.x;
-                final double y2 = this.attackTarget.z - this.z;
-                final float yRot = this.yRot;
-                this.yRot = (float)(Math.atan2(y2, x2) * 180.0 / Math.PI) - 90.0f;
-                final float n5 = (yRot - this.yRot + 90.0f) * Mth.DEGRAD;
-                this.xxa = -Mth.sin(n5) * this.yya * 1.0f;
-                this.yya = Mth.cos(n5) * this.yya * 1.0f;
-            }
-            if (n3 > 0.0) {
+            if (yd > 0.0) {
                 this.jumping = true;
             }
         }
+
         if (this.attackTarget != null) {
             this.lookAt(this.attackTarget, 30.0f, 30.0f);
         }
-        if (this.horizontalCollision && !this.isPathFinding()) {
-            this.jumping = true;
-        }
-        if (this.random.nextFloat() < 0.8f && (inWater || inLava)) {
-            this.jumping = true;
-        }
+
+        if (this.horizontalCollision && !this.isPathFinding()) this.jumping = true;
+        if (this.random.nextFloat() < 0.8f && (inWater || inLava)) this.jumping = true;
     }
     
     protected void findRandomStrollLocation() {
-        boolean b = false;
+        boolean hasBest = false;
         int xBest = -1;
         int yBest = -1;
         int zBest = -1;
-        float n = -99999.0f;
+        float best = -99999.0f;
         for (int i = 0; i < 10; ++i) {
-            final int floor = Mth.floor(this.x + this.random.nextInt(13) - 6.0);
-            final int floor2 = Mth.floor(this.y + this.random.nextInt(7) - 3.0);
-            final int floor3 = Mth.floor(this.z + this.random.nextInt(13) - 6.0);
-            final float walkTargetValue = this.getWalkTargetValue(floor, floor2, floor3);
-            if (walkTargetValue > n) {
-                n = walkTargetValue;
-                xBest = floor;
-                yBest = floor2;
-                zBest = floor3;
-                b = true;
+            final int xt = Mth.floor(this.x + this.random.nextInt(13) - 6.0);
+            final int yt = Mth.floor(this.y + this.random.nextInt(7) - 3.0);
+            final int zt = Mth.floor(this.z + this.random.nextInt(13) - 6.0);
+            final float walkTargetValue = this.getWalkTargetValue(xt, yt, zt);
+            if (walkTargetValue > best) {
+                best = walkTargetValue;
+                xBest = xt;
+                yBest = yt;
+                zBest = zt;
+                hasBest = true;
             }
         }
-        if (b) {
+        if (hasBest) {
             this.path = this.level.findPath(this, xBest, yBest, zBest, 10.0f);
         }
     }
@@ -157,10 +159,10 @@ public class PathfinderMob extends Mob
     
     @Override
     public boolean canSpawn() {
-        final int floor = Mth.floor(this.x);
-        final int floor2 = Mth.floor(this.bb.y0);
-        final int floor3 = Mth.floor(this.z);
-        return super.canSpawn() && this.getWalkTargetValue(floor, floor2, floor3) >= 0.0f;
+        final int xt = Mth.floor(this.x);
+        final int yt = Mth.floor(this.bb.y0);
+        final int zt = Mth.floor(this.z);
+        return super.canSpawn() && this.getWalkTargetValue(xt, yt, zt) >= 0.0f;
     }
     
     public boolean isPathFinding() {

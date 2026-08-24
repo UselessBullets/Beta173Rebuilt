@@ -18,6 +18,7 @@ import java.util.HashMap;
 
 public class SynchedEntityData
 {
+    public static final int MAX_STRING_DATA_LENGTH = 64;
     public static final int EOF_MARKER = 127;
     private static final int TYPE_BYTE = 0;
     private static final int TYPE_SHORT = 1;
@@ -26,45 +27,72 @@ public class SynchedEntityData
     private static final int TYPE_STRING = 4;
     private static final int TYPE_ITEMINSTANCE = 5;
     private static final int TYPE_POS = 6;
-    private static final HashMap<Class<?>, Integer> typeToConstant;
+    private static final HashMap<Class<?>, Integer> typeToConstant = new HashMap<>();
+    static {
+        SynchedEntityData.typeToConstant.put(Byte.class, TYPE_BYTE);
+        SynchedEntityData.typeToConstant.put(Short.class, TYPE_SHORT);
+        SynchedEntityData.typeToConstant.put(Integer.class, TYPE_INT);
+        SynchedEntityData.typeToConstant.put(Float.class, TYPE_FLOAT);
+        SynchedEntityData.typeToConstant.put(String.class, TYPE_STRING);
+        SynchedEntityData.typeToConstant.put(ItemInstance.class, TYPE_ITEMINSTANCE);
+        SynchedEntityData.typeToConstant.put(Pos.class, TYPE_POS);
+    }
     private static final int TYPE_MASK = 0b11100000;
     private static final int TYPE_SHIFT = 5;
-    private static final int MAX_ID_VALUE = 31;
+    private static final int MAX_ID_VALUE = ~TYPE_MASK & 0xff;
     private final Map<Integer, DataItem> itemsById;
+
     private boolean isDirty;
-    
+
     public SynchedEntityData() {
         this.itemsById = new HashMap<>();
     }
-    
+
     public void define(final int id, final Object value) {
-        final Integer n = SynchedEntityData.typeToConstant.get(value.getClass());
-        if (n == null) {
-            throw new IllegalArgumentException("Unknown data type: " + value.getClass());
-        }
-        if (id > MAX_ID_VALUE) {
-            throw new IllegalArgumentException("Data value id is too big with " + id + "! (Max is " + MAX_ID_VALUE + ")");
-        }
-        if (this.itemsById.containsKey(id)) {
-            throw new IllegalArgumentException("Duplicate id value for " + id + "!");
-        }
-        this.itemsById.put(id, new DataItem(n, id, value));
+        final Integer type = SynchedEntityData.typeToConstant.get(value.getClass());
+        if (type == null) throw new IllegalArgumentException("Unknown data type: " + value.getClass());
+        if (id > MAX_ID_VALUE) throw new IllegalArgumentException("Data value id is too big with " + id + "! (Max is " + MAX_ID_VALUE + ")");
+        if (this.itemsById.containsKey(id)) throw new IllegalArgumentException("Duplicate id value for " + id + "!");
+
+        this.itemsById.put(id, new DataItem(type, id, value));
     }
-    
+
     public byte getByte(final int id) {
-        return (byte)this.itemsById.get(id).getValue();
+        return (Byte) this.itemsById.get(id).getValue();
     }
-    
+
+    // Useless - Exists in b1.2 and LCE leaks, constants maintained in b1.7.3 also support its existance
+    public short getShort(int id) {
+        return (Short) this.itemsById.get(id).getValue();
+    }
+
     public int getInteger(final int id) {
-        return (int)this.itemsById.get(id).getValue();
+        return (Integer) this.itemsById.get(id).getValue();
     }
-    
+
+    // Useless - Exists in b1.2 and LCE leaks, constants maintained in b1.7.3 also support its existance
+    public float getFloat(int id) {
+        return (Float) this.itemsById.get(id).getValue();
+    }
+
     public String getString(final int id) {
         return (String)this.itemsById.get(id).getValue();
     }
-    
+
+    // Useless - Exists in b1.2 and LCE leaks, constants maintained in b1.7.3 also support its existance
+    public ItemInstance getItemInstance(int id) {
+        return (ItemInstance)this.itemsById.get(id).getValue();
+    }
+
+    // Useless - Has type in b1.7.3 and load/unload code, LCE also has a stub for this
+    public Pos getPos(int id) {
+        return (Pos) this.itemsById.get(id).getValue();
+    }
+
     public void set(final int id, final Object value) {
         final DataItem dataItem = this.itemsById.get(id);
+
+        // update the value if it has changed
         if (!value.equals(dataItem.getValue())) {
             dataItem.setValue(value);
             dataItem.setDirty(true);
@@ -75,44 +103,53 @@ public class SynchedEntityData
     public boolean isDirty() {
         return this.isDirty;
     }
-    
+
     public static void pack(final List<DataItem> items, final DataOutputStream output) throws IOException {
         if (items != null) {
-            final Iterator<DataItem> iterator = items.iterator();
-            while (iterator.hasNext()) {
-                writeDataItem(output, (DataItem)iterator.next());
+            for (DataItem item : items) {
+                writeDataItem(output, item);
             }
         }
+
+        // add an eof
         output.writeByte(EOF_MARKER);
     }
 
     public ArrayList<DataItem> packDirty() {
-        ArrayList<DataItem> list = null;
+        ArrayList<DataItem> result = null;
+
         if (this.isDirty) {
-            for (final DataItem e : this.itemsById.values()) {
-                if (e.isDirty()) {
-                    e.setDirty(false);
-                    if (list == null) {
-                        list = new ArrayList<>();
+            for (final DataItem dataItem : this.itemsById.values()) {
+                if (dataItem.isDirty()) {
+                    dataItem.setDirty(false);
+
+                    if (result == null) {
+                        result = new ArrayList<>();
                     }
-                    list.add(e);
+                    result.add(dataItem);
                 }
             }
         }
         this.isDirty = false;
-        return list;
+
+        return result;
     }
-    
+
     public void packAll(final DataOutputStream output) throws IOException {
-        final Iterator<DataItem> iterator = this.itemsById.values().iterator();
-        while (iterator.hasNext()) {
-            writeDataItem(output, (DataItem)iterator.next());
+        for (DataItem dataItem : this.itemsById.values()) {
+            writeDataItem(output, dataItem);
         }
+
+        // add an eof
         output.writeByte(EOF_MARKER);
     }
-    
+
     private static void writeDataItem(final DataOutputStream output, final DataItem dataItem) throws IOException {
-        output.writeByte((dataItem.getType() << TYPE_SHIFT | (dataItem.getId() & ~TYPE_MASK)) & 0xFF);
+        // pack type and id
+        int header = ((dataItem.getType() << TYPE_SHIFT) | (dataItem.getId() & ~TYPE_MASK)) & 0xFF;
+        output.writeByte(header);
+
+        // write value
         switch (dataItem.getType()) {
             case TYPE_BYTE: {
                 output.writeByte((byte)dataItem.getValue());
@@ -135,10 +172,10 @@ public class SynchedEntityData
                 break;
             }
             case TYPE_ITEMINSTANCE: {
-                final ItemInstance itemInstance = (ItemInstance)dataItem.getValue();
-                output.writeShort(itemInstance.getItem().id);
-                output.writeByte(itemInstance.count);
-                output.writeShort(itemInstance.getAuxValue());
+                final ItemInstance instance = (ItemInstance)dataItem.getValue();
+                output.writeShort(instance.getItem().id);
+                output.writeByte(instance.count);
+                output.writeShort(instance.getAuxValue());
                 break;
             }
             case TYPE_POS: {
@@ -150,68 +187,61 @@ public class SynchedEntityData
             }
         }
     }
-    
+
     public static List<DataItem> unpack(final DataInputStream input) throws IOException {
-        ArrayList<DataItem> list = null;
-        for (byte b = input.readByte(); b != EOF_MARKER; b = input.readByte()) {
-            if (list == null) {
-                list = new ArrayList<>();
-            }
-            final int type = (b & TYPE_MASK) >> TYPE_SHIFT;
-            final int id = b & ~TYPE_MASK;
-            DataItem e = null;
-            switch (type) {
+        ArrayList<DataItem> result = null;
+
+        byte currentHeader = input.readByte();
+        while (currentHeader != EOF_MARKER) {
+            if (result == null) result = new ArrayList<>();
+
+            // split type and id
+            final int itemType = (currentHeader & TYPE_MASK) >> TYPE_SHIFT;
+            final int itemId = currentHeader & ~TYPE_MASK;
+
+            DataItem item = null;
+            switch (itemType) {
                 case TYPE_BYTE: {
-                    e = new DataItem(type, id, input.readByte());
+                    item = new DataItem(itemType, itemId, input.readByte());
                     break;
                 }
                 case TYPE_SHORT: {
-                    e = new DataItem(type, id, input.readShort());
+                    item = new DataItem(itemType, itemId, input.readShort());
                     break;
                 }
                 case TYPE_INT: {
-                    e = new DataItem(type, id, input.readInt());
+                    item = new DataItem(itemType, itemId, input.readInt());
                     break;
                 }
                 case TYPE_FLOAT: {
-                    e = new DataItem(type, id, input.readFloat());
+                    item = new DataItem(itemType, itemId, input.readFloat());
                     break;
                 }
                 case TYPE_STRING: {
-                    e = new DataItem(type, id, Packet.readUTF(input, 64));
+                    item = new DataItem(itemType, itemId, Packet.readUTF(input, MAX_STRING_DATA_LENGTH));
                     break;
                 }
                 case TYPE_ITEMINSTANCE: {
-                    e = new DataItem(type, id, new ItemInstance(input.readShort(), input.readByte(), input.readShort()));
+                    item = new DataItem(itemType, itemId, new ItemInstance(input.readShort(), input.readByte(), input.readShort()));
                     break;
                 }
                 case TYPE_POS: {
-                    e = new DataItem(type, id, new Pos(input.readInt(), input.readInt(), input.readInt()));
+                    item = new DataItem(itemType, itemId, new Pos(input.readInt(), input.readInt(), input.readInt()));
                     break;
                 }
             }
-            list.add(e);
+            result.add(item);
+
+            currentHeader = input.readByte();
         }
-        return list;
+        return result;
     }
-    
+
     public void assignValues(final List<DataItem> items) {
-        for (final DataItem synchedEntityData_DataItem : items) {
-            final DataItem synchedEntityData_DataItem2 = this.itemsById.get(synchedEntityData_DataItem.getId());
-            if (synchedEntityData_DataItem2 != null) {
-                synchedEntityData_DataItem2.setValue(synchedEntityData_DataItem.getValue());
-            }
+        for (final DataItem item : items) {
+            final DataItem itemFromId = this.itemsById.get(item.getId());
+            if (itemFromId != null) itemFromId.setValue(item.getValue());
         }
-    }
-    
-    static {
-        (typeToConstant = new HashMap<>()).put(Byte.class, TYPE_BYTE);
-        SynchedEntityData.typeToConstant.put(Short.class, TYPE_SHORT);
-        SynchedEntityData.typeToConstant.put(Integer.class, TYPE_INT);
-        SynchedEntityData.typeToConstant.put(Float.class, TYPE_FLOAT);
-        SynchedEntityData.typeToConstant.put(String.class, TYPE_STRING);
-        SynchedEntityData.typeToConstant.put(ItemInstance.class, TYPE_ITEMINSTANCE);
-        SynchedEntityData.typeToConstant.put(Pos.class, TYPE_POS);
     }
 
     public static class DataItem

@@ -560,8 +560,8 @@ public abstract class Entity
     
     public float getBrightness(final float a) {
         final int xTile = Mth.floor(this.x);
-        double hh = this.heightOffset + (this.bb.y1 - this.bb.y0) * 0.66;
-        final int yTile = Mth.floor(this.y - hh);
+        double hh = (this.bb.y1 - this.bb.y0) * 0.66;
+        final int yTile = Mth.floor(this.y - this.heightOffset + hh);
         final int zTile = Mth.floor(this.z);
         if (this.level.hasChunksAt(Mth.floor(this.bb.x0), Mth.floor(this.bb.y0), Mth.floor(this.bb.z0), Mth.floor(this.bb.x1), Mth.floor(this.bb.y1), Mth.floor(this.bb.z1))) {
             float br = this.level.getBrightness(xTile, yTile, zTile);

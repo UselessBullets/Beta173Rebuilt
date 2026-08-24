@@ -9,8 +9,7 @@ import net.minecraft.world.item.ItemInstance;
 
 public class ShapedRecipe implements Recipe
 {
-    private int width;
-    private int height;
+    private int width, height;
     private ItemInstance[] recipeItems;
     private ItemInstance result;
     public final int resultId;
@@ -28,42 +27,34 @@ public class ShapedRecipe implements Recipe
     }
     
     public boolean matches(final CraftingContainer craftSlots) {
-        for (int i = 0; i <= 3 - this.width; ++i) {
-            for (int j = 0; j <= 3 - this.height; ++j) {
-                if (this.matches(craftSlots, i, j, true)) {
-                    return true;
-                }
-                if (this.matches(craftSlots, i, j, false)) {
-                    return true;
-                }
+        for (int xOffs = 0; xOffs <= 3 - this.width; ++xOffs) {
+            for (int yOffs = 0; yOffs <= 3 - this.height; ++yOffs) {
+                if (this.matches(craftSlots, xOffs, yOffs, true)) return true;
+                if (this.matches(craftSlots, xOffs, yOffs, false)) return true;
             }
         }
         return false;
     }
     
     private boolean matches(final CraftingContainer craftSlots, final int xOffs, final int yOffs, final boolean xFlip) {
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                final int n = i - xOffs;
-                final int n2 = j - yOffs;
-                ItemInstance itemInstance = null;
-                if (n >= 0 && n2 >= 0 && n < this.width && n2 < this.height) {
-                    if (xFlip) {
-                        itemInstance = this.recipeItems[this.width - n - 1 + n2 * this.width];
-                    }
-                    else {
-                        itemInstance = this.recipeItems[n + n2 * this.width];
-                    }
+        for (int x = 0; x < 3; ++x) {
+            for (int y = 0; y < 3; ++y) {
+                final int xs = x - xOffs;
+                final int ys = y - yOffs;
+                ItemInstance expected = null;
+                if (xs >= 0 && ys >= 0 && xs < this.width && ys < this.height) {
+                    if (xFlip) expected = this.recipeItems[this.width - xs - 1 + ys * this.width];
+                    else expected = this.recipeItems[xs + ys * this.width];
                 }
-                final ItemInstance item = craftSlots.getItem(i, j);
-                if (item != null || itemInstance != null) {
-                    if ((item == null && itemInstance != null) || (item != null && itemInstance == null)) {
+                final ItemInstance item = craftSlots.getItem(x, y);
+                if (item != null || expected != null) {
+                    if ((item == null && expected != null) || (item != null && expected == null)) {
                         return false;
                     }
-                    if (itemInstance.id != item.id) {
+                    if (expected.id != item.id) {
                         return false;
                     }
-                    if (itemInstance.getAuxValue() != -1 && itemInstance.getAuxValue() != item.getAuxValue()) {
+                    if (expected.getAuxValue() != Recipes.ANY_AUX_VALUE && expected.getAuxValue() != item.getAuxValue()) {
                         return false;
                     }
                 }

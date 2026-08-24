@@ -10,9 +10,30 @@ import net.minecraft.world.level.tile.Tile;
 public class StructureRecipes
 {
     public void addRecipes(final Recipes recipes) {
-        recipes.addShapedRecipe(new ItemInstance(Tile.chest), "###", "# #", "###", '#', Tile.wood);
-        recipes.addShapedRecipe(new ItemInstance(Tile.furnace), "###", "# #", "###", '#', Tile.stoneBrick);
-        recipes.addShapedRecipe(new ItemInstance(Tile.workBench), "##", "##", '#', Tile.wood);
-        recipes.addShapedRecipe(new ItemInstance(Tile.sandStone), "##", "##", '#', Tile.sand);
+        recipes.addShapedRecipe(new ItemInstance(Tile.chest),
+                "###",
+                "# #",
+                "###",
+
+                '#', Tile.wood);
+
+        recipes.addShapedRecipe(new ItemInstance(Tile.furnace),
+                "###",
+                "# #",
+                "###",
+
+                '#', Tile.stoneBrick);
+
+        recipes.addShapedRecipe(new ItemInstance(Tile.workBench),
+                "##",
+                "##",
+
+                '#', Tile.wood);
+
+        recipes.addShapedRecipe(new ItemInstance(Tile.sandStone),
+                "##",
+                "##",
+
+                '#', Tile.sand);
     }
 }

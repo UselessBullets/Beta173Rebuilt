@@ -11,7 +11,11 @@ import net.minecraft.world.level.material.Material;
 
 public class StoneSlabTile extends Tile
 {
-    public static final String[] SLAB_NAMES;
+    public static final int STONE_SLAB = 0;
+    public static final int SAND_SLAB = 1;
+    public static final int WOOD_SLAB = 2;
+    public static final int COBBLESTONE_SLAB = 3;
+    public static final String[] SLAB_NAMES = new String[] { "stone", "sand", "wood", "cobble" };
     private boolean fullSize;
     
     public StoneSlabTile(final int id, final boolean fullSize) {
@@ -106,8 +110,5 @@ public class StoneSlabTile extends Tile
         }
         return f == 1 || (super.isFaceVisible(level, x, y, z, f) && (f == 0 || level.getTile(x, y, z) != this.id));
     }
-    
-    static {
-        SLAB_NAMES = new String[] { "stone", "sand", "wood", "cobble" };
-    }
+
 }

@@ -6,7 +6,7 @@ package net.minecraft.stats;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+
 import net.minecraft.locale.language.I18n;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemInstance;
@@ -91,7 +91,7 @@ public class Stats
             set.add(recipe.getResultItem().id);
         }
 
-        for (ItemInstance itemInstance : FurnaceRecipes.getInstance().getRecipies().values()) {
+        for (ItemInstance itemInstance : FurnaceRecipes.getInstance().getRecipes().values()) {
             set.add(itemInstance.id);
         }
 

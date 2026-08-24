@@ -4,8 +4,6 @@
 
 package net.minecraft.world.item.crafting;
 
-import java.util.Iterator;
-import java.util.Collection;
 import java.util.ArrayList;
 import net.minecraft.world.CraftingContainer;
 import java.util.List;
@@ -26,26 +24,30 @@ public class ShapelessRecipe implements Recipe
     }
     
     public boolean matches(final CraftingContainer craftSlots) {
-        final ArrayList<ItemInstance> list = new ArrayList<>(this.ingredients);
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                final ItemInstance item = craftSlots.getItem(j, i);
+        final ArrayList<ItemInstance> tempList = new ArrayList<>(this.ingredients);
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 3; ++x) {
+                final ItemInstance item = craftSlots.getItem(x, y);
+
                 if (item != null) {
-                    boolean b = false;
-                    for (final ItemInstance itemInstance : list) {
-                        if (item.id == itemInstance.id && (itemInstance.getAuxValue() == -1 || item.getAuxValue() == itemInstance.getAuxValue())) {
-                            b = true;
-                            list.remove(itemInstance);
+                    boolean found = false;
+
+                    for (final ItemInstance ingredient : tempList) {
+                        if (item.id == ingredient.id && (ingredient.getAuxValue() == Recipes.ANY_AUX_VALUE || item.getAuxValue() == ingredient.getAuxValue())) {
+                            found = true;
+                            tempList.remove(ingredient);
                             break;
                         }
                     }
-                    if (!b) {
+
+                    if (!found) {
                         return false;
                     }
                 }
             }
         }
-        return list.isEmpty();
+
+        return tempList.isEmpty();
     }
     
     public ItemInstance assemble(final CraftingContainer craftSlots) {

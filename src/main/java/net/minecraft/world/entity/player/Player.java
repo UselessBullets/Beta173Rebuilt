@@ -287,7 +287,18 @@ public abstract class Player extends Mob
             this.awardStat(Stats.mobKills, 1);
         }
     }
-    
+
+    @Override
+    public boolean isShootable() // Useless - in b1.2 and LCE leaks
+    {
+        return true;
+    }
+
+    @Override
+    public boolean isCreativeModeAllowed() { // Useless - In b1.2 and LCE leaks
+        return true;
+    }
+
     public void drop() {
         this.drop(this.inventory.removeItem(this.inventory.selected, 1), false);
     }

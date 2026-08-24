@@ -253,7 +253,7 @@ public class ThrownEgg extends Entity
     @Override
     public void playerTouch(final Player player) {
         if (!this.inGround || this.owner != player || this.shakeTime > 0) return;
-        
+
         if (player.inventory.add(new ItemInstance(Item.arrow, 1))) {
             this.level.playSound(this, "random.pop", 0.2f, ((this.random.nextFloat() - this.random.nextFloat()) * 0.7f + 1.0f) * 2.0f);
             player.take(this, 1);

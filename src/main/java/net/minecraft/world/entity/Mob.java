@@ -541,6 +541,12 @@ public abstract class Mob extends Entity
     public boolean onLadder() {
         return this.level.getTile(Mth.floor(this.x), Mth.floor(this.bb.y0), Mth.floor(this.z)) == Tile.ladder.id;
     }
+
+    @Override
+    public boolean isShootable() // Useless - in b1.2 and LCE leaks
+    {
+        return true;
+    }
     
     public void addAdditionalSaveData(final CompoundTag compoundTag) {
         compoundTag.putShort("Health", (short)this.health);

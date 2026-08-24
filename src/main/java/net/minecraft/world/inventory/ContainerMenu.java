@@ -16,19 +16,21 @@ public class ContainerMenu extends AbstractContainerMenu
     public ContainerMenu(final Container inventory, final Container container) {
         this.container = container;
         this.containerRows = container.getContainerSize() / 9;
-        final int n = (this.containerRows - 4) * 18;
-        for (int i = 0; i < this.containerRows; ++i) {
-            for (int j = 0; j < 9; ++j) {
-                this.addSlot(new Slot(container, j + i * 9, 8 + j * 18, 18 + i * 18));
+
+        final int yo = (this.containerRows - 4) * 18;
+
+        for (int y = 0; y < this.containerRows; ++y) {
+            for (int x = 0; x < 9; ++x) {
+                this.addSlot(new Slot(container, x + y * 9, 8 + x * 18, 18 + y * 18));
             }
         }
-        for (int k = 0; k < 3; ++k) {
-            for (int l = 0; l < 9; ++l) {
-                this.addSlot(new Slot(inventory, l + k * 9 + 9, 8 + l * 18, 103 + k * 18 + n));
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 9; ++x) {
+                this.addSlot(new Slot(inventory, x + y * 9 + 9, 8 + x * 18, 103 + y * 18 + yo));
             }
         }
-        for (int slot = 0; slot < 9; ++slot) {
-            this.addSlot(new Slot(inventory, slot, 8 + slot * 18, 161 + n));
+        for (int x = 0; x < 9; ++x) {
+            this.addSlot(new Slot(inventory, x, 8 + x * 18, 161 + yo));
         }
     }
     
@@ -39,24 +41,25 @@ public class ContainerMenu extends AbstractContainerMenu
     
     @Override
     public ItemInstance quickMoveStack(final int slotIndex) {
-        ItemInstance copy = null;
+        ItemInstance clicked = null;
         final Slot slot = this.slots.get(slotIndex);
         if (slot != null && slot.hasItem()) {
-            final ItemInstance item = slot.getItem();
-            copy = item.copy();
+            final ItemInstance stack = slot.getItem();
+            clicked = stack.copy();
+
             if (slotIndex < this.containerRows * 9) {
-                this.moveItemStackTo(item, this.containerRows * 9, this.slots.size(), true);
+                this.moveItemStackTo(stack, this.containerRows * 9, this.slots.size(), true);
             }
             else {
-                this.moveItemStackTo(item, 0, this.containerRows * 9, false);
+                this.moveItemStackTo(stack, 0, this.containerRows * 9, false);
             }
-            if (item.count == 0) {
+            if (stack.count == 0) {
                 slot.set(null);
             }
             else {
                 slot.setChanged();
             }
         }
-        return copy;
+        return clicked;
     }
 }

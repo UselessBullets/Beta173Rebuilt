@@ -10,11 +10,7 @@ import net.minecraft.world.Container;
 
 public class ResultContainer implements Container
 {
-    private ItemInstance[] items;
-    
-    public ResultContainer() {
-        this.items = new ItemInstance[1];
-    }
+    private ItemInstance[] items = new ItemInstance[1];
     
     public int getContainerSize() {
         return 1;
@@ -30,9 +26,9 @@ public class ResultContainer implements Container
     
     public ItemInstance removeItem(final int slot, final int count) {
         if (this.items[slot] != null) {
-            final ItemInstance itemInstance = this.items[slot];
+            final ItemInstance item = this.items[slot];
             this.items[slot] = null;
-            return itemInstance;
+            return item;
         }
         return null;
     }
@@ -42,7 +38,7 @@ public class ResultContainer implements Container
     }
     
     public int getMaxStackSize() {
-        return 64;
+        return Container.LARGE_MAX_STACK_SIZE;
     }
     
     public void setChanged() {

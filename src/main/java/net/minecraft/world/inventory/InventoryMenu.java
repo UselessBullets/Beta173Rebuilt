@@ -15,25 +15,34 @@ import net.minecraft.world.level.tile.Tile;
 
 public class InventoryMenu extends AbstractContainerMenu
 {
-    public CraftingContainer craftSlots;
-    public Container resultSlots;
-    public boolean active;
+    public static final int RESULT_SLOT = 0;
+    public static final int CRAFT_SLOT_START = 1;
+    public static final int CRAFT_SLOT_END = InventoryMenu.CRAFT_SLOT_START + 4;
+    public static final int ARMOR_SLOT_START = InventoryMenu.CRAFT_SLOT_END;
+    public static final int ARMOR_SLOT_END = InventoryMenu.ARMOR_SLOT_START + 4;
+    public static final int INV_SLOT_START = InventoryMenu.ARMOR_SLOT_END;
+    public static final int INV_SLOT_END = InventoryMenu.INV_SLOT_START + 9 * 3;
+    public static final int USE_ROW_SLOT_START = InventoryMenu.INV_SLOT_END;
+    public static final int USE_ROW_SLOT_END = InventoryMenu.USE_ROW_SLOT_START + 9;
+
+    public CraftingContainer craftSlots = new CraftingContainer(this, 2, 2);
+    public Container resultSlots = new ResultContainer();
+    public boolean active = false;
     
     public InventoryMenu(final Inventory inventory) {
         this(inventory, true);
     }
     
     public InventoryMenu(final Inventory inventory, final boolean active) {
-        this.craftSlots = new CraftingContainer(this, 2, 2);
-        this.resultSlots = new ResultContainer();
-        this.active = false;
         this.active = active;
-        this.addSlot(new ResultSlot(inventory.player, this.craftSlots, this.resultSlots, 0, 144, 36));
-        for (int i = 0; i < 2; ++i) {
-            for (int j = 0; j < 2; ++j) {
-                this.addSlot(new Slot(this.craftSlots, j + i * 2, 88 + j * 18, 26 + i * 18));
+        this.addSlot(new ResultSlot(inventory.player, this.craftSlots, this.resultSlots, RESULT_SLOT, 144, 36));
+
+        for (int y = 0; y < 2; ++y) {
+            for (int x = 0; x < 2; ++x) {
+                this.addSlot(new Slot(this.craftSlots, x + y * 2, 88 + x * 18, 26 + y * 18));
             }
         }
+
         for (int i = 0; i < 4; ++i) {
             final int slotNum = i;
             this.addSlot(new Slot(inventory, inventory.getContainerSize() - 1 - slotNum, 8, 8 + slotNum * 18) {
@@ -51,13 +60,14 @@ public class InventoryMenu extends AbstractContainerMenu
                 }
             });
         }
-        for (int l = 0; l < 3; ++l) {
-            for (int n = 0; n < 9; ++n) {
-                this.addSlot(new Slot(inventory, n + (l + 1) * 9, 8 + n * 18, 84 + l * 18));
+
+        for (int y = 0; y < 3; ++y) {
+            for (int x = 0; x < 9; ++x) {
+                this.addSlot(new Slot(inventory, x + (y + 1) * 9, 8 + x * 18, 84 + y * 18));
             }
         }
-        for (int slot = 0; slot < 9; ++slot) {
-            this.addSlot(new Slot(inventory, slot, 8 + slot * 18, 142));
+        for (int x = 0; x < 9; ++x) {
+            this.addSlot(new Slot(inventory, x, 8 + x * 18, 142));
         }
         this.slotsChanged(this.craftSlots);
     }
@@ -86,34 +96,39 @@ public class InventoryMenu extends AbstractContainerMenu
     
     @Override
     public ItemInstance quickMoveStack(final int slotIndex) {
-        ItemInstance copy = null;
+        ItemInstance clicked = null;
         final Slot slot = this.slots.get(slotIndex);
+
         if (slot != null && slot.hasItem()) {
-            final ItemInstance item = slot.getItem();
-            copy = item.copy();
-            if (slotIndex == 0) {
-                this.moveItemStackTo(item, 9, 45, true);
+            final ItemInstance stack = slot.getItem();
+            clicked = stack.copy();
+
+            if (slotIndex == RESULT_SLOT) {
+                this.moveItemStackTo(stack, INV_SLOT_START, USE_ROW_SLOT_END, true);
             }
-            else if (slotIndex >= 9 && slotIndex < 36) {
-                this.moveItemStackTo(item, 36, 45, false);
+            else if (slotIndex >= INV_SLOT_START && slotIndex < INV_SLOT_END) {
+                this.moveItemStackTo(stack, USE_ROW_SLOT_START, USE_ROW_SLOT_END, false);
             }
-            else if (slotIndex >= 36 && slotIndex < 45) {
-                this.moveItemStackTo(item, 9, 36, false);
+            else if (slotIndex >= USE_ROW_SLOT_START && slotIndex < USE_ROW_SLOT_END) {
+                this.moveItemStackTo(stack, INV_SLOT_START, INV_SLOT_END, false);
             }
             else {
-                this.moveItemStackTo(item, 9, 45, false);
+                this.moveItemStackTo(stack, INV_SLOT_START, USE_ROW_SLOT_END, false);
             }
-            if (item.count == 0) {
+
+            if (stack.count == 0) {
                 slot.set(null);
             }
             else {
                 slot.setChanged();
             }
-            if (item.count == copy.count) {
+
+            if (stack.count == clicked.count) {
                 return null;
+            } else {
+                slot.onTake(stack);
             }
-            slot.onTake(item);
         }
-        return copy;
+        return clicked;
     }
 }

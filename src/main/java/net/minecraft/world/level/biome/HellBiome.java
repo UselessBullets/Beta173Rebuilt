@@ -13,6 +13,7 @@ public class HellBiome extends Biome
         this.enemies.clear();
         this.friendlies.clear();
         this.waterFriendlies.clear();
+
         this.enemies.add(new MobSpawnerData(Ghast.class, 10));
         this.enemies.add(new MobSpawnerData(PigZombie.class, 10));
     }

@@ -37,7 +37,7 @@ public class BiomeSource
     }
     
     public double getTemperature(final int x, final int z) {
-        this.temperatures = this.temperatureMap.getRegion(this.temperatures, x, z, 1, 1, 0.02500000037252903, 0.02500000037252903, 0.5);
+        this.temperatures = this.temperatureMap.getRegion(this.temperatures, x, z, 1, 1, 0.025f, 0.025f, 0.5);
         return this.temperatures[0];
     }
     
@@ -45,65 +45,68 @@ public class BiomeSource
         return this.biomes = this.getBiomeBlock(this.biomes, x, z, w, h);
     }
     
-    public double[] getTemperatureBlock(double[] result, final int x, final int z, final int w, final int h) {
-        if (result == null || result.length < w * h) {
-            result = new double[w * h];
+    public double[] getTemperatureBlock(double[] temperatures, final int x, final int z, final int w, final int h) {
+        if (temperatures == null || temperatures.length < w * h) {
+            temperatures = new double[w * h];
         }
-        result = this.temperatureMap.getRegion(result, x, z, w, h, 0.02500000037252903, 0.02500000037252903, 0.25);
-        this.noises = this.noiseMap.getRegion(this.noises, x, z, w, h, 0.25, 0.25, 0.5882352941176471);
-        int n = 0;
-        for (int i = 0; i < w; ++i) {
-            for (int j = 0; j < h; ++j) {
-                final double n2 = this.noises[n] * 1.1 + 0.5;
+
+        temperatures = this.temperatureMap.getRegion(temperatures, x, z, w, h, 0.025f, 0.025f, 0.25);
+        this.noises = this.noiseMap.getRegion(this.noises, x, z, w, h, 0.25, 0.25, 10 / 17.0);
+        int i = 0;
+
+        for (int _x = 0; _x < w; ++_x) {
+            for (int _z = 0; _z < h; ++_z) {
+                // Useless - Cannot find information on these local vars
+                final double n2 = this.noises[i] * 1.1 + 0.5;
                 final double n3 = 0.01;
-                final double n4 = (result[n] * 0.15 + 0.7) * (1.0 - n3) + n2 * n3;
-                double n5 = 1.0 - (1.0 - n4) * (1.0 - n4);
-                if (n5 < 0.0) {
-                    n5 = 0.0;
-                }
-                if (n5 > 1.0) {
-                    n5 = 1.0;
-                }
-                result[n] = n5;
-                ++n;
+                final double n4 = (temperatures[i] * 0.15 + 0.7) * (1.0 - n3) + n2 * n3;
+                double t = 1.0 - (1.0 - n4) * (1.0 - n4);
+                if (t < 0.0) t = 0.0;
+                if (t > 1.0) t = 1.0;
+                temperatures[i] = t;
+                i++;
             }
         }
-        return result;
+        return temperatures;
+    }
+
+    // Useless - Existed in b1.2 and LCE leaks
+    public double[] getDownfallBlock(double[] downfalls, int x, int z, int w, int h) {
+        if (downfalls == null || downfalls.length < w * h) {
+            downfalls = new double[w * h];
+        }
+
+        return this.downfallMap.getRegion(downfalls, x, z, w, w, 0.05F, 0.05F, 0.5);
     }
     
-    public Biome[] getBiomeBlock(Biome[] result, final int x, final int z, final int w, final int h) {
-        if (result == null || result.length < w * h) {
-            result = new Biome[w * h];
+    public Biome[] getBiomeBlock(Biome[] biomes, final int x, final int z, final int w, final int h) {
+        if (biomes == null || biomes.length < w * h) {
+            biomes = new Biome[w * h];
         }
-        this.temperatures = this.temperatureMap.getRegion(this.temperatures, x, z, w, w, 0.02500000037252903, 0.02500000037252903, 0.25);
-        this.downfalls = this.downfallMap.getRegion(this.downfalls, x, z, w, w, 0.05f, 0.05f, 0.3333333333333333);
-        this.noises = this.noiseMap.getRegion(this.noises, x, z, w, w, 0.25, 0.25, 0.5882352941176471);
-        int n = 0;
-        for (int i = 0; i < w; ++i) {
-            for (int j = 0; j < h; ++j) {
-                final double n2 = this.noises[n] * 1.1 + 0.5;
+
+        this.temperatures = this.temperatureMap.getRegion(this.temperatures, x, z, w, w, 0.025f, 0.025f, 0.25);
+        this.downfalls = this.downfallMap.getRegion(this.downfalls, x, z, w, w, 0.05f, 0.05f, 1 / 3.0);
+        this.noises = this.noiseMap.getRegion(this.noises, x, z, w, w, 0.25, 0.25, 10 / 17.0);
+        int i = 0;
+
+        for (int _x = 0; _x < w; ++_x) {
+            for (int _z = 0; _z < h; ++_z) {
+                // Useless - Cannot find information on these local vars
+                final double n2 = this.noises[i] * 1.1 + 0.5;
                 final double n3 = 0.01;
-                final double n4 = (this.temperatures[n] * 0.15 + 0.7) * (1.0 - n3) + n2 * n3;
+                final double n4 = (this.temperatures[i] * 0.15 + 0.7) * (1.0 - n3) + n2 * n3;
                 final double n5 = 0.002;
-                double downfall = (this.downfalls[n] * 0.15 + 0.5) * (1.0 - n5) + n2 * n5;
+                double downfall = (this.downfalls[i] * 0.15 + 0.5) * (1.0 - n5) + n2 * n5;
                 double temp = 1.0 - (1.0 - n4) * (1.0 - n4);
-                if (temp < 0.0) {
-                    temp = 0.0;
-                }
-                if (downfall < 0.0) {
-                    downfall = 0.0;
-                }
-                if (temp > 1.0) {
-                    temp = 1.0;
-                }
-                if (downfall > 1.0) {
-                    downfall = 1.0;
-                }
-                this.temperatures[n] = temp;
-                this.downfalls[n] = downfall;
-                result[n++] = Biome.getBiome(temp, downfall);
+                if (temp < 0.0) temp = 0.0;
+                if (downfall < 0.0) downfall = 0.0;
+                if (temp > 1.0) temp = 1.0;
+                if (downfall > 1.0) downfall = 1.0;
+                this.temperatures[i] = temp;
+                this.downfalls[i] = downfall;
+                biomes[i++] = Biome.getBiome(temp, downfall);
             }
         }
-        return result;
+        return biomes;
     }
 }

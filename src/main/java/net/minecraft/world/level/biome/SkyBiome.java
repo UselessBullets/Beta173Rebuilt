@@ -12,11 +12,12 @@ public class SkyBiome extends Biome
         this.enemies.clear();
         this.friendlies.clear();
         this.waterFriendlies.clear();
+
         this.friendlies.add(new MobSpawnerData(Chicken.class, 10));
     }
     
     @Override
     public int getSkyColor(final float temp) {
-        return 12632319;
+        return 0xc0c0ff;
     }
 }

@@ -54,7 +54,9 @@ public class Biome
     private boolean snowCovered;
     private boolean hasRain = true;
 
-    private static Biome[] map = new Biome[4096];
+    // Useless - Theoretical constant that likely existed, the biome map has a fixed precision that it samples temperature and downfall values at
+    private static final int BIOME_MAP_RESOLUTION = 64;
+    private static Biome[] map = new Biome[BIOME_MAP_RESOLUTION * BIOME_MAP_RESOLUTION];
 
     protected Biome() {
         this.enemies.add(new MobSpawnerData(Spider.class, 10));
@@ -77,21 +79,14 @@ public class Biome
     }
 
     public static void recalc() {
-        for (int i = 0; i < 64; ++i) {
-            for (int j = 0; j < 64; ++j) {
-                Biome.map[i + j * 64] = _getBiome(i / 63.0f, j / 63.0f);
+        for (int t = 0; t < BIOME_MAP_RESOLUTION; ++t) {
+            for (int d = 0; d < BIOME_MAP_RESOLUTION; ++d) {
+                Biome.map[t + d * BIOME_MAP_RESOLUTION] = _getBiome(t / (BIOME_MAP_RESOLUTION - 1f), d / (BIOME_MAP_RESOLUTION - 1f));
             }
         }
-        final Biome desert = Biome.desert;
-        final Biome desert2 = Biome.desert;
-        final byte b = (byte)Tile.sand.id;
-        desert2.material = b;
-        desert.topMaterial = b;
-        final Biome iceDesert = Biome.iceDesert;
-        final Biome iceDesert2 = Biome.iceDesert;
-        final byte b2 = (byte)Tile.sand.id;
-        iceDesert2.material = b2;
-        iceDesert.topMaterial = b2;
+
+        Biome.desert.topMaterial = Biome.desert.material = (byte)Tile.sand.id;
+        Biome.iceDesert.topMaterial = Biome.iceDesert.material = (byte)Tile.sand.id;
     }
 
     public Feature getTreeFeature(final Random random) {
@@ -122,43 +117,27 @@ public class Biome
     }
 
     public static Biome getBiome(final double temp, final double downfall) {
-        return Biome.map[(int)(temp * 63.0) + (int)(downfall * 63.0) * 64];
+        return Biome.map[(int)(temp * (BIOME_MAP_RESOLUTION - 1.0)) + (int)(downfall * (BIOME_MAP_RESOLUTION - 1.0)) * BIOME_MAP_RESOLUTION];
     }
 
     public static Biome _getBiome(final float temp, float downfall) {
         downfall *= temp;
-        if (temp < 0.1f) {
-            return Biome.tunfra;
-        }
+        if (temp < 0.1f) return Biome.tunfra;
         if (downfall < 0.2f) {
-            if (temp < 0.5f) {
-                return Biome.tunfra;
-            }
-            if (temp < 0.95f) {
-                return Biome.savanna;
-            }
+            if (temp < 0.5f) return Biome.tunfra;
+            if (temp < 0.95f) return Biome.savanna;
             return Biome.desert;
         }
         else {
-            if (downfall > 0.5f && temp < 0.7f) {
-                return Biome.swampland;
-            }
-            if (temp < 0.5f) {
-                return Biome.taiga;
-            }
+            if (downfall > 0.5f && temp < 0.7f) return Biome.swampland;
+            if (temp < 0.5f) return Biome.taiga;
             if (temp < 0.97f) {
-                if (downfall < 0.35f) {
-                    return Biome.shrubland;
-                }
+                if (downfall < 0.35f) return Biome.shrubland;
                 return Biome.forest;
             }
             else {
-                if (downfall < 0.45f) {
-                    return Biome.plains;
-                }
-                if (downfall < 0.9f) {
-                    return Biome.seasonalForest;
-                }
+                if (downfall < 0.45f) return Biome.plains;
+                if (downfall < 0.9f) return Biome.seasonalForest;
                 return Biome.rainForest;
             }
         }
@@ -166,25 +145,15 @@ public class Biome
 
     public int getSkyColor(float temp) {
         temp /= 3.0f;
-        if (temp < -1.0f) {
-            temp = -1.0f;
-        }
-        if (temp > 1.0f) {
-            temp = 1.0f;
-        }
-        return Color.getHSBColor(0.62222224f - temp * 0.05f, 0.5f + temp * 0.1f, 1.0f).getRGB();
+        if (temp < -1.0f) temp = -1.0f;
+        if (temp > 1.0f) temp = 1.0f;
+        return Color.getHSBColor(224 / 360.0f - temp * 0.05f, 0.5f + temp * 0.1f, 1.0f).getRGB();
     }
 
     public List<MobSpawnerData> getMobs(final MobCategory category) {
-        if (category == MobCategory.monster) {
-            return this.enemies;
-        }
-        if (category == MobCategory.creature) {
-            return this.friendlies;
-        }
-        if (category == MobCategory.waterCreature) {
-            return this.waterFriendlies;
-        }
+        if (category == MobCategory.monster) return this.enemies;
+        if (category == MobCategory.creature) return this.friendlies;
+        if (category == MobCategory.waterCreature) return this.waterFriendlies;
         return null;
     }
 

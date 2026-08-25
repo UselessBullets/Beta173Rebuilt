@@ -40,26 +40,37 @@ public class FixedBiomeSource extends BiomeSource
     }
     
     @Override
-    public double[] getTemperatureBlock(double[] result, final int x, final int z, final int w, final int h) {
-        if (result == null || result.length < w * h) {
-            result = new double[w * h];
+    public double[] getTemperatureBlock(double[] temperatures, final int x, final int z, final int w, final int h) {
+        if (temperatures == null || temperatures.length < w * h) {
+            temperatures = new double[w * h];
         }
-        Arrays.fill(result, 0, w * h, this.temperature);
-        return result;
+        Arrays.fill(temperatures, 0, w * h, this.temperature);
+        return temperatures;
+    }
+
+    @Override
+    // Useless - Existed in b1.2 and LCE leaks
+    public double[] getDownfallBlock(double[] downfalls, int x, int z, int w, int h) {
+        if (downfalls == null || downfalls.length < w * h) {
+            downfalls = new double[w * h];
+        }
+
+        Arrays.fill(downfalls, 0, w * h, this.downfall);
+        return downfalls;
     }
     
     @Override
-    public Biome[] getBiomeBlock(Biome[] result, final int x, final int z, final int w, final int h) {
-        if (result == null || result.length < w * h) {
-            result = new Biome[w * h];
+    public Biome[] getBiomeBlock(Biome[] biomes, final int x, final int z, final int w, final int h) {
+        if (biomes == null || biomes.length < w * h) {
+            biomes = new Biome[w * h];
         }
         if (this.temperatures == null || this.temperatures.length < w * h) {
             this.temperatures = new double[w * h];
             this.downfalls = new double[w * h];
         }
-        Arrays.fill(result, 0, w * h, this.biome);
+        Arrays.fill(biomes, 0, w * h, this.biome);
         Arrays.fill(this.downfalls, 0, w * h, this.downfall);
         Arrays.fill(this.temperatures, 0, w * h, this.temperature);
-        return result;
+        return biomes;
     }
 }

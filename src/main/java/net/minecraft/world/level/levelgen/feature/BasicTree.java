@@ -4,344 +4,474 @@
 
 package net.minecraft.world.level.levelgen.feature;
 
+import net.minecraft.world.level.tile.Tile;
 import util.Mth;
 import net.minecraft.world.level.Level;
 import java.util.Random;
 
 public class BasicTree extends Feature
 {
-    static final byte[] axisConversionArray;
-    Random rnd;
+    // The axisConversionArray, when given a primary index, allows easy
+    // access to the indices of the other two axies.  Access the data at the
+    // primary index location to get the horizontal secondary axis.
+    // Access the data at the primary location plus three to get the
+    // remaining, tertiary, axis.
+    // All directions are specified by an index, 0, 1, or 2 which
+    // correspond to x, y, and z.
+    // The axisConversionArray is used in several places
+    // notably the crossection and taperedLimb methods.
+    // Example:
+    // If the primary axis is z, then the primary index is 2.
+    // The secondary index is axisConversionArray[2] which is 0,
+    // the index for the x axis.
+    // The remaining axis is axisConversionArray[2 + 3] which is 1,
+    // the index for the y axis.
+    // Using this method, the secondary axis will always be horizontal (x or z),
+    // and the tertiary always vertical (y), if possible.
+    static final byte[] axisConversionArray = new byte[] { 2, 0, 0, 1, 2, 1 };
+    // Set up the pseudorandom number generator
+    Random rnd = new Random();
+    // Make fields to hold the level data and the random seed
     Level thisLevel;
-    int[] origin;
-    int height;
+    // Field to hold the tree origin, x y and z.
+    int[] origin = new int[] { 0, 0, 0 };
+    // Field to hold the tree height.
+    int height = 0;
+    // Other important tree information.
     int trunkHeight;
-    double trunkHeightScale;
-    double branchDensity;
-    double branchSlope;
-    double widthScale;
-    double foliageDensity;
-    int trunkWidth;
-    int heightVariance;
-    int foliageHeight;
+    double trunkHeightScale = 0.618;
+    double branchDensity = 1.0;
+    double branchSlope = 0.381;
+    double widthScale = 1.0;
+    double foliageDensity = 1.0;
+    int trunkWidth = 1;
+    int heightVariance = 12;
+    int foliageHeight = 4;
+    // The foliage coordinates are a list of [x,y,z,y of branch base] values for each cluster
     int[][] foliageCoords;
     
-    public BasicTree() {
-        this.rnd = new Random();
-        this.origin = new int[] { 0, 0, 0 };
-        this.height = 0;
-        this.trunkHeightScale = 0.618;
-        this.branchDensity = 1.0;
-        this.branchSlope = 0.381;
-        this.widthScale = 1.0;
-        this.foliageDensity = 1.0;
-        this.trunkWidth = 1;
-        this.heightVariance = 12;
-        this.foliageHeight = 4;
-    }
-    
     void prepare() {
+        // Initialize the instance variables.
+        // Populate the list of foliage cluster locations.
+        // Designed to be overridden in child classes to change basic
+        // tree properties (trunk width, branch angle, foliage density, etc..).
         this.trunkHeight = (int)(this.height * this.trunkHeightScale);
-        if (this.trunkHeight >= this.height) {
-            this.trunkHeight = this.height - 1;
-        }
-        int n = (int)(1.382 + Math.pow(this.foliageDensity * this.height / 13.0, 2.0));
-        if (n < 1) {
-            n = 1;
-        }
-        final int[][] array = new int[n * this.height][4];
-        int n2 = this.origin[1] + this.height - this.foliageHeight;
-        int n3 = 1;
-        final int n4 = this.origin[1] + this.trunkHeight;
-        int i = n2 - this.origin[1];
-        array[0][0] = this.origin[0];
-        array[0][1] = n2;
-        array[0][2] = this.origin[2];
-        array[0][3] = n4;
-        --n2;
-        while (i >= 0) {
-            int j = 0;
-            final float treeShape = this.treeShape(i);
-            if (treeShape < 0.0f) {
-                --n2;
-                --i;
+        if (this.trunkHeight >= this.height) this.trunkHeight = this.height - 1;
+        int clustersPerY = (int)(1.382 + Math.pow(this.foliageDensity * this.height / 13.0, 2.0));
+        if (clustersPerY < 1) clustersPerY = 1;
+
+        // The foliage coordinates are a list of [x,y,z,y of branch base] values for each cluster
+        final int[][] tempFoliageCoords = new int[clustersPerY * this.height][4];
+        int y = this.origin[1] + this.height - this.foliageHeight;
+        int clusterCount = 1;
+        final int trunkTop = this.origin[1] + this.trunkHeight;
+        int relativeY = y - this.origin[1];
+
+        tempFoliageCoords[0][0] = this.origin[0];
+        tempFoliageCoords[0][1] = y;
+        tempFoliageCoords[0][2] = this.origin[2];
+        tempFoliageCoords[0][3] = trunkTop;
+        y--;
+
+        while (relativeY >= 0) {
+            int num = 0;
+
+            final float shapefac = this.treeShape(relativeY);
+            if (shapefac < 0.0f) {
+                y--;
+                relativeY--;
+                continue;
             }
-            else {
-                final double n5 = 0.5;
-                while (j < n) {
-                    final double n6 = this.widthScale * (treeShape * (this.rnd.nextFloat() + 0.328));
-                    final double n7 = this.rnd.nextFloat() * 2.0 * 3.14159;
-                    final int floor = Mth.floor(n6 * Math.sin(n7) + this.origin[0] + n5);
-                    final int floor2 = Mth.floor(n6 * Math.cos(n7) + this.origin[2] + n5);
-                    final int[] array2 = { floor, n2, floor2 };
-                    if (this.checkLine(array2, new int[] { floor, n2 + this.foliageHeight, floor2 }) == -1) {
-                        final int[] start = { this.origin[0], this.origin[1], this.origin[2] };
-                        final double n8 = Math.sqrt(Math.pow(Math.abs(this.origin[0] - array2[0]), 2.0) + Math.pow(Math.abs(this.origin[2] - array2[2]), 2.0)) * this.branchSlope;
-                        if (array2[1] - n8 > n4) {
-                            start[1] = n4;
-                        }
-                        else {
-                            start[1] = (int)(array2[1] - n8);
-                        }
-                        if (this.checkLine(start, array2) == -1) {
-                            array[n3][0] = floor;
-                            array[n3][1] = n2;
-                            array[n3][2] = floor2;
-                            array[n3][3] = start[1];
-                            ++n3;
-                        }
+
+            // The originOffset is to put the value in the middle of the block.
+            final double originOffset = 0.5;
+            while (num < clustersPerY) {
+                final double radius = this.widthScale * (shapefac * (this.rnd.nextFloat() + 0.328));
+                final double angle = this.rnd.nextFloat() * 2.0 * 3.14159;
+                final int x = Mth.floor(radius * Math.sin(angle) + this.origin[0] + originOffset);
+                final int z = Mth.floor(radius * Math.cos(angle) + this.origin[2] + originOffset);
+                final int[] checkStart = { x, y, z };
+                final int[] checkEnd = new int[] { x, y + this.foliageHeight, z };
+                // check the center column of the cluster for obstructions.
+                if (this.checkLine(checkStart, checkEnd) == -1) {
+                    // If the cluster can be created, check the branch path
+                    // for obstructions.
+                    final int[] checkBranchBase = { this.origin[0], this.origin[1], this.origin[2] };
+                    final double distance = Math.sqrt(Math.pow(Math.abs(this.origin[0] - checkStart[0]), 2.0) + Math.pow(Math.abs(this.origin[2] - checkStart[2]), 2.0));
+                    final double branchHeight = distance * this.branchSlope;
+                    if (checkStart[1] - branchHeight > trunkTop) {
+                        checkBranchBase[1] = trunkTop;
                     }
-                    ++j;
+                    else {
+                        checkBranchBase[1] = (int)(checkStart[1] - branchHeight);
+                    }
+                    // Now check the branch path
+                    if (this.checkLine(checkBranchBase, checkStart) == -1) {
+                        // If the branch path is clear, add the position to the list
+                        // of foliage positions
+                        tempFoliageCoords[clusterCount][0] = x;
+                        tempFoliageCoords[clusterCount][1] = y;
+                        tempFoliageCoords[clusterCount][2] = z;
+                        tempFoliageCoords[clusterCount][3] = checkBranchBase[1];
+                        clusterCount++;
+                    }
                 }
-                --n2;
-                --i;
+                num++;
             }
+            y--;
+            relativeY--;
         }
-        System.arraycopy(array, 0, this.foliageCoords = new int[n3][4], 0, n3);
+        this.foliageCoords = new int[clusterCount][4];
+        System.arraycopy(tempFoliageCoords, 0, this.foliageCoords, 0, clusterCount);
     }
     
     void crossection(final int x, final int y, final int z, final float radius, final byte direction, final int material) {
-        final int n = (int)(radius + 0.618);
-        final byte b = BasicTree.axisConversionArray[direction];
-        final byte b2 = BasicTree.axisConversionArray[direction + 3];
-        final int[] array = { x, y, z };
-        final int[] array2 = { 0, 0, 0 };
-        int i = -n;
-        array2[direction] = array[direction];
-        while (i <= n) {
-            array2[b] = array[b] + i;
-            for (int j = -n; j <= n; ++j) {
-                if (Math.sqrt(Math.pow(Math.abs(i) + 0.5, 2.0) + Math.pow(Math.abs(j) + 0.5, 2.0)) <= radius) {
-                    array2[b2] = array[b2] + j;
-                    final int tile = this.thisLevel.getTile(array2[0], array2[1], array2[2]);
-                    if (tile == 0 || tile == 18) {
-                        this.thisLevel.setTileNoUpdate(array2[0], array2[1], array2[2], material);
-                    }
+        // Create a circular cross section.
+        //
+        // Used to nearly everything in the foliage, branches, and trunk.
+        // This is a good target for performance optimization.
+
+        // Passed values:
+        // x,y,z is the center location of the cross section
+        // radius is the radius of the section from the center
+        // direction is the direction the cross section is pointed, 0 for x, 1 for y, 2 for z
+        // material is the index number for the material to use
+        final int rad = (int)(radius + 0.618);
+        final byte secidx1 = BasicTree.axisConversionArray[direction];
+        final byte secidx2 = BasicTree.axisConversionArray[direction + 3];
+        final int[] center = { x, y, z };
+        final int[] position = { 0, 0, 0 };
+        int offset1 = -rad;
+        int offset2 = -rad;
+        int thismat;
+        position[direction] = center[direction];
+        while (offset1 <= rad) {
+            position[secidx1] = center[secidx1] + offset1;
+            offset2 = -rad;
+            while (offset2 <= rad) {
+                double thisdistance = Math.sqrt(Math.pow(Math.abs(offset1) + 0.5, 2.0) + Math.pow(Math.abs(offset2) + 0.5, 2.0));
+                if (!(thisdistance <= radius)) {
+                    offset2++;
+                    continue;
                 }
+                position[secidx2] = center[secidx2] + offset2;
+                thismat = this.thisLevel.getTile(position[0], position[1], position[2]);
+                if (!(thismat == 0 || thismat == Tile.leaves.id)) {
+                    // If the material of the checked block is anything other than
+                    // air or foliage, skip this tile.
+                    offset2++;
+                    continue;
+                }
+                this.thisLevel.setTileNoUpdate(position[0], position[1], position[2], material);
+                offset2++;
             }
-            ++i;
+            offset1++;
         }
     }
     
     float treeShape(final int y) {
-        if (y < (float)this.height * 0.3) {
-            return -1.618f;
-        }
-        final float a = this.height / 2.0f;
-        final float n = this.height / 2.0f - y;
-        float n2;
-        if (n == 0.0f) {
-            n2 = a;
-        }
-        else if (Math.abs(n) >= a) {
-            n2 = 0.0f;
-        }
-        else {
-            n2 = (float)Math.sqrt(Math.pow(Math.abs(a), 2.0) - Math.pow(Math.abs(n), 2.0));
-        }
-        return n2 * 0.5f;
+        // Take the y position relative to the base of the tree.
+        // Return the distance the foliage should be from the trunk axis.
+        // Return a negative number if foliage should not be created at this height.
+        // This method is intended for overriding in child classes, allowing
+        // different shaped trees.
+        // This method should return a consistent value for each y (don't randomize).
+        if (y < (float)this.height * 0.3) return -1.618f;
+        final float radius = this.height / 2.0f;
+        final float adjacent = this.height / 2.0f - y;
+
+        float distance;
+        if (adjacent == 0.0f) distance = radius;
+        else if (Math.abs(adjacent) >= radius) distance = 0.0f;
+        else distance = (float) Math.sqrt(Math.pow(Math.abs(radius), 2.0) - Math.pow(Math.abs(adjacent), 2.0));
+
+        // Alter this factor to change the overall width of the tree.
+        distance *= (float) 0.5;
+        return distance;
     }
     
     float foliageShape(final int y) {
-        if (y < 0 || y >= this.foliageHeight) {
-            return -1.0f;
-        }
-        if (y == 0 || y == this.foliageHeight - 1) {
-            return 2.0f;
-        }
-        return 3.0f;
+        // Take the y position relative to the base of the foliage cluster.
+        // Return the radius of the cluster at this y
+        // Return a negative number if no foliage should be created at this level
+        // this method is intended for overriding in child classes, allowing
+        // foliage of different sizes and shapes.
+        if (y < 0 || y >= this.foliageHeight) return -1.0f;
+        else if (y == 0 || y == this.foliageHeight - 1) return 2.0f;
+        else return 3.0f;
     }
     
     void foliageCluster(final int x, final int y, final int z) {
-        for (int i = y; i < y + this.foliageHeight; ++i) {
-            this.crossection(x, i, z, this.foliageShape(i - y), (byte)1, 18);
+        // Generate a cluster of foliage, with the base at x, y, z.
+        // The shape of the cluster is derived from  foliageShape
+        // crossection is called to make each level.
+        int topy = y + this.foliageHeight;
+        int cury = y;
+        float radius;
+        while (cury < topy) {
+            radius = this.foliageShape(cury - y);
+            this.crossection(x, cury, z, radius, (byte)1, Tile.leaves.id);
+            cury++;
         }
     }
     
     void limb(final int[] start, final int[] end, final int material) {
-        final int[] array = { 0, 0, 0 };
-        int i = 0;
-        int n = 0;
-        while (i < 3) {
-            array[i] = end[i] - start[i];
-            if (Math.abs(array[i]) > Math.abs(array[n])) {
-                n = i;
+        // Create a limb from the start position to the end position.
+        // Used for creating the branches and trunk.
+
+        // Populate delta, the difference between start and end for all three axies.
+        // Set primidx to the index with the largest overall distance traveled.
+        final int[] delta = { 0, 0, 0 };
+        byte idx = 0;
+        byte primidx = 0;
+        while (idx < 3) {
+            delta[idx] = end[idx] - start[idx];
+            if (Math.abs(delta[idx]) > Math.abs(delta[primidx])) {
+                primidx = idx;
             }
-            i = (byte)(i + 1);
+            idx++;
         }
-        if (array[n] == 0) {
-            return;
-        }
-        final byte b = BasicTree.axisConversionArray[n];
-        final byte b2 = BasicTree.axisConversionArray[n + 3];
-        int n2;
-        if (array[n] > 0) {
-            n2 = 1;
-        }
-        else {
-            n2 = -1;
-        }
-        final double n3 = array[b] / (double)array[n];
-        final double n4 = array[b2] / (double)array[n];
-        final int[] array2 = { 0, 0, 0 };
-        for (int j = 0; j != array[n] + n2; j += n2) {
-            array2[n] = Mth.floor(start[n] + j + 0.5);
-            array2[b] = Mth.floor(start[b] + j * n3 + 0.5);
-            array2[b2] = Mth.floor(start[b2] + j * n4 + 0.5);
-            this.thisLevel.setTileNoUpdate(array2[0], array2[1], array2[2], material);
+        // If the largest distance is zero, don't bother to do anything else.
+        if (delta[primidx] == 0) return;
+        // set up the other two axis indices.
+        final byte secidx1 = BasicTree.axisConversionArray[primidx];
+        final byte secidx2 = BasicTree.axisConversionArray[primidx + 3];
+        // primsign is digit 1 or -1 depending on whether the limb is headed
+        // along the positive or negative primidx axis.
+        int primsign;
+        if (delta[primidx] > 0) primsign = 1;
+        else primsign = -1;
+
+        // Initilize the per-step movement for the non-primary axies.
+        final double secfac1 = delta[secidx1] / (double)delta[primidx];
+        final double secfac2 = delta[secidx2] / (double)delta[primidx];
+        // Initialize the coordinates.
+        final int[] coordinate = { 0, 0, 0 };
+        // Loop through each crossection along the primary axis, from start to end
+        int primoffset = 0;
+        int endoffset = delta[primidx] + primsign;
+        while (primoffset != endoffset) {
+            coordinate[primidx] = Mth.floor(start[primidx] + primoffset + 0.5);
+            coordinate[secidx1] = Mth.floor(start[secidx1] + primoffset * secfac1 + 0.5);
+            coordinate[secidx2] = Mth.floor(start[secidx2] + primoffset * secfac2 + 0.5);
+            this.thisLevel.setTileNoUpdate(coordinate[0], coordinate[1], coordinate[2], material);
+            primoffset += primsign;
         }
     }
     
     void makeFoliage() {
-        for (int i = 0; i < this.foliageCoords.length; ++i) {
-            this.foliageCluster(this.foliageCoords[i][0], this.foliageCoords[i][1], this.foliageCoords[i][2]);
+        // Create the tree foliage.
+        // Call foliageCluster at the correct locations
+        int idx = 0;
+        int finish = this.foliageCoords.length;
+        while (idx < finish) {
+            int x = this.foliageCoords[idx][0];
+            int y = this.foliageCoords[idx][1];
+            int z = this.foliageCoords[idx][2];
+            this.foliageCluster(x, y, z);
+            idx++;
         }
     }
     
     boolean trimBranches(final int localY) {
-        return localY >= this.height * 0.2;
+        // For larger trees, randomly "prune" the branches so there
+        // aren't too many.
+        // Return true if the branch should be created.
+        // This method is intended for overriding in child classes, allowing
+        // decent amounts of branches on very large trees.
+        // Can also be used to disable branches on some tree types, or
+        // make branches more sparse.
+        if (localY < this.height * 0.2) return false;
+        else return true;
     }
     
     void makeTrunk() {
-        final int n = this.origin[0];
-        final int n2 = this.origin[1];
-        final int n3 = this.origin[1] + this.trunkHeight;
-        final int n4 = this.origin[2];
-        final int[] array = { n, n2, n4 };
-        final int[] array2 = { n, n3, n4 };
-        this.limb(array, array2, 17);
+        // Create the trunk of the tree.
+        final int x = this.origin[0];
+        final int startY = this.origin[1];
+        final int topY = this.origin[1] + this.trunkHeight;
+        final int z = this.origin[2];
+        final int[] startCoord = { x, startY, z };
+        final int[] endCoord = { x, topY, z };
+        this.limb(startCoord, endCoord, Tile.treeTrunk.id);
         if (this.trunkWidth == 2) {
-            final int[] array3 = array;
-            final int n5 = 0;
-            ++array3[n5];
-            final int[] array4 = array2;
-            final int n6 = 0;
-            ++array4[n6];
-            this.limb(array, array2, 17);
-            final int[] array5 = array;
-            final int n7 = 2;
-            ++array5[n7];
-            final int[] array6 = array2;
-            final int n8 = 2;
-            ++array6[n8];
-            this.limb(array, array2, 17);
-            final int[] array7 = array;
-            final int n9 = 0;
-            --array7[n9];
-            final int[] array8 = array2;
-            final int n10 = 0;
-            --array8[n10];
-            this.limb(array, array2, 17);
+            startCoord[0] += 1;
+            endCoord[0] += 1;
+            this.limb(startCoord, endCoord, Tile.treeTrunk.id);
+            startCoord[0] += 1;
+            endCoord[0] += 1;
+            this.limb(startCoord, endCoord, Tile.treeTrunk.id);
+            startCoord[0] -= 1;
+            endCoord[0] -= 1;
+            this.limb(startCoord, endCoord, Tile.treeTrunk.id);
         }
     }
     
     void makeBranches() {
-        int i = 0;
-        final int length = this.foliageCoords.length;
-        final int[] start = { this.origin[0], this.origin[1], this.origin[2] };
-        while (i < length) {
-            final int[] array = this.foliageCoords[i];
-            final int[] end = { array[0], array[1], array[2] };
-            start[1] = array[3];
-            if (this.trimBranches(start[1] - this.origin[1])) {
-                this.limb(start, end, 17);
+        // Create the tree branches.
+        // Call trimBranches for each branch to see if you should create it.
+        // Call taperedLimb to the correct locations
+        int idx = 0;
+        final int finish = this.foliageCoords.length;
+        final int[] baseCoord = { this.origin[0], this.origin[1], this.origin[2] };
+        while (idx < finish) {
+            final int[] coordValues = this.foliageCoords[idx];
+            final int[] endCoord = { coordValues[0], coordValues[1], coordValues[2] };
+            baseCoord[1] = coordValues[3];
+            int localY = baseCoord[1] - this.origin[1];
+            if (this.trimBranches(localY)) {
+                this.limb(baseCoord, endCoord, Tile.treeTrunk.id);
             }
-            ++i;
+            idx++;
         }
     }
     
     int checkLine(final int[] start, final int[] end) {
-        final int[] array = { 0, 0, 0 };
-        int i = 0;
-        int n = 0;
-        while (i < 3) {
-            array[i] = end[i] - start[i];
-            if (Math.abs(array[i]) > Math.abs(array[n])) {
-                n = i;
+        // Check from coordinates start to end (both inclusive) for blocks other than air and foliage
+        // If a block other than air and foliage is found, return the number of steps taken.
+        // If no block other than air and foliage is found, return -1.
+        // Examples:
+        // If the third block searched is stone, return 2
+        // If the first block searched is lava, return 0
+
+        final int[] delta = { 0, 0, 0 };
+        int idx = 0;
+        int primidx = 0;
+        while (idx < 3) {
+            delta[idx] = end[idx] - start[idx];
+            if (Math.abs(delta[idx]) > Math.abs(delta[primidx])) {
+                primidx = idx;
             }
-            i = (byte)(i + 1);
+            idx++;
         }
-        if (array[n] == 0) {
-            return -1;
-        }
-        final byte b = BasicTree.axisConversionArray[n];
-        final byte b2 = BasicTree.axisConversionArray[n + 3];
-        int n2;
-        if (array[n] > 0) {
-            n2 = 1;
-        }
-        else {
-            n2 = -1;
-        }
-        final double n3 = array[b] / (double)array[n];
-        final double n4 = array[b2] / (double)array[n];
-        final int[] array2 = { 0, 0, 0 };
-        int j;
-        int n5;
-        for (j = 0, n5 = array[n] + n2; j != n5; j += n2) {
-            array2[n] = start[n] + j;
-            array2[b] = Mth.floor(start[b] + j * n3);
-            array2[b2] = Mth.floor(start[b2] + j * n4);
-            final int tile = this.thisLevel.getTile(array2[0], array2[1], array2[2]);
-            if (tile != 0 && tile != 18) {
+        // If the largest distance is zero, don't bother to do anything else.
+        if (delta[primidx] == 0) return -1;
+        // set up the other two axis indices.
+        final byte secidx1 = BasicTree.axisConversionArray[primidx];
+        final byte secidx2 = BasicTree.axisConversionArray[primidx + 3];
+        // primsign is digit 1 or -1 depending on whether the limb is headed
+        // along the positive or negative primidx axis.
+        int primsign;
+        if (delta[primidx] > 0) primsign = 1;
+        else primsign = -1;
+        // Initilize the per-step movement for the non-primary axies.
+        final double secfac1 = delta[secidx1] / (double)delta[primidx];
+        final double secfac2 = delta[secidx2] / (double)delta[primidx];
+        // Initialize the coordinates.
+        final int[] coordinate = { 0, 0, 0 };
+        // Loop through each crossection along the primary axis, from start to end
+        int primoffset = 0;
+        int endoffset = delta[primidx] + primsign;
+        int thismat;
+        while (primoffset != endoffset) {
+            coordinate[primidx] = start[primidx] + primoffset;
+            coordinate[secidx1] = Mth.floor(start[secidx1] + primoffset * secfac1);
+            coordinate[secidx2] = Mth.floor(start[secidx2] + primoffset * secfac2);
+            thismat = this.thisLevel.getTile(coordinate[0], coordinate[1], coordinate[2]);
+            if (thismat != 0 && thismat != Tile.leaves.id) {
+                // If the material of the checked block is anything other than
+                // air or foliage, stop looking.
                 break;
             }
+            primoffset += primsign;
         }
-        if (j == n5) {
+        // If you reached the end without finding anything, return -1.
+        if (primoffset == endoffset) {
             return -1;
         }
-        return Math.abs(j);
+        // Otherwise, return the number of steps you took.
+        else {
+            return Math.abs(primoffset);
+        }
     }
     
     boolean checkLocation() {
-        final int[] start = { this.origin[0], this.origin[1], this.origin[2] };
-        final int[] end = { this.origin[0], this.origin[1] + this.height - 1, this.origin[2] };
-        final int tile = this.thisLevel.getTile(this.origin[0], this.origin[1] - 1, this.origin[2]);
-        if (tile != 2 && tile != 3) {
+        // Return true if the tree can be placed here.
+        // Return false if the tree can not be placed here.
+
+        // Examine the square under the trunk.  Is it grass or dirt?
+        // If not, return false
+        // Examine center column for how tall the tree can be.
+        // If the checked height is shorter than height, but taller
+        // than 4, set the tree to the maximum height allowed.
+        // If the space is too short, return false.
+        final int[] startPosition = { this.origin[0], this.origin[1], this.origin[2] };
+        final int[] endPosition = { this.origin[0], this.origin[1] + this.height - 1, this.origin[2] };
+
+        // Check the location it is resting on
+        final int baseMaterial = this.thisLevel.getTile(this.origin[0], this.origin[1] - 1, this.origin[2]);
+        if (baseMaterial != Tile.grass.id && baseMaterial != Tile.dirt.id) {
             return false;
         }
-        final int checkLine = this.checkLine(start, end);
-        if (checkLine == -1) {
+        final int allowedHeight = this.checkLine(startPosition, endPosition);
+        // If the set height is good, go with that
+        if (allowedHeight == -1) {
             return true;
         }
-        if (checkLine < 6) {
+        // If the space is too short, tell the build to abort
+        else if (allowedHeight < 6) {
             return false;
         }
-        this.height = checkLine;
-        return true;
+        // If the space is shorter than the set height, but not too short
+        // shorten the height, and tell the build to continue
+        else {
+            this.height = allowedHeight;
+//            System.out.println("Shortened the tree");
+            return true;
+        }
     }
     
     @Override
-    public void init(final double V1, final double V2, final double V3) {
-        this.heightVariance = (int)(V1 * 12.0);
-        if (V1 > 0.5) {
-            this.foliageHeight = 5;
-        }
-        this.widthScale = V2;
-        this.foliageDensity = V3;
+    public void init(final double heightInit, final double widthInit, final double foliageDensityInit) {
+        // all of the parameters should be from 0.0 to 1.0
+        // heightInit scales the maximum overall height of the tree (still randomizes height within the possible range)
+        // widthInit scales the maximum overall width of the tree (keep this above 0.3 or so)
+        // foliageDensityInit scales how many foliage clusters are created.
+        //
+        // Note, you can call "place" without calling "init".
+        // This is the same as calling init(1.0,1.0,1.0) and then calling place.
+        this.heightVariance = (int)(heightInit * 12.0);
+        if (heightInit > 0.5) this.foliageHeight = 5;
+        this.widthScale = widthInit;
+        this.foliageDensity = foliageDensityInit;
     }
     
     @Override
     public boolean place(final Level level, final Random random, final int x, final int y, final int z) {
+        // Note to Markus.
+        // currently the following fields are set randomly.  If you like, make them
+        // parameters passed into "place".
+        //
+        // height: so the map generator can intelligently set the height of the tree,
+        // and make forests with large trees in the middle and smaller ones on the edges.
+
+        // Initialize the instance fields for the level and the seed.
         this.thisLevel = level;
         this.rnd.setSeed(random.nextLong());
+        // Initialize the origin of the tree trunk
         this.origin[0] = x;
         this.origin[1] = y;
         this.origin[2] = z;
+        // Sets the height.  Take out this line if height is passed as a parameter
         if (this.height == 0) {
             this.height = 5 + this.rnd.nextInt(this.heightVariance);
         }
         if (!this.checkLocation()) {
+//            System.out.println("Tree location failed");
             return false;
         }
+//        System.out.println("The height is");
+//        System.out.println(height);
+//        System.out.println("Trunk Height check done");
         this.prepare();
+//        System.out.println("Prepare done");
         this.makeFoliage();
+//        System.out.println("Foliage done");
         this.makeTrunk();
+//        System.out.println("Trunk done");
         this.makeBranches();
+//        System.out.println("Branches done");
         return true;
     }
-    
-    static {
-        axisConversionArray = new byte[] { 2, 0, 0, 1, 2, 1 };
-    }
+
 }

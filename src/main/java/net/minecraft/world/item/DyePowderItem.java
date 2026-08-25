@@ -87,59 +87,49 @@ public class DyePowderItem extends Item
     
     @Override
     public boolean useOn(final ItemInstance itemInstance, final Player player, final Level level, final int x, final int y, final int z, final int face) {
-        if (itemInstance.getAuxValue() == 15) {
+        if (itemInstance.getAuxValue() == WHITE) {
+            // bone meal is a fertilizer, so instantly grow trees and stuff
             final int tile = level.getTile(x, y, z);
             if (tile == Tile.sapling.id) {
                 if (!level.isClientSide) {
                     ((Sapling)Tile.sapling).growTree(level, x, y, z, level.random);
-                    --itemInstance.count;
+                    itemInstance.count--;
                 }
                 return true;
             }
             if (tile == Tile.crops.id) {
                 if (!level.isClientSide) {
                     ((CropTile)Tile.crops).growCropsToMax(level, x, y, z);
-                    --itemInstance.count;
+                    itemInstance.count--;
                 }
                 return true;
             }
             if (tile == Tile.grass.id) {
                 if (!level.isClientSide) {
-                    --itemInstance.count;
-                    int i = 0;
-                Label_0370_Outer:
-                    while (i < 128) {
-                        int n = x;
-                        int y2 = y + 1;
-                        int n2 = z;
-                        int j = 0;
-                        while (true) {
-                            while (j < i / 16) {
-                                n += DyePowderItem.random.nextInt(3) - 1;
-                                y2 += (DyePowderItem.random.nextInt(3) - 1) * DyePowderItem.random.nextInt(3) / 2;
-                                n2 += DyePowderItem.random.nextInt(3) - 1;
-                                if (level.getTile(n, y2 - 1, n2) == Tile.grass.id) {
-                                    if (!level.isSolidBlockingTile(n, y2, n2)) {
-                                        ++j;
-                                        continue Label_0370_Outer;
-                                    }
-                                }
-                                ++i;
-                                continue Label_0370_Outer;
+                    itemInstance.count--;
+                    mainLoop:
+                    for (int j = 0; j < 128; j++) {
+                        int xx = x;
+                        int yy = y + 1;
+                        int zz = z;
+                        for (int i = 0; i < j / 16; i++) {
+                            xx += DyePowderItem.random.nextInt(3) - 1;
+                            yy += (DyePowderItem.random.nextInt(3) - 1) * DyePowderItem.random.nextInt(3) / 2;
+                            zz += DyePowderItem.random.nextInt(3) - 1;
+                            if (level.getTile(xx, yy - 1, zz) != Tile.grass.id || level.isSolidBlockingTile(xx, yy, zz)) {
+                                continue mainLoop;
                             }
-                            if (level.getTile(n, y2, n2) != 0) {
-                                continue;
-                            }
+                        }
+
+                        if (level.getTile(xx, yy, zz) == 0) {
                             if (DyePowderItem.random.nextInt(10) != 0) {
-                                level.setTileAndData(n, y2, n2, Tile.tallgrass.id, 1);
-                                continue;
+                                level.setTileAndData(xx, yy, zz, Tile.tallgrass.id, 1);
                             }
-                            if (DyePowderItem.random.nextInt(3) != 0) {
-                                level.setTile(n, y2, n2, Tile.flower.id);
-                                continue;
+                            else if (DyePowderItem.random.nextInt(3) != 0) {
+                                level.setTile(xx, yy, zz, Tile.flower.id);
+                            } else {
+                                level.setTile(xx, yy, zz, Tile.rose.id);
                             }
-                            level.setTile(n, y2, n2, Tile.rose.id);
-                            continue;
                         }
                     }
                 }
@@ -150,15 +140,17 @@ public class DyePowderItem extends Item
     }
     
     @Override
-    public void interractEnemy(final ItemInstance itemInstance, final Mob mob) {
+    public void interactEnemy(final ItemInstance itemInstance, final Mob mob) {
         if (mob instanceof Sheep) {
             final Sheep sheep = (Sheep)mob;
-            final int tileDataForItemAuxValue = ClothTile.getTileDataForItemAuxValue(itemInstance.getAuxValue());
-            if (!sheep.isSheared() && sheep.getColor() != tileDataForItemAuxValue) {
-                sheep.setColor(tileDataForItemAuxValue);
-                --itemInstance.count;
+            // convert to tile-based color value (0 is white instead of black)
+            final int newColor = ClothTile.getTileDataForItemAuxValue(itemInstance.getAuxValue());
+            if (!sheep.isSheared() && sheep.getColor() != newColor) {
+                sheep.setColor(newColor);
+                itemInstance.count--;
             }
         }
     }
+
 
 }

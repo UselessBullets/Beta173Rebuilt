@@ -13,6 +13,7 @@ import net.minecraft.stats.Achievements;
 import net.minecraft.world.entity.item.Minecart;
 import net.minecraft.stats.Stat;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.DyePowderItem;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.tile.BedTile;
 import net.minecraft.world.level.tile.entity.SignTileEntity;
@@ -289,8 +290,7 @@ public abstract class Player extends Mob
     }
 
     @Override
-    public boolean isShootable() // Useless - in b1.2 and LCE leaks
-    {
+    public boolean isShootable() { // Useless - in b1.2 and LCE leaks
         return true;
     }
 

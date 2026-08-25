@@ -15,7 +15,7 @@ public class SaddleItem extends Item
     }
     
     @Override
-    public void interractEnemy(final ItemInstance itemInstance, final Mob mob) {
+    public void interactEnemy(final ItemInstance itemInstance, final Mob mob) {
         if (mob instanceof Pig) {
             final Pig pig = (Pig)mob;
             if (!pig.hasSaddle()) {
@@ -27,7 +27,7 @@ public class SaddleItem extends Item
     
     @Override
     public boolean hurtEnemy(final ItemInstance itemInstance, final Mob mob, final Mob attacker) {
-        this.interractEnemy(itemInstance, mob);
+        this.interactEnemy(itemInstance, mob);
         return true;
     }
 }

@@ -5,6 +5,8 @@
 package net.minecraft.world.item;
 
 import net.minecraft.stats.Stats;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.item.Minecart;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.locale.language.I18n;
 import net.minecraft.world.entity.Entity;
@@ -16,8 +18,10 @@ import java.util.Random;
 
 public class Item
 {
+    public static final int ITEM_NUM_COUNT = 32000;
     protected static Random random = new Random();
-    public static Item[] items = new Item[32000];
+    private static final int MAX_STACK_SIZE = Container.LARGE_MAX_STACK_SIZE;
+    public static Item[] items = new Item[ITEM_NUM_COUNT];
     public static Item shovel_iron = new ShovelItem(0, Tier.IRON).setIcon(2, 5).setDescriptionId("shovelIron");
     public static Item pickAxe_iron = new PickaxeItem(1, Tier.IRON).setIcon(2, 6).setDescriptionId("pickaxeIron");
     public static Item hatchet_iron = new HatchetItem(2, Tier.IRON).setIcon(2, 7).setDescriptionId("hatchetIron");
@@ -60,26 +64,26 @@ public class Item
     public static Item seeds = new SeedItem(39, Tile.crops.id).setIcon(9, 0).setDescriptionId("seeds");
     public static Item wheat = new Item(40).setIcon(9, 1).setDescriptionId("wheat");
     public static Item bread = new FoodItem(41, 5, false).setIcon(9, 2).setDescriptionId("bread");
-    public static Item helmet_cloth = new ArmorItem(42, 0, 0, 0).setIcon(0, 0).setDescriptionId("helmetCloth");
-    public static Item chestplate_cloth = new ArmorItem(43, 0, 0, 1).setIcon(0, 1).setDescriptionId("chestplateCloth");
-    public static Item leggings_cloth = new ArmorItem(44, 0, 0, 2).setIcon(0, 2).setDescriptionId("leggingsCloth");
-    public static Item boots_cloth = new ArmorItem(45, 0, 0, 3).setIcon(0, 3).setDescriptionId("bootsCloth");
-    public static Item helmet_chain = new ArmorItem(46, 1, 1, 0).setIcon(1, 0).setDescriptionId("helmetChain");
-    public static Item chestplate_chain = new ArmorItem(47, 1, 1, 1).setIcon(1, 1).setDescriptionId("chestplateChain");
-    public static Item leggings_chain = new ArmorItem(48, 1, 1, 2).setIcon(1, 2).setDescriptionId("leggingsChain");
-    public static Item boots_chain = new ArmorItem(49, 1, 1, 3).setIcon(1, 3).setDescriptionId("bootsChain");
-    public static Item helmet_iron = new ArmorItem(50, 2, 2, 0).setIcon(2, 0).setDescriptionId("helmetIron");
-    public static Item chestplate_iron = new ArmorItem(51, 2, 2, 1).setIcon(2, 1).setDescriptionId("chestplateIron");
-    public static Item leggings_iron = new ArmorItem(52, 2, 2, 2).setIcon(2, 2).setDescriptionId("leggingsIron");
-    public static Item boots_iron = new ArmorItem(53, 2, 2, 3).setIcon(2, 3).setDescriptionId("bootsIron");
-    public static Item helmet_emerald = new ArmorItem(54, 3, 3, 0).setIcon(3, 0).setDescriptionId("helmetDiamond");
-    public static Item chestplate_emerald = new ArmorItem(55, 3, 3, 1).setIcon(3, 1).setDescriptionId("chestplateDiamond");
-    public static Item leggings_emerald = new ArmorItem(56, 3, 3, 2).setIcon(3, 2).setDescriptionId("leggingsDiamond");
-    public static Item boots_emerald = new ArmorItem(57, 3, 3, 3).setIcon(3, 3).setDescriptionId("bootsDiamond");
-    public static Item helmet_gold = new ArmorItem(58, 1, 4, 0).setIcon(4, 0).setDescriptionId("helmetGold");
-    public static Item chestplate_gold = new ArmorItem(59, 1, 4, 1).setIcon(4, 1).setDescriptionId("chestplateGold");
-    public static Item leggings_gold = new ArmorItem(60, 1, 4, 2).setIcon(4, 2).setDescriptionId("leggingsGold");
-    public static Item boots_gold = new ArmorItem(61, 1, 4, 3).setIcon(4, 3).setDescriptionId("bootsGold");
+    public static Item helmet_cloth = new ArmorItem(42, 0, 0, ArmorItem.SLOT_HEAD).setIcon(0, 0).setDescriptionId("helmetCloth");
+    public static Item chestplate_cloth = new ArmorItem(43, 0, 0, ArmorItem.SLOT_TORSO).setIcon(0, 1).setDescriptionId("chestplateCloth");
+    public static Item leggings_cloth = new ArmorItem(44, 0, 0, ArmorItem.SLOT_LEGS).setIcon(0, 2).setDescriptionId("leggingsCloth");
+    public static Item boots_cloth = new ArmorItem(45, 0, 0, ArmorItem.SLOT_FEET).setIcon(0, 3).setDescriptionId("bootsCloth");
+    public static Item helmet_chain = new ArmorItem(46, 1, 1, ArmorItem.SLOT_HEAD).setIcon(1, 0).setDescriptionId("helmetChain");
+    public static Item chestplate_chain = new ArmorItem(47, 1, 1, ArmorItem.SLOT_TORSO).setIcon(1, 1).setDescriptionId("chestplateChain");
+    public static Item leggings_chain = new ArmorItem(48, 1, 1, ArmorItem.SLOT_LEGS).setIcon(1, 2).setDescriptionId("leggingsChain");
+    public static Item boots_chain = new ArmorItem(49, 1, 1, ArmorItem.SLOT_FEET).setIcon(1, 3).setDescriptionId("bootsChain");
+    public static Item helmet_iron = new ArmorItem(50, 2, 2, ArmorItem.SLOT_HEAD).setIcon(2, 0).setDescriptionId("helmetIron");
+    public static Item chestplate_iron = new ArmorItem(51, 2, 2, ArmorItem.SLOT_TORSO).setIcon(2, 1).setDescriptionId("chestplateIron");
+    public static Item leggings_iron = new ArmorItem(52, 2, 2, ArmorItem.SLOT_LEGS).setIcon(2, 2).setDescriptionId("leggingsIron");
+    public static Item boots_iron = new ArmorItem(53, 2, 2, ArmorItem.SLOT_FEET).setIcon(2, 3).setDescriptionId("bootsIron");
+    public static Item helmet_emerald = new ArmorItem(54, 3, 3, ArmorItem.SLOT_HEAD).setIcon(3, 0).setDescriptionId("helmetDiamond");
+    public static Item chestplate_emerald = new ArmorItem(55, 3, 3, ArmorItem.SLOT_TORSO).setIcon(3, 1).setDescriptionId("chestplateDiamond");
+    public static Item leggings_emerald = new ArmorItem(56, 3, 3, ArmorItem.SLOT_LEGS).setIcon(3, 2).setDescriptionId("leggingsDiamond");
+    public static Item boots_emerald = new ArmorItem(57, 3, 3, ArmorItem.SLOT_FEET).setIcon(3, 3).setDescriptionId("bootsDiamond");
+    public static Item helmet_gold = new ArmorItem(58, 1, 4, ArmorItem.SLOT_HEAD).setIcon(4, 0).setDescriptionId("helmetGold");
+    public static Item chestplate_gold = new ArmorItem(59, 1, 4, ArmorItem.SLOT_TORSO).setIcon(4, 1).setDescriptionId("chestplateGold");
+    public static Item leggings_gold = new ArmorItem(60, 1, 4, ArmorItem.SLOT_LEGS).setIcon(4, 2).setDescriptionId("leggingsGold");
+    public static Item boots_gold = new ArmorItem(61, 1, 4, ArmorItem.SLOT_FEET).setIcon(4, 3).setDescriptionId("bootsGold");
     public static Item flint = new Item(62).setIcon(6, 0).setDescriptionId("flint");
     public static Item porkChop_raw = new FoodItem(63, 3, true).setIcon(7, 5).setDescriptionId("porkchopRaw");
     public static Item porkChop_cooked = new FoodItem(64, 8, true).setIcon(8, 5).setDescriptionId("porkchopCooked");
@@ -90,7 +94,7 @@ public class Item
     public static Item bucket_empty = new BucketItem(69, 0).setIcon(10, 4).setDescriptionId("bucket");
     public static Item bucket_water = new BucketItem(70, Tile.water.id).setIcon(11, 4).setDescriptionId("bucketWater").setCraftingRemainingItem(Item.bucket_empty);
     public static Item bucket_lava = new BucketItem(71, Tile.lava.id).setIcon(12, 4).setDescriptionId("bucketLava").setCraftingRemainingItem(Item.bucket_empty);
-    public static Item minecart = new MinecartItem(72, 0).setIcon(7, 8).setDescriptionId("minecart");
+    public static Item minecart = new MinecartItem(72, Minecart.RIDEABLE).setIcon(7, 8).setDescriptionId("minecart");
     public static Item saddle = new SaddleItem(73).setIcon(8, 6).setDescriptionId("saddle");
     public static Item door_iron = new DoorItem(74, Material.metal).setIcon(12, 2).setDescriptionId("doorIron");
     public static Item redStone = new RedStoneItem(75).setIcon(8, 3).setDescriptionId("redstone");
@@ -104,8 +108,8 @@ public class Item
     public static Item paper = new Item(83).setIcon(10, 3).setDescriptionId("paper");
     public static Item book = new Item(84).setIcon(11, 3).setDescriptionId("book");
     public static Item slimeBall = new Item(85).setIcon(14, 1).setDescriptionId("slimeball");
-    public static Item minecart_chest = new MinecartItem(86, 1).setIcon(7, 9).setDescriptionId("minecartChest");
-    public static Item minecart_furnace = new MinecartItem(87, 2).setIcon(7, 10).setDescriptionId("minecartFurnace");
+    public static Item minecart_chest = new MinecartItem(86, Minecart.CHEST).setIcon(7, 9).setDescriptionId("minecartChest");
+    public static Item minecart_furnace = new MinecartItem(87, Minecart.FURNACE).setIcon(7, 10).setDescriptionId("minecartFurnace");
     public static Item egg = new EggItem(88).setIcon(12, 0).setDescriptionId("egg");
     public static Item compass = new Item(89).setIcon(6, 3).setDescriptionId("compass");
     public static Item fishingRod = new FishingRodItem(90).setIcon(5, 4).setDescriptionId("fishingRod");
@@ -125,24 +129,17 @@ public class Item
     public static Item record_01 = new RecordingItem(2000, "13").setIcon(0, 15).setDescriptionId("record");
     public static Item record_02 = new RecordingItem(2001, "cat").setIcon(1, 15).setDescriptionId("record");
     public final int id;
-    protected int maxStackSize;
-    private int maxDamage;
+    protected int maxStackSize = Item.MAX_STACK_SIZE;
+    private int maxDamage = 0;
     protected int icon;
-    protected boolean handEquipped;
-    protected boolean isStackedByData;
-    private Item craftingRemainingItem;
+    protected boolean handEquipped = false;
+    protected boolean isStackedByData = false;
+    private Item craftingRemainingItem = null;
     private String descriptionId;
     
     protected Item(final int id) {
-        this.maxStackSize = 64;
-        this.maxDamage = 0;
-        this.handEquipped = false;
-        this.isStackedByData = false;
-        this.craftingRemainingItem = null;
         this.id = Tile.TILE_NUM_COUNT + id;
-        if (Item.items[Tile.TILE_NUM_COUNT + id] != null) {
-            System.out.println("CONFLICT @ " + id);
-        }
+        if (Item.items[Tile.TILE_NUM_COUNT + id] != null) System.out.println("CONFLICT @ " + id);
         Item.items[Tile.TILE_NUM_COUNT + id] = this;
     }
     
@@ -210,11 +207,31 @@ public class Item
     public boolean canBeDepleted() {
         return this.maxDamage > 0 && !this.isStackedByData;
     }
-    
+
+
+    /**
+     * Returns true when the item was used to deal more than default damage
+     *
+     * @param itemInstance
+     * @param mob
+     * @param attacker
+     * @return
+     */
     public boolean hurtEnemy(final ItemInstance itemInstance, final Mob mob, final Mob attacker) {
         return false;
     }
-    
+
+    /**
+     * Returns true when the item was used to mine more efficiently
+     *
+     * @param itemInstance
+     * @param tile
+     * @param x
+     * @param y
+     * @param z
+     * @param owner
+     * @return
+     */
     public boolean mineBlock(final ItemInstance itemInstance, final int tile, final int x, final int y, final int z, final Mob owner) {
         return false;
     }
@@ -227,7 +244,7 @@ public class Item
         return false;
     }
     
-    public void interractEnemy(final ItemInstance itemInstance, final Mob mob) {
+    public void interactEnemy(final ItemInstance itemInstance, final Mob mob) {
     }
     
     public Item handEquipped() {

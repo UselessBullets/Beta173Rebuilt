@@ -16,6 +16,11 @@ import net.minecraft.world.level.material.Material;
 
 public class DoorTile extends Tile
 {
+    public static final int UPPER_BIT = 0x8;
+    public static final int C_DIR_MASK = 0x3;
+    public static final int C_OPEN_MASK = 0x4;
+    public static final int C_LOWER_DATA_MASK = 0x7;
+    public static final int C_IS_UPPER_MASK = 0x8;
     protected DoorTile(final int id, final Material material) {
         super(id, material);
         this.tex = 97;

@@ -75,8 +75,8 @@ public class Stats
     }
 
     public static void buildItemStats() {
-        Stats.itemUsed = getUsedStats(Stats.itemUsed, "stat.useItem", ITEMS_USED_OFFSET, Tile.tiles.length, 32000);
-        Stats.itemBroke = getBreakStats(Stats.itemBroke, "stat.breakItem", ITEMS_BROKEN_OFFSET, Tile.tiles.length, 32000);
+        Stats.itemUsed = getUsedStats(Stats.itemUsed, "stat.useItem", ITEMS_USED_OFFSET, Tile.tiles.length, Item.ITEM_NUM_COUNT);
+        Stats.itemBroke = getBreakStats(Stats.itemBroke, "stat.breakItem", ITEMS_BROKEN_OFFSET, Tile.tiles.length, Item.ITEM_NUM_COUNT);
         Stats.itemStatsLoaded = true;
         buildCraftableStats();
     }
@@ -95,7 +95,7 @@ public class Stats
             set.add(itemInstance.id);
         }
 
-        Stats.itemCrafted = new Stat[32000];
+        Stats.itemCrafted = new Stat[Item.ITEM_NUM_COUNT];
         for (final Integer n : set) {
             if (Item.items[n] != null) {
                 Stats.itemCrafted[n] = new ItemStat(ITEMS_CRAFTED_OFFSET + n, I18n.get("stat.craftItem", Item.items[n].getName()), n).postConstruct();
@@ -105,8 +105,8 @@ public class Stats
     }
 
     private static Stat[] getMinedStats(final String nameKey, final int idOff) {
-        final Stat[] stats = new Stat[256];
-        for (int i = 0; i < 256; ++i) {
+        final Stat[] stats = new Stat[Tile.TILE_NUM_COUNT];
+        for (int i = 0; i < Tile.TILE_NUM_COUNT; ++i) {
             if (Tile.tiles[i] != null && Tile.tiles[i].isCollectStatistics()) {
                 stats[i] = new ItemStat(idOff + i, I18n.get(nameKey, Tile.tiles[i].getName()), i).postConstruct();
                 Stats.blocksStats.add((ItemStat) stats[i]);
@@ -118,7 +118,7 @@ public class Stats
 
     private static Stat[] getUsedStats(Stat[] result, final String nameKey, final int idOff, final int start, final int end) {
         if (result == null) {
-            result = new Stat[32000];
+            result = new Stat[Item.ITEM_NUM_COUNT];
         }
         for (int i = start; i < end; ++i) {
             if (Item.items[i] != null) {
@@ -134,7 +134,7 @@ public class Stats
 
     private static Stat[] getBreakStats(Stat[] result, final String nameKey, final int idOff, final int start, final int end) {
         if (result == null) {
-            result = new Stat[32000];
+            result = new Stat[Item.ITEM_NUM_COUNT];
         }
         for (int i = start; i < end; ++i) {
             if (Item.items[i] != null && Item.items[i].canBeDepleted()) {

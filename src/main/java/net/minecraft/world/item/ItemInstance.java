@@ -174,7 +174,7 @@ public final class ItemInstance
     }
     
     public void interactEnemy(final Mob mob) {
-        Item.items[this.id].interractEnemy(this, mob);
+        Item.items[this.id].interactEnemy(this, mob);
     }
     
     public ItemInstance copy() {

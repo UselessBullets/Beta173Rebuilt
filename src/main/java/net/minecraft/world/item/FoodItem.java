@@ -21,7 +21,7 @@ public class FoodItem extends Item
     
     @Override
     public ItemInstance use(final ItemInstance itemInstance, final Level level, final Player player) {
-        --itemInstance.count;
+        itemInstance.count--;
         player.heal(this.nutrition);
         return itemInstance;
     }

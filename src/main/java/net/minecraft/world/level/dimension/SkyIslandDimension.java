@@ -36,15 +36,18 @@ public class SkyIslandDimension extends Dimension
     
     @Override
     public Vec3 getFogColor(final float td, final float a) {
-        final int n = 8421536;
-        float n2 = Mth.cos(td * Mth.PI * 2.0f) * 2.0f + 0.5f;
-        if (n2 < 0.0f) {
-            n2 = 0.0f;
-        }
-        if (n2 > 1.0f) {
-            n2 = 1.0f;
-        }
-        return Vec3.newTemp((n >> 16 & 0xFF) / 255.0f * (n2 * 0.94f + 0.06f), (n >> 8 & 0xFF) / 255.0f * (n2 * 0.94f + 0.06f), (n & 0xFF) / 255.0f * (n2 * 0.91f + 0.09f));
+        final int col = 0x8080a0;
+        float br = Mth.cos(td * Mth.PI * 2.0f) * 2.0f + 0.5f;
+        if (br < 0.0f) br = 0.0f;
+        if (br > 1.0f) br = 1.0f;
+
+        float r = (col >> 16 & 0xFF) / 255.0f;
+        float g = (col >> 8 & 0xFF) / 255.0f;
+        float b = (col & 0xFF) / 255.0f;
+        r *= (br * 0.94f + 0.06f);
+        g *= (br * 0.94f + 0.06f);
+        b *= (br * 0.91f + 0.09f);
+        return Vec3.newTemp(r, g, b);
     }
     
     @Override

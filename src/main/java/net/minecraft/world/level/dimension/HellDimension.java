@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.dimension;
 
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.level.levelgen.HellRandomLevelSource;
 import net.minecraft.world.level.chunk.ChunkSource;
@@ -23,15 +24,15 @@ public class HellDimension extends Dimension
     
     @Override
     public Vec3 getFogColor(final float td, final float a) {
-        return Vec3.newTemp(0.2f, 0.029999999329447746, 0.029999999329447746);
+        return Vec3.newTemp(0.2f, 0.03f, 0.03f);
     }
     
     @Override
     protected void updateLightRamp() {
-        final float n = 0.1f;
-        for (int i = 0; i <= 15; ++i) {
-            final float n2 = 1.0f - i / 15.0f;
-            this.brightnessRamp[i] = (1.0f - n2) / (n2 * 3.0f + 1.0f) * (1.0f - n) + n;
+        final float ambientLight = 0.1f;
+        for (int i = 0; i <= Level.MAX_BRIGHTNESS; ++i) {
+            final float v = 1.0f - i / (float) Level.MAX_BRIGHTNESS;
+            this.brightnessRamp[i] = (1.0f - v) / (v * 3.0f + 1.0f) * (1.0f - ambientLight) + ambientLight;
         }
     }
     

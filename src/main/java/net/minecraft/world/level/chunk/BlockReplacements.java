@@ -8,7 +8,7 @@ import net.minecraft.world.level.tile.Tile;
 
 public class BlockReplacements
 {
-    private static byte[] replacements;
+    private static byte[] replacements = new byte[256];
     
     public static void replace(final byte[] blocks) {
         for (int i = 0; i < blocks.length; ++i) {
@@ -17,7 +17,6 @@ public class BlockReplacements
     }
     
     static {
-        BlockReplacements.replacements = new byte[256];
         try {
             for (int i = 0; i < 256; ++i) {
                 byte b = (byte)i;
@@ -27,8 +26,8 @@ public class BlockReplacements
                 BlockReplacements.replacements[i] = b;
             }
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
     }
 }

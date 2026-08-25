@@ -33,26 +33,25 @@ public class OldChunkStorage implements ChunkStorage
     }
     
     private File getFile(final int x, final int z) {
-        final String string = "c." + Integer.toString(x, 36) + "." + Integer.toString(z, 36) + ".dat";
-        final String string2 = Integer.toString(x & 0x3F, 36);
-        final String string3 = Integer.toString(z & 0x3F, 36);
-        final File parent = new File(this.dir, string2);
-        if (!parent.exists()) {
-            if (!this.create) {
-                return null;
-            }
-            parent.mkdir();
+        String name = "c." + Integer.toString(x, 36) + "." + Integer.toString(z, 36) + ".dat";
+        String path1 = Integer.toString(x & 0x3F, 36);
+        String path2 = Integer.toString(z & 0x3F, 36);
+
+        File file = new File(this.dir, path1);
+        if (!file.exists()) {
+            if (this.create) file.mkdir();
+            else return null;
         }
-        final File parent2 = new File(parent, string3);
-        if (!parent2.exists()) {
-            if (!this.create) {
-                return null;
-            }
-            parent2.mkdir();
+
+        file = new File(file, path2);
+        if (!file.exists()) {
+            if (this.create) file.mkdir();
+            else return null;
         }
-        final File file = new File(parent2, string);
-        if (!file.exists() && !this.create) {
-            return null;
+
+        file = new File(file, name);
+        if (!file.exists()) {
+            if (!this.create) return null;
         }
         return file;
     }
@@ -61,27 +60,28 @@ public class OldChunkStorage implements ChunkStorage
         final File file = this.getFile(x, z);
         if (file != null && file.exists()) {
             try {
-                final CompoundTag compressed = NbtIo.readCompressed(new FileInputStream(file));
-                if (!compressed.contains("Level")) {
+                FileInputStream fis = new FileInputStream(file);
+                final CompoundTag tag = NbtIo.readCompressed(fis);
+                if (!tag.contains("Level")) {
                     System.out.println("Chunk file at " + x + "," + z + " is missing level data, skipping");
                     return null;
                 }
-                if (!compressed.getCompound("Level").contains("Blocks")) {
+                if (!tag.getCompound("Level").contains("Blocks")) {
                     System.out.println("Chunk file at " + x + "," + z + " is missing block data, skipping");
                     return null;
                 }
-                LevelChunk levelChunk = load(level, compressed.getCompound("Level"));
+                LevelChunk levelChunk = load(level, tag.getCompound("Level"));
                 if (!levelChunk.isAt(x, z)) {
                     System.out.println("Chunk file at " + x + "," + z + " is in the wrong location; relocating. (Expected " + x + ", " + z + ", got " + levelChunk.x + ", " + levelChunk.z + ")");
-                    compressed.putInt("xPos", x);
-                    compressed.putInt("zPos", z);
-                    levelChunk = load(level, compressed.getCompound("Level"));
+                    tag.putInt("xPos", x);
+                    tag.putInt("zPos", z);
+                    levelChunk = load(level, tag.getCompound("Level"));
                 }
                 levelChunk.attemptCompression();
                 return levelChunk;
             }
-            catch (final Exception ex) {
-                ex.printStackTrace();
+            catch (final Exception e) {
+                e.printStackTrace();
             }
         }
         return null;
@@ -94,21 +94,25 @@ public class OldChunkStorage implements ChunkStorage
             final LevelData levelData = level.getLevelData();
             levelData.setSizeOnDisk(levelData.getSizeOnDisk() - file.length());
         }
+
         try {
-            final File file2 = new File(this.dir, "tmp_chunk.dat");
-            final FileOutputStream out = new FileOutputStream(file2);
+            final File tmpFile = new File(this.dir, "tmp_chunk.dat");
+
+            final FileOutputStream fos = new FileOutputStream(tmpFile);
             final CompoundTag tag = new CompoundTag();
-            final CompoundTag compoundTag = new CompoundTag();
-            tag.put("Level", compoundTag);
-            save(levelChunk, level, compoundTag);
-            NbtIo.writeCompressed(tag, out);
-            out.close();
+            final CompoundTag levelData = new CompoundTag();
+            tag.put("Level", levelData);
+            save(levelChunk, level, levelData);
+            NbtIo.writeCompressed(tag, fos);
+            fos.close();
+
             if (file.exists()) {
                 file.delete();
             }
-            file2.renameTo(file);
-            final LevelData levelData2 = level.getLevelData();
-            levelData2.setSizeOnDisk(levelData2.getSizeOnDisk() + file.length());
+            tmpFile.renameTo(file);
+
+            final LevelData levelInfo = level.getLevelData();
+            levelInfo.setSizeOnDisk(levelInfo.getSizeOnDisk() + file.length());
         }
         catch (final Exception ex) {
             ex.printStackTrace();
@@ -120,69 +124,82 @@ public class OldChunkStorage implements ChunkStorage
         tag.putInt("xPos", lc.x);
         tag.putInt("zPos", lc.z);
         tag.putLong("LastUpdate", level.getTime());
+
         tag.putByteArray("Blocks", lc.blocks);
         tag.putByteArray("Data", lc.data.data);
         tag.putByteArray("SkyLight", lc.skyLight.data);
         tag.putByteArray("BlockLight", lc.blockLight.data);
         tag.putByteArray("HeightMap", lc.heightmap);
         tag.putBoolean("TerrainPopulated", lc.terrainPopulated);
+
         lc.lastSaveHadEntities = false;
-        final ListTag tag2 = new ListTag();
+        final ListTag<CompoundTag> entityTags = new ListTag<>();
         for (int i = 0; i < lc.entityBlocks.length; ++i) {
             for (final Entity entity : lc.entityBlocks[i]) {
                 lc.lastSaveHadEntities = true;
-                final CompoundTag compoundTag = new CompoundTag();
-                if (entity.save(compoundTag)) {
-                    tag2.add(compoundTag);
+                final CompoundTag eTag = new CompoundTag();
+                if (entity.save(eTag)) {
+                    entityTags.add(eTag);
                 }
             }
         }
-        tag.put("Entities", tag2);
-        final ListTag tag3 = new ListTag();
+        tag.put("Entities", entityTags);
+
+        final ListTag<CompoundTag> tileEntityTags = new ListTag<>();
         for (final TileEntity tileEntity : lc.tileEntities.values()) {
-            final CompoundTag compoundTag2 = new CompoundTag();
-            tileEntity.save(compoundTag2);
-            tag3.add(compoundTag2);
+            final CompoundTag teTag = new CompoundTag();
+            tileEntity.save(teTag);
+            tileEntityTags.add(teTag);
         }
-        tag.put("TileEntities", tag3);
+        tag.put("TileEntities", tileEntityTags);
     }
     
     public static LevelChunk load(final Level level, final CompoundTag tag) {
-        final LevelChunk levelChunk = new LevelChunk(level, tag.getInt("xPos"), tag.getInt("zPos"));
+        int x = tag.getInt("xPos");
+        int z = tag.getInt("zPos");
+
+        final LevelChunk levelChunk = new LevelChunk(level, x, z);
         levelChunk.blocks = tag.getByteArray("Blocks");
         levelChunk.data = new DataLayer(tag.getByteArray("Data"));
         levelChunk.skyLight = new DataLayer(tag.getByteArray("SkyLight"));
         levelChunk.blockLight = new DataLayer(tag.getByteArray("BlockLight"));
         levelChunk.heightmap = tag.getByteArray("HeightMap");
         levelChunk.terrainPopulated = tag.getBoolean("TerrainPopulated");
+
         if (!levelChunk.data.isValid()) {
             levelChunk.data = new DataLayer(levelChunk.blocks.length);
         }
+
         if (levelChunk.heightmap == null || !levelChunk.skyLight.isValid()) {
-            levelChunk.heightmap = new byte[256];
+            levelChunk.heightmap = new byte[16 * 16];
             levelChunk.skyLight = new DataLayer(levelChunk.blocks.length);
             levelChunk.recalcHeightmap();
         }
+
         if (!levelChunk.blockLight.isValid()) {
             levelChunk.blockLight = new DataLayer(levelChunk.blocks.length);
             levelChunk.recalcBlocksLights();
         }
-        final ListTag list = tag.getList("Entities");
-        if (list != null) {
-            for (int i = 0; i < list.size(); ++i) {
-                final Entity loadStatic = EntityIO.loadStatic((CompoundTag)list.get(i), level);
+
+        final ListTag<CompoundTag> entityTags = (ListTag<CompoundTag>) tag.getList("Entities");
+        if (entityTags != null) {
+            for (int i = 0; i < entityTags.size(); ++i) {
+                CompoundTag eTag = entityTags.get(i);
+                final Entity e = EntityIO.loadStatic(eTag, level);
                 levelChunk.lastSaveHadEntities = true;
-                if (loadStatic != null) {
-                    levelChunk.addEntity(loadStatic);
+                if (e != null) {
+                    levelChunk.addEntity(e);
                 }
             }
         }
-        final ListTag list2 = tag.getList("TileEntities");
-        if (list2 != null) {
-            for (int j = 0; j < list2.size(); ++j) {
-                final TileEntity loadStatic2 = TileEntity.loadStatic((CompoundTag)list2.get(j));
-                if (loadStatic2 != null) {
-                    levelChunk.addTileEntity(loadStatic2);
+
+        final ListTag<CompoundTag> tileEntityTags = (ListTag<CompoundTag>) tag.getList("TileEntities");
+        if (tileEntityTags != null) {
+            for (int i = 0; i < tileEntityTags.size(); ++i) {
+                CompoundTag teTag = tileEntityTags.get(i);
+                final TileEntity te = TileEntity.loadStatic(teTag);
+                if (te != null) {
+                    levelChunk.addTileEntity(te);
                 }
             }
         }

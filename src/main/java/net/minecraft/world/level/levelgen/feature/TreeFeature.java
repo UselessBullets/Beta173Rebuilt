@@ -61,7 +61,7 @@ public class TreeFeature extends Feature
             final int t = level.getTile(x, y + hh, z);
             if (t == 0 || t == Tile.leaves.id) level.setTileNoUpdate(x, y + hh, z, Tile.treeTrunk.id);
         }
-        
+
         return true;
     }
 }

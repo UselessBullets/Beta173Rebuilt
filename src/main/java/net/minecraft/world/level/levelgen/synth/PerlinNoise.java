@@ -18,29 +18,41 @@ public class PerlinNoise extends Synth
             this.noiseLevels[i] = new ImprovedNoise(random);
         }
     }
-    
+
+    @Override
     public double getValue(final double x, final double y) {
-        double n = 0.0;
-        double n2 = 1.0;
+        double value = 0.0;
+        double pow = 1.0;
+
         for (int i = 0; i < this.levels; ++i) {
-            n += this.noiseLevels[i].getValue(x * n2, y * n2) / n2;
-            n2 /= 2.0;
+            value += this.noiseLevels[i].getValue(x * pow, y * pow) / pow;
+            pow /= 2.0;
         }
-        return n;
+
+        return value;
+    }
+
+    // Useless - Exists in b1.2 and LCE leaks
+    public double getValue(double x, double y, double z) {
+        double value = 0.0;
+        double pow = 1.0;
+
+        for (int i = 0; i < this.levels; i++) {
+            value += this.noiseLevels[i].getValue(x * pow, y * pow, z * pow) / pow;
+            pow /= 2.0;
+        }
+
+        return value;
     }
     
     public double[] getRegion(double[] buffer, final double x, final double y, final double z, final int xSize, final int ySize, final int zSize, final double xScale, final double yScale, final double zScale) {
-        if (buffer == null) {
-            buffer = new double[xSize * ySize * zSize];
-        }
-        else {
-            for (int i = 0; i < buffer.length; ++i) {
-                buffer[i] = 0.0;
-            }
-        }
+        if (buffer == null) buffer = new double[xSize * ySize * zSize];
+        else for (int i = 0; i < buffer.length; ++i) buffer[i] = 0.0;
+
         double pow = 1.0;
-        for (int j = 0; j < this.levels; ++j) {
-            this.noiseLevels[j].add(buffer, x, y, z, xSize, ySize, zSize, xScale * pow, yScale * pow, zScale * pow, pow);
+        for (int i = 0; i < this.levels; ++i) {
+//            value += noiseLevels[i].getValue(x * pow, y * pow, z * pow) / pow;
+            this.noiseLevels[i].add(buffer, x, y, z, xSize, ySize, zSize, xScale * pow, yScale * pow, zScale * pow, pow);
             pow /= 2.0;
         }
         return buffer;

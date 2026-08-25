@@ -18,29 +18,72 @@ public class PerlinSimplexNoise extends Synth
             this.noiseLevels[i] = new SimplexNoise(random);
         }
     }
-    
+
+    @Override
+    // Useless - Exists in b1.2 and LCE leaks
+    public double getValue(double x, double y) {
+        double value = 0.0;
+        double pow = 1.0;
+
+        for (int i = 0; i < this.levels; i++) {
+            value += this.noiseLevels[i].getValue(x * pow, y * pow) / pow;
+            pow /= 2.0;
+        }
+
+        return value;
+    }
+
+    // Useless - Exists in b1.2 and LCE leaks
+    public double getValue(double x, double y, double z) {
+        double value = 0.0;
+        double pow = 1.0;
+
+        for (int i = 0; i < this.levels; i++) {
+            value += this.noiseLevels[i].getValue(x * pow, y * pow, z * pow) / pow;
+            pow /= 2.0;
+        }
+
+        return value;
+    }
+
     public double[] getRegion(final double[] buffer, final double x, final double y, final int xSize, final int ySize, final double xScale, final double yScale, final double sizeScale) {
         return this.getRegion(buffer, x, y, xSize, ySize, xScale, yScale, sizeScale, 0.5);
     }
-    
+
     public double[] getRegion(double[] buffer, final double x, final double y, final int xSize, final int ySize, double xScale, double yScale, final double sizeScale, final double powScale) {
         xScale /= 1.5;
         yScale /= 1.5;
-        if (buffer == null || buffer.length < xSize * ySize) {
-            buffer = new double[xSize * ySize];
+
+        if (buffer == null || buffer.length < xSize * ySize) buffer = new double[xSize * ySize];
+        else for (int i = 0; i < buffer.length; ++i) buffer[i] = 0.0;
+
+        double pow = 1.0;
+        double scale = 1.0;
+        for (int i = 0; i < this.levels; ++i) {
+            this.noiseLevels[i].add(buffer, x, y, xSize, ySize, xScale * scale, yScale * scale, 0.55 / pow);
+            scale *= sizeScale;
+            pow *= powScale;
         }
-        else {
-            for (int i = 0; i < buffer.length; ++i) {
-                buffer[i] = 0.0;
-            }
+
+        return buffer;
+    }
+
+    // Useless - Exists in b1.2 and LCE leaks
+    public double[] getRegion(double[] buffer, double x, double y, double z, int xSize, int ySize, int zSize, double xScale, double yScale, double zScale) {
+        xScale /= 1.5;
+        yScale /= 1.5;
+
+        if (buffer == null) buffer = new double[xSize * ySize * zSize];
+        else for (int i = 0; i < buffer.length; i++) buffer[i] = 0.0;
+
+        double pow = 1.0;
+
+        for (int i = 0; i < this.levels; i++) {
+//            value += noiseLevels[i].getValue(x * pow, y * pow, z * pow) / pow;
+            this.noiseLevels[i].add(buffer, x, y, z, xSize, ySize, zSize, xScale * pow, yScale * pow, zScale * pow, 0.55 / pow);
+            pow *= 0.5;
         }
-        double n = 1.0;
-        double n2 = 1.0;
-        for (int j = 0; j < this.levels; ++j) {
-            this.noiseLevels[j].add(buffer, x, y, xSize, ySize, xScale * n2, yScale * n2, 0.55 / n);
-            n2 *= sizeScale;
-            n *= powScale;
-        }
+
         return buffer;
     }
 }

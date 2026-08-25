@@ -17,6 +17,15 @@ import net.minecraft.world.level.material.Material;
 
 public class LeafTile extends TransparentTile
 {
+    public static final int REQUIRED_WOOD_RANGE = 4;
+
+    public static final int UPDATE_LEAF_BIT = 0x8;
+
+    public static final int NORMAL_LEAF = 0;
+    public static final int EVERGREEN_LEAF = 1;
+    public static final int BIRCH_LEAF = 2;
+
+    public static final int LEAF_TYPE_MASK = 0x3;
     private int oTex;
     int[] checkBuffer;
     
@@ -28,10 +37,10 @@ public class LeafTile extends TransparentTile
     
     @Override
     public int getColor(final int auxData) {
-        if ((auxData & 0x1) == 0x1) {
+        if ((auxData & LEAF_TYPE_MASK) == EVERGREEN_LEAF) {
             return FoliageColor.getEvergreenColor();
         }
-        if ((auxData & 0x2) == 0x2) {
+        if ((auxData & LEAF_TYPE_MASK) == BIRCH_LEAF) {
             return FoliageColor.getBirchColor();
         }
         return FoliageColor.getDefaultColor();
@@ -40,10 +49,10 @@ public class LeafTile extends TransparentTile
     @Override
     public int getColor(final LevelSource level, final int x, final int y, final int z) {
         final int data = level.getData(x, y, z);
-        if ((data & 0x1) == 0x1) {
+        if ((data & LEAF_TYPE_MASK) == EVERGREEN_LEAF) {
             return FoliageColor.getEvergreenColor();
         }
-        if ((data & 0x2) == 0x2) {
+        if ((data & LEAF_TYPE_MASK) == BIRCH_LEAF) {
             return FoliageColor.getBirchColor();
         }
         level.getBiomeSource().getBiomeBlock(x, z, 1, 1);

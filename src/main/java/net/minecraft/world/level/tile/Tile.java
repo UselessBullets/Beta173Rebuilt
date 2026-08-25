@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.locale.Descriptive;
 import net.minecraft.world.item.TileItem;
 import net.minecraft.world.item.PistonTileItem;
 import net.minecraft.world.item.LeavesTileItem;
@@ -29,8 +30,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSource;
 import net.minecraft.world.level.material.Material;
 
-public class Tile
-{
+public class Tile implements Descriptive<Tile> {
     public static final int TILE_NUM_COUNT = 256;
     public static final int TILE_NUM_MASK = 0xff; // 256 - 1
     public static final int TILE_NUM_SHIFT = 8; // 256 is 8 bits

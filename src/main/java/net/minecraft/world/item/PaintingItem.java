@@ -4,7 +4,7 @@
 
 package net.minecraft.world.item;
 
-import net.minecraft.world.entity.Entity;
+import net.minecraft.Facing;
 import net.minecraft.world.entity.Painting;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.player.Player;
@@ -17,28 +17,20 @@ public class PaintingItem extends Item
     
     @Override
     public boolean useOn(final ItemInstance itemInstance, final Player player, final Level level, final int x, final int y, final int z, final int face) {
-        if (face == 0) {
-            return false;
-        }
-        if (face == 1) {
-            return false;
-        }
+        if (face == Facing.DOWN) return false;
+        if (face == Facing.UP) return false;
+
         int dir = 0;
-        if (face == 4) {
-            dir = 1;
-        }
-        if (face == 3) {
-            dir = 2;
-        }
-        if (face == 5) {
-            dir = 3;
-        }
-        final Painting e = new Painting(level, x, y, z, dir);
-        if (e.survives()) {
+        if (face == Facing.WEST) dir = 1;
+        if (face == Facing.SOUTH) dir = 2;
+        if (face == Facing.EAST) dir = 3;
+
+        final Painting painting = new Painting(level, x, y, z, dir);
+        if (painting.survives()) {
             if (!level.isClientSide) {
-                level.addEntity(e);
+                level.addEntity(painting);
             }
-            --itemInstance.count;
+            itemInstance.count--;
         }
         return true;
     }

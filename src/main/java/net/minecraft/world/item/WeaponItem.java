@@ -16,12 +16,14 @@ public class WeaponItem extends Item
         super(id);
         this.maxStackSize = 1;
         this.setMaxDamage(tier.getUses());
+
         this.damage = 4 + tier.getAttackDamageBonus() * 2;
     }
     
     @Override
     public float getDestroySpeed(final ItemInstance itemInstance, final Tile tile) {
         if (tile.id == Tile.web.id) {
+            // swords can quickly cut web
             return 15.0f;
         }
         return 1.5f;

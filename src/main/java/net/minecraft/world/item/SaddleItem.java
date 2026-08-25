@@ -20,7 +20,7 @@ public class SaddleItem extends Item
             final Pig pig = (Pig)mob;
             if (!pig.hasSaddle()) {
                 pig.setSaddle(true);
-                --itemInstance.count;
+                itemInstance.count--;
             }
         }
     }

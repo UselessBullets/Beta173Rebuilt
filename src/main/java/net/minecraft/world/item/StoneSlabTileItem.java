@@ -4,6 +4,7 @@
 
 package net.minecraft.world.item;
 
+import net.minecraft.Facing;
 import net.minecraft.world.level.tile.StoneSlabTile;
 import net.minecraft.world.level.tile.Tile;
 
@@ -17,7 +18,7 @@ public class StoneSlabTileItem extends TileItem
     
     @Override
     public int getIcon(final int auxValue) {
-        return Tile.stoneSlabHalf.getTexture(2, auxValue);
+        return Tile.stoneSlabHalf.getTexture(Facing.NORTH, auxValue);
     }
     
     @Override

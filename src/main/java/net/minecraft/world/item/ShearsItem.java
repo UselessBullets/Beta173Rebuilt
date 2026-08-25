@@ -4,7 +4,6 @@
 
 package net.minecraft.world.item;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.entity.Mob;
 

@@ -26,205 +26,213 @@ public class MapItem extends ComplexItem
     }
     
     public static MapItemSavedData getSavedData(final short idNum, final Level level) {
-        new StringBuilder().append("map_").append(idNum).toString();
-        MapItemSavedData data = (MapItemSavedData)level.getSavedData(MapItemSavedData.class, "map_" + idNum);
-        if (data == null) {
-            final String string = "map_" + level.getFreeAuxValueFor("map");
-            data = new MapItemSavedData(string);
-            level.setSavedData(string, data);
+        String id = "map_" + idNum;
+        MapItemSavedData mapItemSavedData = (MapItemSavedData)level.getSavedData(MapItemSavedData.class, id);
+        if (mapItemSavedData == null) {
+            int aux = level.getFreeAuxValueFor("map");
+
+            id = "map_" + aux;
+            mapItemSavedData = new MapItemSavedData(id);
+
+            level.setSavedData(id, mapItemSavedData);
         }
-        return data;
+        return mapItemSavedData;
     }
     
     public MapItemSavedData getSavedData(final ItemInstance itemInstance, final Level level) {
-        new StringBuilder().append("map_").append(itemInstance.getAuxValue()).toString();
-        MapItemSavedData data = (MapItemSavedData)level.getSavedData(MapItemSavedData.class, "map_" + itemInstance.getAuxValue());
-        if (data == null) {
+        String id = "map_" + itemInstance.getAuxValue();
+        MapItemSavedData mapItemSavedData = (MapItemSavedData)level.getSavedData(MapItemSavedData.class, id);
+
+        if (mapItemSavedData == null) {
             itemInstance.setAuxValue(level.getFreeAuxValueFor("map"));
-            final String string = "map_" + itemInstance.getAuxValue();
-            data = new MapItemSavedData(string);
-            data.x = level.getLevelData().getXSpawn();
-            data.z = level.getLevelData().getZSpawn();
-            data.scale = 3;
-            data.dimension = (byte)level.dimension.id;
-            data.setDirty();
-            level.setSavedData(string, data);
+
+            id = "map_" + itemInstance.getAuxValue();
+            mapItemSavedData = new MapItemSavedData(id);
+
+            mapItemSavedData.x = level.getLevelData().getXSpawn();
+            mapItemSavedData.z = level.getLevelData().getZSpawn();
+            mapItemSavedData.scale = 3;
+            mapItemSavedData.dimension = (byte)level.dimension.id;
+
+            mapItemSavedData.setDirty();
+
+            level.setSavedData(id, mapItemSavedData);
         }
-        return data;
+        return mapItemSavedData;
     }
     
     public void update(final Level level, final Entity player, final MapItemSavedData data) {
         if (level.dimension.id != data.dimension) {
+            // Wrong dimension, abort
             return;
         }
-        final int n = 128;
-        final int n2 = 128;
-        final int n3 = 1 << data.scale;
-        final int x = data.x;
-        final int z = data.z;
-        final int n4 = Mth.floor(player.x - x) / n3 + n / 2;
-        final int n5 = Mth.floor(player.z - z) / n3 + n2 / 2;
-        int n6 = 128 / n3;
+
+        final int w = MapItem.IMAGE_WIDTH;
+        final int h = MapItem.IMAGE_HEIGHT;
+
+        final int scale = 1 << data.scale;
+
+        final int xo = data.x;
+        final int zo = data.z;
+
+        final int xp = Mth.floor(player.x - xo) / scale + w / 2;
+        final int zp = Mth.floor(player.z - zo) / scale + h / 2;
+
+        int rad = 128 / scale;
         if (level.dimension.hasCeiling) {
-            n6 /= 2;
+            rad /= 2;
         }
-        ++data.step;
-        for (int i = n4 - n6 + 1; i < n4 + n6; ++i) {
-            if ((i & 0xF) == (data.step & 0xF)) {
-                int y0 = 255;
-                int y2 = 0;
-                double n7 = 0.0;
-                for (int j = n5 - n6 - 1; j < n5 + n6; ++j) {
-                    if (i >= 0 && j >= -1 && i < n) {
-                        if (j < n2) {
-                            final int n8 = i - n4;
-                            final int n9 = j - n5;
-                            final boolean b = n8 * n8 + n9 * n9 > (n6 - 2) * (n6 - 2);
-                            final int x2 = (x / n3 + i - n / 2) * n3;
-                            final int z2 = (z / n3 + j - n2 / 2) * n3;
-                            final int n10 = 0;
-                            final int n11 = 0;
-                            final int n12 = 0;
-                            final int[] array = new int[256];
-                            final LevelChunk chunk = level.getChunkAt(x2, z2);
-                            final int n13 = x2 & 0xF;
-                            final int n14 = z2 & 0xF;
-                            int n15 = 0;
-                            double n16 = 0.0;
-                            if (level.dimension.hasCeiling) {
-                                final int n17 = x2 + z2 * 231871;
-                                if ((n17 * n17 * 31287121 + n17 * 11 >> 20 & 0x1) == 0x0) {
-                                    final int[] array2 = array;
-                                    final int id = Tile.dirt.id;
-                                    array2[id] += 10;
-                                }
-                                else {
-                                    final int[] array3 = array;
-                                    final int id2 = Tile.rock.id;
-                                    array3[id2] += 10;
-                                }
-                                n16 = 100.0;
-                            }
-                            else {
-                                for (int k = 0; k < n3; ++k) {
-                                    for (int l = 0; l < n3; ++l) {
-                                        int n18 = chunk.getHeightmap(k + n13, l + n14) + 1;
-                                        int n19 = 0;
-                                        if (n18 > 1) {
-                                            boolean b2;
-                                            do {
-                                                b2 = true;
-                                                n19 = chunk.getTile(k + n13, n18 - 1, l + n14);
-                                                if (n19 == 0) {
-                                                    b2 = false;
-                                                }
-                                                else if (n18 > 0 && n19 > 0 && Tile.tiles[n19].material.color == MaterialColor.none) {
-                                                    b2 = false;
-                                                }
-                                                if (!b2) {
-                                                    --n18;
-                                                    n19 = chunk.getTile(k + n13, n18 - 1, l + n14);
-                                                }
-                                            } while (!b2);
-                                            if (n19 != 0 && Tile.tiles[n19].material.isLiquid()) {
-                                                int n20 = n18 - 1;
-                                                int tile;
-                                                do {
-                                                    tile = chunk.getTile(k + n13, n20--, l + n14);
-                                                    ++n15;
-                                                } while (n20 > 0 && tile != 0 && Tile.tiles[tile].material.isLiquid());
-                                            }
-                                        }
-                                        n16 += n18 / (double)(n3 * n3);
-                                        final int[] array4 = array;
-                                        final int n21 = n19;
-                                        ++array4[n21];
+        data.step++;
+
+        for (int x = xp - rad + 1; x < xp + rad; ++x) {
+            if ((x & 0xF) != (data.step & 0xF)) continue;
+
+            int yd0 = 255;
+            int yd1 = 0;
+
+            double ho = 0.0;
+            for (int z = zp - rad - 1; z < zp + rad; ++z) {
+                if (x < 0 || z < -1 || x >= w || z >= h) continue;
+
+                final int xd = x - xp;
+                final int zd = z - zp;
+
+                final boolean ditherBlack = xd * xd + zd * zd > (rad - 2) * (rad - 2);
+
+                final int xx = (xo / scale + x - w / 2) * scale;
+                final int zz = (zo / scale + z - h / 2) * scale;
+
+                int r = 0;
+                int g = 0;
+                int b = 0;
+
+                final int[] count = new int[Tile.TILE_NUM_COUNT];
+
+                final LevelChunk lc = level.getChunkAt(xx, zz);
+                final int xso = xx & 0xF;
+                final int zso = zz & 0xF;
+                int liquidDepth = 0;
+
+                double hh = 0.0;
+                if (level.dimension.hasCeiling) {
+                    int ss = xx + zz * 231871;
+                    ss = ss * ss * 31287121 + ss * 11;
+
+                    if ((ss >> 20 & 0x1) == 0x0) count[Tile.dirt.id] += 10;
+                    else count[Tile.rock.id] += 10;
+                    hh = 100.0;
+                }
+                else {
+                    for (int xs = 0; xs < scale; ++xs) {
+                        for (int zs = 0; zs < scale; ++zs) {
+                            int yy = lc.getHeightmap(xs + xso, zs + zso) + 1;
+                            int t = 0;
+
+                            if (yy > 1) {
+                                boolean ok = false;
+                                do {
+                                    ok = true;
+                                    t = lc.getTile(xs + xso, yy - 1, zs + zso);
+                                    if (t == 0) ok = false;
+                                    else if (yy > 0 && t > 0 && Tile.tiles[t].material.color == MaterialColor.none) {
+                                        ok = false;
                                     }
-                                }
-                            }
-                            final int n22 = n15 / (n3 * n3);
-                            final int n23 = n10 / (n3 * n3);
-                            final int n24 = n11 / (n3 * n3);
-                            final int n25 = n12 / (n3 * n3);
-                            int n26 = 0;
-                            int n27 = 0;
-                            for (int n28 = 0; n28 < 256; ++n28) {
-                                if (array[n28] > n26) {
-                                    n27 = n28;
-                                    n26 = array[n28];
-                                }
-                            }
-                            final double n29 = (n16 - n7) * 4.0 / (n3 + 4) + ((i + j & 0x1) - 0.5) * 0.4;
-                            int n30 = 1;
-                            if (n29 > 0.6) {
-                                n30 = 2;
-                            }
-                            if (n29 < -0.6) {
-                                n30 = 0;
-                            }
-                            int id3 = 0;
-                            if (n27 > 0) {
-                                final MaterialColor color = Tile.tiles[n27].material.color;
-                                if (color == MaterialColor.water) {
-                                    final double n31 = n22 * 0.1 + (i + j & 0x1) * 0.2;
-                                    n30 = 1;
-                                    if (n31 < 0.5) {
-                                        n30 = 2;
+
+                                    if (!ok) {
+                                        yy--;
+                                        t = lc.getTile(xs + xso, yy - 1, zs + zso);
                                     }
-                                    if (n31 > 0.9) {
-                                        n30 = 0;
-                                    }
-                                }
-                                id3 = color.id;
-                            }
-                            n7 = n16;
-                            if (j >= 0) {
-                                if (n8 * n8 + n9 * n9 < n6 * n6) {
-                                    if (!b || (i + j & 0x1) != 0x0) {
-                                        final byte b3 = data.colors[i + j * n];
-                                        final byte b4 = (byte)(id3 * 4 + n30);
-                                        if (b3 != b4) {
-                                            if (y0 > j) {
-                                                y0 = j;
-                                            }
-                                            if (y2 < j) {
-                                                y2 = j;
-                                            }
-                                            data.colors[i + j * n] = b4;
-                                        }
-                                    }
+                                } while (!ok);
+
+                                if (t != 0 && Tile.tiles[t].material.isLiquid()) {
+                                    int y = yy - 1;
+                                    int below;
+                                    do {
+                                        below = lc.getTile(xs + xso, y--, zs + zso);
+                                        liquidDepth++;
+                                    } while (y > 0 && below != 0 && Tile.tiles[below].material.isLiquid());
                                 }
                             }
+                            hh += yy / (double)(scale * scale);
+
+                            count[t]++;
                         }
                     }
                 }
-                if (y0 <= y2) {
-                    data.setDirty(i, y0, y2);
+                liquidDepth /= (scale * scale);
+                r /= (scale * scale);
+                g /= (scale * scale);
+                b /= (scale * scale);
+
+                int best = 0;
+                int tBest = 0;
+                for (int j = 0; j < 256; ++j) {
+                    if (count[j] > best) {
+                        tBest = j;
+                        best = count[j];
+                    }
                 }
+
+                double diff = (hh - ho) * 4.0 / (scale + 4) + ((x + z & 0x1) - 0.5) * 0.4;
+                int br = 1;
+                if (diff > 0.6) br = 2;
+                if (diff < -0.6) br = 0;
+
+                int col = 0;
+                if (tBest > 0) {
+                    final MaterialColor mc = Tile.tiles[tBest].material.color;
+                    if (mc == MaterialColor.water) {
+                        diff = liquidDepth * 0.1 + (x + z & 0x1) * 0.2;
+                        br = 1;
+                        if (diff < 0.5) br = 2;
+                        if (diff > 0.9) br = 0;
+                    }
+                    col = mc.id;
+                }
+
+                ho = hh;
+
+                if (z < 0) continue;
+                if (xd * xd + zd * zd >= rad * rad) continue;
+                if (ditherBlack && (((x + z) & 0x1) == 0)) {
+                    continue;
+                }
+                final byte oldColor = data.colors[x + z * w];
+                final byte newColor = (byte)(col * 4 + br);
+                if (oldColor != newColor) {
+                    if (yd0 > z) yd0 = z;
+                    if (yd1 < z) yd1 = z;
+                    data.colors[x + z * w] = newColor;
+                }
+            }
+            if (yd0 <= yd1) {
+                data.setDirty(x, yd0, yd1);
             }
         }
     }
     
     @Override
     public void inventoryTick(final ItemInstance itemInstance, final Level level, final Entity owner, final int slot, final boolean selected) {
-        if (level.isClientSide) {
-            return;
-        }
-        final MapItemSavedData savedData = this.getSavedData(itemInstance, level);
+        if (level.isClientSide) return;
+
+        final MapItemSavedData data = this.getSavedData(itemInstance, level);
         if (owner instanceof Player) {
-            savedData.tickCarriedBy((Player)owner, itemInstance);
+            data.tickCarriedBy((Player)owner, itemInstance);
         }
+
         if (selected) {
-            this.update(level, owner, savedData);
+            this.update(level, owner, data);
         }
     }
     
     @Override
     public void onCraftedBy(final ItemInstance itemInstance, final Level level, final Player player) {
         itemInstance.setAuxValue(level.getFreeAuxValueFor("map"));
-        final String string = "map_" + itemInstance.getAuxValue();
-        final MapItemSavedData data = new MapItemSavedData(string);
-        level.setSavedData(string, data);
+
+        final String id = "map_" + itemInstance.getAuxValue();
+        final MapItemSavedData data = new MapItemSavedData(id);
+
+        level.setSavedData(id, data);
         data.x = Mth.floor(player.x);
         data.z = Mth.floor(player.z);
         data.scale = 3;
@@ -234,10 +242,8 @@ public class MapItem extends ComplexItem
 
     @Override
     public Packet getUpdatePacket(final ItemInstance itemInstance, final Level level, final Player player) {
-        final byte[] updatePacket = this.getSavedData(itemInstance, level).getUpdatePacket(itemInstance, level, player);
-        if (updatePacket == null) {
-            return null;
-        }
-        return new ComplexItemDataPacket((short)Item.map.id, (short)itemInstance.getAuxValue(), updatePacket);
+        final byte[] data = this.getSavedData(itemInstance, level).getUpdatePacket(itemInstance, level, player);
+        if (data == null) return null;
+        return new ComplexItemDataPacket((short)Item.map.id, (short)itemInstance.getAuxValue(), data);
     }
 }

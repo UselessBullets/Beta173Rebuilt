@@ -4,6 +4,7 @@
 
 package net.minecraft.world.item;
 
+import net.minecraft.locale.Descriptive;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.stats.Stats;
@@ -12,9 +13,9 @@ import net.minecraft.world.entity.player.Player;
 import com.mojang.nbt.CompoundTag;
 import net.minecraft.world.level.tile.Tile;
 
-public final class ItemInstance
+public final class ItemInstance implements Descriptive<ItemInstance>
 {
-    public int count;
+    public int count = 0;
     public int popTime;
     public int id;
     private int auxValue;
@@ -44,14 +45,12 @@ public final class ItemInstance
     }
     
     public ItemInstance(final int id, final int count, final int auxValue) {
-        this.count = 0;
         this.id = id;
         this.count = count;
         this.auxValue = auxValue;
     }
     
     public ItemInstance(final CompoundTag itemTag) {
-        this.count = 0;
         this.load(itemTag);
     }
     
@@ -70,9 +69,7 @@ public final class ItemInstance
     
     public boolean useOn(final Player player, final Level level, final int x, final int y, final int z, final int face) {
         final boolean useOn = this.getItem().useOn(this, player, level, x, y, z, face);
-        if (useOn) {
-            player.awardStat(Stats.itemUsed[this.id], 1);
-        }
+        if (useOn) player.awardStat(Stats.itemUsed[this.id], 1);
         return useOn;
     }
     
@@ -108,7 +105,13 @@ public final class ItemInstance
     public boolean isDamageableItem() {
         return Item.items[this.id].getMaxDamage() > 0;
     }
-    
+
+    /**
+     * Returns true if this item type only can be stacked with items that have
+     * the same auxValue data.
+     *
+     * @return
+     */
     public boolean isStackedByData() {
         return Item.items[this.id].isStackedByData();
     }
@@ -137,15 +140,15 @@ public final class ItemInstance
         if (!this.isDamageableItem()) {
             return;
         }
+
         this.auxValue += i;
         if (this.auxValue > this.getMaxDamage()) {
             if (owner instanceof Player) {
-                ((Player)owner).awardStat(Stats.itemBroke[this.id], 1);
+                Player player = ((Player)owner);
+                player.awardStat(Stats.itemBroke[this.id], 1);
             }
-            --this.count;
-            if (this.count < 0) {
-                this.count = 0;
-            }
+            this.count--;
+            if (this.count < 0) this.count = 0;
             this.auxValue = 0;
         }
     }
@@ -182,13 +185,25 @@ public final class ItemInstance
     }
     
     public static boolean matches(final ItemInstance a, final ItemInstance b) {
-        return (a == null && b == null) || (a != null && b != null && a.matches(b));
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        return a.matches(b);
     }
     
     private boolean matches(final ItemInstance b) {
-        return this.count == b.count && this.id == b.id && this.auxValue == b.auxValue;
+        if (this.count != b.count) return false;
+        if (this.id != b.id) return false;
+        if (this.auxValue != b.auxValue) return false;
+        return true;
     }
-    
+
+    /**
+     * Checks if this item is the same item as the other one, disregarding the
+     * 'count' value.
+     *
+     * @param b
+     * @return
+     */
     public boolean sameItem(final ItemInstance b) {
         return this.id == b.id && this.auxValue == b.auxValue;
     }
@@ -196,9 +211,14 @@ public final class ItemInstance
     public String getDescriptionId() {
         return Item.items[this.id].getDescriptionId(this);
     }
-    
+
+    @Override
+    public ItemInstance setDescriptionId(String id) {
+        return this;
+    }
+
     public static ItemInstance clone(final ItemInstance item) {
-        return (item == null) ? null : item.copy();
+        return item == null ? null : item.copy();
     }
     
     @Override
@@ -207,9 +227,7 @@ public final class ItemInstance
     }
     
     public void inventoryTick(final Level level, final Entity owner, final int slot, final boolean selected) {
-        if (this.popTime > 0) {
-            --this.popTime;
-        }
+        if (this.popTime > 0) this.popTime--;
         Item.items[this.id].inventoryTick(this, level, owner, slot, selected);
     }
     

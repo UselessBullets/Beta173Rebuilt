@@ -4,7 +4,9 @@
 
 package net.minecraft.world.item;
 
+import net.minecraft.Facing;
 import net.minecraft.world.level.FoliageColor;
+import net.minecraft.world.level.tile.LeafTile;
 import net.minecraft.world.level.tile.Tile;
 
 public class LeavesTileItem extends TileItem
@@ -17,20 +19,20 @@ public class LeavesTileItem extends TileItem
     
     @Override
     public int getLevelDataForAuxValue(final int auxValue) {
-        return auxValue | 0x8;
+        return auxValue | LeafTile.UPDATE_LEAF_BIT;
     }
     
     @Override
     public int getIcon(final int auxValue) {
-        return Tile.leaves.getTexture(0, auxValue);
+        return Tile.leaves.getTexture(Facing.DOWN, auxValue);
     }
     
     @Override
     public int getColor(final int auxData) {
-        if ((auxData & 0x1) == 0x1) {
+        if ((auxData & LeafTile.LEAF_TYPE_MASK) == LeafTile.EVERGREEN_LEAF) {
             return FoliageColor.getEvergreenColor();
         }
-        if ((auxData & 0x2) == 0x2) {
+        if ((auxData & LeafTile.LEAF_TYPE_MASK) == LeafTile.BIRCH_LEAF) {
             return FoliageColor.getBirchColor();
         }
         return FoliageColor.getDefaultColor();

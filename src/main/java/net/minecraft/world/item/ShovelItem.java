@@ -8,7 +8,15 @@ import net.minecraft.world.level.tile.Tile;
 
 public class ShovelItem extends DiggerItem
 {
-    private static Tile[] diggables;
+    private static Tile[] diggables = new Tile[] {
+            Tile.grass,
+            Tile.dirt,
+            Tile.sand,
+            Tile.gravel,
+            Tile.topSnow,
+            Tile.snow,
+            Tile.clay,
+            Tile.farmland };
     
     public ShovelItem(final int id, final Tier tier) {
         super(id, 1, tier, ShovelItem.diggables);
@@ -16,10 +24,9 @@ public class ShovelItem extends DiggerItem
     
     @Override
     public boolean canDestroySpecial(final Tile tile) {
-        return tile == Tile.topSnow || tile == Tile.snow;
+        if (tile == Tile.topSnow) return true;
+        if (tile == Tile.snow) return true;
+        return false;
     }
-    
-    static {
-        ShovelItem.diggables = new Tile[] { Tile.grass, Tile.dirt, Tile.sand, Tile.gravel, Tile.topSnow, Tile.snow, Tile.clay, Tile.farmland };
-    }
+
 }

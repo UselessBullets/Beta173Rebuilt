@@ -22,42 +22,51 @@ public class ClayFeature extends Feature
     
     @Override
     public boolean place(final Level level, final Random random, final int x, final int y, final int z) {
-        if (level.getMaterial(x, y, z) != Material.water) {
-            return false;
-        }
-        final float n = random.nextFloat() * Mth.PI;
-        final double n2 = x + 8 + Mth.sin(n) * this.count / 8.0f;
-        final double n3 = x + 8 - Mth.sin(n) * this.count / 8.0f;
-        final double n4 = z + 8 + Mth.cos(n) * this.count / 8.0f;
-        final double n5 = z + 8 - Mth.cos(n) * this.count / 8.0f;
-        final double n6 = y + random.nextInt(3) + 2;
-        final double n7 = y + random.nextInt(3) + 2;
+        if (level.getMaterial(x, y, z) != Material.water) return false;
+
+        final float dir = random.nextFloat() * Mth.PI;
+
+        final double x0 = x + 8 + Mth.sin(dir) * this.count / 8.0f;
+        final double x1 = x + 8 - Mth.sin(dir) * this.count / 8.0f;
+        final double z0 = z + 8 + Mth.cos(dir) * this.count / 8.0f;
+        final double z1 = z + 8 - Mth.cos(dir) * this.count / 8.0f;
+
+        final double y0 = y + random.nextInt(3) + 2;
+        final double y1 = y + random.nextInt(3) + 2;
+
         for (int i = 0; i <= this.count; ++i) {
-            final double n8 = n2 + (n3 - n2) * i / this.count;
-            final double n9 = n6 + (n7 - n6) * i / this.count;
-            final double n10 = n4 + (n5 - n4) * i / this.count;
-            final double n11 = random.nextDouble() * this.count / 16.0;
-            final double n12 = (Mth.sin(i * Mth.PI / this.count) + 1.0f) * n11 + 1.0;
-            final double n13 = (Mth.sin(i * Mth.PI / this.count) + 1.0f) * n11 + 1.0;
-            final int floor = Mth.floor(n8 - n12 / 2.0);
-            final int floor2 = Mth.floor(n8 + n12 / 2.0);
-            final int floor3 = Mth.floor(n9 - n13 / 2.0);
-            final int floor4 = Mth.floor(n9 + n13 / 2.0);
-            final int floor5 = Mth.floor(n10 - n12 / 2.0);
-            final int floor6 = Mth.floor(n10 + n12 / 2.0);
-            for (int j = floor; j <= floor2; ++j) {
-                for (int k = floor3; k <= floor4; ++k) {
-                    for (int l = floor5; l <= floor6; ++l) {
-                        final double n14 = (j + 0.5 - n8) / (n12 / 2.0);
-                        final double n15 = (k + 0.5 - n9) / (n13 / 2.0);
-                        final double n16 = (l + 0.5 - n10) / (n12 / 2.0);
-                        if (n14 * n14 + n15 * n15 + n16 * n16 < 1.0 && level.getTile(j, k, l) == Tile.sand.id) {
-                            level.setTileNoUpdate(j, k, l, this.tile);
+            final double xx = x0 + (x1 - x0) * i / this.count;
+            final double yy = y0 + (y1 - y0) * i / this.count;
+            final double zz = z0 + (z1 - z0) * i / this.count;
+
+            final double ss = random.nextDouble() * this.count / 16.0;
+            final double r = (Mth.sin(i * Mth.PI / this.count) + 1.0f) * ss + 1.0;
+            final double hr = (Mth.sin(i * Mth.PI / this.count) + 1.0f) * ss + 1.0;
+
+            final int xt0 = Mth.floor(xx - r / 2.0);
+            final int xt1 = Mth.floor(xx + r / 2.0);
+            final int yt0 = Mth.floor(yy - hr / 2.0);
+
+            final int yt1 = Mth.floor(yy + hr / 2.0);
+            final int zt0 = Mth.floor(zz - r / 2.0);
+            final int zt1 = Mth.floor(zz + r / 2.0);
+
+            for (int x2 = xt0; x2 <= xt1; ++x2) {
+                for (int y2 = yt0; y2 <= yt1; ++y2) {
+                    for (int z2 = zt0; z2 <= zt1; ++z2) {
+                        final double xd = (x2 + 0.5 - xx) / (r / 2.0);
+                        final double yd = (y2 + 0.5 - yy) / (hr / 2.0);
+                        final double zd = (z2 + 0.5 - zz) / (r / 2.0);
+                        if (xd * xd + yd * yd + zd * zd < 1.0) {
+                            if (level.getTile(x2, y2, z2) == Tile.sand.id) {
+                                level.setTileNoUpdate(x2, y2, z2, this.tile);
+                            }
                         }
                     }
                 }
             }
         }
+
         return true;
     }
 }

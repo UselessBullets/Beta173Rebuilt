@@ -4,84 +4,89 @@
 
 package net.minecraft.world.level.levelgen.feature;
 
+import net.minecraft.world.level.tile.LeafTile;
 import net.minecraft.world.level.tile.Tile;
 import java.util.Random;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.tile.TreeTile;
 
 public class SpruceFeature extends Feature
 {
     @Override
     public boolean place(final Level level, final Random random, final int x, final int y, final int z) {
-        final int n = random.nextInt(4) + 6;
-        final int n2 = 1 + random.nextInt(2);
-        final int n3 = n - n2;
-        final int n4 = 2 + random.nextInt(2);
-        int n5 = 1;
-        if (y < 1 || y + n + 1 > 128) {
+        // pines can be quite tall
+        final int treeHeight = random.nextInt(4) + 6;
+        final int trunkHeight = 1 + random.nextInt(2);
+        final int topHeight = treeHeight - trunkHeight;
+        final int leafRadius = 2 + random.nextInt(2);
+
+        boolean free = true;
+        // may not be outside of y boundaries
+        if (y < 1 || y + treeHeight + 1 > Level.MAX_BUILD_HEIGHT) {
             return false;
         }
-        for (int y2 = y; y2 <= y + 1 + n && n5 != 0; ++y2) {
-            int n6;
-            if (y2 - y < n2) {
-                n6 = 0;
+
+        // make sure there is enough space
+        for (int yy = y; yy <= y + 1 + treeHeight && free; ++yy) {
+            int r;
+            if (yy - y < trunkHeight) {
+                r = 0;
             }
             else {
-                n6 = n4;
+                r = leafRadius;
             }
-            for (int x2 = x - n6; x2 <= x + n6 && n5 != 0; ++x2) {
-                for (int z2 = z - n6; z2 <= z + n6 && n5 != 0; ++z2) {
-                    if (y2 >= 0 && y2 < 128) {
-                        final int tile = level.getTile(x2, y2, z2);
-                        if (tile != 0 && tile != Tile.leaves.id) {
-                            n5 = 0;
-                        }
+            for (int xx = x - r; xx <= x + r && free; ++xx) {
+                for (int zz = z - r; zz <= z + r && free; ++zz) {
+                    if (yy >= 0 && yy < Level.MAX_BUILD_HEIGHT) {
+                        final int tt = level.getTile(xx, yy, zz);
+                        if (tt != 0 && tt != Tile.leaves.id) free = false;
                     }
                     else {
-                        n5 = 0;
+                        free = false;
                     }
                 }
             }
         }
-        if (n5 == 0) {
-            return false;
-        }
-        final int tile2 = level.getTile(x, y - 1, z);
-        if ((tile2 != Tile.grass.id && tile2 != Tile.dirt.id) || y >= 128 - n - 1) {
-            return false;
-        }
+
+        if (!free) return false;
+
+        // must stand on ground
+        final int belowTile = level.getTile(x, y - 1, z);
+        if ((belowTile != Tile.grass.id && belowTile != Tile.dirt.id) || y >= Level.MAX_BUILD_HEIGHT - treeHeight - 1) return false;
+
         level.setTileNoUpdate(x, y - 1, z, Tile.dirt.id);
-        int nextInt = random.nextInt(2);
-        int n7 = 1;
-        int n8 = 0;
-        for (int i = 0; i <= n3; ++i) {
-            final int n9 = y + n - i;
-            for (int j = x - nextInt; j <= x + nextInt; ++j) {
-                final int a = j - x;
-                for (int k = z - nextInt; k <= z + nextInt; ++k) {
-                    final int a2 = k - z;
-                    if (Math.abs(a) != nextInt || Math.abs(a2) != nextInt || nextInt <= 0) {
-                        if (!Tile.solid[level.getTile(j, n9, k)]) {
-                            level.setTileAndDataNoUpdate(j, n9, k, Tile.leaves.id, 1);
-                        }
-                    }
+
+        // place leaf top
+        int currentRadius = random.nextInt(2);
+        int maxRadius = 1;
+        int minRadius = 0;
+        for (int heightPos = 0; heightPos <= topHeight; ++heightPos) {
+            final int yy = y + treeHeight - heightPos;
+            for (int xx = x - currentRadius; xx <= x + currentRadius; ++xx) {
+                final int xo = xx - x;
+                for (int zz = z - currentRadius; zz <= z + currentRadius; ++zz) {
+                    final int zo = zz - z;
+                    if (Math.abs(xo) == currentRadius && Math.abs(zo) == currentRadius && currentRadius > 0) continue;
+                    if (!Tile.solid[level.getTile(xx, yy, zz)]) level.setTileAndDataNoUpdate(xx, yy, zz, Tile.leaves.id, LeafTile.EVERGREEN_LEAF);
                 }
             }
-            if (nextInt >= n7) {
-                nextInt = n8;
-                n8 = 1;
-                if (++n7 > n4) {
-                    n7 = n4;
+
+            if (currentRadius >= maxRadius) {
+                currentRadius = minRadius;
+                minRadius = 1;
+                maxRadius++;
+                if (maxRadius > leafRadius) {
+                    maxRadius = leafRadius;
                 }
             }
             else {
-                ++nextInt;
+                currentRadius = currentRadius + 1;
             }
         }
-        for (int nextInt2 = random.nextInt(3), l = 0; l < n - nextInt2; ++l) {
-            final int tile3 = level.getTile(x, y + l, z);
-            if (tile3 == 0 || tile3 == Tile.leaves.id) {
-                level.setTileAndDataNoUpdate(x, y + l, z, Tile.treeTrunk.id, 1);
-            }
+        int topOffset = random.nextInt(3);
+        for (int hh = 0; hh < treeHeight - topOffset; ++hh) {
+            final int t = level.getTile(x, y + hh, z);
+            if (t == 0 || t == Tile.leaves.id) level.setTileAndDataNoUpdate(x, y + hh, z, Tile.treeTrunk.id, TreeTile.DARK_TRUNK);
         }
         return true;
     }

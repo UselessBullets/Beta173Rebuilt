@@ -17,13 +17,15 @@ public class CactusFeature extends Feature
             final int y2 = y + random.nextInt(4) - random.nextInt(4);
             final int z2 = z + random.nextInt(8) - random.nextInt(8);
             if (level.isEmptyTile(x2, y2, z2)) {
-                for (int n = 1 + random.nextInt(random.nextInt(3) + 1), j = 0; j < n; ++j) {
-                    if (Tile.cactus.canSurvive(level, x2, y2 + j, z2)) {
-                        level.setTileNoUpdate(x2, y2 + j, z2, Tile.cactus.id);
+                int h = 1 + random.nextInt(random.nextInt(3) + 1);
+                for (int yy = 0; yy < h; ++yy) {
+                    if (Tile.cactus.canSurvive(level, x2, y2 + yy, z2)) {
+                        level.setTileNoUpdate(x2, y2 + yy, z2, Tile.cactus.id);
                     }
                 }
             }
         }
+
         return true;
     }
 }

@@ -12,47 +12,30 @@ public class HellPortalFeature extends Feature
 {
     @Override
     public boolean place(final Level level, final Random random, final int x, final int y, final int z) {
-        if (!level.isEmptyTile(x, y, z)) {
-            return false;
-        }
-        if (level.getTile(x, y + 1, z) != Tile.hellRock.id) {
-            return false;
-        }
+        if (!level.isEmptyTile(x, y, z)) return false;
+        if (level.getTile(x, y + 1, z) != Tile.hellRock.id) return false;
         level.setTile(x, y, z, Tile.lightGem.id);
+
         for (int i = 0; i < 1500; ++i) {
-            final int n = x + random.nextInt(8) - random.nextInt(8);
-            final int n2 = y - random.nextInt(12);
-            final int n3 = z + random.nextInt(8) - random.nextInt(8);
-            if (level.getTile(n, n2, n3) == 0) {
-                int n4 = 0;
-                for (int j = 0; j < 6; ++j) {
-                    int n5 = 0;
-                    if (j == 0) {
-                        n5 = level.getTile(n - 1, n2, n3);
-                    }
-                    if (j == 1) {
-                        n5 = level.getTile(n + 1, n2, n3);
-                    }
-                    if (j == 2) {
-                        n5 = level.getTile(n, n2 - 1, n3);
-                    }
-                    if (j == 3) {
-                        n5 = level.getTile(n, n2 + 1, n3);
-                    }
-                    if (j == 4) {
-                        n5 = level.getTile(n, n2, n3 - 1);
-                    }
-                    if (j == 5) {
-                        n5 = level.getTile(n, n2, n3 + 1);
-                    }
-                    if (n5 == Tile.lightGem.id) {
-                        ++n4;
-                    }
-                }
-                if (n4 == 1) {
-                    level.setTile(n, n2, n3, Tile.lightGem.id);
-                }
+            final int x2 = x + random.nextInt(8) - random.nextInt(8);
+            final int y2 = y - random.nextInt(12);
+            final int z2 = z + random.nextInt(8) - random.nextInt(8);
+            if (level.getTile(x2, y2, z2) != 0) continue;
+
+            int count = 0;
+            for (int t = 0; t < 6; ++t) {
+                int tile = 0;
+                if (t == 0) tile = level.getTile(x2 - 1, y2, z2);
+                if (t == 1) tile = level.getTile(x2 + 1, y2, z2);
+                if (t == 2) tile = level.getTile(x2, y2 - 1, z2);
+                if (t == 3) tile = level.getTile(x2, y2 + 1, z2);
+                if (t == 4) tile = level.getTile(x2, y2, z2 - 1);
+                if (t == 5) tile = level.getTile(x2, y2, z2 + 1);
+
+                if (tile == Tile.lightGem.id) count++;
             }
+
+            if (count == 1) level.setTile(x2, y2, z2, Tile.lightGem.id);
         }
         return true;
     }

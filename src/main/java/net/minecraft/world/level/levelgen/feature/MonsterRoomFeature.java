@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.levelgen.feature;
 
+import net.minecraft.world.item.DyePowderItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.level.material.Material;
@@ -17,140 +18,106 @@ public class MonsterRoomFeature extends Feature
 {
     @Override
     public boolean place(final Level level, final Random random, final int x, final int y, final int z) {
-        final int n = 3;
-        final int n2 = random.nextInt(2) + 2;
-        final int n3 = random.nextInt(2) + 2;
-        int n4 = 0;
-        for (int i = x - n2 - 1; i <= x + n2 + 1; ++i) {
-            for (int j = y - 1; j <= y + n + 1; ++j) {
-                for (int k = z - n3 - 1; k <= z + n3 + 1; ++k) {
-                    final Material material = level.getMaterial(i, j, k);
-                    if (j == y - 1 && !material.isSolid()) {
-                        return false;
-                    }
-                    if (j == y + n + 1 && !material.isSolid()) {
-                        return false;
-                    }
-                    if ((i == x - n2 - 1 || i == x + n2 + 1 || k == z - n3 - 1 || k == z + n3 + 1) && j == y && level.isEmptyTile(i, j, k) && level.isEmptyTile(i, j + 1, k)) {
-                        ++n4;
+        final int hr = 3;
+        final int xr = random.nextInt(2) + 2;
+        final int zr = random.nextInt(2) + 2;
+
+        int holeCount = 0;
+        for (int xx = x - xr - 1; xx <= x + xr + 1; ++xx) {
+            for (int yy = y - 1; yy <= y + hr + 1; ++yy) {
+                for (int zz = z - zr - 1; zz <= z + zr + 1; ++zz) {
+                    final Material m = level.getMaterial(xx, yy, zz);
+                    if (yy == y - 1 && !m.isSolid()) return false;
+                    if (yy == y + hr + 1 && !m.isSolid()) return false;
+
+                    if (xx == x - xr - 1 || xx == x + xr + 1 || zz == z - zr - 1 || zz == z + zr + 1) {
+                        if (yy == y && level.isEmptyTile(xx, yy, zz) && level.isEmptyTile(xx, yy + 1, zz)) {
+                            ++holeCount;
+                        }
                     }
                 }
             }
         }
-        if (n4 < 1 || n4 > 5) {
-            return false;
-        }
-        for (int l = x - n2 - 1; l <= x + n2 + 1; ++l) {
-            for (int y2 = y + n; y2 >= y - 1; --y2) {
-                for (int n5 = z - n3 - 1; n5 <= z + n3 + 1; ++n5) {
-                    if (l == x - n2 - 1 || y2 == y - 1 || n5 == z - n3 - 1 || l == x + n2 + 1 || y2 == y + n + 1 || n5 == z + n3 + 1) {
-                        if (y2 >= 0 && !level.getMaterial(l, y2 - 1, n5).isSolid()) {
-                            level.setTile(l, y2, n5, 0);
+
+        if (holeCount < 1 || holeCount > 5) return false;
+
+        for (int xx = x - xr - 1; xx <= x + xr + 1; ++xx) {
+            for (int yy = y + hr; yy >= y - 1; --yy) {
+                for (int zz = z - zr - 1; zz <= z + zr + 1; ++zz) {
+                    if (xx == x - xr - 1 || yy == y - 1 || zz == z - zr - 1 || xx == x + xr + 1 || yy == y + hr + 1 || zz == z + zr + 1) {
+                        if (yy >= 0 && !level.getMaterial(xx, yy - 1, zz).isSolid()) {
+                            level.setTile(xx, yy, zz, 0);
                         }
-                        else if (level.getMaterial(l, y2, n5).isSolid()) {
-                            if (y2 == y - 1 && random.nextInt(4) != 0) {
-                                level.setTile(l, y2, n5, Tile.mossStone.id);
+                        else if (level.getMaterial(xx, yy, zz).isSolid()) {
+                            if (yy == y - 1 && random.nextInt(4) != 0) {
+                                level.setTile(xx, yy, zz, Tile.mossStone.id);
                             }
                             else {
-                                level.setTile(l, y2, n5, Tile.stoneBrick.id);
+                                level.setTile(xx, yy, zz, Tile.stoneBrick.id);
                             }
                         }
                     }
                     else {
-                        level.setTile(l, y2, n5, 0);
+                        level.setTile(xx, yy, zz, 0);
                     }
                 }
             }
         }
-        for (int n6 = 0; n6 < 2; ++n6) {
-            for (int n7 = 0; n7 < 3; ++n7) {
-                final int x2 = x + random.nextInt(n2 * 2 + 1) - n2;
-                final int z2 = z + random.nextInt(n3 * 2 + 1) - n3;
-                if (level.isEmptyTile(x2, y, z2)) {
-                    int n8 = 0;
-                    if (level.getMaterial(x2 - 1, y, z2).isSolid()) {
-                        ++n8;
-                    }
-                    if (level.getMaterial(x2 + 1, y, z2).isSolid()) {
-                        ++n8;
-                    }
-                    if (level.getMaterial(x2, y, z2 - 1).isSolid()) {
-                        ++n8;
-                    }
-                    if (level.getMaterial(x2, y, z2 + 1).isSolid()) {
-                        ++n8;
-                    }
-                    if (n8 == 1) {
-                        level.setTile(x2, y, z2, Tile.chest.id);
-                        final ChestTileEntity chestTileEntity = (ChestTileEntity)level.getTileEntity(x2, y, z2);
-                        for (int n9 = 0; n9 < 8; ++n9) {
-                            final ItemInstance randomItem = this.randomItem(random);
-                            if (randomItem != null) {
-                                chestTileEntity.setItem(random.nextInt(chestTileEntity.getContainerSize()), randomItem);
-                            }
-                        }
-                        break;
-                    }
+
+        for (int cc = 0; cc < 2; ++cc) {
+            for (int i = 0; i < 3; ++i) {
+                final int xc = x + random.nextInt(xr * 2 + 1) - xr;
+                final int yc = y;
+                final int zc = z + random.nextInt(zr * 2 + 1) - zr;
+                if (!level.isEmptyTile(xc, yc, zc)) continue;
+
+                int count = 0;
+                if (level.getMaterial(xc - 1, yc, zc).isSolid()) count++;
+                if (level.getMaterial(xc + 1, yc, zc).isSolid()) count++;
+                if (level.getMaterial(xc, yc, zc - 1).isSolid()) count++;
+                if (level.getMaterial(xc, yc, zc + 1).isSolid()) count++;
+
+                if (count != 1) continue;
+
+                level.setTile(xc, yc, zc, Tile.chest.id);
+                final ChestTileEntity chest = (ChestTileEntity)level.getTileEntity(xc, yc, zc);
+                for (int j = 0; j < 8; ++j) {
+                    final ItemInstance item = this.randomItem(random);
+                    if (item != null) chest.setItem(random.nextInt(chest.getContainerSize()), item);
                 }
+
+                break;
             }
         }
         level.setTile(x, y, z, Tile.mobSpawner.id);
-        ((MobSpawnerTileEntity)level.getTileEntity(x, y, z)).setEntityId(this.randomEntityId(random));
+        MobSpawnerTileEntity entity = ((MobSpawnerTileEntity)level.getTileEntity(x, y, z));
+        entity.setEntityId(this.randomEntityId(random));
         return true;
     }
     
     private ItemInstance randomItem(final Random random) {
-        final int nextInt = random.nextInt(11);
-        if (nextInt == 0) {
-            return new ItemInstance(Item.saddle);
-        }
-        if (nextInt == 1) {
-            return new ItemInstance(Item.ironIngot, random.nextInt(4) + 1);
-        }
-        if (nextInt == 2) {
-            return new ItemInstance(Item.bread);
-        }
-        if (nextInt == 3) {
-            return new ItemInstance(Item.wheat, random.nextInt(4) + 1);
-        }
-        if (nextInt == 4) {
-            return new ItemInstance(Item.sulphur, random.nextInt(4) + 1);
-        }
-        if (nextInt == 5) {
-            return new ItemInstance(Item.string, random.nextInt(4) + 1);
-        }
-        if (nextInt == 6) {
-            return new ItemInstance(Item.bucket_empty);
-        }
-        if (nextInt == 7 && random.nextInt(100) == 0) {
-            return new ItemInstance(Item.apple_gold);
-        }
-        if (nextInt == 8 && random.nextInt(2) == 0) {
-            return new ItemInstance(Item.redStone, random.nextInt(4) + 1);
-        }
-        if (nextInt == 9 && random.nextInt(10) == 0) {
-            return new ItemInstance(Item.items[Item.record_01.id + random.nextInt(2)]);
-        }
-        if (nextInt == 10) {
-            return new ItemInstance(Item.dye_powder, 1, 3);
-        }
+        final int type = random.nextInt(11);
+        if (type == 0) return new ItemInstance(Item.saddle);
+        if (type == 1) return new ItemInstance(Item.ironIngot, random.nextInt(4) + 1);
+        if (type == 2) return new ItemInstance(Item.bread);
+        if (type == 3) return new ItemInstance(Item.wheat, random.nextInt(4) + 1);
+        if (type == 4) return new ItemInstance(Item.sulphur, random.nextInt(4) + 1);
+        if (type == 5) return new ItemInstance(Item.string, random.nextInt(4) + 1);
+        if (type == 6) return new ItemInstance(Item.bucket_empty);
+        if (type == 7 && random.nextInt(100) == 0) return new ItemInstance(Item.apple_gold);
+        if (type == 8 && random.nextInt(2) == 0) return new ItemInstance(Item.redStone, random.nextInt(4) + 1);
+        if (type == 9 && random.nextInt(10) == 0) return new ItemInstance(Item.items[Item.record_01.id + random.nextInt(2)]);
+        if (type == 10) return new ItemInstance(Item.dye_powder, 1, DyePowderItem.BROWN);
+
         return null;
     }
     
     private String randomEntityId(final Random random) {
         final int nextInt = random.nextInt(4);
-        if (nextInt == 0) {
-            return "Skeleton";
-        }
-        if (nextInt == 1) {
-            return "Zombie";
-        }
-        if (nextInt == 2) {
-            return "Zombie";
-        }
-        if (nextInt == 3) {
-            return "Spider";
-        }
+        if (nextInt == 0) return "Skeleton";
+        if (nextInt == 1) return "Zombie";
+        if (nextInt == 2) return "Zombie";
+        if (nextInt == 3) return "Spider";
         return "";
     }
 }

@@ -11,6 +11,8 @@ import net.minecraft.world.level.material.Material;
 
 public class TreeTile extends Tile
 {
+    public static final int DARK_TRUNK = 1;
+    public static final int BIRCH_TRUNK = 2;
     protected TreeTile(final int id) {
         super(id, Material.wood);
         this.tex = 20;

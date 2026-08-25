@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.chunk;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.List;
 import net.minecraft.world.phys.AABB;
@@ -104,7 +105,11 @@ public class EmptyLevelChunk extends LevelChunk
     public boolean isSkyLit(final int x, final int y, final int z) {
         return false;
     }
-    
+
+    @Override
+    public void skyBrightnessChanged() {
+    }
+
     @Override
     public TileEntity getTileEntity(final int x, final int y, final int z) {
         return null;
@@ -133,13 +138,19 @@ public class EmptyLevelChunk extends LevelChunk
     @Override
     public void markUnsaved() {
     }
-    
+
     @Override
-    public void getEntities(final Entity except, final AABB bb, final List es) {
+    public void getEntities(Entity except, AABB bb, List<Entity> es) {
     }
-    
+
     @Override
-    public void getEntitiesOfClass(final Class ec, final AABB bb, final List es) {
+    public <T extends Entity> void getEntitiesOfClass(Class<T> ec, AABB bb, List<Entity> es) {
+    }
+
+    @Override
+    // Useless - in b1.2 and LCE leaks
+    public int countEntities() {
+        return 0;
     }
     
     @Override
@@ -149,8 +160,25 @@ public class EmptyLevelChunk extends LevelChunk
     
     @Override
     public int getBlocksAndData(final byte[] data, final int x0, final int y0, final int z0, final int x1, final int y1, final int z1, final int p) {
-        final int n = (x1 - x0) * (y1 - y0) * (z1 - z0);
-        return n + n / 2 * 3;
+        int xs = x1 - x0;
+        int ys = y1 - y0;
+        int zs = z1 - z0;
+
+        final int s = xs * ys * zs;
+        final int len = s + s / 2 * 3;
+        Arrays.fill(data, p, p + len, (byte) 0);
+        return len;
+    }
+
+    @Override
+    // Useless - in B1.2 and LCE leaks
+    public int setBlocksAndData(byte[] data, int x0, int y0, int z0, int x1, int y1, int z1, int p) {
+        int xs = x1 - x0;
+        int ys = y1 - y0;
+        int zs = z1 - z0;
+
+        int s = xs * ys * zs;
+        return s + s / 2 * 3;
     }
     
     @Override

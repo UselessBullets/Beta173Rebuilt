@@ -7,7 +7,6 @@ package net.minecraft.client.multiplayer;
 import net.minecraft.network.packet.DisconnectPacket;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.LevelListener;
 import net.minecraft.Pos;
 import java.util.HashSet;
 
@@ -108,7 +107,7 @@ public class MultiPlayerLevel extends Level
             this.chunkCache.drop(x, z);
         }
         if (!visible) {
-            this.setTilesDirty(x * 16, 0, z * 16, x * 16 + 15, Level.maxBuildHeight, z * 16 + 15);
+            this.setTilesDirty(x * 16, 0, z * 16, x * 16 + 15, Level.MAX_BUILD_HEIGHT, z * 16 + 15);
         }
     }
     

@@ -36,7 +36,7 @@ public class TileItem extends Item
 
         if (itemInstance.count == 0) return false;
 
-        if (y == (Level.maxBuildHeight - 1) && Tile.tiles[this.tileId].material.isSolid()) return false;
+        if (y == (Level.MAX_BUILD_HEIGHT - 1) && Tile.tiles[this.tileId].material.isSolid()) return false;
 
         if (level.mayPlace(this.tileId, x, y, z, false, face)) {
             final Tile tile = Tile.tiles[this.tileId];

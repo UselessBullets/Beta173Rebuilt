@@ -17,26 +17,40 @@ public class DataLayer
     }
     
     public int get(final int x, final int y, final int z) {
-        final int n = x << 11 | z << 7 | y;
-        final int n2 = n >> 1;
-        if ((n & 0x1) == 0x0) {
-            return this.data[n2] & 0xF;
+        final int pos = x << 11 | z << 7 | y;
+        final int slot = pos >> 1;
+        final int part = pos & 0x1;
+
+        if (part == 0) {
+            return this.data[slot] & 0xF;
+        } else {
+            return this.data[slot] >> 4 & 0xF;
         }
-        return this.data[n2] >> 4 & 0xF;
     }
     
     public void set(final int x, final int y, final int z, final int val) {
-        final int n = x << 11 | z << 7 | y;
-        final int n2 = n >> 1;
-        if ((n & 0x1) == 0x0) {
-            this.data[n2] = (byte)((this.data[n2] & 0xF0) | (val & 0xF));
+        final int pos = x << 11 | z << 7 | y;
+
+        final int slot = pos >> 1;
+        final int part = pos & 0x1;
+
+        if (part == 0) {
+            this.data[slot] = (byte)((this.data[slot] & 0xF0) | (val & 0xF));
         }
         else {
-            this.data[n2] = (byte)((this.data[n2] & 0xF) | (val & 0xF) << 4);
+            this.data[slot] = (byte)((this.data[slot] & 0xF) | (val & 0xF) << 4);
         }
     }
     
     public boolean isValid() {
         return this.data != null;
+    }
+
+    // Useless - in b1.2 and LCE leaks
+    public void setAll(int br) {
+        byte val = (byte)(br & br << 4);
+        for (int i = 0; i < this.data.length; i++) {
+            this.data[i] = val;
+        }
     }
 }

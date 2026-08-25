@@ -21,6 +21,9 @@ public interface ChunkSource
     boolean tick();
     
     boolean shouldSave();
-    
+
+    /**
+     * Returns some stats that are rendered when the user holds F3.
+     */
     String gatherStats();
 }

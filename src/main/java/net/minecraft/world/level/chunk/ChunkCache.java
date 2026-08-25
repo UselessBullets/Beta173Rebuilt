@@ -11,16 +11,26 @@ import net.minecraft.world.level.chunk.storage.ChunkStorage;
 
 public class ChunkCache implements ChunkSource
 {
+    private static final int CHUNK_CACHE_WIDTH = 32;
     private LevelChunk emptyChunk;
     private ChunkSource source;
     private ChunkStorage storage;
-    private LevelChunk[] chunks;
+    private LevelChunk[] chunks = new LevelChunk[CHUNK_CACHE_WIDTH * CHUNK_CACHE_WIDTH];
     private Level level;
-    int xLast;
-    int zLast;
+    int xLast = -999999999;
+    int zLast = -999999999;
     private LevelChunk last;
     private int xCenter;
     private int zCenter;
+    private static final int MAX_SAVES = 2;
+
+    // Useless - Constructor existed in b1.2 leaks
+    public ChunkCache(Level var1, ChunkStorage var2, ChunkSource var3) {
+        this.emptyChunk = new EmptyLevelChunk(var1, new byte[Level.CHUNK_TILE_COUNT], 0, 0);
+        this.level = var1;
+        this.storage = var2;
+        this.source = var3;
+    }
     
     public void centerOn(final int xCenter, final int zCenter) {
         this.xCenter = xCenter;
@@ -28,19 +38,17 @@ public class ChunkCache implements ChunkSource
     }
     
     public boolean fits(final int x, final int z) {
-        final int n = 15;
-        return x >= this.xCenter - n && z >= this.zCenter - n && x <= this.xCenter + n && z <= this.zCenter + n;
+        final int r = CHUNK_CACHE_WIDTH / 2 - 1;
+        return x >= this.xCenter - r && z >= this.zCenter - r && x <= this.xCenter + r && z <= this.zCenter + r;
     }
     
     public boolean hasChunk(final int x, final int z) {
-        if (!this.fits(x, z)) {
-            return false;
-        }
-        if (x == this.xLast && z == this.zLast && this.last != null) {
-            return true;
-        }
-        final int n = (x & 0x1F) + (z & 0x1F) * 32;
-        return this.chunks[n] != null && (this.chunks[n] == this.emptyChunk || this.chunks[n].isAt(x, z));
+        if (!this.fits(x, z)) return false;
+
+        if (x == this.xLast && z == this.zLast && this.last != null) return true;
+
+        final int i = (x & (CHUNK_CACHE_WIDTH - 1)) + (z & (CHUNK_CACHE_WIDTH - 1)) * CHUNK_CACHE_WIDTH;
+        return this.chunks[i] != null && (this.chunks[i] == this.emptyChunk || this.chunks[i].isAt(x, z));
     }
     
     public LevelChunk create(final int x, final int z) {
@@ -48,91 +56,83 @@ public class ChunkCache implements ChunkSource
     }
     
     public LevelChunk getChunk(final int x, final int z) {
-        if (x == this.xLast && z == this.zLast && this.last != null) {
-            return this.last;
-        }
-        if (!this.level.isFindingSpawn && !this.fits(x, z)) {
-            return this.emptyChunk;
-        }
-        final int n = (x & 0x1F) + (z & 0x1F) * 32;
+        if (x == this.xLast && z == this.zLast && this.last != null) return this.last;
+
+        if (!this.level.isFindingSpawn && !this.fits(x, z)) return this.emptyChunk;
+
+        final int i = (x & (CHUNK_CACHE_WIDTH - 1)) + (z & (CHUNK_CACHE_WIDTH - 1)) * CHUNK_CACHE_WIDTH;
         if (!this.hasChunk(x, z)) {
-            if (this.chunks[n] != null) {
-                this.chunks[n].unload();
-                this.save(this.chunks[n]);
-                this.saveEntities(this.chunks[n]);
+            if (this.chunks[i] != null) {
+                this.chunks[i].unload();
+                this.save(this.chunks[i]);
+                this.saveEntities(this.chunks[i]);
             }
-            LevelChunk levelChunk = this.load(x, z);
-            if (levelChunk == null) {
+
+            LevelChunk chunk = this.load(x, z);
+            if (chunk == null) {
                 if (this.source == null) {
-                    levelChunk = this.emptyChunk;
+                    chunk = this.emptyChunk;
                 }
                 else {
-                    levelChunk = this.source.getChunk(x, z);
-                    levelChunk.attemptCompression();
+                    chunk = this.source.getChunk(x, z);
+                    chunk.attemptCompression();
                 }
             }
-            (this.chunks[n] = levelChunk).lightLava();
-            if (this.chunks[n] != null) {
-                this.chunks[n].load();
+            this.chunks[i] = chunk;
+            this.chunks[i].lightLava();
+            if (this.chunks[i] != null) {
+                this.chunks[i].load();
             }
-            if (!this.chunks[n].terrainPopulated && this.hasChunk(x + 1, z + 1) && this.hasChunk(x, z + 1) && this.hasChunk(x + 1, z)) {
-                this.postProcess(this, x, z);
-            }
-            if (this.hasChunk(x - 1, z) && !this.getChunk(x - 1, z).terrainPopulated && this.hasChunk(x - 1, z + 1) && this.hasChunk(x, z + 1) && this.hasChunk(x - 1, z)) {
-                this.postProcess(this, x - 1, z);
-            }
-            if (this.hasChunk(x, z - 1) && !this.getChunk(x, z - 1).terrainPopulated && this.hasChunk(x + 1, z - 1) && this.hasChunk(x, z - 1) && this.hasChunk(x + 1, z)) {
-                this.postProcess(this, x, z - 1);
-            }
-            if (this.hasChunk(x - 1, z - 1) && !this.getChunk(x - 1, z - 1).terrainPopulated && this.hasChunk(x - 1, z - 1) && this.hasChunk(x, z - 1) && this.hasChunk(x - 1, z)) {
-                this.postProcess(this, x - 1, z - 1);
-            }
+
+            if (!this.chunks[i].terrainPopulated && this.hasChunk(x + 1, z + 1) && this.hasChunk(x, z + 1) && this.hasChunk(x + 1, z)) this.postProcess(this, x, z);
+            if (this.hasChunk(x - 1, z) && !this.getChunk(x - 1, z).terrainPopulated && this.hasChunk(x - 1, z + 1) && this.hasChunk(x, z + 1) && this.hasChunk(x - 1, z)) this.postProcess(this, x - 1, z);
+            if (this.hasChunk(x, z - 1) && !this.getChunk(x, z - 1).terrainPopulated && this.hasChunk(x + 1, z - 1) && this.hasChunk(x, z - 1) && this.hasChunk(x + 1, z)) this.postProcess(this, x, z - 1);
+            if (this.hasChunk(x - 1, z - 1) && !this.getChunk(x - 1, z - 1).terrainPopulated && this.hasChunk(x - 1, z - 1) && this.hasChunk(x, z - 1) && this.hasChunk(x - 1, z)) this.postProcess(this, x - 1, z - 1);
         }
+
         this.xLast = x;
         this.zLast = z;
-        this.last = this.chunks[n];
-        return this.chunks[n];
+        this.last = this.chunks[i];
+
+        return this.chunks[i];
     }
     
     private LevelChunk load(final int x, final int z) {
-        if (this.storage == null) {
-            return this.emptyChunk;
-        }
+        if (this.storage == null) return this.emptyChunk;
+
         try {
-            final LevelChunk load = this.storage.load(this.level, x, z);
-            if (load != null) {
-                load.lastSaveTime = this.level.getTime();
+            final LevelChunk levelChunk = this.storage.load(this.level, x, z);
+            if (levelChunk != null) {
+                levelChunk.lastSaveTime = this.level.getTime();
             }
-            return load;
+            return levelChunk;
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
             return this.emptyChunk;
         }
     }
     
     private void saveEntities(final LevelChunk levelChunk) {
-        if (this.storage == null) {
-            return;
-        }
+        if (this.storage == null) return;
+
         try {
             this.storage.saveEntities(this.level, levelChunk);
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
     }
     
     private void save(final LevelChunk levelChunk) {
-        if (this.storage == null) {
-            return;
-        }
+        if (this.storage == null) return;
+
         try {
             levelChunk.lastSaveTime = this.level.getTime();
             this.storage.save(this.level, levelChunk);
         }
-        catch (final IOException ex) {
-            ex.printStackTrace();
+        catch (final IOException e) {
+            e.printStackTrace();
         }
     }
     
@@ -148,33 +148,39 @@ public class ChunkCache implements ChunkSource
     }
     
     public boolean save(final boolean force, final ProgressListener progressListener) {
-        int n = 0;
-        int n2 = 0;
+        int saves = 0;
+        int count = 0;
+
         if (progressListener != null) {
             for (int i = 0; i < this.chunks.length; ++i) {
                 if (this.chunks[i] != null && this.chunks[i].shouldSave(force)) {
-                    ++n2;
+                    count++;
                 }
             }
         }
-        int n3 = 0;
-        for (int j = 0; j < this.chunks.length; ++j) {
-            if (this.chunks[j] != null) {
-                if (force && !this.chunks[j].dontSave) {
-                    this.saveEntities(this.chunks[j]);
+        int cc = 0;
+
+        for (int i = 0; i < this.chunks.length; ++i) {
+            if (this.chunks[i] != null) {
+                if (force && !this.chunks[i].dontSave) {
+                    this.saveEntities(this.chunks[i]);
                 }
-                if (this.chunks[j].shouldSave(force)) {
-                    this.save(this.chunks[j]);
-                    this.chunks[j].unsaved = false;
-                    if (++n == 2 && !force) {
+                if (this.chunks[i].shouldSave(force)) {
+                    this.save(this.chunks[i]);
+                    this.chunks[i].unsaved = false;
+                    if (saves++ == MAX_SAVES && !force) {
                         return false;
                     }
-                    if (progressListener != null && ++n3 % 10 == 0) {
-                        progressListener.progressStagePercentage(n3 * 100 / n2);
+
+                    if (progressListener != null) {
+                        if (++cc % 10 == 0) {
+                            progressListener.progressStagePercentage(cc * 100 / count);
+                        }
                     }
                 }
             }
         }
+
         if (force) {
             if (this.storage == null) {
                 return true;
@@ -185,9 +191,7 @@ public class ChunkCache implements ChunkSource
     }
     
     public boolean tick() {
-        if (this.storage != null) {
-            this.storage.tick();
-        }
+        if (this.storage != null) this.storage.tick();
         return this.source.tick();
     }
     

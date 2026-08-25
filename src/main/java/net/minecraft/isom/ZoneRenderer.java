@@ -106,7 +106,7 @@ public class ZoneRenderer
                 final int xp = xx + zz;
                 boolean solid = true;
 
-                for (int y = Level.minBuildHeight; y < Level.maxBuildHeight; ++y) {
+                for (int y = Level.MIN_BUILD_HEIGHT; y < Level.MAX_BUILD_HEIGHT; ++y) {
                     final int yp = zz - xx - y + IMG_HEIGHT - 16;
                     if (yp < this.yBuf[xp] || yp < this.yBuf[xp + 1]) {
                         final Tile t = Tile.tiles[level.getTile(x, y, z)];

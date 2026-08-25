@@ -38,6 +38,11 @@ public class Mth
         final int n = (int)v;
         return (v < n) ? (n - 1) : n;
     }
+
+    // Useless - In b1.2 and LCE leaks
+    public static int absFloor(double v) {
+        return (int)(v >= 0.0 ? v : -v + 1.0);
+    }
     
     public static float abs(final float v) {
         return (v >= 0.0f) ? v : (-v);

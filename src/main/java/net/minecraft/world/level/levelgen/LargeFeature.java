@@ -10,23 +10,22 @@ import java.util.Random;
 
 public class LargeFeature
 {
-    protected int radius;
-    protected Random random;
-    
-    public LargeFeature() {
-        this.radius = 8;
-        this.random = new Random();
-    }
-    
+    protected int radius = 8;
+    protected Random random = new Random();
+
     public void apply(final ChunkSource chunkSource, final Level level, final int xOffs, final int zOffs, final byte[] blocks) {
-        final int radius = this.radius;
+        final int r = this.radius;
+
         this.random.setSeed(level.getSeed());
-        final long n = this.random.nextLong() / 2L * 2L + 1L;
-        final long n2 = this.random.nextLong() / 2L * 2L + 1L;
-        for (int i = xOffs - radius; i <= xOffs + radius; ++i) {
-            for (int j = zOffs - radius; j <= zOffs + radius; ++j) {
-                this.random.setSeed(i * n + j * n2 ^ level.getSeed());
-                this.addFeature(level, i, j, xOffs, zOffs, blocks);
+        final long xScale = this.random.nextLong() / 2L * 2L + 1L;
+        final long zScale = this.random.nextLong() / 2L * 2L + 1L;
+
+        for (int x = xOffs - r; x <= xOffs + r; ++x) {
+            for (int z = zOffs - r; z <= zOffs + r; ++z) {
+                long xx = x * xScale;
+                long zz = z * zScale;
+                this.random.setSeed(xx + zz ^ level.getSeed());
+                this.addFeature(level, x, z, xOffs, zOffs, blocks);
             }
         }
     }

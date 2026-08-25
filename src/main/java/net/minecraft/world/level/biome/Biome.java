@@ -40,9 +40,6 @@ public class Biome
     public static final Biome tunfra = new Biome().setColor(0x57ebf9).setName("Tundra").setSnowCovered().setLeafColor(0xc4d339);
     public static final Biome hell = new HellBiome().setColor(0xff0000).setName("Hell").setNoRain();
     public static final Biome sky = new SkyBiome().setColor(0x8080ff).setName("Sky").setNoRain();
-    static {
-        recalc();
-    }
     public String name;
     public int color;
     public byte topMaterial = (byte)Tile.grass.id;
@@ -53,10 +50,13 @@ public class Biome
     protected List<MobSpawnerData> waterFriendlies = new ArrayList<>();
     private boolean snowCovered;
     private boolean hasRain = true;
-
     // Useless - Theoretical constant that likely existed, the biome map has a fixed precision that it samples temperature and downfall values at
+
     private static final int BIOME_MAP_RESOLUTION = 64;
     private static Biome[] map = new Biome[BIOME_MAP_RESOLUTION * BIOME_MAP_RESOLUTION];
+    static {
+        recalc();
+    }
 
     protected Biome() {
         this.enemies.add(new MobSpawnerData(Spider.class, 10));

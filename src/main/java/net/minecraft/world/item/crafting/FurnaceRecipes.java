@@ -24,7 +24,7 @@ public class FurnaceRecipes
     private FurnaceRecipes() {
         this.addFurnaceRecipe(Tile.ironOre.id, new ItemInstance(Item.ironIngot));
         this.addFurnaceRecipe(Tile.goldOre.id, new ItemInstance(Item.goldIngot));
-        this.addFurnaceRecipe(Tile.emeraldOre.id, new ItemInstance(Item.emerald));
+        this.addFurnaceRecipe(Tile.diamondOre.id, new ItemInstance(Item.diamond));
         this.addFurnaceRecipe(Tile.sand.id, new ItemInstance(Tile.glass));
         this.addFurnaceRecipe(Item.porkChop_raw.id, new ItemInstance(Item.porkChop_cooked));
         this.addFurnaceRecipe(Item.fish_raw.id, new ItemInstance(Item.fish_cooked));

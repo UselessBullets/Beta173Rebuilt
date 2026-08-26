@@ -1977,6 +1977,10 @@ public class Level implements LevelSource
         }
         return tileId > 0 && tile == null && tile2.mayPlace(this, x, y, z, face);
     }
+    // Useless - Exists in b1.2 and LCE leaks
+    public int getSeaLevel() {
+        return SEA_LEVEL;
+    }
     
     public Path findPath(final Entity from, final Entity to, final float maxDist) {
         final int floor = Mth.floor(from.x);

@@ -206,7 +206,7 @@ public class AchievementScreen extends Screen
                         tileType = Tile.unbreakable.tex;
                     } else if (heightValue == diamondLevel) {
                         if (random.nextInt(2) == 0) {
-                            tileType = Tile.emeraldOre.tex;
+                            tileType = Tile.diamondOre.tex;
                         } else {
                             tileType = Tile.redStoneOre.tex;
                         }

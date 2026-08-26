@@ -19,8 +19,8 @@ public class OreTile extends Tile
         if (this.id == Tile.coalOre.id) {
             return Item.coal.id;
         }
-        if (this.id == Tile.emeraldOre.id) {
-            return Item.emerald.id;
+        if (this.id == Tile.diamondOre.id) {
+            return Item.diamond.id;
         }
         if (this.id == Tile.lapisOre.id) {
             return Item.dye_powder.id;

@@ -27,11 +27,11 @@ public class ToolRecipes
               " #",
               " #" } };
     private Object[][] map = new Object[][] {
-            { Tile.wood, Tile.stoneBrick, Item.ironIngot, Item.emerald, Item.goldIngot },
-            { Item.pickAxe_wood, Item.pickAxe_stone, Item.pickAxe_iron, Item.pickAxe_emerald, Item.pickAxe_gold },
-            { Item.shovel_wood, Item.shovel_stone, Item.shovel_iron, Item.shovel_emerald, Item.shovel_gold },
-            { Item.hatchet_wood, Item.hatchet_stone, Item.hatchet_iron, Item.hatchet_emerald, Item.hatchet_gold },
-            { Item.hoe_wood, Item.hoe_stone, Item.hoe_iron, Item.hoe_emerald, Item.hoe_gold }
+            { Tile.wood, Tile.stoneBrick, Item.ironIngot, Item.diamond, Item.goldIngot },
+            { Item.pickAxe_wood, Item.pickAxe_stone, Item.pickAxe_iron, Item.pickAxe_diamond, Item.pickAxe_gold },
+            { Item.shovel_wood, Item.shovel_stone, Item.shovel_iron, Item.shovel_diamond, Item.shovel_gold },
+            { Item.hatchet_wood, Item.hatchet_stone, Item.hatchet_iron, Item.hatchet_diamond, Item.hatchet_gold },
+            { Item.hoe_wood, Item.hoe_stone, Item.hoe_iron, Item.hoe_diamond, Item.hoe_gold }
     };
     
     public void addRecipes(final Recipes recipes) {

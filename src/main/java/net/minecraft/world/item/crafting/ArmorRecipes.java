@@ -28,11 +28,11 @@ public class ArmorRecipes
             };
     private Object[][] map = new Object[][]
             {
-                    { Item.leather, Tile.fire, Item.ironIngot, Item.emerald, Item.goldIngot },
-                    { Item.helmet_cloth, Item.helmet_chain, Item.helmet_iron, Item.helmet_emerald, Item.helmet_gold },
-                    { Item.chestplate_cloth, Item.chestplate_chain, Item.chestplate_iron, Item.chestplate_emerald, Item.chestplate_gold },
-                    { Item.leggings_cloth, Item.leggings_chain, Item.leggings_iron, Item.leggings_emerald, Item.leggings_gold },
-                    { Item.boots_cloth, Item.boots_chain, Item.boots_iron, Item.boots_emerald, Item.boots_gold }
+                    { Item.leather, Tile.fire, Item.ironIngot, Item.diamond, Item.goldIngot },
+                    { Item.helmet_cloth, Item.helmet_chain, Item.helmet_iron, Item.helmet_diamond, Item.helmet_gold },
+                    { Item.chestplate_cloth, Item.chestplate_chain, Item.chestplate_iron, Item.chestplate_diamond, Item.chestplate_gold },
+                    { Item.leggings_cloth, Item.leggings_chain, Item.leggings_iron, Item.leggings_diamond, Item.leggings_gold },
+                    { Item.boots_cloth, Item.boots_chain, Item.boots_iron, Item.boots_diamond, Item.boots_gold }
             };
     
     public void addRecipes(final Recipes recipes) {

@@ -15,7 +15,7 @@ public class OreRecipes
             {
                     { Tile.goldBlock, new ItemInstance(Item.goldIngot, 9) },
                     { Tile.ironBlock, new ItemInstance(Item.ironIngot, 9) },
-                    { Tile.emeraldBlock, new ItemInstance(Item.emerald, 9) },
+                    { Tile.diamondBlock, new ItemInstance(Item.diamond, 9) },
                     { Tile.lapisBlock, new ItemInstance(Item.dye_powder, 9, DyePowderItem.BLUE) }
             };
     

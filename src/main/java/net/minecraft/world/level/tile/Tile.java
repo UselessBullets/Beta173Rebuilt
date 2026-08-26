@@ -141,8 +141,8 @@ public class Tile implements Descriptive<Tile> {
     public static final Tile stairs_wood = new StairTile(53, Tile.wood).setDescriptionId("stairsWood").sendTileData();
     public static final Tile chest = new ChestTile(54).setDestroyTime(2.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("chest").sendTileData();
     public static final Tile redStoneDust = new RedStoneDustTile(55, 164).setDestroyTime(0.0f).setSoundType(Tile.SOUND_NORMAL).setDescriptionId("redstoneDust").setNotCollectStatistics().sendTileData();
-    public static final Tile emeraldOre = new OreTile(56, 50).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreDiamond");
-    public static final Tile emeraldBlock = new MetalTile(57, 24).setDestroyTime(5.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_METAL).setDescriptionId("blockDiamond");
+    public static final Tile diamondOre = new OreTile(56, 50).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreDiamond");
+    public static final Tile diamondBlock = new MetalTile(57, 24).setDestroyTime(5.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_METAL).setDescriptionId("blockDiamond");
     public static final Tile workBench = new WorkbenchTile(58).setDestroyTime(2.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("workbench");
     public static final Tile crops = new CropTile(59, 88).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("crops").setNotCollectStatistics().sendTileData();
     public static final Tile farmland = new FarmTile(60).setDestroyTime(0.6f).setSoundType(Tile.SOUND_GRAVEL).setDescriptionId("farmland");

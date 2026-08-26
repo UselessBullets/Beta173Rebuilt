@@ -11,6 +11,9 @@ import net.minecraft.world.level.LevelSource;
 
 public class TallGrass extends Bush
 {
+    public static final int DEAD_SHRUB = 0;
+    public static final int TALL_GRASS = 1;
+    public static final int FERN = 2;
     protected TallGrass(final int id, final int tex) {
         super(id, tex);
         final float n = 0.4f;

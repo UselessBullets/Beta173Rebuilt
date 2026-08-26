@@ -30,7 +30,7 @@ public class Item implements Descriptive<Item> {
     public static Item bow = new BowItem(5).setIcon(5, 1).setDescriptionId("bow");
     public static Item arrow = new Item(6).setIcon(5, 2).setDescriptionId("arrow");
     public static Item coal = new CoalItem(7).setIcon(7, 0).setDescriptionId("coal");
-    public static Item emerald = new Item(8).setIcon(7, 3).setDescriptionId("emerald");
+    public static Item diamond = new Item(8).setIcon(7, 3).setDescriptionId("emerald");
     public static Item ironIngot = new Item(9).setIcon(7, 1).setDescriptionId("ingotIron");
     public static Item goldIngot = new Item(10).setIcon(7, 2).setDescriptionId("ingotGold");
     public static Item sword_iron = new WeaponItem(11, Tier.IRON).setIcon(2, 4).setDescriptionId("swordIron");
@@ -42,10 +42,10 @@ public class Item implements Descriptive<Item> {
     public static Item shovel_stone = new ShovelItem(17, Tier.STONE).setIcon(1, 5).setDescriptionId("shovelStone");
     public static Item pickAxe_stone = new PickaxeItem(18, Tier.STONE).setIcon(1, 6).setDescriptionId("pickaxeStone");
     public static Item hatchet_stone = new HatchetItem(19, Tier.STONE).setIcon(1, 7).setDescriptionId("hatchetStone");
-    public static Item sword_emerald = new WeaponItem(20, Tier.EMERALD).setIcon(3, 4).setDescriptionId("swordDiamond");
-    public static Item shovel_emerald = new ShovelItem(21, Tier.EMERALD).setIcon(3, 5).setDescriptionId("shovelDiamond");
-    public static Item pickAxe_emerald = new PickaxeItem(22, Tier.EMERALD).setIcon(3, 6).setDescriptionId("pickaxeDiamond");
-    public static Item hatchet_emerald = new HatchetItem(23, Tier.EMERALD).setIcon(3, 7).setDescriptionId("hatchetDiamond");
+    public static Item sword_diamond = new WeaponItem(20, Tier.DIAMOND).setIcon(3, 4).setDescriptionId("swordDiamond");
+    public static Item shovel_diamond = new ShovelItem(21, Tier.DIAMOND).setIcon(3, 5).setDescriptionId("shovelDiamond");
+    public static Item pickAxe_diamond = new PickaxeItem(22, Tier.DIAMOND).setIcon(3, 6).setDescriptionId("pickaxeDiamond");
+    public static Item hatchet_diamond = new HatchetItem(23, Tier.DIAMOND).setIcon(3, 7).setDescriptionId("hatchetDiamond");
     public static Item stick = new Item(24).setIcon(5, 3).handEquipped().setDescriptionId("stick");
     public static Item bowl = new Item(25).setIcon(7, 4).setDescriptionId("bowl");
     public static Item mushroomStew = new BowlFoodItem(26, 10).setIcon(8, 4).setDescriptionId("mushroomStew");
@@ -59,7 +59,7 @@ public class Item implements Descriptive<Item> {
     public static Item hoe_wood = new HoeItem(34, Tier.WOOD).setIcon(0, 8).setDescriptionId("hoeWood");
     public static Item hoe_stone = new HoeItem(35, Tier.STONE).setIcon(1, 8).setDescriptionId("hoeStone");
     public static Item hoe_iron = new HoeItem(36, Tier.IRON).setIcon(2, 8).setDescriptionId("hoeIron");
-    public static Item hoe_emerald = new HoeItem(37, Tier.EMERALD).setIcon(3, 8).setDescriptionId("hoeDiamond");
+    public static Item hoe_diamond = new HoeItem(37, Tier.DIAMOND).setIcon(3, 8).setDescriptionId("hoeDiamond");
     public static Item hoe_gold = new HoeItem(38, Tier.GOLD).setIcon(4, 8).setDescriptionId("hoeGold");
     public static Item seeds = new SeedItem(39, Tile.crops.id).setIcon(9, 0).setDescriptionId("seeds");
     public static Item wheat = new Item(40).setIcon(9, 1).setDescriptionId("wheat");
@@ -76,10 +76,10 @@ public class Item implements Descriptive<Item> {
     public static Item chestplate_iron = new ArmorItem(51, 2, 2, ArmorItem.SLOT_TORSO).setIcon(2, 1).setDescriptionId("chestplateIron");
     public static Item leggings_iron = new ArmorItem(52, 2, 2, ArmorItem.SLOT_LEGS).setIcon(2, 2).setDescriptionId("leggingsIron");
     public static Item boots_iron = new ArmorItem(53, 2, 2, ArmorItem.SLOT_FEET).setIcon(2, 3).setDescriptionId("bootsIron");
-    public static Item helmet_emerald = new ArmorItem(54, 3, 3, ArmorItem.SLOT_HEAD).setIcon(3, 0).setDescriptionId("helmetDiamond");
-    public static Item chestplate_emerald = new ArmorItem(55, 3, 3, ArmorItem.SLOT_TORSO).setIcon(3, 1).setDescriptionId("chestplateDiamond");
-    public static Item leggings_emerald = new ArmorItem(56, 3, 3, ArmorItem.SLOT_LEGS).setIcon(3, 2).setDescriptionId("leggingsDiamond");
-    public static Item boots_emerald = new ArmorItem(57, 3, 3, ArmorItem.SLOT_FEET).setIcon(3, 3).setDescriptionId("bootsDiamond");
+    public static Item helmet_diamond = new ArmorItem(54, 3, 3, ArmorItem.SLOT_HEAD).setIcon(3, 0).setDescriptionId("helmetDiamond");
+    public static Item chestplate_diamond = new ArmorItem(55, 3, 3, ArmorItem.SLOT_TORSO).setIcon(3, 1).setDescriptionId("chestplateDiamond");
+    public static Item leggings_diamond = new ArmorItem(56, 3, 3, ArmorItem.SLOT_LEGS).setIcon(3, 2).setDescriptionId("leggingsDiamond");
+    public static Item boots_diamond = new ArmorItem(57, 3, 3, ArmorItem.SLOT_FEET).setIcon(3, 3).setDescriptionId("bootsDiamond");
     public static Item helmet_gold = new ArmorItem(58, 1, 4, ArmorItem.SLOT_HEAD).setIcon(4, 0).setDescriptionId("helmetGold");
     public static Item chestplate_gold = new ArmorItem(59, 1, 4, ArmorItem.SLOT_TORSO).setIcon(4, 1).setDescriptionId("chestplateGold");
     public static Item leggings_gold = new ArmorItem(60, 1, 4, ArmorItem.SLOT_LEGS).setIcon(4, 2).setDescriptionId("leggingsGold");
@@ -314,7 +314,7 @@ public class Item implements Descriptive<Item> {
         WOOD(0, 59, 2.0f, 0),
         STONE(1, 131, 4.0f, 1),
         IRON(2, 250, 6.0f, 2),
-        EMERALD(3, 1561, 8.0f, 3),
+        DIAMOND(3, 1561, 8.0f, 3),
         GOLD(0, 32, 12.0f, 0);
 
         private final int level;

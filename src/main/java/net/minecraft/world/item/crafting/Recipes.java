@@ -6,7 +6,6 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.world.CraftingContainer;
 import java.util.HashMap;
-import java.util.Comparator;
 import java.util.Collections;
 
 import net.minecraft.world.item.CoalItem;
@@ -59,7 +58,7 @@ public class Recipes
                 "#X#",
                 "###",
 
-                '#', Tile.wood, 'X', Item.emerald);
+                '#', Tile.wood, 'X', Item.diamond);
 
         this.addShapedRecipe(new ItemInstance(Tile.musicBlock, 1),
                 "###",

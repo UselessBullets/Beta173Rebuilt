@@ -21,8 +21,8 @@ public class PickaxeItem extends DiggerItem
             Tile.coalOre,
             Tile.goldBlock,
             Tile.goldOre,
-            Tile.emeraldOre,
-            Tile.emeraldBlock,
+            Tile.diamondOre,
+            Tile.diamondBlock,
             Tile.ice,
             Tile.hellRock,
             Tile.lapisOre,
@@ -35,7 +35,7 @@ public class PickaxeItem extends DiggerItem
     @Override
     public boolean canDestroySpecial(final Tile tile) {
         if (tile == Tile.obsidian) return this.tier.getLevel() == 3;
-        if (tile == Tile.emeraldBlock || tile == Tile.emeraldOre) return this.tier.getLevel() >= 2;
+        if (tile == Tile.diamondBlock || tile == Tile.diamondOre) return this.tier.getLevel() >= 2;
         if (tile == Tile.goldBlock || tile == Tile.goldOre) return this.tier.getLevel() >= 2;
         if (tile == Tile.ironBlock || tile == Tile.ironOre) return this.tier.getLevel() >= 1;
         if (tile == Tile.lapisBlock || tile == Tile.lapisOre) return this.tier.getLevel() >= 1;

@@ -306,7 +306,7 @@ public class SkyIslandRandomLevelSource implements ChunkSource
             new OreFeature(Tile.redStoneOre.id, 7).place(this.level, this.random, n + this.random.nextInt(16), this.random.nextInt(16), n2 + this.random.nextInt(16));
         }
         for (int n7 = 0; n7 < 1; ++n7) {
-            new OreFeature(Tile.emeraldOre.id, 7).place(this.level, this.random, n + this.random.nextInt(16), this.random.nextInt(16), n2 + this.random.nextInt(16));
+            new OreFeature(Tile.diamondOre.id, 7).place(this.level, this.random, n + this.random.nextInt(16), this.random.nextInt(16), n2 + this.random.nextInt(16));
         }
         for (int n8 = 0; n8 < 1; ++n8) {
             new OreFeature(Tile.lapisOre.id, 6).place(this.level, this.random, n + this.random.nextInt(16), this.random.nextInt(16) + this.random.nextInt(16), n2 + this.random.nextInt(16));

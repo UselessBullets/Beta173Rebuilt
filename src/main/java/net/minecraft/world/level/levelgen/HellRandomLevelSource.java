@@ -32,9 +32,9 @@ public class HellRandomLevelSource implements ChunkSource
     public PerlinNoise depthNoise;
     private Level level;
     private double[] buffer;
-    private double[] sandBuffer = new double[256];
-    private double[] gravelBuffer = new double[256];
-    private double[] depthBuffer = new double[256];
+    private double[] sandBuffer = new double[16 * 16];
+    private double[] gravelBuffer = new double[16 * 16];
+    private double[] depthBuffer = new double[16 * 16];
     private LargeFeature caveFeature = new LargeHellCaveFeature();
     double[] pnr;
     double[] ar;

@@ -90,10 +90,10 @@ public class Minimap
             glScalef(4.0f, 4.0f, 3.0f);
             glTranslatef(-0.125f, 0.125f, 0.0f);
 
-            final float u0 = (dec.imgIndex % 4 + 0) / 4.0f;
-            final float v0 = (dec.imgIndex / 4 + 0) / 4.0f;
-            final float u1 = (dec.imgIndex % 4 + 1) / 4.0f;
-            final float v1 = (dec.imgIndex / 4 + 1) / 4.0f;
+            final float u0 = (dec.img % 4 + 0) / 4.0f;
+            final float v0 = (dec.img / 4 + 0) / 4.0f;
+            final float u1 = (dec.img % 4 + 1) / 4.0f;
+            final float v1 = (dec.img / 4 + 1) / 4.0f;
 
             t.begin();
             t.vertexUV(-1.0, 1.0, 0.0, u0, v0);

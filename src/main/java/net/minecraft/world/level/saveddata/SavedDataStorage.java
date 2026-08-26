@@ -4,18 +4,16 @@
 
 package net.minecraft.world.level.saveddata;
 
-import java.io.DataOutput;
 import java.io.DataOutputStream;
-import java.util.Iterator;
+
 import com.mojang.nbt.ShortTag;
 import com.mojang.nbt.Tag;
-import java.io.DataInput;
+
 import java.io.DataInputStream;
-import java.io.OutputStream;
 import java.io.FileOutputStream;
 import com.mojang.nbt.CompoundTag;
 import java.io.File;
-import java.io.InputStream;
+
 import com.mojang.nbt.NbtIo;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -27,56 +25,55 @@ import net.minecraft.world.level.storage.LevelStorage;
 public class SavedDataStorage
 {
     private LevelStorage levelStorage;
-    private Map<String, SavedData> cache;
-    private List<SavedData> savedDatas;
-    private Map<String, Short> usedAuxIds;
+    private Map<String, SavedData> cache = new HashMap<>();
+    private List<SavedData> savedDatas = new ArrayList<>();
+    private Map<String, Short> usedAuxIds = new HashMap<>();
     
     public SavedDataStorage(final LevelStorage levelStorage) {
-        this.cache = new HashMap<>();
-        this.savedDatas = new ArrayList<>();
-        this.usedAuxIds = new HashMap<>();
         this.levelStorage = levelStorage;
         this.loadAuxValues();
     }
     
     public SavedData get(final Class<? extends SavedData> clazz, final String id) {
-        SavedData savedData = this.cache.get(id);
-        if (savedData != null) {
-            return savedData;
-        }
+        SavedData data = this.cache.get(id);
+        if (data != null) return data;
+
         if (this.levelStorage != null) {
             try {
-                final File dataFile = this.levelStorage.getDataFile(id);
-                if (dataFile != null && dataFile.exists()) {
+                final File file = this.levelStorage.getDataFile(id);
+                if (file != null && file.exists()) {
                     try {
-                        savedData = clazz.getConstructor(String.class).newInstance(id);
+                        data = clazz.getConstructor(String.class).newInstance(id);
                     }
-                    catch (final Exception cause) {
-                        throw new RuntimeException("Failed to instantiate " + clazz.toString(), cause);
+                    catch (final Exception e) {
+                        throw new RuntimeException("Failed to instantiate " + clazz.toString(), e);
                     }
-                    final FileInputStream in = new FileInputStream(dataFile);
-                    final CompoundTag compressed = NbtIo.readCompressed(in);
-                    in.close();
-                    savedData.load(compressed.getCompound("data"));
+
+                    final FileInputStream fis = new FileInputStream(file);
+                    final CompoundTag root = NbtIo.readCompressed(fis);
+                    fis.close();
+
+                    data.load(root.getCompound("data"));
                 }
             }
-            catch (final Exception ex) {
-                ex.printStackTrace();
+            catch (final Exception e) {
+                e.printStackTrace();
             }
         }
-        if (savedData != null) {
-            this.cache.put(id, savedData);
-            this.savedDatas.add(savedData);
+
+        if (data != null) {
+            this.cache.put(id, data);
+            this.savedDatas.add(data);
         }
-        return savedData;
+        return data;
     }
     
     public void set(final String id, final SavedData data) {
-        if (data == null) {
-            throw new RuntimeException("Can't set null data");
-        }
+        if (data == null) throw new RuntimeException("Can't set null data");
+
         if (this.cache.containsKey(id)) {
             this.savedDatas.remove(this.cache.remove(id));
+
         }
         this.cache.put(id, data);
         this.savedDatas.add(data);
@@ -93,78 +90,79 @@ public class SavedDataStorage
     }
     
     private void save(final SavedData data) {
-        if (this.levelStorage == null) {
-            return;
-        }
+        if (this.levelStorage == null) return;
+
         try {
-            final File dataFile = this.levelStorage.getDataFile(data.id);
-            if (dataFile != null) {
-                final CompoundTag compoundTag = new CompoundTag();
-                data.save(compoundTag);
+            final File file = this.levelStorage.getDataFile(data.id);
+            if (file != null) {
+                final CompoundTag dataTag = new CompoundTag();
+                data.save(dataTag);
+
                 final CompoundTag tag = new CompoundTag();
-                tag.putCompound("data", compoundTag);
-                final FileOutputStream out = new FileOutputStream(dataFile);
-                NbtIo.writeCompressed(tag, out);
-                out.close();
+                tag.putCompound("data", dataTag);
+
+                final FileOutputStream fos = new FileOutputStream(file);
+                NbtIo.writeCompressed(tag, fos);
+                fos.close();
             }
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
     }
     
     private void loadAuxValues() {
         try {
             this.usedAuxIds.clear();
-            if (this.levelStorage == null) {
-                return;
-            }
-            final File dataFile = this.levelStorage.getDataFile("idcounts");
-            if (dataFile != null && dataFile.exists()) {
-                final DataInputStream dis = new DataInputStream(new FileInputStream(dataFile));
-                final CompoundTag read = NbtIo.read(dis);
+
+            if (this.levelStorage == null) return;
+            final File file = this.levelStorage.getDataFile("idcounts");
+            if (file != null && file.exists()) {
+                FileInputStream fis = new FileInputStream(file);
+                final DataInputStream dis = new DataInputStream(fis);
+                final CompoundTag tags = NbtIo.read(dis);
                 dis.close();
-                for (final Tag tag : read.getAllTags()) {
+
+                for (final Tag tag : tags.getAllTags()) {
                     if (tag instanceof ShortTag) {
-                        final ShortTag shortTag = (ShortTag)tag;
-                        this.usedAuxIds.put(shortTag.getName(), shortTag.data);
+                        final ShortTag sTag = (ShortTag)tag;
+                        this.usedAuxIds.put(sTag.getName(), sTag.data);
                     }
                 }
             }
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
     }
     
     public int getFreeAuxValueFor(final String id) {
-        final Short n = this.usedAuxIds.get(id);
-        Short n2;
-        if (n == null) {
-            n2 = 0;
-        }
-        else {
-            n2 = (short)(n + 1);
-        }
-        this.usedAuxIds.put(id, n2);
-        if (this.levelStorage == null) {
-            return n2;
-        }
+        Short val = this.usedAuxIds.get(id);
+        if (val == null) val = 0;
+        else val++;
+
+        this.usedAuxIds.put(id, val);
+        if (this.levelStorage == null) return val;
+
         try {
-            final File dataFile = this.levelStorage.getDataFile("idcounts");
-            if (dataFile != null) {
+            final File file = this.levelStorage.getDataFile("idcounts");
+            if (file != null) {
                 final CompoundTag tag = new CompoundTag();
+
                 for (final String name : this.usedAuxIds.keySet()) {
-                    tag.putShort(name, (short)this.usedAuxIds.get(name));
+                    short value = this.usedAuxIds.get(name);
+                    tag.putShort(name, value);
                 }
-                final DataOutputStream dos = new DataOutputStream(new FileOutputStream(dataFile));
+
+                FileOutputStream fos = new FileOutputStream(file);
+                final DataOutputStream dos = new DataOutputStream(fos);
                 NbtIo.write(tag, dos);
                 dos.close();
             }
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
-        return n2;
+        return val;
     }
 }

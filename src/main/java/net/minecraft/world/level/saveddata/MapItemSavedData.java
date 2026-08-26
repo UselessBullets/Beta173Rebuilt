@@ -7,6 +7,7 @@ package net.minecraft.world.level.saveddata;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.entity.player.Player;
 import com.mojang.nbt.CompoundTag;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
@@ -16,100 +17,96 @@ import java.util.List;
 
 public class MapItemSavedData extends SavedData
 {
-    public int x;
-    public int z;
+    public static final int MAP_SIZE = 64;
+    public static final int MAX_SCALE = 4;
+
+    public int x, z;
     public byte dimension;
     public byte scale;
-    public byte[] colors;
+    public byte[] colors = new byte[MapItem.IMAGE_WIDTH * MapItem.IMAGE_HEIGHT];
     public int step;
-    public List<HoldingPlayer> carriedBy;
-    private Map<Player, HoldingPlayer> carriedByPlayers;
-    public List<MapDecoration> decorations;
+    public List<HoldingPlayer> carriedBy = new ArrayList<>();
+    private Map<Player, HoldingPlayer> carriedByPlayers = new HashMap<>();
+    public List<MapDecoration> decorations = new ArrayList<>();
     
     public MapItemSavedData(final String id) {
         super(id);
-        this.colors = new byte[16384];
-        this.carriedBy = new ArrayList<>();
-        this.carriedByPlayers = new HashMap<>();
-        this.decorations = new ArrayList<>();
     }
     
     @Override
-    public void load(final CompoundTag compoundTag) {
-        this.dimension = compoundTag.getByte("dimension");
-        this.x = compoundTag.getInt("xCenter");
-        this.z = compoundTag.getInt("zCenter");
-        this.scale = compoundTag.getByte("scale");
-        if (this.scale < 0) {
-            this.scale = 0;
-        }
-        if (this.scale > 4) {
-            this.scale = 4;
-        }
-        final short short1 = compoundTag.getShort("width");
-        final short short2 = compoundTag.getShort("height");
-        if (short1 == 128 && short2 == 128) {
-            this.colors = compoundTag.getByteArray("colors");
+    public void load(final CompoundTag tag) {
+        this.dimension = tag.getByte("dimension");
+        this.x = tag.getInt("xCenter");
+        this.z = tag.getInt("zCenter");
+        this.scale = tag.getByte("scale");
+        if (this.scale < 0) this.scale = 0;
+        if (this.scale > MAX_SCALE) this.scale = MAX_SCALE;
+
+        final short width = tag.getShort("width");
+        final short height = tag.getShort("height");
+        if (width == MapItem.IMAGE_WIDTH && height == MapItem.IMAGE_HEIGHT) {
+            this.colors = tag.getByteArray("colors");
         }
         else {
-            final byte[] byteArray = compoundTag.getByteArray("colors");
-            this.colors = new byte[16384];
-            final int n = (128 - short1) / 2;
-            final int n2 = (128 - short2) / 2;
-            for (short n3 = 0; n3 < short2; ++n3) {
-                final int n4 = n3 + n2;
-                if (n4 >= 0 || n4 < 128) {
-                    for (short n5 = 0; n5 < short1; ++n5) {
-                        final int n6 = n5 + n;
-                        if (n6 >= 0 || n6 < 128) {
-                            this.colors[n6 + n4 * 128] = byteArray[n5 + n3 * short1];
-                        }
-                    }
+            final byte[] newColors = tag.getByteArray("colors");
+            this.colors = new byte[MapItem.IMAGE_WIDTH * MapItem.IMAGE_HEIGHT];
+            final int xo = (MapItem.IMAGE_WIDTH - width) / 2;
+            final int yo = (MapItem.IMAGE_HEIGHT - height) / 2;
+            for (short y = 0; y < height; ++y) {
+                final int yt = y + yo;
+
+                if (yt < 0 && yt >= MapItem.IMAGE_HEIGHT) continue;
+                for (short x = 0; x < width; ++x) {
+                    final int xt = x + xo;
+
+                    if (xt < 0 && xt >= MapItem.IMAGE_WIDTH) continue;
+                    this.colors[xt + yt * MapItem.IMAGE_WIDTH] = newColors[x + y * width];
                 }
             }
         }
     }
     
     @Override
-    public void save(final CompoundTag compoundTag) {
-        compoundTag.putByte("dimension", this.dimension);
-        compoundTag.putInt("xCenter", this.x);
-        compoundTag.putInt("zCenter", this.z);
-        compoundTag.putByte("scale", this.scale);
-        compoundTag.putShort("width", (short)128);
-        compoundTag.putShort("height", (short)128);
-        compoundTag.putByteArray("colors", this.colors);
+    public void save(final CompoundTag tag) {
+        tag.putByte("dimension", this.dimension);
+        tag.putInt("xCenter", this.x);
+        tag.putInt("zCenter", this.z);
+        tag.putByte("scale", this.scale);
+        tag.putShort("width", (short)MapItem.IMAGE_WIDTH);
+        tag.putShort("height", (short)MapItem.IMAGE_HEIGHT);
+        tag.putByteArray("colors", this.colors);
     }
     
     public void tickCarriedBy(final Player player, final ItemInstance item) {
         if (!this.carriedByPlayers.containsKey(player)) {
-            final HoldingPlayer mapItemSavedData_HoldingPlayer = new HoldingPlayer(this, player);
-            this.carriedByPlayers.put(player, mapItemSavedData_HoldingPlayer);
-            this.carriedBy.add(mapItemSavedData_HoldingPlayer);
+            final HoldingPlayer hp = new HoldingPlayer(player);
+            this.carriedByPlayers.put(player, hp);
+            this.carriedBy.add(hp);
         }
+
         this.decorations.clear();
         for (int i = 0; i < this.carriedBy.size(); ++i) {
-            final HoldingPlayer mapItemSavedData_HoldingPlayer2 = this.carriedBy.get(i);
-            if (mapItemSavedData_HoldingPlayer2.player.removed || !mapItemSavedData_HoldingPlayer2.player.inventory.contains(item)) {
-                this.carriedByPlayers.remove(mapItemSavedData_HoldingPlayer2.player);
-                this.carriedBy.remove(mapItemSavedData_HoldingPlayer2);
+            final HoldingPlayer hp = this.carriedBy.get(i);
+            if (hp.player.removed || !hp.player.inventory.contains(item)) {
+                this.carriedByPlayers.remove(hp.player);
+                this.carriedBy.remove(hp);
             }
             else {
-                final float n = (float)(mapItemSavedData_HoldingPlayer2.player.x - this.x) / (1 << this.scale);
-                final float n2 = (float)(mapItemSavedData_HoldingPlayer2.player.z - this.z) / (1 << this.scale);
-                final int n3 = 64;
-                final int n4 = 64;
-                if (n >= -n3 && n2 >= -n4 && n <= n3 && n2 <= n4) {
+                final float xd = (float)(hp.player.x - this.x) / (1 << this.scale);
+                final float yd = (float)(hp.player.z - this.z) / (1 << this.scale);
+                final int ww = MAP_SIZE;
+                final int hh = MAP_SIZE;
+                if (xd >= -ww && yd >= -hh && xd <= ww && yd <= hh) {
                     final byte img = 0;
-                    final byte x = (byte)(n * 2.0f + 0.5);
-                    final byte y = (byte)(n2 * 2.0f + 0.5);
+                    final byte x = (byte)(xd * 2.0f + 0.5);
+                    final byte y = (byte)(yd * 2.0f + 0.5);
                     byte rot = (byte)(player.yRot * 16.0f / 360.0f + 0.5);
                     if (this.dimension < 0) {
-                        final int n5 = this.step / 10;
-                        rot = (byte)(n5 * n5 * 34187121 + n5 * 121 >> 15 & 0xF);
+                        final int s = this.step / 10;
+                        rot = (byte)(s * s * 34187121 + s * 121 >> 15 & 0xF);
                     }
-                    if (mapItemSavedData_HoldingPlayer2.player.dimension == this.dimension) {
-                        this.decorations.add(new MapDecoration(this, img, x, y, rot));
+                    if (hp.player.dimension == this.dimension) {
+                        this.decorations.add(new MapDecoration(img, x, y, rot));
                     }
                 }
             }
@@ -117,80 +114,68 @@ public class MapItemSavedData extends SavedData
     }
 
     public byte[] getUpdatePacket(final ItemInstance itemInstance, final Level level, final Player player) {
-        final HoldingPlayer holdingPlayer = this.carriedByPlayers.get(player);
-        if (holdingPlayer == null) {
-            return null;
-        }
-        return holdingPlayer.nextUpdatePacket(itemInstance);
+        final HoldingPlayer hp = this.carriedByPlayers.get(player);
+        if (hp == null) return null;
+
+        return hp.nextUpdatePacket(itemInstance);
     }
     
     public void setDirty(final int x, final int y0, final int y1) {
         super.setDirty();
         for (int i = 0; i < this.carriedBy.size(); ++i) {
-            final HoldingPlayer mapItemSavedData_HoldingPlayer = this.carriedBy.get(i);
-            if (mapItemSavedData_HoldingPlayer.rowsDirtyMin[x] < 0 || mapItemSavedData_HoldingPlayer.rowsDirtyMin[x] > y0) {
-                mapItemSavedData_HoldingPlayer.rowsDirtyMin[x] = y0;
-            }
-            if (mapItemSavedData_HoldingPlayer.rowsDirtyMax[x] < 0 || mapItemSavedData_HoldingPlayer.rowsDirtyMax[x] < y1) {
-                mapItemSavedData_HoldingPlayer.rowsDirtyMax[x] = y1;
-            }
+            final HoldingPlayer hp = this.carriedBy.get(i);
+            if (hp.rowsDirtyMin[x] < 0 || hp.rowsDirtyMin[x] > y0) hp.rowsDirtyMin[x] = y0;
+            if (hp.rowsDirtyMax[x] < 0 || hp.rowsDirtyMax[x] < y1) hp.rowsDirtyMax[x] = y1;
         }
     }
     
     public void handleComplexItemData(final byte[] data) {
         if (data[0] == 0) {
-            final int n = data[1] & 0xFF;
-            final int n2 = data[2] & 0xFF;
+            final int xx = data[1] & 0xFF;
+            final int yy = data[2] & 0xFF;
             for (int i = 0; i < data.length - 3; ++i) {
-                this.colors[(i + n2) * 128 + n] = data[i + 3];
+                this.colors[(i + yy) * MapItem.IMAGE_WIDTH + xx] = data[i + 3];
             }
             this.setDirty();
         }
         else if (data[0] == 1) {
             this.decorations.clear();
-            for (int j = 0; j < (data.length - 1) / 3; ++j) {
-                this.decorations.add(new MapDecoration(this, (byte)(data[j * 3 + 1] % 16), data[j * 3 + 2], data[j * 3 + 3], (byte)(data[j * 3 + 1] / 16)));
+            for (int i = 0; i < (data.length - 1) / 3; ++i) {
+                byte img = (byte) (data[i * 3 + 1] % 16);
+                byte x = data[i * 3 + 2];
+                byte y = data[i * 3 + 3];
+                byte rot = (byte) (data[i * 3 + 1] / 16);
+                this.decorations.add(new MapDecoration(img, x, y, rot));
             }
         }
     }
 
-    public static class MapDecoration
+    public class MapDecoration
     {
-        public byte imgIndex;
-        public byte x;
-        public byte y;
-        public byte rot;
-        final /* synthetic */ MapItemSavedData data;
+        public byte img, x, y, rot;
 
-        public MapDecoration(final MapItemSavedData data, final byte img, final byte x, final byte y, final byte rot) {
-            this.data = data;
-            this.imgIndex = img;
+        public MapDecoration(final byte img, final byte x, final byte y, final byte rot) {
+            this.img = img;
             this.x = x;
             this.y = y;
             this.rot = rot;
         }
     }
 
-    public static class HoldingPlayer
+    public class HoldingPlayer
     {
         public final Player player;
-        public int[] rowsDirtyMin;
-        public int[] rowsDirtyMax;
-        private int tick;
-        private int sendPosTick;
+        public int[] rowsDirtyMin = new int[MapItem.IMAGE_WIDTH];
+        public int[] rowsDirtyMax = new int[MapItem.IMAGE_WIDTH];
+        private int tick = 0;
+        private int sendPosTick = 0;
         private byte[] lastSentDecorations;
-        final /* synthetic */ MapItemSavedData data;
 
-        public HoldingPlayer(final MapItemSavedData data, final Player player) {
-            this.data = data;
-            this.rowsDirtyMin = new int[128];
-            this.rowsDirtyMax = new int[128];
-            this.tick = 0;
-            this.sendPosTick = 0;
+        public HoldingPlayer(final Player player) {
             this.player = player;
             for (int i = 0; i < this.rowsDirtyMin.length; ++i) {
                 this.rowsDirtyMin[i] = 0;
-                this.rowsDirtyMax[i] = 127;
+                this.rowsDirtyMax[i] = MapItem.IMAGE_HEIGHT - 1;
             }
         }
 
@@ -199,46 +184,51 @@ public class MapItemSavedData extends SavedData
             this.sendPosTick = sendPosTick;
             if (sendPosTick < 0) {
                 this.sendPosTick = 4;
-                final byte[] lastSentDecorations = new byte[this.data.decorations.size() * 3 + 1];
-                lastSentDecorations[0] = 1;
-                for (int i = 0; i < this.data.decorations.size(); ++i) {
-                    final MapDecoration decoration = this.data.decorations.get(i);
-                    lastSentDecorations[i * 3 + 1] = (byte)(decoration.imgIndex + (decoration.rot & 0xF) * 16);
-                    lastSentDecorations[i * 3 + 2] = decoration.x;
-                    lastSentDecorations[i * 3 + 3] = decoration.y;
+                int playerDecorationSize = MapItemSavedData.this.decorations.size();
+                final byte[] data = new byte[playerDecorationSize * 3 + 1];
+                data[0] = 1;
+                for (int i = 0; i < MapItemSavedData.this.decorations.size(); ++i) {
+                    final MapDecoration md = MapItemSavedData.this.decorations.get(i);
+                    data[i * 3 + 1] = (byte) (md.img | ((md.rot & 0xF) << 4));
+                    data[i * 3 + 2] = md.x;
+                    data[i * 3 + 3] = md.y;
                 }
-                boolean b = true;
-                if (this.lastSentDecorations == null || this.lastSentDecorations.length != lastSentDecorations.length) {
-                    b = false;
+
+                boolean thesame = true;
+                if (this.lastSentDecorations == null || this.lastSentDecorations.length != data.length) {
+                    thesame = false;
                 }
                 else {
-                    for (int j = 0; j < lastSentDecorations.length; ++j) {
-                        if (lastSentDecorations[j] != this.lastSentDecorations[j]) {
-                            b = false;
+                    for (int i = 0; i < data.length; ++i) {
+                        if (data[i] != this.lastSentDecorations[i]) {
+                            thesame = false;
                             break;
                         }
                     }
                 }
-                if (!b) {
-                    return this.lastSentDecorations = lastSentDecorations;
+                if (!thesame) {
+                    return this.lastSentDecorations = data;
                 }
             }
-            for (int k = 0; k < 10; ++k) {
-                final int n = this.tick * 11 % 128;
-                ++this.tick;
-                if (this.rowsDirtyMin[n] >= 0) {
-                    final int n2 = this.rowsDirtyMax[n] - this.rowsDirtyMin[n] + 1;
-                    final int n3 = this.rowsDirtyMin[n];
-                    final byte[] array = new byte[n2 + 3];
-                    array[0] = 0;
-                    array[1] = (byte)n;
-                    array[2] = (byte)n3;
-                    for (int l = 0; l < array.length - 3; ++l) {
-                        array[l + 3] = this.data.colors[(l + n3) * 128 + n];
+
+            for (int d = 0; d < 10; ++d) {
+                final int column = this.tick * 11 % MapItem.IMAGE_WIDTH;
+                this.tick++;
+
+                if (this.rowsDirtyMin[column] >= 0) {
+                    final int len = this.rowsDirtyMax[column] - this.rowsDirtyMin[column] + 1;
+                    final int min = this.rowsDirtyMin[column];
+
+                    final byte[] data = new byte[len + 3];
+                    data[0] = 0;
+                    data[1] = (byte)column;
+                    data[2] = (byte)min;
+                    for (int y = 0; y < data.length - 3; ++y) {
+                        data[y + 3] = MapItemSavedData.this.colors[(y + min) * MapItem.IMAGE_HEIGHT + column];
                     }
-                    this.rowsDirtyMax[n] = -1;
-                    this.rowsDirtyMin[n] = -1;
-                    return array;
+                    this.rowsDirtyMax[column] = -1;
+                    this.rowsDirtyMin[column] = -1;
+                    return data;
                 }
             }
             return null;

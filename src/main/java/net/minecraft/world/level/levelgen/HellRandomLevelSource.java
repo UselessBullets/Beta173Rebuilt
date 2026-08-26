@@ -59,12 +59,12 @@ public class HellRandomLevelSource implements ChunkSource
         final int waterHeight = 32;
 
         final int xSize = xChunks + 1;
-        final int ySize = Level.MAX_BUILD_HEIGHT / CHUNK_HEIGHT + 1;
+        final int ySize = Level.MAX_HEIGHT / CHUNK_HEIGHT + 1;
         final int zSize = xChunks + 1;
         this.buffer = this.getHeights(this.buffer, xOffs * xChunks, 0, zOffs * xChunks, xSize, ySize, zSize);
         for (int xc = 0; xc < xChunks; ++xc) {
             for (int zc = 0; zc < xChunks; ++zc) {
-                for (int yc = 0; yc < Level.MAX_BUILD_HEIGHT / CHUNK_HEIGHT; ++yc) {
+                for (int yc = 0; yc < Level.MAX_HEIGHT / CHUNK_HEIGHT; ++yc) {
                     final double yStep = 1 / (double) CHUNK_HEIGHT;
                     double s0 = this.buffer[((xc + 0) * zSize + (zc + 0)) * ySize + (yc + 0)];
                     double s1 = this.buffer[((xc + 0) * zSize + (zc + 1)) * ySize + (yc + 0)];
@@ -85,7 +85,7 @@ public class HellRandomLevelSource implements ChunkSource
 
                         for (int x = 0; x < CHUNK_WIDTH; ++x) {
                             int offs = x + xc * CHUNK_WIDTH << 11 | 0 + zc * CHUNK_WIDTH << 7 | yc * CHUNK_HEIGHT + y;
-                            final int step = Level.MAX_BUILD_HEIGHT;
+                            final int step = Level.MAX_HEIGHT;
                             final double zStep = 1 / (double) CHUNK_WIDTH;
 
                             double val = _s0;
@@ -118,7 +118,7 @@ public class HellRandomLevelSource implements ChunkSource
     }
     
     public void buildSurfaces(final int xOffs, final int zOffs, final byte[] blocks) {
-        final int waterHeight = Level.MAX_BUILD_HEIGHT - 64;
+        final int waterHeight = Level.MAX_HEIGHT - 64;
 
         final double s = 1 / 32.0;
 
@@ -137,10 +137,10 @@ public class HellRandomLevelSource implements ChunkSource
                 byte top = (byte)Tile.hellRock.id;
                 byte material = (byte)Tile.hellRock.id;
 
-                for (int y = Level.MAX_BUILD_HEIGHT - 1; y >= 0; --y) {
-                    final int offs = (z * 16 + x) * Level.MAX_BUILD_HEIGHT + y;
+                for (int y = Level.MAX_HEIGHT - 1; y >= 0; --y) {
+                    final int offs = (z * 16 + x) * Level.MAX_HEIGHT + y;
 
-                    if (y >= (Level.MAX_BUILD_HEIGHT - 1) - this.random.nextInt(5)) {
+                    if (y >= (Level.MAX_HEIGHT - 1) - this.random.nextInt(5)) {
                         blocks[offs] = (byte)Tile.unbreakable.id;
                     }
                     else if (y <= 0 + this.random.nextInt(5)) {
@@ -190,7 +190,7 @@ public class HellRandomLevelSource implements ChunkSource
     public LevelChunk getChunk(final int x, final int z) {
         this.random.setSeed(x * 341873128712L + z * 132897987541L);
 
-        final byte[] blocks = new byte[Level.MAX_BUILD_HEIGHT * 16 * 16];
+        final byte[] blocks = new byte[Level.MAX_HEIGHT * 16 * 16];
 
         this.prepareHeights(x, z, blocks);
         this.buildSurfaces(x, z, blocks);
@@ -300,7 +300,7 @@ public class HellRandomLevelSource implements ChunkSource
 
         for (int i = 0; i < 8; ++i) {
             int x = xo + this.random.nextInt(16) + 8;
-            int y = this.random.nextInt(Level.MAX_BUILD_HEIGHT - 8) + 4;
+            int y = this.random.nextInt(Level.MAX_HEIGHT - 8) + 4;
             int z = zo + this.random.nextInt(16) + 8;
             new HellSpringFeature(Tile.lava.id).place(this.level, this.random, x, y, z);
         }
@@ -309,7 +309,7 @@ public class HellRandomLevelSource implements ChunkSource
 
         for (int i = 0; i < count; ++i) {
             int x = xo + this.random.nextInt(16) + 8;
-            int y = this.random.nextInt(Level.MAX_BUILD_HEIGHT - 8) + 4;
+            int y = this.random.nextInt(Level.MAX_HEIGHT - 8) + 4;
             int z = zo + this.random.nextInt(16) + 8;
             new HellFireFeature().place(this.level, this.random, x, y, z);
         }
@@ -317,27 +317,27 @@ public class HellRandomLevelSource implements ChunkSource
         count = this.random.nextInt(this.random.nextInt(10) + 1);
         for (int i = 0; i < count; ++i) {
             int x = xo + this.random.nextInt(16) + 8;
-            int y = this.random.nextInt(Level.MAX_BUILD_HEIGHT - 8) + 4;
+            int y = this.random.nextInt(Level.MAX_HEIGHT - 8) + 4;
             int z = zo + this.random.nextInt(16) + 8;
             new HellPortalFeature().place(this.level, this.random, x, y, z);
         }
 
         for (int i = 0; i < 10; ++i) {
             int x = xo + this.random.nextInt(16) + 8;
-            int y = this.random.nextInt(Level.MAX_BUILD_HEIGHT);
+            int y = this.random.nextInt(Level.MAX_HEIGHT);
             int z = zo + this.random.nextInt(16) + 8;
             new LightGemFeature().place(this.level, this.random, x, y, z);
         }
 
         if (this.random.nextInt(1) == 0) {
             int x = xo + this.random.nextInt(16) + 8;
-            int y = this.random.nextInt(Level.MAX_BUILD_HEIGHT);
+            int y = this.random.nextInt(Level.MAX_HEIGHT);
             int z = zo + this.random.nextInt(16) + 8;
             new FlowerFeature(Tile.mushroom1.id).place(this.level, this.random, x, y, z);
         }
         if (this.random.nextInt(1) == 0) {
             int x = xo + this.random.nextInt(16) + 8;
-            int y = this.random.nextInt(Level.MAX_BUILD_HEIGHT);
+            int y = this.random.nextInt(Level.MAX_HEIGHT);
             int z = zo + this.random.nextInt(16) + 8;
             new FlowerFeature(Tile.mushroom2.id).place(this.level, this.random, x, y, z);
         }

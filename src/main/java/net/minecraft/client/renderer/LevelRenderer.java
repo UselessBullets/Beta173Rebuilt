@@ -237,7 +237,7 @@ public class LevelRenderer implements LevelListener
         int dist = 64 << 3 - this.lastViewDistance;
         if (dist > 400) dist = 400;
         this.xChunks = dist / CHUNK_SIZE + 1;
-        this.yChunks = Level.MAX_BUILD_HEIGHT / CHUNK_SIZE;
+        this.yChunks = Level.MAX_HEIGHT / CHUNK_SIZE;
         this.zChunks = dist / CHUNK_SIZE + 1;
 
         this.chunks = new Chunk[this.xChunks * this.yChunks * this.zChunks];

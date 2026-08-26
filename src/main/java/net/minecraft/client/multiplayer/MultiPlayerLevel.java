@@ -107,7 +107,7 @@ public class MultiPlayerLevel extends Level
             this.chunkCache.drop(x, z);
         }
         if (!visible) {
-            this.setTilesDirty(x * 16, 0, z * 16, x * 16 + 15, Level.MAX_BUILD_HEIGHT, z * 16 + 15);
+            this.setTilesDirty(x * 16, 0, z * 16, x * 16 + 15, Level.MAX_HEIGHT, z * 16 + 15);
         }
     }
     

@@ -22,7 +22,7 @@ public class PineFeature extends Feature
 
         boolean free = true;
         // may not be outside of y boundaries
-        if (y < 1 || y + treeHeight + 1 > Level.MAX_BUILD_HEIGHT) {
+        if (y < 1 || y + treeHeight + 1 > Level.MAX_HEIGHT) {
             return false;
         }
 
@@ -37,7 +37,7 @@ public class PineFeature extends Feature
             }
             for (int xx = x - r; xx <= x + r && free; ++xx) {
                 for (int zz = z - r; zz <= z + r && free; ++zz) {
-                    if (yy >= 0 && yy < Level.MAX_BUILD_HEIGHT) {
+                    if (yy >= 0 && yy < Level.MAX_HEIGHT) {
                         final int tt = level.getTile(xx, yy, zz);
                         if (tt != 0 && tt != Tile.leaves.id) free = false;
                     }
@@ -52,7 +52,7 @@ public class PineFeature extends Feature
 
         // must stand on ground
         final int belowTile = level.getTile(x, y - 1, z);
-        if ((belowTile != Tile.grass.id && belowTile != Tile.dirt.id) || y >= Level.MAX_BUILD_HEIGHT - treeHeight - 1) return false;
+        if ((belowTile != Tile.grass.id && belowTile != Tile.dirt.id) || y >= Level.MAX_HEIGHT - treeHeight - 1) return false;
 
         level.setTileNoUpdate(x, y - 1, z, Tile.dirt.id);
 

@@ -15,7 +15,7 @@ public class TreeFeature extends Feature
         final int treeHeight = random.nextInt(3) + 4;
 
         boolean free = true;
-        if (y < 1 || y + treeHeight + 1 > Level.MAX_BUILD_HEIGHT) return false;
+        if (y < 1 || y + treeHeight + 1 > Level.MAX_HEIGHT) return false;
 
         for (int yy = y; yy <= y + 1 + treeHeight; ++yy) {
             int r = 1;
@@ -24,7 +24,7 @@ public class TreeFeature extends Feature
 
             for (int xx = x - r; xx <= x + r && free; ++xx) {
                 for (int zz = z - r; zz <= z + r && free; ++zz) {
-                    if (yy >= 0 && yy < Level.MAX_BUILD_HEIGHT) {
+                    if (yy >= 0 && yy < Level.MAX_HEIGHT) {
                         final int tt = level.getTile(xx, yy, zz);
                         if (tt != 0 && tt != Tile.leaves.id) free = false;
                     }
@@ -38,7 +38,7 @@ public class TreeFeature extends Feature
         if (!free) return false;
 
         final int belowTile = level.getTile(x, y - 1, z);
-        if ((belowTile != Tile.grass.id && belowTile != Tile.dirt.id) || y >= Level.MAX_BUILD_HEIGHT - treeHeight - 1) return false;
+        if ((belowTile != Tile.grass.id && belowTile != Tile.dirt.id) || y >= Level.MAX_HEIGHT - treeHeight - 1) return false;
 
         level.setTileNoUpdate(x, y - 1, z, Tile.dirt.id);
 

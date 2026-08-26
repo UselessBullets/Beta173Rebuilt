@@ -8,7 +8,6 @@ import java.util.Random;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.world.phys.AABB;
-import java.util.Iterator;
 
 import net.minecraft.world.level.tile.EntityTile;
 import net.minecraft.world.level.TilePos;
@@ -26,7 +25,7 @@ import net.minecraft.world.level.Level;
 public class LevelChunk
 {
     // Useless - LCE has a note that this used to be static until 1.8.2, so was presumably just static here like so
-    private static final int ENTITY_BLOCKS_LENGTH = Level.MAX_BUILD_HEIGHT / 16;
+    private static final int ENTITY_BLOCKS_LENGTH = Level.MAX_HEIGHT / 16;
     public static boolean touchedSky;
     public byte[] blocks;
     public boolean loaded;
@@ -76,10 +75,10 @@ public class LevelChunk
     }
     
     public void recalcHeightmapOnly() {
-        int min = Level.MAX_BUILD_HEIGHT - 1;
+        int min = Level.MAX_HEIGHT - 1;
         for (int x = 0; x < 16; ++x) {
             for (int z = 0; z < 16; ++z) {
-                int y = Level.MAX_BUILD_HEIGHT - 1;
+                int y = Level.MAX_HEIGHT - 1;
 
                 int p = x << 11 | z << 7;
                 while (y > 0 && Tile.lightBlock[this.blocks[p + y - 1] & 0xFF] == 0) {
@@ -95,10 +94,10 @@ public class LevelChunk
     }
     
     public void recalcHeightmap() {
-        int min = Level.MAX_BUILD_HEIGHT - 1;
+        int min = Level.MAX_HEIGHT - 1;
         for (int x = 0; x < 16; ++x) {
             for (int z = 0; z < 16; ++z) {
-                int y = Level.MAX_BUILD_HEIGHT - 1;
+                int y = Level.MAX_HEIGHT - 1;
 
                 int p = (x << 11 | z << 7);
                 while (y > 0 && Tile.lightBlock[this.blocks[p + y - 1] & 0xFF] == 0) {
@@ -109,7 +108,7 @@ public class LevelChunk
 
                 if (!this.level.dimension.hasCeiling) {
                     int br = Level.MAX_BRIGHTNESS;
-                    int yy = Level.MAX_BUILD_HEIGHT - 1;
+                    int yy = Level.MAX_HEIGHT - 1;
                     do {
                         br -= Tile.lightBlock[this.blocks[p + yy] & 0xFF];
                         if (br > 0) {
@@ -211,7 +210,7 @@ public class LevelChunk
             this.minHeight = y;
         }
         else {
-            int min = Level.MAX_BUILD_HEIGHT - 1;
+            int min = Level.MAX_HEIGHT - 1;
             for (int _x = 0; _x < 16; ++_x) {
                 for (int _z = 0; _z < 16; ++_z) {
                     if ((this.heightmap[_z << 4 | _x] & 0xFF) < min) min = (this.heightmap[_z << 4 | _x] & 0xFF);
@@ -415,7 +414,7 @@ public class LevelChunk
         int y0 = this.minHeight - 16;
         int z0 = this.z * 16;
         int x1 = this.x * 16 + 16;
-        int y1 = Level.MAX_BUILD_HEIGHT - 1;
+        int y1 = Level.MAX_HEIGHT - 1;
         int z1 = this.z * 16 + 16;
 
         this.level.setTilesDirty(x0, y0, z0, x1, y1, z1);

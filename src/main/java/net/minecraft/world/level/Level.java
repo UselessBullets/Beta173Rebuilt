@@ -45,11 +45,11 @@ public class Level implements LevelSource
 {
     public static final int MAX_TICK_TILES_PER_TICK = 1000;
     public static final int MAX_LEVEL_SIZE = 32000000;
-    public static final short MIN_BUILD_HEIGHT = 0;
-    public static final short MAX_BUILD_HEIGHT = 128;
+    public static final short MIN_HEIGHT = 0;
+    public static final short MAX_HEIGHT = 128;
     public static final short SEA_LEVEL = 63;
 
-    public static final int CHUNK_TILE_COUNT = MAX_BUILD_HEIGHT * 16 * 16;   // Useless - In LCE leak and are convient
+    public static final int CHUNK_TILE_COUNT = MAX_HEIGHT * 16 * 16;   // Useless - In LCE leak and are convient
 
     public boolean instaTick;
     public static final int MAX_BRIGHTNESS = 15;

@@ -210,10 +210,10 @@ public class Pos implements Comparable<Pos> {
     }
 
     public double dist(final int x, final int y, final int z) {
-        final int n = this.x - x;
-        final int n2 = this.y - y;
-        final int n3 = this.z - z;
-        return Math.sqrt(n * n + n2 * n2 + n3 * n3);
+        final int dx = this.x - x;
+        final int dy = this.y - y;
+        final int dz = this.z - z;
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
 

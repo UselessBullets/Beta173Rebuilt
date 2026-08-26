@@ -55,7 +55,7 @@ public class CreateWorldScreen extends Screen
             this.resultFolder = this.resultFolder.replace(SharedConstants.ILLEGAL_FILE_CHARACTERS[i], '_');
         }
 
-        if (Mth.isNullOrEmpty(this.resultFolder)) {
+        if (Mth.isEmpty(this.resultFolder)) {
             this.resultFolder = "World";
         }
         this.resultFolder = findAvailableFolderName(this.minecraft.getLevelSource(), this.resultFolder);
@@ -88,7 +88,7 @@ public class CreateWorldScreen extends Screen
             long seedValue = new Random().nextLong();
             final String seedString = this.seedEdit.getValue();
 
-            if (!Mth.isNullOrEmpty(seedString)) {
+            if (!Mth.isEmpty(seedString)) {
                 try {
                     final long value = Long.parseLong(seedString);
                     if (value != 0L) {

@@ -22,9 +22,7 @@ public class DirectoryLevelStorageSource implements LevelStorageSource
     protected final File baseDir;
     
     public DirectoryLevelStorageSource(final File dir) {
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        if (!dir.exists()) dir.mkdirs();
         this.baseDir = dir;
     }
     
@@ -33,71 +31,101 @@ public class DirectoryLevelStorageSource implements LevelStorageSource
     }
     
     public List<LevelSummary> getLevelList() {
-        final ArrayList<LevelSummary> list = new ArrayList<>();
+        final ArrayList<LevelSummary> levels = new ArrayList<>();
         for (int i = 0; i < 5; ++i) {
-            final String string = "World" + (i + 1);
-            final LevelData dataTag = this.getDataTagFor(string);
-            if (dataTag != null) {
-                list.add(new LevelSummary(string, "", dataTag.getLastPlayed(), dataTag.getSizeOnDisk(), false));
+            final String levelId = "World" + (i + 1);
+
+            final LevelData levelData = this.getDataTagFor(levelId);
+            if (levelData != null) {
+                levels.add(new LevelSummary(levelId, "", levelData.getLastPlayed(), levelData.getSizeOnDisk(), false));
             }
         }
-        return list;
+        return levels;
     }
     
     public void clearAll() {
     }
     
     public LevelData getDataTagFor(final String levelId) {
-        final File file = new File(this.baseDir, levelId);
-        if (!file.exists()) {
-            return null;
-        }
-        final File file2 = new File(file, "level.dat");
-        if (file2.exists()) {
+        final File levelFolder = new File(this.baseDir, levelId);
+        if (!levelFolder.exists()) return null;
+
+        File dataFile = new File(levelFolder, "level.dat");
+        if (dataFile.exists()) {
             try {
-                return new LevelData(NbtIo.readCompressed(new FileInputStream(file2)).getCompound("Data"));
-            }
-            catch (final Exception ex) {
-                ex.printStackTrace();
+                FileInputStream fis = new FileInputStream(dataFile);
+                CompoundTag root = NbtIo.readCompressed(fis);
+                CompoundTag tag = root.getCompound("Data");
+                return new LevelData(tag);
+            } catch (final Exception e) {
+                e.printStackTrace();
             }
         }
-        final File file3 = new File(file, "level.dat_old");
-        if (file3.exists()) {
+
+        dataFile = new File(levelFolder, "level.dat_old");
+        if (dataFile.exists()) {
             try {
-                return new LevelData(NbtIo.readCompressed(new FileInputStream(file3)).getCompound("Data"));
-            }
-            catch (final Exception ex2) {
-                ex2.printStackTrace();
+                FileInputStream fis = new FileInputStream(dataFile);
+                CompoundTag root = NbtIo.readCompressed(fis);
+                CompoundTag tag = root.getCompound("Data");
+                return new LevelData(tag);
+            } catch (final Exception e) {
+                e.printStackTrace();
             }
         }
         return null;
     }
-    
-    public void renameLevel(final String levelId, final String newLevelName) {
-        final File parent = new File(this.baseDir, levelId);
-        if (!parent.exists()) {
-            return;
-        }
-        final File file = new File(parent, "level.dat");
-        if (file.exists()) {
-            try {
-                final CompoundTag compressed = NbtIo.readCompressed(new FileInputStream(file));
-                compressed.getCompound("Data").putString("LevelName", newLevelName);
-                NbtIo.writeCompressed(compressed, new FileOutputStream(file));
+
+    @Override
+    // Useless - In LCE in a between methods that do exist here
+    public boolean isNewLevelIdAcceptable(String levelId) {
+        try {
+            File levelFolder = new File(this.baseDir, levelId);
+            if (levelFolder.exists()) {
+                return false;
             }
-            catch (final Exception ex) {
-                ex.printStackTrace();
+
+            levelFolder.mkdir();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    public void renameLevel(final String levelId, final String newLevelName) {
+        final File levelFolder = new File(this.baseDir, levelId);
+        if (!levelFolder.exists()) return;
+
+        final File dataFile = new File(levelFolder, "level.dat");
+        if (dataFile.exists()) {
+            try {
+                FileInputStream fis = new FileInputStream(dataFile);
+                final CompoundTag root = NbtIo.readCompressed(fis);
+                CompoundTag tag = root.getCompound("Data");
+                tag.putString("LevelName", newLevelName);
+
+                FileOutputStream fos = new FileOutputStream(dataFile);
+                NbtIo.writeCompressed(root, fos);
+            }
+            catch (final Exception e) {
+                e.printStackTrace();
             }
         }
     }
-    
+
+    @Override
+    // Useless - In LCE in a between methods that do exist here
+    public boolean isConvertible(String levelId) {
+        return false;
+    }
+
     public void deleteLevel(final String levelId) {
-        final File file = new File(this.baseDir, levelId);
-        if (!file.exists()) {
-            return;
-        }
-        deleteRecursive(file.listFiles());
-        file.delete();
+        final File levelFolder = new File(this.baseDir, levelId);
+        if (!levelFolder.exists()) return;
+
+        deleteRecursive(levelFolder.listFiles());
+        levelFolder.delete();
     }
     
     protected static void deleteRecursive(final File[] files) {

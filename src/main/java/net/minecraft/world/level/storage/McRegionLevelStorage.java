@@ -16,6 +16,7 @@ import java.io.File;
 
 public class McRegionLevelStorage extends DirectoryLevelStorage
 {
+    protected static final int MCREGION_VERSION_ID = 0x4abc;
     public McRegionLevelStorage(final File dir, final String levelId, final boolean createPlayerDir) {
         super(dir, levelId, createPlayerDir);
     }
@@ -33,7 +34,7 @@ public class McRegionLevelStorage extends DirectoryLevelStorage
     
     @Override
     public void saveLevelData(final LevelData levelData, final List<Player> players) {
-        levelData.setVersion(19132);
+        levelData.setVersion(MCREGION_VERSION_ID);
         super.saveLevelData(levelData, players);
     }
 }

@@ -72,7 +72,7 @@ public class SelectWorldScreen extends Screen
     
     protected String getWorldName(final int id) {
         String levelName = this.levelList.get(id).getLevelName();
-        if (Mth.isNullOrEmpty(levelName)) {
+        if (Mth.isEmpty(levelName)) {
             levelName = Language.getInstance().getElement("selectWorld.world") + " " + (id + 1);
         }
         return levelName;
@@ -210,7 +210,7 @@ public class SelectWorldScreen extends Screen
             final LevelSummary levelSummary = SelectWorldScreen.this.levelList.get(i);
 
             String name = levelSummary.getLevelName();
-            if (Mth.isNullOrEmpty(name)) {
+            if (Mth.isEmpty(name)) {
                 name = SelectWorldScreen.this.worldLang + " " + (i + 1);
             }
 

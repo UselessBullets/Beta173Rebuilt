@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.storage;
 
+import com.mojang.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 
 public interface PlayerIO
@@ -11,4 +12,5 @@ public interface PlayerIO
     void save(final Player player);
     
     void load(final Player player);
+    CompoundTag loadPlayerDataTag(final String userName);
 }

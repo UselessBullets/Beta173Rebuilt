@@ -85,10 +85,10 @@ public class Minimap
 
         for (final MapItemSavedData.MapDecoration dec : data.decorations) {
             glPushMatrix();
-            glTranslatef(x + dec.x / 2.0f + 64.0f, y + dec.y / 2.0f + 64.0f, -0.02f);
+            glTranslatef(x + dec.x / 2.0f + (w / 2f), y + dec.y / 2.0f + (h / 2f), -0.02f);
             glRotatef(dec.rot * 360 / 16.0f, 0.0f, 0.0f, 1.0f);
             glScalef(4.0f, 4.0f, 3.0f);
-            glTranslatef(-0.125f, 0.125f, 0.0f);
+            glTranslatef(-1.0f / 8, 1.0f / 8, 0.0f);
 
             final float u0 = (dec.img % 4 + 0) / 4.0f;
             final float v0 = (dec.img / 4 + 0) / 4.0f;

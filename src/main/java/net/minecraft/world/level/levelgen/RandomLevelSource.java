@@ -288,13 +288,13 @@ public class RandomLevelSource implements ChunkSource
 
         int p = 0;
         int pp = 0;
-        final int n5 = 16 / xSize;
+        final int step = 16 / xSize;
 
         for (int xx = 0; xx < xSize; ++xx) {
-            final int _x = xx * n5 + n5 / 2;
+            final int _x = xx * step + step / 2;
 
             for (int zz = 0; zz < zSize; ++zz) {
-                int _z = zz * n5 + n5 / 2;
+                int _z = zz * step + step / 2;
                 double temp = temperatures[_x * 16 + _z];
                 double rain = downfalls[_x * 16 + _z];
                 double intensity = 1.0 - rain * temp; // Useless - TODO I could not find what this local var would be called, naming it intensity for now as it seems to vary the height intensity of terrain based on rain/temp value
@@ -346,8 +346,9 @@ public class RandomLevelSource implements ChunkSource
                     else val = bb + (cc - bb) * v;
                     val -= yOffs;
 
-                    if (yy > ySize - 4) {
-                        final double slide = (yy - (ySize - 4)) / 3.0f;
+                    int slideRange = 4;
+                    if (yy > ySize - slideRange) {
+                        final double slide = (yy - (ySize - slideRange)) / (slideRange - 1.0f);
                         val = val * (1.0 - slide) + -10.0 * slide;
                     }
 

@@ -8,23 +8,18 @@ import util.Mth;
 
 public class Node
 {
-    public final int x;
-    public final int y;
-    public final int z;
+    public final int x, y, z;
     private final int hash;
-    int heapIdx;
-    float g;
-    float h;
-    float f;
+    int heapIdx = -1;
+    float g, h, f;
     Node cameFrom;
-    public boolean closed;
+    public boolean closed = false;
     
     public Node(final int x, final int y, final int z) {
-        this.heapIdx = -1;
-        this.closed = false;
         this.x = x;
         this.y = y;
         this.z = z;
+
         this.hash = createHash(x, y, z);
     }
     
@@ -33,10 +28,10 @@ public class Node
     }
     
     public float distanceTo(final Node node) {
-        final float n = (float)(node.x - this.x);
-        final float n2 = (float)(node.y - this.y);
-        final float n3 = (float)(node.z - this.z);
-        return Mth.sqrt(n * n + n2 * n2 + n3 * n3);
+        final float xd = (float)(node.x - this.x);
+        final float yd = (float)(node.y - this.y);
+        final float zd = (float)(node.z - this.z);
+        return Mth.sqrt(xd * xd + yd * yd + zd * zd);
     }
     
     @Override

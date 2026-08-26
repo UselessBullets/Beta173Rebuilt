@@ -17,7 +17,7 @@ public class Path
         this.nodes = nodes;
         this.length = nodes.length;
     }
-    
+
     public void next() {
         ++this.pos;
     }
@@ -25,7 +25,12 @@ public class Path
     public boolean isDone() {
         return this.pos >= this.nodes.length;
     }
-    
+
+    // Useless - In b1.2 and LCE leaks
+    public Node get(int i) {
+        return this.nodes[i];
+    }
+
     public Node last() {
         if (this.length > 0) {
             return this.nodes[this.length - 1];
@@ -34,6 +39,9 @@ public class Path
     }
     
     public Vec3 current(final Entity e) {
-        return Vec3.newTemp(this.nodes[this.pos].x + (int)(e.bbWidth + 1.0f) * 0.5, this.nodes[this.pos].y, this.nodes[this.pos].z + (int)(e.bbWidth + 1.0f) * 0.5);
+        double x = this.nodes[this.pos].x + (int) (e.bbWidth + 1.0f) * 0.5;
+        double y = this.nodes[this.pos].y;
+        double z = this.nodes[this.pos].z + (int) (e.bbWidth + 1.0f) * 0.5;
+        return Vec3.newTemp(x, y, z);
     }
 }

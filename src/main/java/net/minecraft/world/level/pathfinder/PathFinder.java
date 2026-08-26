@@ -15,14 +15,11 @@ import net.minecraft.world.level.LevelSource;
 public class PathFinder
 {
     private LevelSource level;
-    private BinaryHeap openSet;
-    private IntHashMap nodes;
-    private Node[] neighbors;
+    private BinaryHeap openSet = new BinaryHeap();
+    private IntHashMap<Node> nodes = new IntHashMap<>();
+    private Node[] neighbors = new Node[32];
     
     public PathFinder(final LevelSource level) {
-        this.openSet = new BinaryHeap();
-        this.nodes = new IntHashMap();
-        this.neighbors = new Node[32];
         this.level = level;
     }
     
@@ -37,152 +34,157 @@ public class PathFinder
     private Path findPath(final Entity e, final double xt, final double yt, final double zt, final float maxDist) {
         this.openSet.clear();
         this.nodes.clear();
-        return this.findPath(e, this.getNode(Mth.floor(e.bb.x0), Mth.floor(e.bb.y0), Mth.floor(e.bb.z0)), this.getNode(Mth.floor(xt - e.bbWidth / 2.0f), Mth.floor(yt), Mth.floor(zt - e.bbWidth / 2.0f)), new Node(Mth.floor(e.bbWidth + 1.0f), Mth.floor(e.bbHeight + 1.0f), Mth.floor(e.bbWidth + 1.0f)), maxDist);
+
+        Node from = this.getNode(Mth.floor(e.bb.x0), Mth.floor(e.bb.y0), Mth.floor(e.bb.z0));
+        Node to = this.getNode(Mth.floor(xt - e.bbWidth / 2.0f), Mth.floor(yt), Mth.floor(zt - e.bbWidth / 2.0f));
+
+        Node size = new Node(Mth.floor(e.bbWidth + 1.0f), Mth.floor(e.bbHeight + 1.0f), Mth.floor(e.bbWidth + 1.0f));
+        return this.findPath(e, from, to, size, maxDist);
     }
-    
+
+    // function A*(start,goal)
     private Path findPath(final Entity e, final Node from, final Node to, final Node size, final float maxDist) {
         from.g = 0.0f;
         from.h = from.distanceTo(to);
         from.f = from.h;
+
         this.openSet.clear();
         this.openSet.insert(from);
-        Node to2 = from;
+
+        Node closest = from;
         while (!this.openSet.isEmpty()) {
-            final Node pop = this.openSet.pop();
-            if (pop.equals(to)) {
+            final Node x = this.openSet.pop();
+            if (x.equals(to)) {
                 return this.reconstruct_path(from, to);
             }
-            if (pop.distanceTo(to) < to2.distanceTo(to)) {
-                to2 = pop;
+
+            if (x.distanceTo(to) < closest.distanceTo(to)) {
+                closest = x;
             }
-            pop.closed = true;
-            for (int neighbors = this.getNeighbors(e, pop, size, to, maxDist), i = 0; i < neighbors; ++i) {
-                final Node node = this.neighbors[i];
-                final float g = pop.g + pop.distanceTo(node);
-                if (!node.isOpenSet() || g < node.g) {
-                    node.cameFrom = pop;
-                    node.g = g;
-                    node.h = node.distanceTo(to);
-                    if (node.isOpenSet()) {
-                        this.openSet.changeCost(node, node.g + node.h);
+            x.closed = true;
+
+            int neighborCount = this.getNeighbors(e, x, size, to, maxDist);
+            for (int i = 0; i < neighborCount; ++i) {
+                final Node y = this.neighbors[i];
+
+                final float tentative_g_score = x.g + x.distanceTo(y);
+                if (!y.isOpenSet() || tentative_g_score < y.g) {
+                    y.cameFrom = x;
+                    y.g = tentative_g_score;
+                    y.h = y.distanceTo(to);
+                    if (y.isOpenSet()) {
+                        this.openSet.changeCost(y, y.g + y.h);
                     }
                     else {
-                        node.f = node.g + node.h;
-                        this.openSet.insert(node);
+                        y.f = y.g + y.h;
+                        this.openSet.insert(y);
                     }
                 }
             }
         }
-        if (to2 == from) {
-            return null;
-        }
-        return this.reconstruct_path(from, to2);
+
+        if (closest == from) return null;
+        return this.reconstruct_path(from, closest);
     }
     
     private int getNeighbors(final Entity entity, final Node pos, final Node size, final Node target, final float maxDist) {
-        int n = 0;
-        int n2 = 0;
-        if (this.isFree(entity, pos.x, pos.y + 1, pos.z, size) == 1) {
-            n2 = 1;
-        }
-        final Node node = this.getNode(entity, pos.x, pos.y, pos.z + 1, size, n2);
-        final Node node2 = this.getNode(entity, pos.x - 1, pos.y, pos.z, size, n2);
-        final Node node3 = this.getNode(entity, pos.x + 1, pos.y, pos.z, size, n2);
-        final Node node4 = this.getNode(entity, pos.x, pos.y, pos.z - 1, size, n2);
-        if (node != null && !node.closed && node.distanceTo(target) < maxDist) {
-            this.neighbors[n++] = node;
-        }
-        if (node2 != null && !node2.closed && node2.distanceTo(target) < maxDist) {
-            this.neighbors[n++] = node2;
-        }
-        if (node3 != null && !node3.closed && node3.distanceTo(target) < maxDist) {
-            this.neighbors[n++] = node3;
-        }
-        if (node4 != null && !node4.closed && node4.distanceTo(target) < maxDist) {
-            this.neighbors[n++] = node4;
-        }
-        return n;
+        int p = 0;
+
+        int jumpSize = 0;
+        if (this.isFree(entity, pos.x, pos.y + 1, pos.z, size) == TYPE_OPEN) jumpSize = 1;
+
+        final Node n = this.getNode(entity, pos.x, pos.y, pos.z + 1, size, jumpSize);
+        final Node w = this.getNode(entity, pos.x - 1, pos.y, pos.z, size, jumpSize);
+        final Node e = this.getNode(entity, pos.x + 1, pos.y, pos.z, size, jumpSize);
+        final Node s = this.getNode(entity, pos.x, pos.y, pos.z - 1, size, jumpSize);
+
+        if (n != null && !n.closed && n.distanceTo(target) < maxDist) this.neighbors[p++] = n;
+        if (w != null && !w.closed && w.distanceTo(target) < maxDist) this.neighbors[p++] = w;
+        if (e != null && !e.closed && e.distanceTo(target) < maxDist) this.neighbors[p++] = e;
+        if (s != null && !s.closed && s.distanceTo(target) < maxDist) this.neighbors[p++] = s;
+
+        return p;
     }
     
     private Node getNode(final Entity entity, final int x, int y, final int z, final Node size, final int jumpSize) {
-        Node node = null;
-        if (this.isFree(entity, x, y, z, size) == 1) {
-            node = this.getNode(x, y, z);
-        }
-        if (node == null && jumpSize > 0 && this.isFree(entity, x, y + jumpSize, z, size) == 1) {
-            node = this.getNode(x, y + jumpSize, z);
+        Node best = null;
+        int pathType = this.isFree(entity, x, y, z, size);
+        if (pathType == TYPE_OPEN) best = this.getNode(x, y, z);
+        if (best == null && jumpSize > 0 && this.isFree(entity, x, y + jumpSize, z, size) == TYPE_OPEN) {
+            best = this.getNode(x, y + jumpSize, z);
             y += jumpSize;
         }
-        if (node != null) {
-            int n = 0;
-            int free = 0;
-            while (y > 0 && (free = this.isFree(entity, x, y - 1, z, size)) == 1) {
-                if (++n >= 4) {
-                    return null;
-                }
-                if (--y <= 0) {
-                    continue;
-                }
-                node = this.getNode(x, y, z);
+
+        if (best != null) {
+            int drop = 0;
+            int cost = 0;
+            while (y > 0) {
+                cost = this.isFree(entity, x, y - 1, z, size);
+                if (cost != TYPE_OPEN) break;
+                // fell too far?
+                if (++drop >= 4) return null;
+                --y;
+
+                if (y > 0) best = this.getNode(x, y, z);
             }
-            if (free == -2) {
-                return null;
-            }
+            // fell into lava?
+            if (cost == TYPE_LAVA) return null;
         }
-        return node;
+
+        return best;
     }
     
     private final Node getNode(final int x, final int y, final int z) {
-        final int hash = Node.createHash(x, y, z);
-        Node value = (Node)this.nodes.get(hash);
-        if (value == null) {
-            value = new Node(x, y, z);
-            this.nodes.put(hash, value);
+        final int i = Node.createHash(x, y, z);
+        Node node = this.nodes.get(i);
+        if (node == null) {
+            node = new Node(x, y, z);
+            this.nodes.put(i, node);
         }
-        return value;
+        return node;
     }
+
+    public static final int TYPE_LAVA = -2;
+    public static final int TYPE_WATER = -1;
+    public static final int TYPE_BLOCKED = 0;
+    public static final int TYPE_OPEN = 1;
     
     private int isFree(final Entity entity, final int x, final int y, final int z, final Node size) {
-        for (int i = x; i < x + size.x; ++i) {
-            for (int j = y; j < y + size.y; ++j) {
-                for (int k = z; k < z + size.z; ++k) {
-                    final int tile = this.level.getTile(i, j, k);
-                    if (tile > 0) {
-                        if (tile == Tile.door_iron.id || tile == Tile.door_wood.id) {
-                            if (!DoorTile.isOpen(this.level.getData(i, j, k))) {
-                                return 0;
-                            }
-                        }
-                        else {
-                            final Material material = Tile.tiles[tile].material;
-                            if (material.blocksMotion()) {
-                                return 0;
-                            }
-                            if (material == Material.water) {
-                                return -1;
-                            }
-                            if (material == Material.lava) {
-                                return -2;
-                            }
-                        }
+        for (int xx = x; xx < x + size.x; ++xx) {
+            for (int yy = y; yy < y + size.y; ++yy) {
+                for (int zz = z; zz < z + size.z; ++zz) {
+                    final int tileId = this.level.getTile(xx, yy, zz);
+                    if (tileId <= 0) continue;
+                    if (tileId == Tile.door_iron.id || tileId == Tile.door_wood.id) {
+                        if (!DoorTile.isOpen(this.level.getData(xx, yy, zz))) return TYPE_BLOCKED;
+                    }
+                    else {
+                        final Material m = Tile.tiles[tileId].material;
+                        if (m.blocksMotion()) return TYPE_BLOCKED;
+                        if (m == Material.water) return TYPE_WATER;
+                        if (m == Material.lava) return TYPE_LAVA;
                     }
                 }
             }
         }
-        return 1;
+        return TYPE_OPEN;
     }
-    
+
+    // function reconstruct_path(came_from,current_node)
     private Path reconstruct_path(final Node from, final Node to) {
-        int n = 1;
-        for (Node cameFrom = to; cameFrom.cameFrom != null; cameFrom = cameFrom.cameFrom) {
-            ++n;
+        int count = 1;
+        Node n = to;
+        while (n.cameFrom != null) {
+            count++;
+            n = n.cameFrom;
         }
-        final Node[] nodes = new Node[n];
-        Node cameFrom2 = to;
-        nodes[--n] = cameFrom2;
-        while (cameFrom2.cameFrom != null) {
-            cameFrom2 = cameFrom2.cameFrom;
-            nodes[--n] = cameFrom2;
+
+        final Node[] nodes = new Node[count];
+        n = to;
+        nodes[--count] = n;
+        while (n.cameFrom != null) {
+            n = n.cameFrom;
+            nodes[--count] = n;
         }
         return new Path(nodes);
     }

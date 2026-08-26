@@ -15,63 +15,84 @@ public class BinaryHeap
     }
     
     public Node insert(final Node node) {
-        if (node.heapIdx >= 0) {
-            throw new IllegalStateException("OW KNOWS!");
-        }
+        if (node.heapIdx >= 0) throw new IllegalStateException("OW KNOWS!");
+
+        // Expand if necessary.
         if (this.size == this.heap.length) {
-            final Node[] heap = new Node[this.size << 1];
-            System.arraycopy(this.heap, 0, heap, 0, this.size);
-            this.heap = heap;
+            final Node[] newHeap = new Node[this.size << 1];
+
+            System.arraycopy(this.heap, 0, newHeap, 0, this.size);
+
+            this.heap = newHeap;
         }
+
+        // Insert at end and bubble up.
         this.heap[this.size] = node;
         node.heapIdx = this.size;
         this.upHeap(this.size++);
+
         return node;
     }
     
     public void clear() {
         this.size = 0;
     }
-    
-    public Node pop() {
-        final Node node = this.heap[0];
-        final Node[] heap = this.heap;
-        final int n = 0;
-        final Node[] heap2 = this.heap;
-        final int size = this.size - 1;
-        this.size = size;
-        heap[n] = heap2[size];
-        this.heap[this.size] = null;
-        if (this.size > 0) {
-            this.downHeap(0);
-        }
-        node.heapIdx = -1;
-        return node;
+
+    // Useless - In b1.2 and LCE leaks
+    public Node peek() {
+        return this.heap[0];
     }
-    
+    public Node pop() {
+        final Node popped = this.heap[0];
+        this.heap[0] = this.heap[--this.size];
+        this.heap[this.size] = null;
+        if (this.size > 0) this.downHeap(0);
+        popped.heapIdx = -1;
+        return popped;
+    }
+
+    // Useless - In b1.2 and LCE leaks
+    public void remove(Node var1) {
+        // This is what node.heapIdx is for.
+        this.heap[var1.heapIdx] = this.heap[--this.size];
+        this.heap[this.size] = null;
+        if (this.size > var1.heapIdx) {
+            if (this.heap[var1.heapIdx].f < var1.f) {
+                this.upHeap(var1.heapIdx);
+            } else {
+                this.downHeap(var1.heapIdx);
+            }
+        }
+        // Just as a precaution: should make stuff blow up if the node is abused.
+        var1.heapIdx = -1;
+    }
     public void changeCost(final Node node, final float newCost) {
-        final float f = node.f;
+        final float oldCost = node.f;
         node.f = newCost;
-        if (newCost < f) {
+        if (newCost < oldCost) {
             this.upHeap(node.heapIdx);
         }
         else {
             this.downHeap(node.heapIdx);
         }
     }
+
+    // Useless - In b1.2 and LCE leaks
+    public int size() {
+        return this.size;
+    }
     
     private void upHeap(int idx) {
         final Node node = this.heap[idx];
-        final float f = node.f;
+        final float cost = node.f;
         while (idx > 0) {
-            final int n = idx - 1 >> 1;
-            final Node node2 = this.heap[n];
-            if (f >= node2.f) {
-                break;
-            }
-            this.heap[idx] = node2;
-            node2.heapIdx = idx;
-            idx = n;
+            final int parentIdx = idx - 1 >> 1;
+            final Node parent = this.heap[parentIdx];
+            if (cost < parent.f) {
+                this.heap[idx] = parent;
+                parent.heapIdx = idx;
+                idx = parentIdx;
+            } else break;
         }
         this.heap[idx] = node;
         node.heapIdx = idx;
@@ -79,42 +100,49 @@ public class BinaryHeap
     
     private void downHeap(int idx) {
         final Node node = this.heap[idx];
-        final float f = node.f;
+        final float cost = node.f;
+
         while (true) {
-            final int n = 1 + (idx << 1);
-            final int n2 = n + 1;
-            if (n >= this.size) {
-                break;
-            }
-            final Node node2 = this.heap[n];
-            final float f2 = node2.f;
-            Node node3;
-            float f3;
-            if (n2 >= this.size) {
-                node3 = null;
-                f3 = Float.POSITIVE_INFINITY;
-            }
-            else {
-                node3 = this.heap[n2];
-                f3 = node3.f;
-            }
-            if (f2 < f3) {
-                if (f2 >= f) {
-                    break;
-                }
-                this.heap[idx] = node2;
-                node2.heapIdx = idx;
-                idx = n;
+            final int leftIdx = 1 + (idx << 1);
+            final int rightIdx = leftIdx + 1;
+
+            if (leftIdx >= this.size) break;
+
+            // We definitely have a left child.
+            final Node leftNode = this.heap[leftIdx];
+            final float leftCost = leftNode.f;
+
+            // We may have a right child.
+            Node rightNode;
+            float rightCost;
+            if (rightIdx >= this.size) {
+                // Only need to compare with left.
+                rightNode = null;
+                rightCost = Float.POSITIVE_INFINITY;
             }
             else {
-                if (f3 >= f) {
-                    break;
-                }
-                this.heap[idx] = node3;
-                node3.heapIdx = idx;
-                idx = n2;
+                rightNode = this.heap[rightIdx];
+                rightCost = rightNode.f;
+            }
+
+            // Find the smallest of the three costs: the corresponding node
+            // should be the parent.
+            if (leftCost < rightCost) {
+                if (leftCost < cost) {
+                    this.heap[idx] = leftNode;
+                    leftNode.heapIdx = idx;
+                    idx = leftIdx;
+                } else break;
+            }
+            else {
+                if (rightCost < cost) {
+                    this.heap[idx] = rightNode;
+                    rightNode.heapIdx = idx;
+                    idx = rightIdx;
+                } else break;
             }
         }
+
         this.heap[idx] = node;
         node.heapIdx = idx;
     }

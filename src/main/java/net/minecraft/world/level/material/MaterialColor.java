@@ -6,21 +6,21 @@ package net.minecraft.world.level.material;
 
 public class MaterialColor
 {
-    public static final MaterialColor[] colors;
-    public static final MaterialColor none;
-    public static final MaterialColor grass;
-    public static final MaterialColor sand;
-    public static final MaterialColor cloth;
-    public static final MaterialColor fire;
-    public static final MaterialColor ice;
-    public static final MaterialColor metal;
-    public static final MaterialColor plant;
-    public static final MaterialColor snow;
-    public static final MaterialColor clay;
-    public static final MaterialColor dirt;
-    public static final MaterialColor stone;
-    public static final MaterialColor water;
-    public static final MaterialColor wood;
+    public static final MaterialColor[] colors = new MaterialColor[16];
+    public static final MaterialColor none = new MaterialColor(0, 0x000000);
+    public static final MaterialColor grass = new MaterialColor(1, 0x7fb238);
+    public static final MaterialColor sand = new MaterialColor(2, 0xf7e9a3);
+    public static final MaterialColor cloth = new MaterialColor(3, 0xa7a7a7);
+    public static final MaterialColor fire = new MaterialColor(4, 0xff0000);
+    public static final MaterialColor ice = new MaterialColor(5, 0xa0a0ff);
+    public static final MaterialColor metal = new MaterialColor(6, 0xa7a7a7);
+    public static final MaterialColor plant = new MaterialColor(7, 0x007c00);
+    public static final MaterialColor snow = new MaterialColor(8, 0xffffff);
+    public static final MaterialColor clay = new MaterialColor(9, 0xa4a8b8);
+    public static final MaterialColor dirt = new MaterialColor(10, 0xb76a2f);
+    public static final MaterialColor stone = new MaterialColor(11, 0x707070);
+    public static final MaterialColor water = new MaterialColor(12, 0x4040ff);
+    public static final MaterialColor wood = new MaterialColor(13, 0x685332);
     public final int col;
     public final int id;
     
@@ -29,22 +29,5 @@ public class MaterialColor
         this.col = col;
         MaterialColor.colors[id] = this;
     }
-    
-    static {
-        colors = new MaterialColor[16];
-        none = new MaterialColor(0, 0);
-        grass = new MaterialColor(1, 8368696);
-        sand = new MaterialColor(2, 16247203);
-        cloth = new MaterialColor(3, 10987431);
-        fire = new MaterialColor(4, 16711680);
-        ice = new MaterialColor(5, 10526975);
-        metal = new MaterialColor(6, 10987431);
-        plant = new MaterialColor(7, 31744);
-        snow = new MaterialColor(8, 16777215);
-        clay = new MaterialColor(9, 10791096);
-        dirt = new MaterialColor(10, 12020271);
-        stone = new MaterialColor(11, 7368816);
-        water = new MaterialColor(12, 4210943);
-        wood = new MaterialColor(13, 6837042);
-    }
+
 }

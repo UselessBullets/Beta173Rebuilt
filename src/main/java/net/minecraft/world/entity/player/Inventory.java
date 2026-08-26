@@ -5,7 +5,6 @@
 package net.minecraft.world.entity.player;
 
 import net.minecraft.world.item.ArmorItem;
-import com.mojang.nbt.Tag;
 import com.mojang.nbt.CompoundTag;
 import com.mojang.nbt.ListTag;
 import net.minecraft.world.level.tile.Tile;
@@ -254,7 +253,7 @@ public class Inventory implements Container
     }
     
     public boolean canDestroy(final Tile tile) {
-        if (tile.material.isDestroyedByHand()) return true;
+        if (tile.material.isAlwaysDestroyable()) return true;
 
         final ItemInstance item = this.getItem(this.selected);
         if (item != null) return item.canDestroySpecial(tile);

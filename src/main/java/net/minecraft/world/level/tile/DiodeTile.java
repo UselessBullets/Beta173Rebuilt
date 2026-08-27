@@ -4,6 +4,8 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.Direction;
+import net.minecraft.Facing;
 import net.minecraft.world.item.Item;
 import util.Mth;
 import net.minecraft.world.entity.Mob;
@@ -18,14 +20,14 @@ public class DiodeTile extends Tile
     public static final int DIRECTION_MASK = 0x3; // Useless - possibly a forward port, DiodeTile starts extending DirectionalTile in the future and this mask is part of DirectionalTile
     public static final int DELAY_MASK = 0xc;
     public static final int DELAY_SHIFT = 2;
-    public static final double[] DELAY_RENDER_OFFSETS;
-    private static final int[] DELAYS;
+    public static final double[] DELAY_RENDER_OFFSETS = new double[] { -0.0625, 0.0625, 0.1875, 0.3125 };
+    private static final int[] DELAYS = new int[] { 1, 2, 3, 4 };
     private final boolean on;
     
     protected DiodeTile(final int id, final boolean on) {
         super(id, 6, Material.decoration);
         this.on = on;
-        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.125f, 1.0f);
+        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 2.0f / 16.0f, 1.0f);
     }
     
     @Override
@@ -35,56 +37,69 @@ public class DiodeTile extends Tile
     
     @Override
     public boolean mayPlace(final Level level, final int x, final int y, final int z) {
-        return level.isSolidBlockingTile(x, y - 1, z) && super.mayPlace(level, x, y, z);
+        if (!level.isSolidBlockingTile(x, y - 1, z)) {
+            return false;
+        }
+        return super.mayPlace(level, x, y, z);
     }
     
     @Override
     public boolean canSurvive(final Level level, final int x, final int y, final int z) {
-        return level.isSolidBlockingTile(x, y - 1, z) && super.canSurvive(level, x, y, z);
+        if (!level.isSolidBlockingTile(x, y - 1, z)) {
+            return false;
+        }
+        return super.canSurvive(level, x, y, z);
     }
     
     @Override
     public void tick(final Level level, final int x, final int y, final int z, final Random random) {
         final int data = level.getData(x, y, z);
-        final boolean sourceSignal = this.getSourceSignal(level, x, y, z, data);
-        if (this.on && !sourceSignal) {
+        final boolean sourceOn = this.getSourceSignal(level, x, y, z, data);
+        if (this.on && !sourceOn) {
             level.setTileAndData(x, y, z, Tile.diode_off.id, data);
         }
         else if (!this.on) {
+            // when off-diodes are ticked, they always turn on for one tick and
+            // then off again if necessary
             level.setTileAndData(x, y, z, Tile.diode_on.id, data);
-            if (!sourceSignal) {
-                level.addToTickNextTick(x, y, z, Tile.diode_on.id, DiodeTile.DELAYS[(data & 0xC) >> 2] * 2);
+            if (!sourceOn) {
+                int delay = (data & DELAY_MASK) >> DELAY_SHIFT;
+                level.addToTickNextTick(x, y, z, Tile.diode_on.id, DiodeTile.DELAYS[delay] * 2);
             }
         }
     }
     
     @Override
     public int getTexture(final int face, final int data) {
-        if (face == 0) {
+        // down is used by the torch tesselator
+        if (face == Facing.DOWN) {
             if (this.on) {
                 return 99;
             }
             return 115;
         }
-        else {
-            if (face != 1) {
-                return 5;
-            }
+        if (face == Facing.UP) {
             if (this.on) {
                 return 147;
             }
             return 131;
         }
+        // edge of stone half-step
+        return 5;
     }
     
     @Override
     public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int f) {
-        return f != 0 && f != 1;
+        if (f == Facing.DOWN || f == Facing.UP) {
+            // up and down is a special case handled by the shape renderer
+            return false;
+        }
+        return true;
     }
     
     @Override
     public int getRenderShape() {
-        return 15;
+        return Tile.SHAPE_DIODE;
     }
     
     @Override
@@ -98,12 +113,19 @@ public class DiodeTile extends Tile
     }
     
     @Override
-    public boolean getSignal(final LevelSource level, final int x, final int y, final int z, final int dir) {
+    public boolean getSignal(final LevelSource level, final int x, final int y, final int z, final int facing) {
         if (!this.on) {
             return false;
         }
-        final int n = level.getData(x, y, z) & 0x3;
-        return (n == 0 && dir == 3) || (n == 1 && dir == 4) || (n == 2 && dir == 2) || (n == 3 && dir == 5);
+
+        final int dir = level.getData(x, y, z) & 0x3;
+
+        if (dir == Direction.SOUTH && facing == Facing.SOUTH) return true;
+        if (dir == Direction.WEST && facing == Facing.WEST) return true;
+        if (dir == Direction.NORTH && facing == Facing.NORTH) return true;
+        if (dir == Direction.EAST && facing == Facing.EAST) return true;
+
+        return false;
     }
     
     @Override
@@ -113,41 +135,38 @@ public class DiodeTile extends Tile
             level.setTile(x, y, z, 0);
             return;
         }
+
         final int data = level.getData(x, y, z);
-        final boolean sourceSignal = this.getSourceSignal(level, x, y, z, data);
-        final int n = (data & 0xC) >> 2;
-        if (this.on && !sourceSignal) {
-            level.addToTickNextTick(x, y, z, this.id, DiodeTile.DELAYS[n] * 2);
-        }
-        else if (!this.on && sourceSignal) {
-            level.addToTickNextTick(x, y, z, this.id, DiodeTile.DELAYS[n] * 2);
+
+        final boolean sourceOn = this.getSourceSignal(level, x, y, z, data);
+        final int delay = (data & DELAY_MASK) >> DELAY_SHIFT;
+        if (this.on && !sourceOn || !this.on && sourceOn) {
+            level.addToTickNextTick(x, y, z, this.id, DiodeTile.DELAYS[delay] * 2);
         }
     }
     
     private boolean getSourceSignal(final Level level, final int x, final int y, final int z, final int data) {
-        switch (data & 0x3) {
-            case 0: {
+        int dir = data & DIRECTION_MASK;
+        switch (dir) {
+            case Direction.SOUTH:
                 return level.getSignal(x, y, z + 1, 3) || (level.getTile(x, y, z + 1) == Tile.redStoneDust.id && level.getData(x, y, z + 1) > 0);
-            }
-            case 2: {
+            case Direction.NORTH:
                 return level.getSignal(x, y, z - 1, 2) || (level.getTile(x, y, z - 1) == Tile.redStoneDust.id && level.getData(x, y, z - 1) > 0);
-            }
-            case 3: {
+            case Direction.EAST:
                 return level.getSignal(x + 1, y, z, 5) || (level.getTile(x + 1, y, z) == Tile.redStoneDust.id && level.getData(x + 1, y, z) > 0);
-            }
-            case 1: {
+            case Direction.WEST:
                 return level.getSignal(x - 1, y, z, 4) || (level.getTile(x - 1, y, z) == Tile.redStoneDust.id && level.getData(x - 1, y, z) > 0);
-            }
-            default: {
-                return false;
-            }
         }
+        return false;
     }
     
     @Override
     public boolean use(final Level level, final int x, final int y, final int z, final Player player) {
         final int data = level.getData(x, y, z);
-        level.setData(x, y, z, (((data & 0xC) >> 2) + 1 << 2 & 0xC) | (data & 0x3));
+        int delay = (data & DELAY_MASK) >> DELAY_SHIFT;
+        delay = ((delay + 1) << DELAY_SHIFT) & DELAY_MASK;
+
+        level.setData(x, y, z, delay | (data & DIRECTION_MASK));
         return true;
     }
     
@@ -158,9 +177,11 @@ public class DiodeTile extends Tile
     
     @Override
     public void setPlacedBy(final Level level, final int x, final int y, final int z, final Mob by) {
-        final int n = ((Mth.floor(by.yRot * 4.0f / 360.0f + 0.5) & 0x3) + 2) % 4;
-        level.setData(x, y, z, n);
-        if (this.getSourceSignal(level, x, y, z, n)) {
+        final int dir = ((Mth.floor(by.yRot * 4.0f / 360.0f + 0.5) & 0x3) + 2) % 4;
+        level.setData(x, y, z, dir);
+
+        boolean sourceOn = this.getSourceSignal(level, x, y, z, dir);
+        if (sourceOn) {
             level.addToTickNextTick(x, y, z, this.id, 1);
         }
     }
@@ -186,62 +207,53 @@ public class DiodeTile extends Tile
     }
     
     @Override
-    public void animateTick(final Level level, final int x, final int y, final int z, final Random random) {
-        if (!this.on) {
-            return;
-        }
-        final int data = level.getData(x, y, z);
-        final double n = x + 0.5f + (random.nextFloat() - 0.5f) * 0.2;
-        final double y2 = y + 0.4f + (random.nextFloat() - 0.5f) * 0.2;
-        final double n2 = z + 0.5f + (random.nextFloat() - 0.5f) * 0.2;
-        double n3 = 0.0;
-        double n4 = 0.0;
+    public void animateTick(final Level level, final int xt, final int yt, final int zt, final Random random) {
+        if (!this.on) return;
+        final int data = level.getData(xt, yt, zt);
+        int dir = data & 0x3;
+
+        final double x = xt + 0.5f + (random.nextFloat() - 0.5f) * 0.2;
+        final double y = yt + 0.4f + (random.nextFloat() - 0.5f) * 0.2;
+        final double z = zt + 0.5f + (random.nextFloat() - 0.5f) * 0.2;
+
+        double xo = 0.0;
+        double zo = 0.0;
+
         if (random.nextInt(2) == 0) {
-            switch (data & 0x3) {
-                case 0: {
-                    n4 = -0.3125;
+            // spawn on receiver
+            switch (dir) {
+                case 0:
+                    zo = -5.0f / 16.0f;
                     break;
-                }
-                case 2: {
-                    n4 = 0.3125;
+                case 2:
+                    zo = 5.0f / 16.0f;
                     break;
-                }
-                case 3: {
-                    n3 = -0.3125;
+                case 3:
+                    xo = -5.0f / 16.0f;
                     break;
-                }
-                case 1: {
-                    n3 = 0.3125;
+                case 1:
+                    xo = 5.0f / 16.0f;
                     break;
-                }
+            }
+        } else {
+            // spawn on transmitter
+            final int delay = (data & DELAY_MASK) >> DELAY_SHIFT;
+            switch (dir) {
+                case 0:
+                    zo = DiodeTile.DELAY_RENDER_OFFSETS[delay];
+                    break;
+                case 2:
+                    zo = -DiodeTile.DELAY_RENDER_OFFSETS[delay];
+                    break;
+                case 3:
+                    xo = DiodeTile.DELAY_RENDER_OFFSETS[delay];
+                    break;
+                case 1:
+                    xo = -DiodeTile.DELAY_RENDER_OFFSETS[delay];
+                    break;
             }
         }
-        else {
-            final int n5 = (data & 0xC) >> 2;
-            switch (data & 0x3) {
-                case 0: {
-                    n4 = DiodeTile.DELAY_RENDER_OFFSETS[n5];
-                    break;
-                }
-                case 2: {
-                    n4 = -DiodeTile.DELAY_RENDER_OFFSETS[n5];
-                    break;
-                }
-                case 3: {
-                    n3 = DiodeTile.DELAY_RENDER_OFFSETS[n5];
-                    break;
-                }
-                case 1: {
-                    n3 = -DiodeTile.DELAY_RENDER_OFFSETS[n5];
-                    break;
-                }
-            }
-        }
-        level.addParticle("reddust", n + n3, y2, n2 + n4, 0.0, 0.0, 0.0);
+        level.addParticle("reddust", x + xo, y, z + zo, 0.0, 0.0, 0.0);
     }
-    
-    static {
-        DELAY_RENDER_OFFSETS = new double[] { -0.0625, 0.0625, 0.1875, 0.3125 };
-        DELAYS = new int[] { 1, 2, 3, 4 };
-    }
+
 }

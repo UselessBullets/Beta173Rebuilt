@@ -9,7 +9,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.level.tile.entity.TileEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.level.tile.entity.ChestTileEntity;
@@ -20,11 +19,10 @@ import java.util.Random;
 
 public class ChestTile extends EntityTile
 {
-    private Random random;
+    private Random random = new Random();
     
     protected ChestTile(final int id) {
         super(id, Material.wood);
-        this.random = new Random();
         this.tex = 26;
     }
     
@@ -164,7 +162,7 @@ public class ChestTile extends EntityTile
         if (level.isClientSide) return true;
 
         player.openContainer(container);
-        
+
         return true;
     }
     

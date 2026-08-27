@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.Facing;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.item.Item;
@@ -24,18 +25,20 @@ public class DoorTile extends Tile
     protected DoorTile(final int id, final Material material) {
         super(id, material);
         this.tex = 97;
+
         if (material == Material.metal) {
-            ++this.tex;
+            this.tex++;
         }
-        final float n = 0.5f;
-        this.setShape(0.5f - n, 0.0f, 0.5f - n, 0.5f + n, 1.0f, 0.5f + n);
+
+        final float r = 0.5f;
+        final float h = 1.0f;
+        this.setShape(0.5f - r, 0.0f, 0.5f - r, 0.5f + r, h, 0.5f + r);
     }
     
     @Override
     public int getTexture(final int face, final int data) {
-        if (face == 0 || face == 1) {
-            return this.tex;
-        }
+        if (face == Facing.DOWN || face == Facing.UP) return this.tex;
+
         final int dir = this.getDir(data);
         if ((dir == 0 || dir == 2) ^ face <= 3) {
             return this.tex;
@@ -45,6 +48,7 @@ public class DoorTile extends Tile
         if ((n & 0x1) != 0x0) {
             n2 = -n2;
         }
+
         return n2;
     }
     

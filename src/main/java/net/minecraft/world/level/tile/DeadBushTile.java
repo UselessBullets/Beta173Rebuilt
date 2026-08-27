@@ -10,8 +10,8 @@ public class DeadBushTile extends Bush
 {
     protected DeadBushTile(final int id, final int tex) {
         super(id, tex);
-        final float n = 0.4f;
-        this.setShape(0.5f - n, 0.0f, 0.5f - n, 0.5f + n, 0.8f, 0.5f + n);
+        final float ss = 0.4f;
+        this.setShape(0.5f - ss, 0.0f, 0.5f - ss, 0.5f + ss, 0.8f, 0.5f + ss);
     }
     
     @Override

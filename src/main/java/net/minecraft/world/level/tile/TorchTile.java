@@ -35,7 +35,7 @@ public class TorchTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 2;
+        return Tile.SHAPE_TORCH;
     }
     
     private boolean isConnection(final Level level, final int x, final int y, final int z) {

@@ -36,6 +36,6 @@ public class FenceTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 11;
+        return Tile.SHAPE_FENCE;
     }
 }

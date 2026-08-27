@@ -15,8 +15,8 @@ public class Bush extends Tile
         super(id, Material.replaceable_plant);
         this.tex = tex;
         this.setTicking(true);
-        final float n = 0.2f;
-        this.setShape(0.5f - n, 0.0f, 0.5f - n, 0.5f + n, n * 3.0f, 0.5f + n);
+        final float ss = 0.2f;
+        this.setShape(0.5f - ss, 0.0f, 0.5f - ss, 0.5f + ss, ss * 3.0f, 0.5f + ss);
     }
     
     @Override
@@ -68,6 +68,6 @@ public class Bush extends Tile
     
     @Override
     public int getRenderShape() {
-        return 1;
+        return Tile.SHAPE_CROSS_TEXTURE;
     }
 }

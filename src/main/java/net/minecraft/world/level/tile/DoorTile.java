@@ -60,7 +60,7 @@ public class DoorTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 7;
+        return Tile.SHAPE_DOOR;
     }
     
     @Override

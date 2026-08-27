@@ -65,7 +65,7 @@ public class SignTile extends EntityTile
     
     @Override
     public int getRenderShape() {
-        return -1;
+        return Tile.SHAPE_INVISIBLE;
     }
     
     @Override

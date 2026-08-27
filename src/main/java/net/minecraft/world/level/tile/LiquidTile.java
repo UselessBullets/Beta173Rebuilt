@@ -94,7 +94,7 @@ public abstract class LiquidTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 4;
+        return Tile.SHAPE_WATER;
     }
     
     @Override

@@ -257,7 +257,7 @@ public class Tile implements Descriptive<Tile> {
     }
     
     public int getRenderShape() {
-        return 0;
+        return Tile.SHAPE_BLOCK;
     }
     
     protected Tile setDestroyTime(final float destroySpeed) {

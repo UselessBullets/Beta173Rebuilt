@@ -65,7 +65,7 @@ public class LadderTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 8;
+        return Tile.SHAPE_LADDER;
     }
     
     @Override

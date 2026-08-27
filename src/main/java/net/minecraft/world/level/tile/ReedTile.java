@@ -83,6 +83,6 @@ public class ReedTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 1;
+        return Tile.SHAPE_CROSS_TEXTURE;
     }
 }

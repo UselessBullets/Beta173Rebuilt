@@ -36,7 +36,7 @@ public class TrapDoorTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 0;
+        return Tile.SHAPE_BLOCK;
     }
     
     @Override

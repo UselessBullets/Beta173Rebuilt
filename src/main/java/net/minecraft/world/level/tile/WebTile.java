@@ -34,7 +34,7 @@ public class WebTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 1;
+        return Tile.SHAPE_CROSS_TEXTURE;
     }
     
     @Override

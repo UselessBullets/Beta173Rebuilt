@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.Facing;
 import net.minecraft.world.item.Item;
 import java.util.Random;
 import net.minecraft.world.level.LevelSource;
@@ -18,9 +19,12 @@ public class BedTile extends Tile
 {
     private static final int PART_FOOT = 0;
     private static final int PART_HEAD = 1;
-    public static final int HEAD_PIECE_DATA = 0x8;
-    public static final int OCCUPIED_DATA = 0x4;
-    public static final int[][] HEAD_DIRECTION_OFFSETS = new int[][] { { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 0 } };
+    public static final int DIRECTION_MASK = 0b0011;
+    public static final int HEAD_PIECE_DATA = 0b1000;
+    public static final int OCCUPIED_DATA = 0b100;
+    public static final int[][] HEAD_DIRECTION_OFFSETS = new int[][] {
+            { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 0 }
+    };
     
     public BedTile(final int id) {
         super(id, 134, Material.cloth);
@@ -29,84 +33,95 @@ public class BedTile extends Tile
     
     @Override
     public boolean use(final Level level, int x, final int y, int z, final Player player) {
-        if (level.isClientSide) {
-            return true;
-        }
-        int n = level.getData(x, y, z);
-        if (!isHeadPiece(n)) {
-            final int direction = getDirection(n);
+        if (level.isClientSide) return true;
+
+        int data = level.getData(x, y, z);
+
+        if (!isHeadPiece(data)) {
+            // fetch head piece instead
+            final int direction = getDirection(data);
             x += BedTile.HEAD_DIRECTION_OFFSETS[direction][0];
             z += BedTile.HEAD_DIRECTION_OFFSETS[direction][1];
             if (level.getTile(x, y, z) != this.id) {
                 return true;
             }
-            n = level.getData(x, y, z);
+            data = level.getData(x, y, z);
         }
+
         if (!level.dimension.mayRespawn()) {
-            final double n2 = x + 0.5;
-            final double n3 = y + 0.5;
-            final double n4 = z + 0.5;
+            double xc = x + 0.5;
+            double yc = y + 0.5;
+            double zc = z + 0.5;
             level.setTile(x, y, z, 0);
-            final int direction2 = getDirection(n);
-            x += BedTile.HEAD_DIRECTION_OFFSETS[direction2][0];
-            z += BedTile.HEAD_DIRECTION_OFFSETS[direction2][1];
+            final int direction = getDirection(data);
+            x += BedTile.HEAD_DIRECTION_OFFSETS[direction][0];
+            z += BedTile.HEAD_DIRECTION_OFFSETS[direction][1];
             if (level.getTile(x, y, z) == this.id) {
                 level.setTile(x, y, z, 0);
-                final double n5 = (n2 + x + 0.5) / 2.0;
-                final double n6 = (n3 + y + 0.5) / 2.0;
-                final double n7 = (n4 + z + 0.5) / 2.0;
+                xc = (xc + x + 0.5) / 2.0;
+                yc = (yc + y + 0.5) / 2.0;
+                zc = (zc + z + 0.5) / 2.0;
             }
             level.explode(null, x + 0.5f, y + 0.5f, z + 0.5f, 5.0f, true);
             return true;
         }
-        if (isOccupied(n)) {
-            Player player2 = null;
-            for (final Player player3 : level.players) {
-                if (player3.isSleeping()) {
-                    final Pos bedPosition = player3.bedPosition;
-                    if (bedPosition.x != x || bedPosition.y != y || bedPosition.z != z) {
-                        continue;
+
+        if (isOccupied(data)) {
+            Player sleepingPlayer = null;
+            for (final Player p : level.players) {
+                if (p.isSleeping()) {
+                    final Pos pos = p.bedPosition;
+                    if (pos.x == x && pos.y == y && pos.z == z) {
+                        sleepingPlayer = p;
                     }
-                    player2 = player3;
                 }
             }
-            if (player2 != null) {
+
+            if (sleepingPlayer == null) {
+                setOccupied(level, x, y, z, false);
+            } else {
                 player.displayClientMessage("tile.bed.occupied");
+
                 return true;
             }
-            setOccupied(level, x, y, z, false);
         }
-        final Player.BedSleepingResult startSleepInBed = player.startSleepInBed(x, y, z);
-        if (startSleepInBed == Player.BedSleepingResult.OK) {
+
+        final Player.BedSleepingResult result = player.startSleepInBed(x, y, z);
+        if (result == Player.BedSleepingResult.OK) {
             setOccupied(level, x, y, z, true);
             return true;
         }
-        if (startSleepInBed == Player.BedSleepingResult.NOT_POSSIBLE_NOW) {
+
+        if (result == Player.BedSleepingResult.NOT_POSSIBLE_NOW) {
             player.displayClientMessage("tile.bed.noSleep");
         }
+
         return true;
     }
     
     @Override
     public int getTexture(final int face, final int data) {
-        if (face == 0) {
+        if (face == Facing.DOWN) {
             return Tile.wood.tex;
         }
-        final int n = Direction.RELATIVE_DIRECTION_FACING[getDirection(data)][face];
+
+        int direction = getDirection(data);
+        int tileFacing = Direction.RELATIVE_DIRECTION_FACING[direction][face];
+
         if (isHeadPiece(data)) {
-            if (n == 2) {
+            if (tileFacing == Facing.NORTH) {
                 return this.tex + 2 + 16;
             }
-            if (n == 5 || n == 4) {
+            if (tileFacing == Facing.EAST || tileFacing == Facing.WEST) {
                 return this.tex + 1 + 16;
             }
             return this.tex + 1;
         }
         else {
-            if (n == 3) {
+            if (tileFacing == Facing.SOUTH) {
                 return this.tex - 1 + 16;
             }
-            if (n == 5 || n == 4) {
+            if (tileFacing == Facing.EAST || tileFacing == Facing.WEST) {
                 return this.tex + 16;
             }
             return this.tex;
@@ -115,7 +130,7 @@ public class BedTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 14;
+        return Tile.SHAPE_BED;
     }
     
     @Override
@@ -137,6 +152,7 @@ public class BedTile extends Tile
     public void neighborChanged(final Level level, final int x, final int y, final int z, final int type) {
         final int data = level.getData(x, y, z);
         final int direction = getDirection(data);
+
         if (isHeadPiece(data)) {
             if (level.getTile(x - BedTile.HEAD_DIRECTION_OFFSETS[direction][0], y, z - BedTile.HEAD_DIRECTION_OFFSETS[direction][1]) != this.id) {
                 level.setTile(x, y, z, 0);
@@ -159,51 +175,58 @@ public class BedTile extends Tile
     }
     
     private void setShape() {
-        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5625f, 1.0f);
+        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 9 / 16.0f, 1.0f);
     }
     
     public static int getDirection(final int data) {
-        return data & 0x3;
+        return data & DIRECTION_MASK;
     }
     
     public static boolean isHeadPiece(final int data) {
-        return (data & 0x8) != 0x0;
+        return (data & HEAD_PIECE_DATA) != 0x0;
     }
     
     public static boolean isOccupied(final int data) {
-        return (data & 0x4) != 0x0;
+        return (data & OCCUPIED_DATA) != 0x0;
     }
     
     public static void setOccupied(final Level level, final int x, final int y, final int z, final boolean occupied) {
-        final int data = level.getData(x, y, z);
-        int data2;
+        int data = level.getData(x, y, z);
         if (occupied) {
-            data2 = (data | 0x4);
+            data = (data | OCCUPIED_DATA);
         }
         else {
-            data2 = (data & 0xFFFFFFFB);
+            data = (data & ~OCCUPIED_DATA);
         }
-        level.setData(x, y, z, data2);
+        level.setData(x, y, z, data);
     }
     
     public static Pos findStandUpPosition(final Level level, final int x, final int y, final int z, int skipCount) {
-        final int direction = getDirection(level.getData(x, y, z));
-        for (int i = 0; i <= 1; ++i) {
-            final int n = x - BedTile.HEAD_DIRECTION_OFFSETS[direction][0] * i - 1;
-            final int n2 = z - BedTile.HEAD_DIRECTION_OFFSETS[direction][1] * i - 1;
-            final int n3 = n + 2;
-            final int n4 = n2 + 2;
-            for (int j = n; j <= n3; ++j) {
-                for (int k = n2; k <= n4; ++k) {
-                    if (level.isSolidBlockingTile(j, y - 1, k) && level.isEmptyTile(j, y, k) && level.isEmptyTile(j, y + 1, k)) {
-                        if (skipCount <= 0) {
-                            return new Pos(j, y, k);
+        int data = level.getData(x, y, z);
+        int direction = getDirection(data);
+
+        // try to find a clear location near the bed
+        for (int step = 0; step <= 1; step++) {
+            final int startX = x - BedTile.HEAD_DIRECTION_OFFSETS[direction][0] * step - 1;
+            final int startZ = z - BedTile.HEAD_DIRECTION_OFFSETS[direction][1] * step - 1;
+            final int endX = startX + 2;
+            final int endZ = startZ + 2;
+
+            for (int standX = startX; standX <= endX; ++standX) {
+                for (int standZ = startZ; standZ <= endZ; ++standZ) {
+                    if (level.isSolidBlockingTile(standX, y - 1, standZ) &&
+                            level.isEmptyTile(standX, y, standZ) &&
+                            level.isEmptyTile(standX, y + 1, standZ)) {
+                        if (skipCount > 0) {
+                            skipCount--;
+                            continue;
                         }
-                        --skipCount;
+                        return new Pos(standX, y, standZ);
                     }
                 }
             }
         }
+
         return null;
     }
     
@@ -216,7 +239,7 @@ public class BedTile extends Tile
     
     @Override
     public int getPistonPushReaction() {
-        return 1;
+        return Material.PUSH_DESTROY;
     }
 
 }

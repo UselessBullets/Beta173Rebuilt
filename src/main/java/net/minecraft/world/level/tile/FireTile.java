@@ -56,7 +56,7 @@ public class FireTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 3;
+        return Tile.SHAPE_FIRE;
     }
     
     @Override

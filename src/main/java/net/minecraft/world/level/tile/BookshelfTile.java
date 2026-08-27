@@ -5,6 +5,8 @@
 package net.minecraft.world.level.tile;
 
 import java.util.Random;
+
+import net.minecraft.Facing;
 import net.minecraft.world.level.material.Material;
 
 public class BookshelfTile extends Tile
@@ -15,9 +17,7 @@ public class BookshelfTile extends Tile
     
     @Override
     public int getTexture(final int face) {
-        if (face <= 1) {
-            return 4;
-        }
+        if (face <= Facing.UP) return 4;
         return this.tex;
     }
     

@@ -33,7 +33,7 @@ public class LeverTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 12;
+        return Tile.SHAPE_LEVER;
     }
     
     @Override

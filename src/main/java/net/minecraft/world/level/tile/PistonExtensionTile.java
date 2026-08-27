@@ -70,7 +70,7 @@ public class PistonExtensionTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 17;
+        return Tile.SHAPE_PISTON_EXTENSION;
     }
     
     @Override

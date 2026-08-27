@@ -51,7 +51,7 @@ public class RedStoneDustTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 5;
+        return Tile.SHAPE_RED_DUST;
     }
     
     @Override

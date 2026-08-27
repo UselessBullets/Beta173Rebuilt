@@ -50,7 +50,7 @@ public class StairTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 10;
+        return Tile.SHAPE_STAIRS;
     }
     
     @Override

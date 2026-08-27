@@ -5,6 +5,8 @@
 package net.minecraft.world.level.tile;
 
 import java.util.Random;
+
+import net.minecraft.Facing;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
@@ -20,53 +22,50 @@ public class CakeTile extends Tile
     
     @Override
     public void updateShape(final LevelSource level, final int x, final int y, final int z) {
-        final int data = level.getData(x, y, z);
-        final float z2 = 0.0625f;
-        this.setShape((1 + data * 2) / 16.0f, 0.0f, z2, 1.0f - z2, 0.5f, 1.0f - z2);
+        final int d = level.getData(x, y, z);
+        float r = 1 / 16.0f;
+        float r2 = (1 + d * 2) / 16.0f;
+        float h = 8 / 16.0f;
+        this.setShape(r2, 0.0f, r, 1.0f - r, h, 1.0f - r);
     }
     
     @Override
     public void updateDefaultShape() {
-        final float n = 0.0625f;
-        this.setShape(n, 0.0f, n, 1.0f - n, 0.5f, 1.0f - n);
+        float r = 1 / 16.0f;
+        float h = 0.5f;
+        this.setShape(r, 0.0f, r, 1.0f - r, h, 1.0f - r);
     }
     
     @Override
     public AABB getAABB(final Level level, final int x, final int y, final int z) {
-        final int data = level.getData(x, y, z);
-        final float n = 0.0625f;
-        return AABB.newTemp(x + (1 + data * 2) / 16.0f, y, z + n, x + 1 - n, y + 0.5f - n, z + 1 - n);
+        final int d = level.getData(x, y, z);
+        float r = 1 / 16.0f;
+        float r2 = (1 + d * 2) / 16.0f;
+        float h = 8 / 16.0f;
+        return AABB.newTemp(x + r2, y, z + r, x + 1 - r, y + h - r, z + 1 - r);
     }
     
     @Override
     public AABB getTileAABB(final Level level, final int x, final int y, final int z) {
-        final int data = level.getData(x, y, z);
-        final float n = 0.0625f;
-        return AABB.newTemp(x + (1 + data * 2) / 16.0f, y, z + n, x + 1 - n, y + 0.5f, z + 1 - n);
+        final int d = level.getData(x, y, z);
+        float r = 0.0625f;
+        float r2 = (1 + d * 2) / 16.0f;
+        float h = 8 / 16.0f;
+        return AABB.newTemp(x + r2, y, z + r, x + 1 - r, y + h, z + 1 - r);
     }
     
     @Override
     public int getTexture(final int face, final int data) {
-        if (face == 1) {
-            return this.tex;
-        }
-        if (face == 0) {
-            return this.tex + 3;
-        }
-        if (data > 0 && face == 4) {
-            return this.tex + 2;
-        }
+        if (face == Facing.UP) return this.tex;
+        if (face == Facing.DOWN) return this.tex + 3;
+        if (data > 0 && face == Facing.WEST) return this.tex + 2;
         return this.tex + 1;
     }
     
     @Override
     public int getTexture(final int face) {
-        if (face == 1) {
-            return this.tex;
-        }
-        if (face == 0) {
-            return this.tex + 3;
-        }
+        if (face == Facing.UP) return this.tex;
+        if (face == Facing.DOWN) return this.tex + 3;
         return this.tex + 1;
     }
     
@@ -92,14 +91,15 @@ public class CakeTile extends Tile
     }
     
     private void eat(final Level level, final int x, final int y, final int z, final Player player) {
-        if (player.health < 20) {
+        if (player.health < Player.MAX_HEALTH) {
             player.heal(3);
-            final int data = level.getData(x, y, z) + 1;
-            if (data >= 6) {
+
+            final int d = level.getData(x, y, z) + 1;
+            if (d >= 6) {
                 level.setTile(x, y, z, 0);
             }
             else {
-                level.setData(x, y, z, data);
+                level.setData(x, y, z, d);
                 level.setTileDirty(x, y, z);
             }
         }
@@ -107,7 +107,9 @@ public class CakeTile extends Tile
     
     @Override
     public boolean mayPlace(final Level level, final int x, final int y, final int z) {
-        return super.mayPlace(level, x, y, z) && this.canSurvive(level, x, y, z);
+        if (!super.mayPlace(level, x, y, z)) return false;
+
+        return this.canSurvive(level, x, y, z);
     }
     
     @Override

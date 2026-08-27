@@ -90,7 +90,7 @@ public class RailTile extends Tile
     
     @Override
     public int getRenderShape() {
-        return 9;
+        return Tile.SHAPE_RAIL;
     }
     
     @Override

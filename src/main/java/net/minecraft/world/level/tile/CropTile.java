@@ -87,7 +87,7 @@ public class CropTile extends Bush
     
     @Override
     public int getRenderShape() {
-        return 6;
+        return Tile.SHAPE_ROWS;
     }
     
     @Override

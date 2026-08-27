@@ -17,33 +17,31 @@ public class SignTileEntity extends TileEntity
     private boolean isEditable = true;
     
     @Override
-    public void save(final CompoundTag compoundTag) {
-        super.save(compoundTag);
-        compoundTag.putString("Text1", this.messages[0]);
-        compoundTag.putString("Text2", this.messages[1]);
-        compoundTag.putString("Text3", this.messages[2]);
-        compoundTag.putString("Text4", this.messages[3]);
+    public void save(final CompoundTag tag) {
+        super.save(tag);
+        tag.putString("Text1", this.messages[0]);
+        tag.putString("Text2", this.messages[1]);
+        tag.putString("Text3", this.messages[2]);
+        tag.putString("Text4", this.messages[3]);
     }
     
     @Override
-    public void load(final CompoundTag compoundTag) {
+    public void load(final CompoundTag tag) {
         this.isEditable = false;
-        super.load(compoundTag);
+        super.load(tag);
         for (int i = 0; i < MAX_SIGN_LINES; ++i) {
-            this.messages[i] = compoundTag.getString("Text" + (i + 1));
-            if (this.messages[i].length() > 15) {
-                this.messages[i] = this.messages[i].substring(0, 15);
-            }
+            this.messages[i] = tag.getString("Text" + (i + 1));
+            if (this.messages[i].length() > MAX_LINE_LENGTH) this.messages[i] = this.messages[i].substring(0, MAX_LINE_LENGTH);
         }
     }
 
     @Override
     public Packet getUpdatePacket() {
-        final String[] lines = new String[MAX_SIGN_LINES];
+        final String[] copy = new String[MAX_SIGN_LINES];
         for (int i = 0; i < MAX_SIGN_LINES; ++i) {
-            lines[i] = this.messages[i];
+            copy[i] = this.messages[i];
         }
-        return new SignUpdatePacket(this.x, this.y, this.z, lines);
+        return new SignUpdatePacket(this.x, this.y, this.z, copy);
     }
 
     public boolean isEditable() {

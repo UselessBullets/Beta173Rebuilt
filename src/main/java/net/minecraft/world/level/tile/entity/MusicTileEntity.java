@@ -15,6 +15,7 @@ public class MusicTileEntity extends TileEntity
     
     public MusicTileEntity() {
         this.note = 0;
+
         this.on = false;
     }
     
@@ -28,12 +29,8 @@ public class MusicTileEntity extends TileEntity
     public void load(final CompoundTag compoundTag) {
         super.load(compoundTag);
         this.note = compoundTag.getByte("note");
-        if (this.note < 0) {
-            this.note = 0;
-        }
-        if (this.note > 24) {
-            this.note = 24;
-        }
+        if (this.note < 0) this.note = 0;
+        if (this.note > 24) this.note = 24;
     }
     
     public void tune() {
@@ -42,23 +39,15 @@ public class MusicTileEntity extends TileEntity
     }
     
     public void playNote(final Level level, final int x, final int y, final int z) {
-        if (level.getMaterial(x, y + 1, z) != Material.air) {
-            return;
-        }
-        final Material material = level.getMaterial(x, y - 1, z);
-        int b0 = 0;
-        if (material == Material.stone) {
-            b0 = 1;
-        }
-        if (material == Material.sand) {
-            b0 = 2;
-        }
-        if (material == Material.glass) {
-            b0 = 3;
-        }
-        if (material == Material.wood) {
-            b0 = 4;
-        }
-        level.tileEvent(x, y, z, b0, this.note);
+        if (level.getMaterial(x, y + 1, z) != Material.air) return;
+
+        final Material m = level.getMaterial(x, y - 1, z);
+        int i = 0;
+        if (m == Material.stone) i = 1;
+        if (m == Material.sand) i = 2;
+        if (m == Material.glass) i = 3;
+        if (m == Material.wood) i = 4;
+
+        level.tileEvent(x, y, z, i, this.note);
     }
 }

@@ -15,24 +15,27 @@ public class ReedTile extends Tile
     protected ReedTile(final int id, final int tex) {
         super(id, Material.replaceable_plant);
         this.tex = tex;
-        final float n = 0.375f;
-        this.setShape(0.5f - n, 0.0f, 0.5f - n, 0.5f + n, 1.0f, 0.5f + n);
+
+        final float ss = 6 / 16.0f;
+        this.setShape(0.5f - ss, 0.0f, 0.5f - ss, 0.5f + ss, 1.0f, 0.5f + ss);
         this.setTicking(true);
     }
     
     @Override
     public void tick(final Level level, final int x, final int y, final int z, final Random random) {
         if (level.isEmptyTile(x, y + 1, z)) {
-            int n;
-            for (n = 1; level.getTile(x, y - n, z) == this.id; ++n) {}
-            if (n < 3) {
-                final int data = level.getData(x, y, z);
-                if (data == 15) {
+            int height = 1;
+            while (level.getTile(x, y - height, z) == this.id) {
+                height++;
+            }
+            if (height < 3) {
+                final int age = level.getData(x, y, z);
+                if (age == 15) {
                     level.setTile(x, y + 1, z, this.id);
                     level.setData(x, y, z, 0);
                 }
                 else {
-                    level.setData(x, y, z, data + 1);
+                    level.setData(x, y, z, age + 1);
                 }
             }
         }
@@ -40,8 +43,14 @@ public class ReedTile extends Tile
     
     @Override
     public boolean mayPlace(final Level level, final int x, final int y, final int z) {
-        final int tile = level.getTile(x, y - 1, z);
-        return tile == this.id || ((tile == Tile.grass.id || tile == Tile.dirt.id) && (level.getMaterial(x - 1, y - 1, z) == Material.water || level.getMaterial(x + 1, y - 1, z) == Material.water || level.getMaterial(x, y - 1, z - 1) == Material.water || level.getMaterial(x, y - 1, z + 1) == Material.water));
+        final int below = level.getTile(x, y - 1, z);
+        if (below == this.id) return true;
+        if (below != Tile.grass.id && below != Tile.dirt.id) return false;
+        if (level.getMaterial(x - 1, y - 1, z) == Material.water) return true;
+        if (level.getMaterial(x + 1, y - 1, z) == Material.water) return true;
+        if (level.getMaterial(x, y - 1, z - 1) == Material.water) return true;
+        if (level.getMaterial(x, y - 1, z + 1) == Material.water) return true;
+        return false;
     }
     
     @Override

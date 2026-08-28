@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.Direction;
 import util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
@@ -17,6 +18,11 @@ import net.minecraft.world.level.LevelSource;
 
 public class StairTile extends Tile
 {
+    // the direction is the way going up (for normal non-upsidedown stairs)
+    public static final int DIR_EAST = 0;
+    public static final int DIR_WEST = 1;
+    public static final int DIR_SOUTH = 2;
+    public static final int DIR_NORTH = 3;
     private Tile base;
     
     protected StairTile(final int id, final Tile base) {
@@ -61,25 +67,25 @@ public class StairTile extends Tile
     @Override
     public void addAABBs(final Level level, final int x, final int y, final int z, final AABB box, final ArrayList boxes) {
         final int data = level.getData(x, y, z);
-        if (data == 0) {
+        if (data == DIR_EAST) {
             this.setShape(0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 1.0f);
             super.addAABBs(level, x, y, z, box, boxes);
             this.setShape(0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
             super.addAABBs(level, x, y, z, box, boxes);
         }
-        else if (data == 1) {
+        else if (data == DIR_WEST) {
             this.setShape(0.0f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f);
             super.addAABBs(level, x, y, z, box, boxes);
             this.setShape(0.5f, 0.0f, 0.0f, 1.0f, 0.5f, 1.0f);
             super.addAABBs(level, x, y, z, box, boxes);
         }
-        else if (data == 2) {
+        else if (data == DIR_SOUTH) {
             this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 0.5f);
             super.addAABBs(level, x, y, z, box, boxes);
             this.setShape(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f);
             super.addAABBs(level, x, y, z, box, boxes);
         }
-        else if (data == 3) {
+        else if (data == DIR_NORTH) {
             this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);
             super.addAABBs(level, x, y, z, box, boxes);
             this.setShape(0.0f, 0.0f, 0.5f, 1.0f, 0.5f, 1.0f);
@@ -211,18 +217,11 @@ public class StairTile extends Tile
     
     @Override
     public void setPlacedBy(final Level level, final int x, final int y, final int z, final Mob by) {
-        final int n = Mth.floor(by.yRot * 4.0f / 360.0f + 0.5) & 0x3;
-        if (n == 0) {
-            level.setData(x, y, z, 2);
-        }
-        if (n == 1) {
-            level.setData(x, y, z, 1);
-        }
-        if (n == 2) {
-            level.setData(x, y, z, 3);
-        }
-        if (n == 3) {
-            level.setData(x, y, z, 0);
-        }
+        final int dir = Mth.floor(by.yRot * 4.0f / 360.0f + 0.5) & 0x3;
+
+        if (dir == Direction.SOUTH) level.setData(x, y, z, DIR_SOUTH);
+        if (dir == Direction.WEST) level.setData(x, y, z, DIR_WEST);
+        if (dir == Direction.NORTH) level.setData(x, y, z, DIR_NORTH);
+        if (dir == Direction.EAST) level.setData(x, y, z, DIR_EAST);
     }
 }

@@ -33,20 +33,24 @@ public class SandTile extends Tile
     }
     
     private void checkSlide(final Level level, final int x, int y, final int z) {
-        final int n = y;
-        if (isFree(level, x, n - 1, z) && n >= 0) {
-            final int n2 = 32;
-            if (SandTile.instaFall || !level.hasChunksAt(x - n2, y - n2, z - n2, x + n2, y + n2, z + n2)) {
+        int x2 = x;
+        int y2 = y;
+        int z2 = z;
+        if (isFree(level, x2, y2 - 1, z2) && y2 >= 0) {
+            final int r = 32;
+
+            if (SandTile.instaFall || !level.hasChunksAt(x - r, y - r, z - r, x + r, y + r, z + r)) {
                 level.setTile(x, y, z, 0);
                 while (isFree(level, x, y - 1, z) && y > 0) {
-                    --y;
+                    y--;
                 }
                 if (y > 0) {
                     level.setTile(x, y, z, this.id);
                 }
             }
             else {
-                level.addEntity(new FallingTile(level, x + 0.5f, y + 0.5f, z + 0.5f, this.id));
+                FallingTile e = new FallingTile(level, x + 0.5f, y + 0.5f, z + 0.5f, this.id);
+                level.addEntity(e);
             }
         }
     }
@@ -57,15 +61,13 @@ public class SandTile extends Tile
     }
     
     public static boolean isFree(final Level level, final int x, final int y, final int z) {
-        final int tile = level.getTile(x, y, z);
-        if (tile == 0) {
-            return true;
-        }
-        if (tile == Tile.fire.id) {
-            return true;
-        }
-        final Material material = Tile.tiles[tile].material;
-        return material == Material.water || material == Material.lava;
+        final int t = level.getTile(x, y, z);
+        if (t == 0) return true;
+        if (t == Tile.fire.id) return true;
+        final Material material = Tile.tiles[t].material;
+        if (material == Material.water) return true;
+        if (material == Material.lava) return true;
+        return false;
     }
 
 }

@@ -22,8 +22,9 @@ public class SignTile extends EntityTile
         this.onGround = onGround;
         this.tex = 4;
         this.clas = clas;
-        final float n = 0.25f;
-        this.setShape(0.5f - n, 0.0f, 0.5f - n, 0.5f + n, 1.0f, 0.5f + n);
+        final float r = 4 / 16.0f;
+        float h = 16 / 16.0f;
+        this.setShape(0.5f - r, 0.0f, 0.5f - r, 0.5f + r, h, 0.5f + r);
     }
     
     @Override
@@ -39,28 +40,22 @@ public class SignTile extends EntityTile
     
     @Override
     public void updateShape(final LevelSource level, final int x, final int y, final int z) {
-        if (this.onGround) {
-            return;
-        }
-        final int data = level.getData(x, y, z);
-        final float n = 0.28125f;
-        final float n2 = 0.78125f;
-        final float n3 = 0.0f;
-        final float n4 = 1.0f;
-        final float n5 = 0.125f;
+        if (this.onGround) return;
+
+        final int face = level.getData(x, y, z);
+
+        final float h0 = (4 + 0.5f) / 16.0f;
+        final float h1 = (12 + 0.5f) / 16.0f;
+        final float w0 = 0 / 16.0f;
+        final float w1 = 16 / 16.0f;
+
+        final float d = 2 / 16.0f;
+
         this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-        if (data == 2) {
-            this.setShape(n3, n, 1.0f - n5, n4, n2, 1.0f);
-        }
-        if (data == 3) {
-            this.setShape(n3, n, 0.0f, n4, n2, n5);
-        }
-        if (data == 4) {
-            this.setShape(1.0f - n5, n, n3, 1.0f, n2, n4);
-        }
-        if (data == 5) {
-            this.setShape(0.0f, n, n3, n5, n2, n4);
-        }
+        if (face == 2) this.setShape(w0, h0, 1.0f - d, w1, h1, 1.0f);
+        if (face == 3) this.setShape(w0, h0, 0.0f, w1, h1, d);
+        if (face == 4) this.setShape(1.0f - d, h0, w0, 1.0f, h1, w1);
+        if (face == 5) this.setShape(0.0f, h0, w0, d, h1, w1);
     }
     
     @Override
@@ -83,8 +78,8 @@ public class SignTile extends EntityTile
         try {
             return this.clas.newInstance();
         }
-        catch (final Exception cause) {
-            throw new RuntimeException(cause);
+        catch (final Exception e) {
+            throw new RuntimeException(e);
         }
     }
     
@@ -95,32 +90,24 @@ public class SignTile extends EntityTile
     
     @Override
     public void neighborChanged(final Level level, final int x, final int y, final int z, final int type) {
-        boolean b = false;
+        boolean remove = false;
+
         if (this.onGround) {
-            if (!level.getMaterial(x, y - 1, z).isSolid()) {
-                b = true;
-            }
+            if (!level.getMaterial(x, y - 1, z).isSolid()) remove = true;
         }
         else {
-            final int data = level.getData(x, y, z);
-            b = true;
-            if (data == 2 && level.getMaterial(x, y, z + 1).isSolid()) {
-                b = false;
-            }
-            if (data == 3 && level.getMaterial(x, y, z - 1).isSolid()) {
-                b = false;
-            }
-            if (data == 4 && level.getMaterial(x + 1, y, z).isSolid()) {
-                b = false;
-            }
-            if (data == 5 && level.getMaterial(x - 1, y, z).isSolid()) {
-                b = false;
-            }
+            final int face = level.getData(x, y, z);
+            remove = true;
+            if (face == 2 && level.getMaterial(x, y, z + 1).isSolid()) remove = false;
+            if (face == 3 && level.getMaterial(x, y, z - 1).isSolid()) remove = false;
+            if (face == 4 && level.getMaterial(x + 1, y, z).isSolid()) remove = false;
+            if (face == 5 && level.getMaterial(x - 1, y, z).isSolid()) remove = false;
         }
-        if (b) {
+        if (remove) {
             this.spawnResources(level, x, y, z, level.getData(x, y, z));
             level.setTile(x, y, z, 0);
         }
+
         super.neighborChanged(level, x, y, z, type);
     }
 }

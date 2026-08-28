@@ -19,14 +19,12 @@ import java.util.Set;
 
 public class RedStoneDustTile extends Tile
 {
-    private boolean shouldSignal;
-    private Set toUpdate;
+    private boolean shouldSignal = true;
+    private Set<TilePos> toUpdate = new HashSet<>();
     
     public RedStoneDustTile(final int id, final int tex) {
         super(id, tex, Material.decoration);
-        this.shouldSignal = true;
-        this.toUpdate = new HashSet();
-        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.0625f, 1.0f);
+        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1 / 16.0f, 1.0f);
     }
     
     @Override
@@ -56,7 +54,7 @@ public class RedStoneDustTile extends Tile
     
     @Override
     public int getColor(final LevelSource level, final int x, final int y, final int z) {
-        return 8388608;
+        return 0x800000;
     }
     
     @Override
@@ -66,100 +64,81 @@ public class RedStoneDustTile extends Tile
     
     private void updatePowerStrength(final Level level, final int x, final int y, final int z) {
         this.updatePowerStrength(level, x, y, z, x, y, z);
-        final ArrayList list = new ArrayList(this.toUpdate);
+
+        final ArrayList<TilePos> updates = new ArrayList<>(this.toUpdate);
         this.toUpdate.clear();
-        for (int i = 0; i < list.size(); ++i) {
-            final TilePos tilePos = (TilePos)list.get(i);
-            level.updateNeighborsAt(tilePos.x, tilePos.y, tilePos.z, this.id);
+
+        for (int i = 0; i < updates.size(); ++i) {
+            final TilePos tp = updates.get(i);
+            level.updateNeighborsAt(tp.x, tp.y, tp.z, this.id);
         }
     }
     
     private void updatePowerStrength(final Level level, final int x, final int y, final int z, final int xFrom, final int yFrom, final int zFrom) {
-        final int data = level.getData(x, y, z);
-        int n = 0;
+        final int old = level.getData(x, y, z);
+        int target = 0;
+
         this.shouldSignal = false;
         final boolean hasNeighborSignal = level.hasNeighborSignal(x, y, z);
         this.shouldSignal = true;
+
         if (hasNeighborSignal) {
-            n = 15;
+            target = 15;
         }
         else {
             for (int i = 0; i < 4; ++i) {
-                int x2 = x;
-                int z2 = z;
-                if (i == 0) {
-                    --x2;
+                int xt = x;
+                int zt = z;
+                if (i == 0) xt--;
+                if (i == 1) xt++;
+                if (i == 2) zt--;
+                if (i == 3) zt++;
+
+                if (xt != xFrom || y != yFrom || zt != zFrom) target = this.checkTarget(level, xt, y, zt, target);
+                if (level.isSolidBlockingTile(xt, y, zt) && !level.isSolidBlockingTile(x, y + 1, z)) {
+                    if (xt != xFrom || y + 1 != yFrom || zt != zFrom) target = this.checkTarget(level, xt, y + 1, zt, target);
                 }
-                if (i == 1) {
-                    ++x2;
-                }
-                if (i == 2) {
-                    --z2;
-                }
-                if (i == 3) {
-                    ++z2;
-                }
-                if (x2 != xFrom || y != yFrom || z2 != zFrom) {
-                    n = this.checkTarget(level, x2, y, z2, n);
-                }
-                if (level.isSolidBlockingTile(x2, y, z2) && !level.isSolidBlockingTile(x, y + 1, z)) {
-                    if (x2 != xFrom || y + 1 != yFrom || z2 != zFrom) {
-                        n = this.checkTarget(level, x2, y + 1, z2, n);
-                    }
-                }
-                else if (!level.isSolidBlockingTile(x2, y, z2) && (x2 != xFrom || y - 1 != yFrom || z2 != zFrom)) {
-                    n = this.checkTarget(level, x2, y - 1, z2, n);
+                else if (!level.isSolidBlockingTile(xt, y, zt)) {
+                    if (xt != xFrom || y - 1 != yFrom || zt != zFrom) target = this.checkTarget(level, xt, y - 1, zt, target);
                 }
             }
-            if (n > 0) {
-                --n;
-            }
-            else {
-                n = 0;
-            }
+            if (target > 0) --target;
+            else target = 0;
         }
-        if (data != n) {
+
+        if (old != target) {
             level.noNeighborUpdate = true;
-            level.setData(x, y, z, n);
+            level.setData(x, y, z, target);
             level.setTilesDirty(x, y, z, x, y, z);
             level.noNeighborUpdate = false;
-            for (int j = 0; j < 4; ++j) {
-                int x3 = x;
-                int z3 = z;
-                int n2 = y - 1;
-                if (j == 0) {
-                    --x3;
+
+            for (int i = 0; i < 4; ++i) {
+                int xt = x;
+                int zt = z;
+                int yt = y - 1;
+                if (i == 0) xt--;
+                if (i == 1) xt++;
+                if (i == 2) zt--;
+                if (i == 3) zt++;
+
+                if (level.isSolidBlockingTile(xt, y, zt)) yt += 2;
+
+                int current = 0;
+                current = this.checkTarget(level, xt, y, zt, -1);
+                target = level.getData(x, y, z);
+                if (target > 0) target--;
+                if (current >= 0 && current != target) {
+                    this.updatePowerStrength(level, xt, y, zt, x, y, z);
                 }
-                if (j == 1) {
-                    ++x3;
-                }
-                if (j == 2) {
-                    --z3;
-                }
-                if (j == 3) {
-                    ++z3;
-                }
-                if (level.isSolidBlockingTile(x3, y, z3)) {
-                    n2 += 2;
-                }
-                final int checkTarget = this.checkTarget(level, x3, y, z3, -1);
-                int data2 = level.getData(x, y, z);
-                if (data2 > 0) {
-                    --data2;
-                }
-                if (checkTarget >= 0 && checkTarget != data2) {
-                    this.updatePowerStrength(level, x3, y, z3, x, y, z);
-                }
-                final int checkTarget2 = this.checkTarget(level, x3, n2, z3, -1);
-                n = level.getData(x, y, z);
-                if (n > 0) {
-                    --n;
-                }
-                if (checkTarget2 >= 0 && checkTarget2 != n) {
-                    this.updatePowerStrength(level, x3, n2, z3, x, y, z);
+                current = this.checkTarget(level, xt, yt, zt, -1);
+                target = level.getData(x, y, z);
+                if (target > 0) target--;
+                if (current >= 0 && current != target) {
+                    this.updatePowerStrength(level, xt, yt, zt, x, y, z);
                 }
             }
-            if (data == 0 || n == 0) {
+
+            if (old == 0 || target == 0) {
                 this.toUpdate.add(new TilePos(x, y, z));
                 this.toUpdate.add(new TilePos(x - 1, y, z));
                 this.toUpdate.add(new TilePos(x + 1, y, z));
@@ -172,14 +151,14 @@ public class RedStoneDustTile extends Tile
     }
     
     private void checkCornerChangeAt(final Level level, final int x, final int y, final int z) {
-        if (level.getTile(x, y, z) != this.id) {
-            return;
-        }
+        if (level.getTile(x, y, z) != this.id) return;
+
         level.updateNeighborsAt(x, y, z, this.id);
         level.updateNeighborsAt(x - 1, y, z, this.id);
         level.updateNeighborsAt(x + 1, y, z, this.id);
         level.updateNeighborsAt(x, y, z - 1, this.id);
         level.updateNeighborsAt(x, y, z + 1, this.id);
+
         level.updateNeighborsAt(x, y - 1, z, this.id);
         level.updateNeighborsAt(x, y + 1, z, this.id);
     }
@@ -187,105 +166,72 @@ public class RedStoneDustTile extends Tile
     @Override
     public void onPlace(final Level level, final int x, final int y, final int z) {
         super.onPlace(level, x, y, z);
-        if (level.isClientSide) {
-            return;
-        }
+        if (level.isClientSide) return;
+
         this.updatePowerStrength(level, x, y, z);
         level.updateNeighborsAt(x, y + 1, z, this.id);
         level.updateNeighborsAt(x, y - 1, z, this.id);
+
         this.checkCornerChangeAt(level, x - 1, y, z);
         this.checkCornerChangeAt(level, x + 1, y, z);
         this.checkCornerChangeAt(level, x, y, z - 1);
         this.checkCornerChangeAt(level, x, y, z + 1);
-        if (level.isSolidBlockingTile(x - 1, y, z)) {
-            this.checkCornerChangeAt(level, x - 1, y + 1, z);
-        }
-        else {
-            this.checkCornerChangeAt(level, x - 1, y - 1, z);
-        }
-        if (level.isSolidBlockingTile(x + 1, y, z)) {
-            this.checkCornerChangeAt(level, x + 1, y + 1, z);
-        }
-        else {
-            this.checkCornerChangeAt(level, x + 1, y - 1, z);
-        }
-        if (level.isSolidBlockingTile(x, y, z - 1)) {
-            this.checkCornerChangeAt(level, x, y + 1, z - 1);
-        }
-        else {
-            this.checkCornerChangeAt(level, x, y - 1, z - 1);
-        }
-        if (level.isSolidBlockingTile(x, y, z + 1)) {
-            this.checkCornerChangeAt(level, x, y + 1, z + 1);
-        }
-        else {
-            this.checkCornerChangeAt(level, x, y - 1, z + 1);
-        }
+
+        if (level.isSolidBlockingTile(x - 1, y, z)) this.checkCornerChangeAt(level, x - 1, y + 1, z);
+        else this.checkCornerChangeAt(level, x - 1, y - 1, z);
+        if (level.isSolidBlockingTile(x + 1, y, z)) this.checkCornerChangeAt(level, x + 1, y + 1, z);
+        else this.checkCornerChangeAt(level, x + 1, y - 1, z);
+        if (level.isSolidBlockingTile(x, y, z - 1)) this.checkCornerChangeAt(level, x, y + 1, z - 1);
+        else this.checkCornerChangeAt(level, x, y - 1, z - 1);
+        if (level.isSolidBlockingTile(x, y, z + 1)) this.checkCornerChangeAt(level, x, y + 1, z + 1);
+        else this.checkCornerChangeAt(level, x, y - 1, z + 1);
     }
     
     @Override
     public void onRemove(final Level level, final int x, final int y, final int z) {
         super.onRemove(level, x, y, z);
-        if (level.isClientSide) {
-            return;
-        }
+        if (level.isClientSide) return;
+
         level.updateNeighborsAt(x, y + 1, z, this.id);
         level.updateNeighborsAt(x, y - 1, z, this.id);
         this.updatePowerStrength(level, x, y, z);
+
         this.checkCornerChangeAt(level, x - 1, y, z);
         this.checkCornerChangeAt(level, x + 1, y, z);
         this.checkCornerChangeAt(level, x, y, z - 1);
         this.checkCornerChangeAt(level, x, y, z + 1);
-        if (level.isSolidBlockingTile(x - 1, y, z)) {
-            this.checkCornerChangeAt(level, x - 1, y + 1, z);
-        }
-        else {
-            this.checkCornerChangeAt(level, x - 1, y - 1, z);
-        }
-        if (level.isSolidBlockingTile(x + 1, y, z)) {
-            this.checkCornerChangeAt(level, x + 1, y + 1, z);
-        }
-        else {
-            this.checkCornerChangeAt(level, x + 1, y - 1, z);
-        }
-        if (level.isSolidBlockingTile(x, y, z - 1)) {
-            this.checkCornerChangeAt(level, x, y + 1, z - 1);
-        }
-        else {
-            this.checkCornerChangeAt(level, x, y - 1, z - 1);
-        }
-        if (level.isSolidBlockingTile(x, y, z + 1)) {
-            this.checkCornerChangeAt(level, x, y + 1, z + 1);
-        }
-        else {
-            this.checkCornerChangeAt(level, x, y - 1, z + 1);
-        }
+
+        if (level.isSolidBlockingTile(x - 1, y, z)) this.checkCornerChangeAt(level, x - 1, y + 1, z);
+        else this.checkCornerChangeAt(level, x - 1, y - 1, z);
+        if (level.isSolidBlockingTile(x + 1, y, z)) this.checkCornerChangeAt(level, x + 1, y + 1, z);
+        else this.checkCornerChangeAt(level, x + 1, y - 1, z);
+        if (level.isSolidBlockingTile(x, y, z - 1)) this.checkCornerChangeAt(level, x, y + 1, z - 1);
+        else this.checkCornerChangeAt(level, x, y - 1, z - 1);
+        if (level.isSolidBlockingTile(x, y, z + 1)) this.checkCornerChangeAt(level, x, y + 1, z + 1);
+        else this.checkCornerChangeAt(level, x, y - 1, z + 1);
     }
     
     private int checkTarget(final Level level, final int x, final int y, final int z, final int target) {
-        if (level.getTile(x, y, z) != this.id) {
-            return target;
-        }
-        final int data = level.getData(x, y, z);
-        if (data > target) {
-            return data;
-        }
+        if (level.getTile(x, y, z) != this.id) return target;
+        final int d = level.getData(x, y, z);
+        if (d > target) return d;
         return target;
     }
     
     @Override
     public void neighborChanged(final Level level, final int x, final int y, final int z, final int type) {
-        if (level.isClientSide) {
-            return;
-        }
-        final int data = level.getData(x, y, z);
-        if (!this.mayPlace(level, x, y, z)) {
-            this.spawnResources(level, x, y, z, data);
+        if (level.isClientSide) return;
+        final int face = level.getData(x, y, z);
+
+        boolean ok = this.mayPlace(level, x, y, z);
+
+        if (ok) {
+            this.updatePowerStrength(level, x, y, z);
+        } else {
+            this.spawnResources(level, x, y, z, face);
             level.setTile(x, y, z, 0);
         }
-        else {
-            this.updatePowerStrength(level, x, y, z);
-        }
+
         super.neighborChanged(level, x, y, z, type);
     }
     
@@ -296,39 +242,37 @@ public class RedStoneDustTile extends Tile
     
     @Override
     public boolean getDirectSignal(final Level level, final int x, final int y, final int z, final int dir) {
-        return this.shouldSignal && this.getSignal(level, x, y, z, dir);
+        if (!this.shouldSignal) return false;
+        return this.getSignal(level, x, y, z, dir);
     }
     
     @Override
     public boolean getSignal(final LevelSource level, final int x, final int y, final int z, final int dir) {
-        if (!this.shouldSignal) {
-            return false;
-        }
-        if (level.getData(x, y, z) == 0) {
-            return false;
-        }
-        if (dir == 1) {
-            return true;
-        }
-        boolean b = shouldReceivePowerFrom(level, x - 1, y, z, 1) || (!level.isSolidBlockingTile(x - 1, y, z) && shouldReceivePowerFrom(level, x - 1, y - 1, z, -1));
-        boolean b2 = shouldReceivePowerFrom(level, x + 1, y, z, 3) || (!level.isSolidBlockingTile(x + 1, y, z) && shouldReceivePowerFrom(level, x + 1, y - 1, z, -1));
-        boolean b3 = shouldReceivePowerFrom(level, x, y, z - 1, 2) || (!level.isSolidBlockingTile(x, y, z - 1) && shouldReceivePowerFrom(level, x, y - 1, z - 1, -1));
-        boolean b4 = shouldReceivePowerFrom(level, x, y, z + 1, 0) || (!level.isSolidBlockingTile(x, y, z + 1) && shouldReceivePowerFrom(level, x, y - 1, z + 1, -1));
+        if (!this.shouldSignal) return false;
+        if (level.getData(x, y, z) == 0) return false;
+
+        if (dir == 1) return true;
+
+        boolean w = shouldReceivePowerFrom(level, x - 1, y, z, Direction.WEST) || (!level.isSolidBlockingTile(x - 1, y, z) && shouldReceivePowerFrom(level, x - 1, y - 1, z, Direction.UNDEFINED));
+        boolean e = shouldReceivePowerFrom(level, x + 1, y, z, Direction.EAST) || (!level.isSolidBlockingTile(x + 1, y, z) && shouldReceivePowerFrom(level, x + 1, y - 1, z, Direction.UNDEFINED));
+        boolean n = shouldReceivePowerFrom(level, x, y, z - 1, Direction.NORTH) || (!level.isSolidBlockingTile(x, y, z - 1) && shouldReceivePowerFrom(level, x, y - 1, z - 1, Direction.UNDEFINED));
+        boolean s = shouldReceivePowerFrom(level, x, y, z + 1, Direction.SOUTH) || (!level.isSolidBlockingTile(x, y, z + 1) && shouldReceivePowerFrom(level, x, y - 1, z + 1, Direction.UNDEFINED));
+
         if (!level.isSolidBlockingTile(x, y + 1, z)) {
-            if (level.isSolidBlockingTile(x - 1, y, z) && shouldReceivePowerFrom(level, x - 1, y + 1, z, -1)) {
-                b = true;
-            }
-            if (level.isSolidBlockingTile(x + 1, y, z) && shouldReceivePowerFrom(level, x + 1, y + 1, z, -1)) {
-                b2 = true;
-            }
-            if (level.isSolidBlockingTile(x, y, z - 1) && shouldReceivePowerFrom(level, x, y + 1, z - 1, -1)) {
-                b3 = true;
-            }
-            if (level.isSolidBlockingTile(x, y, z + 1) && shouldReceivePowerFrom(level, x, y + 1, z + 1, -1)) {
-                b4 = true;
-            }
+            if (level.isSolidBlockingTile(x - 1, y, z) && shouldReceivePowerFrom(level, x - 1, y + 1, z, Direction.UNDEFINED)) w = true;
+            if (level.isSolidBlockingTile(x + 1, y, z) && shouldReceivePowerFrom(level, x + 1, y + 1, z, Direction.UNDEFINED)) e = true;
+            if (level.isSolidBlockingTile(x, y, z - 1) && shouldReceivePowerFrom(level, x, y + 1, z - 1, Direction.UNDEFINED)) n = true;
+            if (level.isSolidBlockingTile(x, y, z + 1) && shouldReceivePowerFrom(level, x, y + 1, z + 1, Direction.UNDEFINED)) s = true;
         }
-        return (!b3 && !b2 && !b && !b4 && dir >= 2 && dir <= 5) || (dir == 2 && b3 && !b && !b2) || (dir == 3 && b4 && !b && !b2) || (dir == 4 && b && !b3 && !b4) || (dir == 5 && b2 && !b3 && !b4);
+
+        if (!n && !e && !w && !s && dir >= 2 && dir <= 5) return true;
+
+        if (dir == 2 && n && !w && !e) return true;
+        if (dir == 3 && s && !w && !e) return true;
+        if (dir == 4 && w && !n && !s) return true;
+        if (dir == 5 && e && !n && !s) return true;
+
+        return false;
     }
     
     @Override
@@ -340,28 +284,32 @@ public class RedStoneDustTile extends Tile
     public void animateTick(final Level level, final int x, final int y, final int z, final Random random) {
         final int data = level.getData(x, y, z);
         if (data > 0) {
-            final double x2 = x + 0.5 + (random.nextFloat() - 0.5) * 0.2;
-            final double y2 = y + 0.0625f;
-            final double z2 = z + 0.5 + (random.nextFloat() - 0.5) * 0.2;
-            final float n = data / 15.0f;
-            float n2 = n * 0.6f + 0.4f;
-            if (data == 0) {
-                n2 = 0.0f;
-            }
-            float n3 = n * n * 0.7f - 0.5f;
-            float n4 = n * n * 0.6f - 0.7f;
-            if (n3 < 0.0f) {
-                n3 = 0.0f;
-            }
-            if (n4 < 0.0f) {
-                n4 = 0.0f;
-            }
-            level.addParticle("reddust", x2, y2, z2, n2, n3, n4);
+            final double xx = x + 0.5 + (random.nextFloat() - 0.5) * 0.2;
+            final double yy = y + 1 / 16.0f;
+            final double zz = z + 0.5 + (random.nextFloat() - 0.5) * 0.2;
+
+            // use the x movement variable to determine particle color
+            final float pow = data / 15.0f;
+            float red = pow * 0.6f + 0.4f;
+            if (data == 0) red = 0.0f;
+
+            float green = pow * pow * 0.7f - 0.5f;
+            float blue = pow * pow * 0.6f - 0.7f;
+            if (green < 0.0f) green = 0.0f;
+            if (blue < 0.0f) blue = 0.0f;
+
+            level.addParticle("reddust", xx, yy, zz, red, green, blue);
         }
     }
     
     public static boolean shouldReceivePowerFrom(final LevelSource level, final int x, final int y, final int z, final int direction) {
-        final int tile = level.getTile(x, y, z);
-        return tile == Tile.redStoneDust.id || (tile != 0 && (Tile.tiles[tile].isSignalSource() || ((tile == Tile.diode_off.id || tile == Tile.diode_on.id) && direction == Direction.DIRECTION_OPPOSITE[level.getData(x, y, z) & 0x3])));
+        final int t = level.getTile(x, y, z);
+        if (t == Tile.redStoneDust.id) return true;
+        if (t == 0) return false;
+        if (t == Tile.diode_off.id || t == Tile.diode_on.id) {
+            int data = level.getData(x, y, z);
+            if (direction == Direction.DIRECTION_OPPOSITE[data & DiodeTile.DIRECTION_MASK]) return true;
+        }
+        return Tile.tiles[t].isSignalSource();
     }
 }

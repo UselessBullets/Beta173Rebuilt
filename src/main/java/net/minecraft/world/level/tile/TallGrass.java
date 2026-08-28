@@ -22,30 +22,27 @@ public class TallGrass extends Bush
     
     @Override
     public int getTexture(final int face, final int data) {
-        if (data == 1) {
-            return this.tex;
-        }
-        if (data == 2) {
-            return this.tex + 16 + 1;
-        }
-        if (data == 0) {
-            return this.tex + 16;
-        }
+        if (data == TALL_GRASS) return this.tex;
+        if (data == FERN) return this.tex + 16 + 1;
+        if (data == DEAD_SHRUB) return this.tex + 16;
         return this.tex;
     }
     
     @Override
     public int getColor(final LevelSource level, int x, int y, int z) {
-        if (level.getData(x, y, z) == 0) {
-            return 16777215;
-        }
-        final long n = x * 3129871 + z * 6129781 + y;
-        final long n2 = n * n * 42317861L + n * 11L;
-        x += (int)(n2 >> 14 & 0x1FL);
-        y += (int)(n2 >> 19 & 0x1FL);
-        z += (int)(n2 >> 24 & 0x1FL);
+        if (level.getData(x, y, z) == DEAD_SHRUB) return 0xffffff;
+
+        long seed = x * 3129871L + z * 6129781L + y;
+        seed = seed * seed * 42317861L + seed * 11L;
+        x += (int)(seed >> 14 & 0x1FL);
+        y += (int)(seed >> 19 & 0x1FL);
+        z += (int)(seed >> 24 & 0x1FL);
+
         level.getBiomeSource().getBiomeBlock(x, z, 1, 1);
-        return GrassColor.get(level.getBiomeSource().temperatures[0], level.getBiomeSource().downfalls[0]);
+        double temp = level.getBiomeSource().temperatures[0];
+        double rain = level.getBiomeSource().downfalls[0];
+
+        return GrassColor.get(temp, rain);
     }
     
     @Override

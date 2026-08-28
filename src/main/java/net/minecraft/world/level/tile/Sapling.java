@@ -14,64 +14,69 @@ import net.minecraft.world.level.Level;
 
 public class Sapling extends Bush
 {
+    public static final int TYPE_DEFAULT = LeafTile.NORMAL_LEAF;
+    public static final int TYPE_EVERGREEN = LeafTile.EVERGREEN_LEAF;
+    public static final int TYPE_BIRCH = LeafTile.BIRCH_LEAF;
+    private static final int TYPE_MASK = 0x3;
+    private static final int AGE_BIT = 0x8;
     protected Sapling(final int id, final int tex) {
         super(id, tex);
-        final float n = 0.4f;
-        this.setShape(0.5f - n, 0.0f, 0.5f - n, 0.5f + n, n * 2.0f, 0.5f + n);
+        final float ss = 0.4f;
+        this.setShape(0.5f - ss, 0.0f, 0.5f - ss, 0.5f + ss, ss * 2.0f, 0.5f + ss);
     }
     
     @Override
     public void tick(final Level level, final int x, final int y, final int z, final Random random) {
-        if (level.isClientSide) {
-            return;
-        }
+        if (level.isClientSide) return;
+
         super.tick(level, x, y, z, random);
-        if (level.getRawBrightness(x, y + 1, z) >= 9 && random.nextInt(30) == 0) {
-            final int data = level.getData(x, y, z);
-            if ((data & 0x8) == 0x0) {
-                level.setData(x, y, z, data | 0x8);
-            }
-            else {
-                this.growTree(level, x, y, z, random);
+
+        if (level.getRawBrightness(x, y + 1, z) >= (Level.MAX_BRIGHTNESS - 6)) {
+            if (random.nextInt(30) == 0) {
+                final int data = level.getData(x, y, z);
+                if ((data & AGE_BIT) == 0x0) {
+                    level.setData(x, y, z, data | AGE_BIT);
+                } else {
+                    this.growTree(level, x, y, z, random);
+                }
             }
         }
     }
     
     @Override
     public int getTexture(final int face, int data) {
-        data &= 0x3;
-        if (data == 1) {
-            return 63;
-        }
-        if (data == 2) {
-            return 79;
-        }
+        data &= TYPE_MASK;
+        if (data == TYPE_EVERGREEN) return 63;
+        if (data == TYPE_BIRCH) return 79;
         return super.getTexture(face, data);
     }
     
     public void growTree(final Level level, final int x, final int y, final int z, final Random random) {
-        final int data = level.getData(x, y, z) & 0x3;
+        final int data = level.getData(x, y, z) & TYPE_MASK;
+
         level.setTileNoUpdate(x, y, z, 0);
-        Feature feature;
-        if (data == 1) {
-            feature = new SpruceFeature();
+
+        Feature f = null;
+        if (data == TYPE_EVERGREEN) {
+            f = new SpruceFeature();
         }
-        else if (data == 2) {
-            feature = new BirchFeature();
+        else if (data == TYPE_BIRCH) {
+            f = new BirchFeature();
         }
         else {
-            feature = new TreeFeature();
+            f = new TreeFeature();
             if (random.nextInt(10) == 0) {
-                feature = new BasicTree();
+                f = new BasicTree();
             }
         }
-        if (!feature.place(level, random, x, y, z)) {
+
+        if (!f.place(level, random, x, y, z)) {
             level.setTileAndDataNoUpdate(x, y, z, this.id, data);
         }
     }
     
     @Override
     protected int getSpawnResourcesAuxValue(final int data) {
-        return data & 0x3;
+        return data & TYPE_MASK;
     }
 }

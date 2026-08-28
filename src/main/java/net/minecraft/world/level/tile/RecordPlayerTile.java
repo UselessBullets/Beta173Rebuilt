@@ -46,9 +46,7 @@ public class RecordPlayerTile extends EntityTile
     }
     
     public void dropRecording(final Level level, final int x, final int y, final int z) {
-        if (level.isClientSide) {
-            return;
-        }
+        if (level.isClientSide) return;
 
         final Entity rte = (Entity)level.getTileEntity(x, y, z);
 
@@ -61,10 +59,10 @@ public class RecordPlayerTile extends EntityTile
         rte.setChanged();
         level.setData(x, y, z, 0);
 
-        final float n = 0.7f;
-        double xo = x + (level.random.nextFloat() * n + (1.0f - n) * 0.5);
-        double yo = y + (level.random.nextFloat() * n + (1.0f - n) * 0.2 + 0.6);
-        double zo = z + (level.random.nextFloat() * n + (1.0f - n) * 0.5);
+        final float s = 0.7f;
+        double xo = x + (level.random.nextFloat() * s + (1.0f - s) * 0.5);
+        double yo = y + (level.random.nextFloat() * s + (1.0f - s) * 0.2 + 0.6);
+        double zo = z + (level.random.nextFloat() * s + (1.0f - s) * 0.5);
         final ItemEntity item = new ItemEntity(level, xo, yo, zo, new ItemInstance(oldRecord, 1, 0));
         item.throwTime = 10;
         level.addEntity(item);

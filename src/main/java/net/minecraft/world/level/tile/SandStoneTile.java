@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.Facing;
 import net.minecraft.world.level.material.Material;
 
 public class SandStoneTile extends Tile
@@ -14,12 +15,8 @@ public class SandStoneTile extends Tile
     
     @Override
     public int getTexture(final int face) {
-        if (face == 1) {
-            return this.tex - 16;
-        }
-        if (face == 0) {
-            return this.tex + 16;
-        }
+        if (face == Facing.UP) return this.tex - 16;
+        if (face == Facing.DOWN) return this.tex + 16;
         return this.tex;
     }
 }

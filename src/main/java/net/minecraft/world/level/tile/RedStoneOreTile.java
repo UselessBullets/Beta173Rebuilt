@@ -79,31 +79,19 @@ public class RedStoneOreTile extends Tile
     
     private void poofParticles(final Level level, final int x, final int y, final int z) {
         final Random random = level.random;
-        final double n = 0.0625;
+        final double r = 1 / 16.0f;
         for (int i = 0; i < 6; ++i) {
-            double x2 = x + random.nextFloat();
-            double y2 = y + random.nextFloat();
-            double z2 = z + random.nextFloat();
-            if (i == 0 && !level.isSolidTile(x, y + 1, z)) {
-                y2 = y + 1 + n;
-            }
-            if (i == 1 && !level.isSolidTile(x, y - 1, z)) {
-                y2 = y + 0 - n;
-            }
-            if (i == 2 && !level.isSolidTile(x, y, z + 1)) {
-                z2 = z + 1 + n;
-            }
-            if (i == 3 && !level.isSolidTile(x, y, z - 1)) {
-                z2 = z + 0 - n;
-            }
-            if (i == 4 && !level.isSolidTile(x + 1, y, z)) {
-                x2 = x + 1 + n;
-            }
-            if (i == 5 && !level.isSolidTile(x - 1, y, z)) {
-                x2 = x + 0 - n;
-            }
-            if (x2 < x || x2 > x + 1 || y2 < 0.0 || y2 > y + 1 || z2 < z || z2 > z + 1) {
-                level.addParticle("reddust", x2, y2, z2, 0.0, 0.0, 0.0);
+            double xx = x + random.nextFloat();
+            double yy = y + random.nextFloat();
+            double zz = z + random.nextFloat();
+            if (i == 0 && !level.isSolidTile(x, y + 1, z)) yy = y + 1 + r;
+            if (i == 1 && !level.isSolidTile(x, y - 1, z)) yy = y + 0 - r;
+            if (i == 2 && !level.isSolidTile(x, y, z + 1)) zz = z + 1 + r;
+            if (i == 3 && !level.isSolidTile(x, y, z - 1)) zz = z + 0 - r;
+            if (i == 4 && !level.isSolidTile(x + 1, y, z)) xx = x + 1 + r;
+            if (i == 5 && !level.isSolidTile(x - 1, y, z)) xx = x + 0 - r;
+            if (xx < x || xx > x + 1 || yy < 0.0 || yy > y + 1 || zz < z || zz > z + 1) {
+                level.addParticle("reddust", xx, yy, zz, 0.0, 0.0, 0.0);
             }
         }
     }

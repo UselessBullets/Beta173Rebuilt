@@ -24,19 +24,19 @@ public class RailTile extends Tile
     public static final int RAIL_DIRECTION_MASK = 0b111;
     private final boolean usesDataBit;
     
-    public static final boolean isRail(final Level level, final int x, final int y, final int z) {
+    public static boolean isRail(final Level level, final int x, final int y, final int z) {
         final int tile = level.getTile(x, y, z);
         return tile == Tile.rail.id || tile == Tile.goldenRail.id || tile == Tile.detectorRail.id;
     }
     
-    public static final boolean isRail(final int id) {
+    public static boolean isRail(final int id) {
         return id == Tile.rail.id || id == Tile.goldenRail.id || id == Tile.detectorRail.id;
     }
     
     protected RailTile(final int id, final int tex, final boolean usesDataBit) {
         super(id, tex, Material.decoration);
         this.usesDataBit = usesDataBit;
-        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.125f, 1.0f);
+        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 2 / 16.0f, 1.0f);
     }
     
     public boolean isUsesDataBit() {
@@ -63,23 +63,23 @@ public class RailTile extends Tile
     public void updateShape(final LevelSource level, final int x, final int y, final int z) {
         final int data = level.getData(x, y, z);
         if (data >= 2 && data <= 5) {
-            this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.625f, 1.0f);
+            this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 2 / 16.0f + 0.5f, 1.0f);
         }
         else {
-            this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.125f, 1.0f);
+            this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 2 / 16.0f, 1.0f);
         }
     }
     
     @Override
     public int getTexture(final int face, final int data) {
         if (this.usesDataBit) {
-            if (this.id == Tile.goldenRail.id && (data & 0x8) == 0x0) {
-                return this.tex - 16;
+            if (this.id == Tile.goldenRail.id) {
+                if ((data & RAIL_DATA_BIT) == 0x0) {
+                    return this.tex - 16;
+                }
             }
         }
-        else if (data >= 6) {
-            return this.tex - 16;
-        }
+        else if (data >= 6) return this.tex - 16;
         return this.tex;
     }
     
@@ -100,7 +100,10 @@ public class RailTile extends Tile
     
     @Override
     public boolean mayPlace(final Level level, final int x, final int y, final int z) {
-        return level.isSolidBlockingTile(x, y - 1, z);
+        if (level.isSolidBlockingTile(x, y - 1, z)) {
+            return true;
+        }
+        return false;
     }
     
     @Override
@@ -112,151 +115,147 @@ public class RailTile extends Tile
     
     @Override
     public void neighborChanged(final Level level, final int x, final int y, final int z, final int type) {
-        if (level.isClientSide) {
-            return;
-        }
-        int data;
-        final int n = data = level.getData(x, y, z);
+        if (level.isClientSide) return;
+
+        final int data = level.getData(x, y, z);
+        int dir = data;
         if (this.usesDataBit) {
-            data &= 0x7;
+            dir &= RAIL_DIRECTION_MASK;
         }
-        boolean b = false;
-        if (!level.isSolidBlockingTile(x, y - 1, z)) {
-            b = true;
-        }
-        if (data == 2 && !level.isSolidBlockingTile(x + 1, y, z)) {
-            b = true;
-        }
-        if (data == 3 && !level.isSolidBlockingTile(x - 1, y, z)) {
-            b = true;
-        }
-        if (data == 4 && !level.isSolidBlockingTile(x, y, z - 1)) {
-            b = true;
-        }
-        if (data == 5 && !level.isSolidBlockingTile(x, y, z + 1)) {
-            b = true;
-        }
-        if (b) {
+        boolean remove = false;
+
+        if (!level.isSolidBlockingTile(x, y - 1, z)) remove = true;
+        if (dir == 2 && !level.isSolidBlockingTile(x + 1, y, z)) remove = true;
+        if (dir == 3 && !level.isSolidBlockingTile(x - 1, y, z)) remove = true;
+        if (dir == 4 && !level.isSolidBlockingTile(x, y, z - 1)) remove = true;
+        if (dir == 5 && !level.isSolidBlockingTile(x, y, z + 1)) remove = true;
+
+        if (remove) {
             this.spawnResources(level, x, y, z, level.getData(x, y, z));
             level.setTile(x, y, z, 0);
         }
-        else if (this.id == Tile.goldenRail.id) {
-            final boolean b2 = level.hasNeighborSignal(x, y, z) || level.hasNeighborSignal(x, y + 1, z) || this.findGoldenRailSignal(level, x, y, z, n, true, 0) || this.findGoldenRailSignal(level, x, y, z, n, false, 0);
-            boolean b3 = false;
-            if (b2 && (n & 0x8) == 0x0) {
-                level.setData(x, y, z, data | 0x8);
-                b3 = true;
-            }
-            else if (!b2 && (n & 0x8) != 0x0) {
-                level.setData(x, y, z, data);
-                b3 = true;
-            }
-            if (b3) {
-                level.updateNeighborsAt(x, y - 1, z, this.id);
-                if (data == 2 || data == 3 || data == 4 || data == 5) {
-                    level.updateNeighborsAt(x, y + 1, z, this.id);
+        else {
+            if (this.id == Tile.goldenRail.id) {
+                boolean signal = level.hasNeighborSignal(x, y, z) || level.hasNeighborSignal(x, y + 1, z);
+                signal = signal || this.findGoldenRailSignal(level, x, y, z, data, true, 0) || this.findGoldenRailSignal(level, x, y, z, data, false, 0);
+
+                boolean changed = false;
+                if (signal && (data & RAIL_DATA_BIT) == 0x0) {
+                    level.setData(x, y, z, dir | RAIL_DATA_BIT);
+                    changed = true;
+                } else if (!signal && (data & RAIL_DATA_BIT) != 0x0) {
+                    level.setData(x, y, z, dir);
+                    changed = true;
+                }
+
+                // usually the level only updates neighbors that are in the same
+                // y plane as the current tile, but sloped rails may need to
+                // update tiles above or below it as well
+                if (changed) {
+                    level.updateNeighborsAt(x, y - 1, z, this.id);
+                    if (dir == 2 || dir == 3 || dir == 4 || dir == 5) {
+                        level.updateNeighborsAt(x, y + 1, z, this.id);
+                    }
+                }
+            } else if (type > 0 && Tile.tiles[type].isSignalSource() && !this.usesDataBit) {
+                Rail rail = new Rail(level, x, y, z);
+                if (rail.countPotentialConnections() == 3) {
+                    this.updateDir(level, x, y, z, false);
                 }
             }
-        }
-        else if (type > 0 && Tile.tiles[type].isSignalSource() && !this.usesDataBit && new Rail(this, level, x, y, z).countPotentialConnections() == 3) {
-            this.updateDir(level, x, y, z, false);
         }
     }
     
     private void updateDir(final Level level, final int x, final int y, final int z, final boolean first) {
-        if (level.isClientSide) {
-            return;
-        }
-        new Rail(this, level, x, y, z).place(level.hasNeighborSignal(x, y, z), first);
+        if (level.isClientSide) return;
+        Rail rail = new Rail(level, x, y, z);
+        rail.place(level.hasNeighborSignal(x, y, z), first);
     }
     
     private boolean findGoldenRailSignal(final Level level, int x, int y, int z, final int data, final boolean forward, final int searchDepth) {
         if (searchDepth >= 8) {
             return false;
         }
-        int n = data & 0x7;
-        boolean b = true;
-        switch (n) {
-            case 0: {
-                if (forward) {
-                    ++z;
-                    break;
-                }
-                --z;
+
+        int dir = data & RAIL_DIRECTION_MASK;
+        boolean checkBelow = true;
+        switch (dir) {
+            case DIR_FLAT_Z: {
+                if (forward) z++;
+                else z--;
                 break;
             }
-            case 1: {
-                if (forward) {
-                    --x;
-                    break;
-                }
-                ++x;
+            case DIR_FLAT_X: {
+                if (forward) x--;
+                else x++;
                 break;
             }
             case 2: {
-                if (forward) {
-                    --x;
-                }
+                if (forward) x--;
                 else {
-                    ++x;
-                    ++y;
-                    b = false;
+                    x++;
+                    y++;
+                    checkBelow = false;
                 }
-                n = 1;
+                dir = DIR_FLAT_X;
                 break;
             }
             case 3: {
                 if (forward) {
-                    --x;
-                    ++y;
-                    b = false;
+                    x--;
+                    y++;
+                    checkBelow = false;
                 }
-                else {
-                    ++x;
-                }
-                n = 1;
+                else x++;
+                dir = DIR_FLAT_X;
                 break;
             }
             case 4: {
-                if (forward) {
-                    ++z;
-                }
+                if (forward) z++;
                 else {
-                    --z;
-                    ++y;
-                    b = false;
+                    z--;
+                    y++;
+                    checkBelow = false;
                 }
-                n = 0;
+                dir = DIR_FLAT_Z;
                 break;
             }
             case 5: {
                 if (forward) {
-                    ++z;
-                    ++y;
-                    b = false;
+                    z++;
+                    y++;
+                    checkBelow = false;
                 }
-                else {
-                    --z;
-                }
-                n = 0;
+                else z--;
+                dir = DIR_FLAT_Z;
                 break;
             }
         }
-        return this.isGoldenRailWithPower(level, x, y, z, forward, searchDepth, n) || (b && this.isGoldenRailWithPower(level, x, y - 1, z, forward, searchDepth, n));
+        if (this.isGoldenRailWithPower(level, x, y, z, forward, searchDepth, dir)) {
+            return true;
+        }
+        if (checkBelow && this.isGoldenRailWithPower(level, x, y - 1, z, forward, searchDepth, dir)) {
+            return true;
+        }
+        return false;
     }
     
     private boolean isGoldenRailWithPower(final Level level, final int x, final int y, final int z, final boolean forward, final int searchDepth, final int dir) {
-        if (level.getTile(x, y, z) == Tile.goldenRail.id) {
-            final int data = level.getData(x, y, z);
-            final int n = data & 0x7;
-            if (dir == 1 && (n == 0 || n == 4 || n == 5)) {
+        int tile = level.getTile(x, y, z);
+        if (tile == Tile.goldenRail.id) {
+            final int tileData = level.getData(x, y, z);
+            final int myDir = tileData & RAIL_DIRECTION_MASK;
+            if (dir == DIR_FLAT_X && (myDir == DIR_FLAT_Z || myDir == 4 || myDir == 5)) {
                 return false;
             }
-            if (dir == 0 && (n == 1 || n == 2 || n == 3)) {
+            if (dir == DIR_FLAT_Z && (myDir == DIR_FLAT_X || myDir == 2 || myDir == 3)) {
                 return false;
             }
-            if ((data & 0x8) != 0x0) {
-                return level.hasNeighborSignal(x, y, z) || level.hasNeighborSignal(x, y + 1, z) || this.findGoldenRailSignal(level, x, y, z, data, forward, searchDepth + 1);
+
+            if ((tileData & RAIL_DATA_BIT) != 0x0) {
+                if (level.hasNeighborSignal(x, y, z)) return true;
+                if (level.hasNeighborSignal(x, y + 1, z)) return true;
+                return this.findGoldenRailSignal(level, x, y, z, tileData, forward, searchDepth + 1);
             }
         }
         return false;
@@ -270,39 +269,36 @@ public class RailTile extends Tile
     static class Rail
     {
         private Level level;
-        private int x;
-        private int y;
-        private int z;
+        private int x, y, z;
         private final boolean usesDataBit;
-        private List<TilePos> connections;
-        final /* synthetic */ RailTile rt;
+        private List<TilePos> connections = new ArrayList<>();
 
-        public Rail(final RailTile rt, final Level level, final int x, final int y, final int z) {
-            this.rt = rt;
-            this.connections = new ArrayList();
+        public Rail(final Level level, final int x, final int y, final int z) {
             this.level = level;
             this.x = x;
             this.y = y;
             this.z = z;
-            final int tile = level.getTile(x, y, z);
-            int data = level.getData(x, y, z);
-            if (((RailTile) tiles[tile]).usesDataBit) {
+
+            final int id = level.getTile(x, y, z);
+
+            int direction = level.getData(x, y, z);
+            if (((RailTile) tiles[id]).usesDataBit) {
                 this.usesDataBit = true;
-                data &= 0xFFFFFFF7;
+                direction &= ~RAIL_DATA_BIT;
             }
             else {
                 this.usesDataBit = false;
             }
-            this.updateConnections(data);
+            this.updateConnections(direction);
         }
 
         private void updateConnections(final int direction) {
             this.connections.clear();
-            if (direction == 0) {
+            if (direction == DIR_FLAT_Z) {
                 this.connections.add(new TilePos(this.x, this.y, this.z - 1));
                 this.connections.add(new TilePos(this.x, this.y, this.z + 1));
             }
-            else if (direction == 1) {
+            else if (direction == DIR_FLAT_X) {
                 this.connections.add(new TilePos(this.x - 1, this.y, this.z));
                 this.connections.add(new TilePos(this.x + 1, this.y, this.z));
             }
@@ -344,7 +340,8 @@ public class RailTile extends Tile
             for (int i = 0; i < this.connections.size(); ++i) {
                 final Rail rail = this.getRail(this.connections.get(i));
                 if (rail == null || !rail.connectsTo(this)) {
-                    this.connections.remove(i--);
+                    this.connections.remove(i);
+                    i--;
                 }
                 else {
                     this.connections.set(i, new TilePos(rail.x, rail.y, rail.z));
@@ -353,26 +350,23 @@ public class RailTile extends Tile
         }
 
         private boolean hasRail(final int x, final int y, final int z) {
-            return isRail(this.level, x, y, z) || isRail(this.level, x, y + 1, z) || isRail(this.level, x, y - 1, z);
+            if (isRail(this.level, x, y, z)) return true;
+            if (isRail(this.level, x, y + 1, z)) return true;
+            if (isRail(this.level, x, y - 1, z)) return true;
+            return false;
         }
 
         private Rail getRail(final TilePos p) {
-            if (isRail(this.level, p.x, p.y, p.z)) {
-                return new Rail(this.rt, this.level, p.x, p.y, p.z);
-            }
-            if (isRail(this.level, p.x, p.y + 1, p.z)) {
-                return new Rail(this.rt, this.level, p.x, p.y + 1, p.z);
-            }
-            if (isRail(this.level, p.x, p.y - 1, p.z)) {
-                return new Rail(this.rt, this.level, p.x, p.y - 1, p.z);
-            }
+            if (isRail(this.level, p.x, p.y, p.z)) return new Rail(this.level, p.x, p.y, p.z);
+            if (isRail(this.level, p.x, p.y + 1, p.z)) return new Rail(this.level, p.x, p.y + 1, p.z);
+            if (isRail(this.level, p.x, p.y - 1, p.z)) return new Rail(this.level, p.x, p.y - 1, p.z);
             return null;
         }
 
         private boolean connectsTo(final Rail rail) {
             for (int i = 0; i < this.connections.size(); ++i) {
-                final TilePos tilePos = this.connections.get(i);
-                if (tilePos.x == rail.x && tilePos.z == rail.z) {
+                final TilePos p = this.connections.get(i);
+                if (p.x == rail.x && p.z == rail.z) {
                     return true;
                 }
             }
@@ -381,8 +375,8 @@ public class RailTile extends Tile
 
         private boolean hasConnection(final int x, final int y, final int z) {
             for (int i = 0; i < this.connections.size(); ++i) {
-                final TilePos tilePos = this.connections.get(i);
-                if (tilePos.x == x && tilePos.z == z) {
+                final TilePos p = this.connections.get(i);
+                if (p.x == x && p.z == z) {
                     return true;
                 }
             }
@@ -390,195 +384,138 @@ public class RailTile extends Tile
         }
 
         private int countPotentialConnections() {
-            int n = 0;
-            if (this.hasRail(this.x, this.y, this.z - 1)) {
-                ++n;
-            }
-            if (this.hasRail(this.x, this.y, this.z + 1)) {
-                ++n;
-            }
-            if (this.hasRail(this.x - 1, this.y, this.z)) {
-                ++n;
-            }
-            if (this.hasRail(this.x + 1, this.y, this.z)) {
-                ++n;
-            }
-            return n;
+            int count = 0;
+
+            if (this.hasRail(this.x, this.y, this.z - 1)) count++;
+            if (this.hasRail(this.x, this.y, this.z + 1)) count++;
+            if (this.hasRail(this.x - 1, this.y, this.z)) count++;
+            if (this.hasRail(this.x + 1, this.y, this.z)) count++;
+
+            return count;
         }
 
         private boolean canConnectTo(final Rail rail) {
-            if (this.connectsTo(rail)) {
-                return true;
-            }
+            if (this.connectsTo(rail)) return true;
             if (this.connections.size() == 2) {
                 return false;
             }
-            if (this.connections.size() == 0) {
+            if (this.connections.isEmpty()) {
                 return true;
             }
-            final TilePos tilePos = this.connections.get(0);
-            return rail.y != this.y || tilePos.y != this.y || true;
+
+            final TilePos c = this.connections.get(0);
+            return rail.y == this.y && c.y == this.y ? true : true;
         }
 
         private void connectTo(final Rail rail) {
             this.connections.add(new TilePos(rail.x, rail.y, rail.z));
-            final boolean hasConnection = this.hasConnection(this.x, this.y, this.z - 1);
-            final boolean hasConnection2 = this.hasConnection(this.x, this.y, this.z + 1);
-            final boolean hasConnection3 = this.hasConnection(this.x - 1, this.y, this.z);
-            final boolean hasConnection4 = this.hasConnection(this.x + 1, this.y, this.z);
-            int n = -1;
-            if (hasConnection || hasConnection2) {
-                n = 0;
-            }
-            if (hasConnection3 || hasConnection4) {
-                n = 1;
-            }
+
+            final boolean n = this.hasConnection(this.x, this.y, this.z - 1);
+            final boolean s = this.hasConnection(this.x, this.y, this.z + 1);
+            final boolean w = this.hasConnection(this.x - 1, this.y, this.z);
+            final boolean e = this.hasConnection(this.x + 1, this.y, this.z);
+
+            int dir = -1;
+
+            if (n || s) dir = DIR_FLAT_Z;
+            if (w || e) dir = DIR_FLAT_X;
+
             if (!this.usesDataBit) {
-                if (hasConnection2 && hasConnection4 && !hasConnection && !hasConnection3) {
-                    n = 6;
-                }
-                if (hasConnection2 && hasConnection3 && !hasConnection && !hasConnection4) {
-                    n = 7;
-                }
-                if (hasConnection && hasConnection3 && !hasConnection2 && !hasConnection4) {
-                    n = 8;
-                }
-                if (hasConnection && hasConnection4 && !hasConnection2 && !hasConnection3) {
-                    n = 9;
-                }
+                if (s && e && !n && !w) dir = 6;
+                if (s && w && !n && !e) dir = 7;
+                if (n && w && !s && !e) dir = 8;
+                if (n && e && !s && !w) dir = 9;
             }
-            if (n == 0) {
-                if (isRail(this.level, this.x, this.y + 1, this.z - 1)) {
-                    n = 4;
-                }
-                if (isRail(this.level, this.x, this.y + 1, this.z + 1)) {
-                    n = 5;
-                }
+            if (dir == DIR_FLAT_Z) {
+                if (isRail(this.level, this.x, this.y + 1, this.z - 1)) dir = 4;
+                if (isRail(this.level, this.x, this.y + 1, this.z + 1)) dir = 5;
             }
-            if (n == 1) {
-                if (isRail(this.level, this.x + 1, this.y + 1, this.z)) {
-                    n = 2;
-                }
-                if (isRail(this.level, this.x - 1, this.y + 1, this.z)) {
-                    n = 3;
-                }
+            if (dir == DIR_FLAT_X) {
+                if (isRail(this.level, this.x + 1, this.y + 1, this.z)) dir = 2;
+                if (isRail(this.level, this.x - 1, this.y + 1, this.z)) dir = 3;
             }
-            if (n < 0) {
-                n = 0;
-            }
-            int data = n;
+
+            if (dir < 0) dir = DIR_FLAT_Z;
+
+            int data = dir;
             if (this.usesDataBit) {
-                data = ((this.level.getData(this.x, this.y, this.z) & 0x8) | n);
+                data = ((this.level.getData(this.x, this.y, this.z) & RAIL_DATA_BIT) | dir);
             }
+
             this.level.setData(this.x, this.y, this.z, data);
         }
 
         private boolean hasNeighborRail(final int x, final int y, final int z) {
-            final Rail rail = this.getRail(new TilePos(x, y, z));
-            if (rail == null) {
-                return false;
-            }
-            rail.removeSoftConnections();
-            return rail.canConnectTo(this);
+            TilePos tp = new TilePos(x, y, z);
+            final Rail neighbor = this.getRail(tp);
+            if (neighbor == null) return false;
+            neighbor.removeSoftConnections();
+            return neighbor.canConnectTo(this);
         }
 
         public void place(final boolean hasSignal, final boolean first) {
-            final boolean hasNeighborRail = this.hasNeighborRail(this.x, this.y, this.z - 1);
-            final boolean hasNeighborRail2 = this.hasNeighborRail(this.x, this.y, this.z + 1);
-            final boolean hasNeighborRail3 = this.hasNeighborRail(this.x - 1, this.y, this.z);
-            final boolean hasNeighborRail4 = this.hasNeighborRail(this.x + 1, this.y, this.z);
-            int direction = -1;
-            if ((hasNeighborRail || hasNeighborRail2) && !hasNeighborRail3 && !hasNeighborRail4) {
-                direction = 0;
-            }
-            if ((hasNeighborRail3 || hasNeighborRail4) && !hasNeighborRail && !hasNeighborRail2) {
-                direction = 1;
-            }
+            final boolean n = this.hasNeighborRail(this.x, this.y, this.z - 1);
+            final boolean s = this.hasNeighborRail(this.x, this.y, this.z + 1);
+            final boolean w = this.hasNeighborRail(this.x - 1, this.y, this.z);
+            final boolean e = this.hasNeighborRail(this.x + 1, this.y, this.z);
+
+            int dir = -1;
+            if ((n || s) && !w && !e) dir = DIR_FLAT_Z;
+            if ((w || e) && !n && !s) dir = DIR_FLAT_X;
+
             if (!this.usesDataBit) {
-                if (hasNeighborRail2 && hasNeighborRail4 && !hasNeighborRail && !hasNeighborRail3) {
-                    direction = 6;
-                }
-                if (hasNeighborRail2 && hasNeighborRail3 && !hasNeighborRail && !hasNeighborRail4) {
-                    direction = 7;
-                }
-                if (hasNeighborRail && hasNeighborRail3 && !hasNeighborRail2 && !hasNeighborRail4) {
-                    direction = 8;
-                }
-                if (hasNeighborRail && hasNeighborRail4 && !hasNeighborRail2 && !hasNeighborRail3) {
-                    direction = 9;
-                }
+                if (s && e && !n && !w) dir = 6;
+                if (s && w && !n && !e) dir = 7;
+                if (n && w && !s && !e) dir = 8;
+                if (n && e && !s && !w) dir = 9;
             }
-            if (direction == -1) {
-                if (hasNeighborRail || hasNeighborRail2) {
-                    direction = 0;
-                }
-                if (hasNeighborRail3 || hasNeighborRail4) {
-                    direction = 1;
-                }
+            if (dir == -1) {
+                if (n || s) dir = DIR_FLAT_Z;
+                if (w || e) dir = DIR_FLAT_X;
+
                 if (!this.usesDataBit) {
                     if (hasSignal) {
-                        if (hasNeighborRail2 && hasNeighborRail4) {
-                            direction = 6;
-                        }
-                        if (hasNeighborRail3 && hasNeighborRail2) {
-                            direction = 7;
-                        }
-                        if (hasNeighborRail4 && hasNeighborRail) {
-                            direction = 9;
-                        }
-                        if (hasNeighborRail && hasNeighborRail3) {
-                            direction = 8;
-                        }
+                        if (s && e) dir = 6;
+                        if (w && s) dir = 7;
+                        if (e && n) dir = 9;
+                        if (n && w) dir = 8;
                     }
                     else {
-                        if (hasNeighborRail && hasNeighborRail3) {
-                            direction = 8;
-                        }
-                        if (hasNeighborRail4 && hasNeighborRail) {
-                            direction = 9;
-                        }
-                        if (hasNeighborRail3 && hasNeighborRail2) {
-                            direction = 7;
-                        }
-                        if (hasNeighborRail2 && hasNeighborRail4) {
-                            direction = 6;
-                        }
+                        if (n && w) dir = 8;
+                        if (e && n) dir = 9;
+                        if (w && s) dir = 7;
+                        if (s && e) dir = 6;
                     }
                 }
             }
-            if (direction == 0) {
-                if (isRail(this.level, this.x, this.y + 1, this.z - 1)) {
-                    direction = 4;
-                }
-                if (isRail(this.level, this.x, this.y + 1, this.z + 1)) {
-                    direction = 5;
-                }
+
+            if (dir == DIR_FLAT_Z) {
+                if (isRail(this.level, this.x, this.y + 1, this.z - 1)) dir = 4;
+                if (isRail(this.level, this.x, this.y + 1, this.z + 1)) dir = 5;
             }
-            if (direction == 1) {
-                if (isRail(this.level, this.x + 1, this.y + 1, this.z)) {
-                    direction = 2;
-                }
-                if (isRail(this.level, this.x - 1, this.y + 1, this.z)) {
-                    direction = 3;
-                }
+            if (dir == DIR_FLAT_X) {
+                if (isRail(this.level, this.x + 1, this.y + 1, this.z)) dir = 2;
+                if (isRail(this.level, this.x - 1, this.y + 1, this.z)) dir = 3;
             }
-            if (direction < 0) {
-                direction = 0;
-            }
-            this.updateConnections(direction);
-            int data = direction;
+
+            if (dir < 0) dir = DIR_FLAT_Z;
+
+            this.updateConnections(dir);
+
+            int data = dir;
             if (this.usesDataBit) {
-                data = ((this.level.getData(this.x, this.y, this.z) & 0x8) | direction);
+                data = ((this.level.getData(this.x, this.y, this.z) & 0x8) | dir);
             }
+
             if (first || this.level.getData(this.x, this.y, this.z) != data) {
                 this.level.setData(this.x, this.y, this.z, data);
                 for (int i = 0; i < this.connections.size(); ++i) {
-                    final Rail rail = this.getRail(this.connections.get(i));
-                    if (rail != null) {
-                        rail.removeSoftConnections();
-                        if (rail.canConnectTo(this)) {
-                            rail.connectTo(this);
-                        }
+                    final Rail neighbor = this.getRail(this.connections.get(i));
+                    if (neighbor == null) continue;
+                    neighbor.removeSoftConnections();
+
+                    if (neighbor.canConnectTo(this)) {
+                        neighbor.connectTo(this);
                     }
                 }
             }

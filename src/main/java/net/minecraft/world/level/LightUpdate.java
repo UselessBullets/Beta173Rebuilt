@@ -10,8 +10,9 @@ import net.minecraft.world.level.tile.Tile;
 public class LightUpdate
 {
     public final LightLayer layer;
-    public int x0, y0, z0, x1, y1, z1;
-    
+    public int x0, y0, z0;
+    public int x1, y1, z1;
+
     public LightUpdate(final LightLayer layer, final int x0, final int y0, final int z0, final int x1, final int y1, final int z1) {
         this.layer = layer;
         this.x0 = x0;

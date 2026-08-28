@@ -213,32 +213,32 @@ public class Level implements LevelSource
     
     public void loadPlayer(final Player player) {
         try {
-            final CompoundTag loadedPlayerTag = this.levelData.getLoadedPlayerTag();
-            if (loadedPlayerTag != null) {
-                player.load(loadedPlayerTag);
+            final CompoundTag playerTag = this.levelData.getLoadedPlayerTag();
+            if (playerTag != null) {
+                player.load(playerTag);
                 this.levelData.setLoadedPlayerTag(null);
             }
+
             if (this.chunkSource instanceof ChunkCache) {
-                ((ChunkCache)this.chunkSource).centerOn(Mth.floor((float)(int)player.x) >> 4, Mth.floor((float)(int)player.z) >> 4);
+                ChunkCache cache = (ChunkCache) this.chunkSource;
+                int xc = Mth.floor((float) (int) player.x) >> 4;
+                int zc = Mth.floor((float) (int) player.z) >> 4;
+                cache.centerOn(xc, zc);
             }
             this.addEntity(player);
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
     }
     
     public void save(final boolean force, final ProgressListener progressListener) {
-        if (!this.chunkSource.shouldSave()) {
-            return;
-        }
-        if (progressListener != null) {
-            progressListener.progressStartNoAbort("Saving level");
-        }
+        if (!this.chunkSource.shouldSave()) return;
+
+        if (progressListener != null) progressListener.progressStartNoAbort("Saving level");
         this.saveLevelData();
-        if (progressListener != null) {
-            progressListener.progressStage("Saving chunks");
-        }
+        if (progressListener != null) progressListener.progressStage("Saving chunks");
+
         this.chunkSource.save(force, progressListener);
     }
     
@@ -249,25 +249,18 @@ public class Level implements LevelSource
     }
     
     public boolean pauseSave(final int saveStep) {
-        if (!this.chunkSource.shouldSave()) {
-            return true;
-        }
-        if (saveStep == 0) {
-            this.saveLevelData();
-        }
+        if (!this.chunkSource.shouldSave()) return true;
+        if (saveStep == 0) this.saveLevelData();
         return this.chunkSource.save(false, null);
     }
     
     public int getTile(final int x, final int y, final int z) {
-        if (x < -32000000 || z < -32000000 || x >= 32000000 || z > 32000000) {
+        if (x < -MAX_LEVEL_SIZE || z < -MAX_LEVEL_SIZE || x >= MAX_LEVEL_SIZE || z > MAX_LEVEL_SIZE) {
             return 0;
         }
-        if (y < 0) {
-            return 0;
-        }
-        if (y >= 128) {
-            return 0;
-        }
+
+        if (y < MIN_HEIGHT) return 0;
+        if (y >= MAX_HEIGHT) return 0;
         return this.getChunk(x >> 4, z >> 4).getTile(x & 0xF, y, z & 0xF);
     }
     
@@ -316,11 +309,11 @@ public class Level implements LevelSource
     }
     
     public boolean setTileAndDataNoUpdate(final int x, final int y, final int z, final int tile, final int data) {
-        return x >= -32000000 && z >= -32000000 && x < 32000000 && z <= 32000000 && y >= 0 && y < 128 && this.getChunk(x >> 4, z >> 4).setTileAndData(x & 0xF, y, z & 0xF, tile, data);
+        return x >= -MAX_LEVEL_SIZE && z >= -MAX_LEVEL_SIZE && x < MAX_LEVEL_SIZE && z <= MAX_LEVEL_SIZE && y >= 0 && y < 128 && this.getChunk(x >> 4, z >> 4).setTileAndData(x & 0xF, y, z & 0xF, tile, data);
     }
     
     public boolean setTileNoUpdate(final int x, final int y, final int z, final int tile) {
-        return x >= -32000000 && z >= -32000000 && x < 32000000 && z <= 32000000 && y >= 0 && y < 128 && this.getChunk(x >> 4, z >> 4).setTile(x & 0xF, y, z & 0xF, tile);
+        return x >= -MAX_LEVEL_SIZE && z >= -MAX_LEVEL_SIZE && x < MAX_LEVEL_SIZE && z <= MAX_LEVEL_SIZE && y >= 0 && y < 128 && this.getChunk(x >> 4, z >> 4).setTile(x & 0xF, y, z & 0xF, tile);
     }
     
     public Material getMaterial(final int x, final int y, final int z) {
@@ -332,7 +325,7 @@ public class Level implements LevelSource
     }
     
     public int getData(int x, final int y, int z) {
-        if (x < -32000000 || z < -32000000 || x >= 32000000 || z > 32000000) {
+        if (x < -MAX_LEVEL_SIZE || z < -MAX_LEVEL_SIZE || x >= MAX_LEVEL_SIZE || z > MAX_LEVEL_SIZE) {
             return 0;
         }
         if (y < 0) {
@@ -360,7 +353,7 @@ public class Level implements LevelSource
     }
     
     public boolean setDataNoUpdate(int x, final int y, int z, final int data) {
-        if (x < -32000000 || z < -32000000 || x >= 32000000 || z > 32000000) {
+        if (x < -MAX_LEVEL_SIZE || z < -MAX_LEVEL_SIZE || x >= MAX_LEVEL_SIZE || z > MAX_LEVEL_SIZE) {
             return false;
         }
         if (y < 0) {
@@ -462,7 +455,7 @@ public class Level implements LevelSource
     }
     
     public int getRawBrightness(int x, int y, int z, final boolean propagate) {
-        if (x < -32000000 || z < -32000000 || x >= 32000000 || z > 32000000) {
+        if (x < -MAX_LEVEL_SIZE || z < -MAX_LEVEL_SIZE || x >= MAX_LEVEL_SIZE || z > MAX_LEVEL_SIZE) {
             return 15;
         }
         if (propagate) {
@@ -501,7 +494,7 @@ public class Level implements LevelSource
     }
     
     public boolean isSkyLit(int x, final int y, int z) {
-        if (x < -32000000 || z < -32000000 || x >= 32000000 || z > 32000000) {
+        if (x < -MAX_LEVEL_SIZE || z < -MAX_LEVEL_SIZE || x >= MAX_LEVEL_SIZE || z > MAX_LEVEL_SIZE) {
             return false;
         }
         if (y < 0) {
@@ -520,7 +513,7 @@ public class Level implements LevelSource
     }
     
     public int getHeightmap(final int x, final int z) {
-        if (x < -32000000 || z < -32000000 || x >= 32000000 || z > 32000000) {
+        if (x < -MAX_LEVEL_SIZE || z < -MAX_LEVEL_SIZE || x >= MAX_LEVEL_SIZE || z > MAX_LEVEL_SIZE) {
             return 0;
         }
         if (!this.hasChunk(x >> 4, z >> 4)) {
@@ -559,7 +552,7 @@ public class Level implements LevelSource
         if (y >= 128) {
             y = 127;
         }
-        if (y < 0 || y >= 128 || x < -32000000 || z < -32000000 || x >= 32000000 || z > 32000000) {
+        if (y < 0 || y >= 128 || x < -MAX_LEVEL_SIZE || z < -MAX_LEVEL_SIZE || x >= MAX_LEVEL_SIZE || z > MAX_LEVEL_SIZE) {
             return layer.surrounding;
         }
         final int n = x >> 4;
@@ -571,7 +564,7 @@ public class Level implements LevelSource
     }
     
     public void setBrightness(final LightLayer layer, final int x, final int y, final int z, final int brightness) {
-        if (x < -32000000 || z < -32000000 || x >= 32000000 || z > 32000000) {
+        if (x < -MAX_LEVEL_SIZE || z < -MAX_LEVEL_SIZE || x >= MAX_LEVEL_SIZE || z > MAX_LEVEL_SIZE) {
             return;
         }
         if (y < 0) {

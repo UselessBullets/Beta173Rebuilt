@@ -4,6 +4,7 @@
 
 package net.minecraft.server;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.server.gui.MinecraftServerGui;
 import java.awt.GraphicsEnvironment;
 import net.minecraft.stats.Stats;
@@ -38,33 +39,30 @@ import java.util.logging.Logger;
 
 public class MinecraftServer implements Runnable, ConsoleInputSource
 {
-    public static Logger logger;
-    public static HashMap<String, Integer> ironTimers;
+    public static final String VERSION = SharedConstants.VERSION_STRING;
+    public static Logger logger = Logger.getLogger("Minecraft");
+    public static HashMap<String, Integer> ironTimers = new HashMap<>();
+    private static final int DEFAULT_MINECRAFT_PORT = 25565;
+    private static final int MS_PER_TICK = 1000 / SharedConstants.TICKS_PER_SECOND;
     public ServerConnection connection;
     public Settings settings;
     public ServerLevel[] levels;
     public PlayerList players;
     private ConsoleCommands commands;
-    private boolean running;
-    public boolean stopped;
-    int tickCount;
+    private boolean running = true;
+    public boolean stopped = false;
+    int tickCount = 0;
     public String progressStatus;
     public int progress;
-    private List<Tickable> tickables;
-    private List<ConsoleInput> consoleInput;
-    public EntityTracker[] trackers;
+    private List<Tickable> tickables = new ArrayList<>();
+    private List<ConsoleInput> consoleInput = Collections.synchronizedList(new ArrayList<>());
+    public EntityTracker[] trackers = new EntityTracker[2];
     public boolean onlineMode;
     public boolean isAnimals;
     public boolean pvp;
     public boolean isFlightAllowed;
     
     public MinecraftServer() {
-        this.running = true;
-        this.stopped = false;
-        this.tickCount = 0;
-        this.tickables = new ArrayList<>();
-        this.consoleInput = Collections.synchronizedList(new ArrayList<>());
-        this.trackers = new EntityTracker[2];
         new Thread() {
             {
                 this.setDaemon(true);
@@ -79,7 +77,7 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
                             Thread.sleep(2147483647L);
                         }
                     }
-                    catch (final InterruptedException ex) {}
+                    catch (final InterruptedException e) {}
                 }
             }
         };
@@ -87,6 +85,7 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
     
     private boolean initServer() throws UnknownHostException {
         this.commands = new ConsoleCommands(this);
+
         final Thread t = new Thread(() -> {
             final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             try {
@@ -101,58 +100,66 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
         });
         t.setDaemon(true);
         t.start();
+
         LogConfigurator.initLogger();
-        MinecraftServer.logger.info("Starting minecraft server version Beta 1.7.3");
+        MinecraftServer.logger.info("Starting minecraft server version " + VERSION);
+
         if (Runtime.getRuntime().maxMemory() / 1024L / 1024L < 512L) {
             MinecraftServer.logger.warning("**** NOT ENOUGH RAM!");
             MinecraftServer.logger.warning("To start the server with more ram, launch it as \"java -Xmx1024M -Xms1024M -jar minecraft_server.jar\"");
         }
+
         MinecraftServer.logger.info("Loading properties");
         this.settings = new Settings(new File("server.properties"));
-        final String string = this.settings.getString("server-ip", "");
+
+        final String localIp = this.settings.getString("server-ip", "");
         this.onlineMode = this.settings.getBoolean("online-mode", true);
         this.isAnimals = this.settings.getBoolean("spawn-animals", true);
         this.pvp = this.settings.getBoolean("pvp", true);
         this.isFlightAllowed = this.settings.getBoolean("allow-flight", false);
-        InetAddress byName = null;
-        if (string.length() > 0) {
-            byName = InetAddress.getByName(string);
-        }
-        final int int1 = this.settings.getInt("server-port", 25565);
-        MinecraftServer.logger.info("Starting Minecraft server on " + ((string.length() == 0) ? "*" : string) + ":" + int1);
+
+        InetAddress localAddress = null;
+        if (localIp.length() > 0) localAddress = InetAddress.getByName(localIp);
+        final int port = this.settings.getInt("server-port", DEFAULT_MINECRAFT_PORT);
+
+        MinecraftServer.logger.info("Starting Minecraft server on " + (localIp.isEmpty() ? "*" : localIp) + ":" + port);
         try {
-            this.connection = new ServerConnection(this, byName, int1);
+            this.connection = new ServerConnection(this, localAddress, port);
         }
         catch (final IOException ex) {
             MinecraftServer.logger.warning("**** FAILED TO BIND TO PORT!");
-            MinecraftServer.logger.log(Level.WARNING, "The exception was: " + ex.toString());
+            MinecraftServer.logger.log(Level.WARNING, "The exception was: " + ex);
             MinecraftServer.logger.warning("Perhaps a server is already running on that port?");
             return false;
         }
+
         if (!this.onlineMode) {
             MinecraftServer.logger.warning("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
             MinecraftServer.logger.warning("The server will make no attempt to authenticate usernames. Beware.");
             MinecraftServer.logger.warning("While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.");
             MinecraftServer.logger.warning("To change this, set \"online-mode\" to \"true\" in the server.settings file.");
         }
+
         this.players = new PlayerList(this);
+
         this.trackers[0] = new EntityTracker(this, 0);
         this.trackers[1] = new EntityTracker(this, -1);
-        final long nanoTime = System.nanoTime();
-        final String string2 = this.settings.getString("level-name", "world");
-        final String string3 = this.settings.getString("level-seed", "");
+        final long levelNanoTime = System.nanoTime();
+        final String levelName = this.settings.getString("level-name", "world");
+        final String levelSeed = this.settings.getString("level-seed", "");
         long seed = new Random().nextLong();
-        if (string3.length() > 0) {
+        if (!levelSeed.isEmpty()) {
             try {
-                seed = Long.parseLong(string3);
+                seed = Long.parseLong(levelSeed);
             }
-            catch (final NumberFormatException ex2) {
-                seed = string3.hashCode();
+            catch (final NumberFormatException e) {
+                seed = levelSeed.hashCode();
             }
         }
-        MinecraftServer.logger.info("Preparing level \"" + string2 + "\"");
-        this.loadLevel(new McRegionLevelStorageSource(new File(".")), string2, seed);
-        MinecraftServer.logger.info("Done (" + (System.nanoTime() - nanoTime) + "ns)! For help, type \"help\" or \"?\"");
+
+        MinecraftServer.logger.info("Preparing level \"" + levelName + "\"");
+        this.loadLevel(new McRegionLevelStorageSource(new File(".")), levelName, seed);
+        MinecraftServer.logger.info("Done (" + (System.nanoTime() - levelNanoTime) + "ns)! For help, type \"help\" or \"?\"");
         return true;
     }
     
@@ -162,13 +169,9 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
             storageSource.convertLevel(name, new ProgressListener() {
                 private long lastCheckTime = System.currentTimeMillis();
 
-                public void progressStartNoAbort(final String string) {
-                }
-
+                public void progressStartNoAbort(final String string) {}
                 @Override
-                public void progressStart(String var1) {
-
-                }
+                public void progressStart(String var1) {}
 
                 public void progressStagePercentage(final int i) {
                     if (System.currentTimeMillis() - this.lastCheckTime >= 1000L) {
@@ -176,44 +179,44 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
                         logger.info("Converting... " + i + "%");
                     }
                 }
-
-                public void progressStage(final String status) {
-                }
+                public void progressStage(final String status) {}
             });
         }
         this.levels = new ServerLevel[2];
-        final McRegionLevelStorage mcRegionLevelStorage = new McRegionLevelStorage(new File("."), name, true);
+
+        File pSave = new File(".");
+        final McRegionLevelStorage mcRegionLevelStorage = new McRegionLevelStorage(pSave, name, true);
         for (int i = 0; i < this.levels.length; ++i) {
-            if (i == 0) {
-                this.levels[i] = new ServerLevel(this, mcRegionLevelStorage, name, (i == 0) ? 0 : -1, seed);
-            }
-            else {
-                this.levels[i] = new DerivedServerLevel(this, mcRegionLevelStorage, name, (i == 0) ? 0 : -1, seed, this.levels[0]);
-            }
+            if (i == 0) this.levels[i] = new ServerLevel(this, mcRegionLevelStorage, name, (i == 0) ? 0 : -1, seed);
+            else this.levels[i] = new DerivedServerLevel(this, mcRegionLevelStorage, name, (i == 0) ? 0 : -1, seed, this.levels[0]);
+
             this.levels[i].addListener(new ServerLevelListener(this, this.levels[i]));
             this.levels[i].difficulty = (this.settings.getBoolean("spawn-monsters", true) ? 1 : 0);
             this.levels[i].setSpawnSettings(this.settings.getBoolean("spawn-monsters", true), this.isAnimals);
             this.players.setLevel(this.levels);
         }
-        final int n = 196;
-        long currentTimeMillis = System.currentTimeMillis();
-        for (int j = 0; j < this.levels.length; ++j) {
-            MinecraftServer.logger.info("Preparing start region for level " + j);
-            if (j == 0 || this.settings.getBoolean("allow-nether", true)) {
-                final ServerLevel serverLevel = this.levels[j];
-                final Pos sharedSpawnPos = serverLevel.getSharedSpawnPos();
-                for (int n2 = -n; n2 <= n && this.running; n2 += 16) {
-                    for (int n3 = -n; n3 <= n && this.running; n3 += 16) {
-                        final long currentTimeMillis2 = System.currentTimeMillis();
-                        if (currentTimeMillis2 < currentTimeMillis) {
-                            currentTimeMillis = currentTimeMillis2;
+
+        final int r = 196;
+        long lastTime = System.currentTimeMillis();
+        for (int i = 0; i < this.levels.length; ++i) {
+            MinecraftServer.logger.info("Preparing start region for level " + i);
+            if (i == 0 || this.settings.getBoolean("allow-nether", true)) {
+                final ServerLevel level = this.levels[i];
+                final Pos spawnPos = level.getSharedSpawnPos();
+
+                int twoRPlusOne = r * 2 + 1;
+                int total = twoRPlusOne * twoRPlusOne;
+                for (int x = -r; x <= r && this.running; x += 16) {
+                    for (int z = -r; z <= r && this.running; z += 16) {
+                        final long now = System.currentTimeMillis();
+                        if (now < lastTime) lastTime = now;
+                        if (now > lastTime + 1000L) {
+                            int pos = (x + r) * twoRPlusOne + (z + 1);
+                            this.setProgress("Preparing spawn area", pos * 100 / total);
+                            lastTime = now;
                         }
-                        if (currentTimeMillis2 > currentTimeMillis + 1000L) {
-                            this.setProgress("Preparing spawn area", ((n2 + n) * (n * 2 + 1) + (n3 + 1)) * 100 / ((n * 2 + 1) * (n * 2 + 1)));
-                            currentTimeMillis = currentTimeMillis2;
-                        }
-                        serverLevel.cache.create(sharedSpawnPos.x + n2 >> 4, sharedSpawnPos.z + n3 >> 4);
-                        while (serverLevel.updateLights() && this.running) {}
+                        level.cache.create(spawnPos.x + x >> 4, spawnPos.z + z >> 4);
+                        while (level.updateLights() && this.running) {}
                     }
                 }
             }
@@ -235,9 +238,9 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
     private void saveAllChunks() {
         MinecraftServer.logger.info("Saving chunks");
         for (int i = 0; i < this.levels.length; ++i) {
-            final ServerLevel serverLevel = this.levels[i];
-            serverLevel.save(true, null);
-            serverLevel.closeLevelStorage();
+            final ServerLevel level = this.levels[i];
+            level.save(true, null);
+            level.closeLevelStorage();
         }
     }
     
@@ -260,28 +263,29 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
     public void run() {
         try {
             if (this.initServer()) {
-                long currentTimeMillis = System.currentTimeMillis();
-                long n = 0L;
+                long lastTime = System.currentTimeMillis();
+                long unprocessedTime = 0L;
                 while (this.running) {
-                    final long currentTimeMillis2 = System.currentTimeMillis();
-                    long n2 = currentTimeMillis2 - currentTimeMillis;
-                    if (n2 > 2000L) {
+                    final long now = System.currentTimeMillis();
+                    long passedTime = now - lastTime;
+                    if (passedTime > MS_PER_TICK * 40) {
                         MinecraftServer.logger.warning("Can't keep up! Did the system time change, or is the server overloaded?");
-                        n2 = 2000L;
+                        passedTime = MS_PER_TICK * 40;
                     }
-                    if (n2 < 0L) {
+                    if (passedTime < 0L) {
                         MinecraftServer.logger.warning("Time ran backwards! Did the system time change?");
-                        n2 = 0L;
+                        passedTime = 0L;
                     }
-                    n += n2;
-                    currentTimeMillis = currentTimeMillis2;
+                    unprocessedTime += passedTime;
+                    lastTime = now;
+
                     if (this.levels[0].allPlayersAreSleeping()) {
                         this.tick();
-                        n = 0L;
+                        unprocessedTime = 0L;
                     }
                     else {
-                        while (n > 50L) {
-                            n -= 50L;
+                        while (unprocessedTime > MS_PER_TICK) {
+                            unprocessedTime -= MS_PER_TICK;
                             this.tick();
                         }
                     }
@@ -294,24 +298,26 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
                     try {
                         Thread.sleep(10L);
                     }
-                    catch (final InterruptedException ex) {
-                        ex.printStackTrace();
+                    catch (final InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         }
-        catch (final Throwable thrown) {
-            thrown.printStackTrace();
-            MinecraftServer.logger.log(Level.SEVERE, "Unexpected exception", thrown);
+        catch (final Throwable e) {
+            e.printStackTrace();
+            MinecraftServer.logger.log(Level.SEVERE, "Unexpected exception", e);
             while (this.running) {
                 this.handleConsoleInputs();
                 try {
                     Thread.sleep(10L);
                 }
-                catch (final InterruptedException ex2) {
-                    ex2.printStackTrace();
+                catch (final InterruptedException e1) {
+                    e1.printStackTrace();
                 }
             }
+        }
+        finally {
             try {
                 this.stopServer();
                 this.stopped = true;
@@ -323,62 +329,54 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
                 System.exit(0);
             }
         }
-        finally {
-            try {
-                this.stopServer();
-                this.stopped = true;
-            }
-            catch (final Throwable t2) {
-                t2.printStackTrace();
-                System.exit(0);
-            }
-            finally {
-                System.exit(0);
-            }
-        }
     }
     
     private void tick() {
-        final ArrayList list = new ArrayList();
+        final ArrayList<String> toRemove = new ArrayList<>();
         for (final String s : MinecraftServer.ironTimers.keySet()) {
-            final int intValue = MinecraftServer.ironTimers.get(s);
-            if (intValue > 0) {
-                MinecraftServer.ironTimers.put(s, intValue - 1);
+            final int t = MinecraftServer.ironTimers.get(s);
+            if (t > 0) {
+                MinecraftServer.ironTimers.put(s, t - 1);
             }
             else {
-                list.add(s);
+                toRemove.add(s);
             }
         }
-        for (int i = 0; i < list.size(); ++i) {
-            MinecraftServer.ironTimers.remove(list.get(i));
+        for (int i = 0; i < toRemove.size(); ++i) {
+            MinecraftServer.ironTimers.remove(toRemove.get(i));
         }
+
         AABB.resetPool();
         Vec3.resetPool();
-        ++this.tickCount;
-        for (int j = 0; j < this.levels.length; ++j) {
-            if (j == 0 || this.settings.getBoolean("allow-nether", true)) {
-                final ServerLevel serverLevel = this.levels[j];
+
+        this.tickCount++;
+
+        for (int i = 0; i < this.levels.length; ++i) {
+            if (i == 0 || this.settings.getBoolean("allow-nether", true)) {
+                final ServerLevel level = this.levels[i];
+
                 if (this.tickCount % 20 == 0) {
-                    this.players.broadcastAll(new SetTimePacket(serverLevel.getTime()), serverLevel.dimension.id);
+                    this.players.broadcastAll(new SetTimePacket(level.getTime()), level.dimension.id);
                 }
-                serverLevel.tick();
-                while (serverLevel.updateLights()) {}
-                serverLevel.tickEntities();
+
+                level.tick();
+                while (level.updateLights()) {}
+                level.tickEntities();
             }
         }
         this.connection.tick();
         this.players.tick();
-        for (int k = 0; k < this.trackers.length; ++k) {
-            this.trackers[k].tick();
+        for (int i = 0; i < this.trackers.length; ++i) {
+            this.trackers[i].tick();
         }
-        for (int l = 0; l < this.tickables.size(); ++l) {
-            ((Tickable)this.tickables.get(l)).tick();
+        for (int i = 0; i < this.tickables.size(); ++i) {
+            this.tickables.get(i).tick();
         }
         try {
             this.handleConsoleInputs();
         }
-        catch (final Exception thrown) {
-            MinecraftServer.logger.log(Level.WARNING, "Unexpected exception while parsing console command", thrown);
+        catch (final Exception e) {
+            MinecraftServer.logger.log(Level.WARNING, "Unexpected exception while parsing console command", e);
         }
     }
     
@@ -399,13 +397,13 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
     public static void main(final String[] args) {
         Stats.init();
         try {
-            final MinecraftServer minecraftServer = new MinecraftServer();
+            final MinecraftServer server = new MinecraftServer();
             if (!GraphicsEnvironment.isHeadless()) {
-                if (args.length <= 0 || !args[0].equals("nogui")) {
-                    MinecraftServerGui.showFrameFor(minecraftServer);
+                if (args.length == 0 || !args[0].equals("nogui")) {
+                    MinecraftServerGui.showFrameFor(server);
                 }
             }
-            new Thread(minecraftServer).start();
+            new Thread(server).start();
         }
         catch (final Exception thrown) {
             MinecraftServer.logger.log(Level.SEVERE, "Failed to start the minecraft server", thrown);
@@ -429,21 +427,12 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
     }
     
     public ServerLevel getLevel(final int dimension) {
-        if (dimension == -1) {
-            return this.levels[1];
-        }
+        if (dimension == -1) return this.levels[1];
         return this.levels[0];
     }
     
     public EntityTracker getTracker(final int dimension) {
-        if (dimension == -1) {
-            return this.trackers[1];
-        }
+        if (dimension == -1) return this.trackers[1];
         return this.trackers[0];
-    }
-    
-    static {
-        MinecraftServer.logger = Logger.getLogger("Minecraft");
-        MinecraftServer.ironTimers = new HashMap();
     }
 }

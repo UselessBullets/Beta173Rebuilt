@@ -5,132 +5,139 @@
 package net.minecraft.server.level;
 
 import net.minecraft.world.item.ItemInstance;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.TileUpdatePacket;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelEvent;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.entity.player.Player;
 
 public class ServerPlayerGameMode
-{ // TODO somehow forgot to deobf this class
-    private ServerLevel b;
+{ 
+    private ServerLevel level;
     public Player player;
-    private float c;
-    private int d;
-    private int e;
-    private int f;
-    private int g;
-    private int h;
-    private boolean i;
-    private int j;
-    private int k;
-    private int l;
-    private int m;
+    private float destroyProgress = 0.0f; // Useless - Assuming this class is copied from regular gamemode classes, this seems most likely to be destroyProgress still
+    private int destroyProgressStart;
+    private int xDestroyBlock, yDestroyBlock, zDestroyBlock;
+    private int gameTicks;
+    private boolean hasDelayedDestroy;
+    private int delayedDestroyX, delayedDestroyY, delayedDestroyZ;
+    private int delayedTickStart;
     
-    public ServerPlayerGameMode(final ServerLevel dp) {
-        this.c = 0.0f;
-        this.b = dp;
+    public ServerPlayerGameMode(final ServerLevel level) {
+        this.level = level;
     }
 
     public void tick() {
-        ++this.h;
-        if (this.i) {
-            final int n = this.h - this.m;
-            final int tile = this.b.getTile(this.j, this.k, this.l);
-            if (tile != 0) {
-                if (Tile.tiles[tile].getDestroyProgress(this.player) * (n + 1) >= 1.0f) {
-                    this.i = false;
-                    this.c(this.j, this.k, this.l);
+        this.gameTicks++;
+
+        if (this.hasDelayedDestroy) {
+            final int ticksSpentDestroying = this.gameTicks - this.delayedTickStart;
+            final int t = this.level.getTile(this.delayedDestroyX, this.delayedDestroyY, this.delayedDestroyZ);
+            if (t == 0) {
+                this.hasDelayedDestroy = false;
+            } else {
+                Tile tile = Tile.tiles[t];
+                float destroyProgress = tile.getDestroyProgress(this.player) * (ticksSpentDestroying + 1);
+
+                if (destroyProgress >= 1.0f) {
+                    this.hasDelayedDestroy = false;
+                    this.destroyBlock(this.delayedDestroyX, this.delayedDestroyY, this.delayedDestroyZ);
                 }
-            }
-            else {
-                this.i = false;
             }
         }
     }
     
-    public void startDestroyBlock(final int integer1, final int integer2, final int integer3, final int integer4) {
-        this.b.extinguishFire(null, integer1, integer2, integer3, integer4);
-        this.d = this.h;
-        final int tile = this.b.getTile(integer1, integer2, integer3);
-        if (tile > 0) {
-            Tile.tiles[tile].attack(this.b, integer1, integer2, integer3, this.player);
+    public void startDestroyBlock(final int x, final int y, final int z, final int face) {
+        this.level.extinguishFire(null, x, y, z, face);
+        this.destroyProgressStart = this.gameTicks;
+        final int t = this.level.getTile(x, y, z);
+        if (t > 0) {
+            Tile.tiles[t].attack(this.level, x, y, z, this.player);
         }
-        if (tile > 0 && Tile.tiles[tile].getDestroyProgress(this.player) >= 1.0f) {
-            this.c(integer1, integer2, integer3);
+
+        if (t > 0 && Tile.tiles[t].getDestroyProgress(this.player) >= 1.0f) {
+            this.destroyBlock(x, y, z);
         }
         else {
-            this.e = integer1;
-            this.f = integer2;
-            this.g = integer3;
+            this.xDestroyBlock = x;
+            this.yDestroyBlock = y;
+            this.zDestroyBlock = z;
         }
     }
     
-    public void stopDestroyBlock(final int integer1, final int integer2, final int integer3) {
-        if (integer1 == this.e && integer2 == this.f && integer3 == this.g) {
-            final int n = this.h - this.d;
-            final int tile = this.b.getTile(integer1, integer2, integer3);
-            if (tile != 0) {
-                if (Tile.tiles[tile].getDestroyProgress(this.player) * (n + 1) >= 0.7f) {
-                    this.c(integer1, integer2, integer3);
+    public void stopDestroyBlock(final int x, final int y, final int z) {
+        if (x == this.xDestroyBlock && y == this.yDestroyBlock && z == this.zDestroyBlock) {
+            final int ticksSpentDestroying = this.gameTicks - this.destroyProgressStart;
+
+            final int t = this.level.getTile(x, y, z);
+            if (t != 0) {
+                Tile tile = Tile.tiles[t];
+                float destroyProgress = tile.getDestroyProgress(this.player) * (ticksSpentDestroying + 1);
+                if (destroyProgress >= 0.7f) {
+                    this.destroyBlock(x, y, z);
                 }
-                else if (!this.i) {
-                    this.i = true;
-                    this.j = integer1;
-                    this.k = integer2;
-                    this.l = integer3;
-                    this.m = this.d;
+                else if (!this.hasDelayedDestroy) {
+                    this.hasDelayedDestroy = true;
+                    this.delayedDestroyX = x;
+                    this.delayedDestroyY = y;
+                    this.delayedDestroyZ = z;
+                    this.delayedTickStart = this.destroyProgressStart;
                 }
             }
         }
-        this.c = 0.0f;
+        this.destroyProgress = 0.0f;
     }
-    
-    public boolean b(final int integer1, final int integer2, final int integer3) {
-        final Tile tile = Tile.tiles[this.b.getTile(integer1, integer2, integer3)];
-        final int data = this.b.getData(integer1, integer2, integer3);
-        final boolean setTile = this.b.setTile(integer1, integer2, integer3, 0);
-        if (tile != null && setTile) {
-            tile.destroy(this.b, integer1, integer2, integer3, data);
+
+    public boolean superDestroyBlock(final int x, final int y, final int z) {
+        final Tile oldTile = Tile.tiles[this.level.getTile(x, y, z)];
+        final int data = this.level.getData(x, y, z);
+
+        final boolean changed = this.level.setTile(x, y, z, 0);
+        if (oldTile != null && changed) {
+            oldTile.destroy(this.level, x, y, z, data);
         }
-        return setTile;
+        return changed;
     }
     
-    public boolean c(final int integer1, final int integer2, final int integer3) {
-        final int tile = this.b.getTile(integer1, integer2, integer3);
-        final int data = this.b.getData(integer1, integer2, integer3);
-        this.b.levelEvent(this.player, 2001, integer1, integer2, integer3, tile + this.b.getData(integer1, integer2, integer3) * Tile.TILE_NUM_COUNT);
-        final boolean b = this.b(integer1, integer2, integer3);
-        final ItemInstance selectedItem = this.player.getSelectedItem();
-        if (selectedItem != null) {
-            selectedItem.mineBlock(tile, integer1, integer2, integer3, this.player);
-            if (selectedItem.count == 0) {
-                selectedItem.snap(this.player);
+    public boolean destroyBlock(final int x, final int y, final int z) {
+        final int t = this.level.getTile(x, y, z);
+        final int data = this.level.getData(x, y, z);
+
+        this.level.levelEvent(this.player, LevelEvent.PARTICLES_DESTROY_BLOCK, x, y, z, t + this.level.getData(x, y, z) * Tile.TILE_NUM_COUNT);
+
+        final boolean changed = this.superDestroyBlock(x, y, z);
+
+        final ItemInstance item = this.player.getSelectedItem();
+        if (item != null) {
+            item.mineBlock(t, x, y, z, this.player);
+            if (item.count == 0) {
+                item.snap(this.player);
                 this.player.removeSelectedItem();
             }
         }
-        if (b && this.player.canDestroy(Tile.tiles[tile])) {
-            Tile.tiles[tile].playerDestroy(this.b, this.player, integer1, integer2, integer3, data);
-            ((ServerPlayer)this.player).connection.send(new TileUpdatePacket(integer1, integer2, integer3, this.b));
+        boolean canDestroy = this.player.canDestroy(Tile.tiles[t]);
+        if (changed && canDestroy) {
+            Tile.tiles[t].playerDestroy(this.level, this.player, x, y, z, data);
+            ((ServerPlayer)this.player).connection.send(new TileUpdatePacket(x, y, z, this.level));
         }
-        return b;
+        return changed;
     }
     
-    public boolean useItem(final Player em, final Level dj, final ItemInstance fy) {
-        final int count = fy.count;
-        final ItemInstance use = fy.use(dj, em);
-        if (use != fy || (use != null && use.count != count)) {
-            em.inventory.items[em.inventory.selected] = use;
-            if (use.count == 0) {
-                em.inventory.items[em.inventory.selected] = null;
+    public boolean useItem(final Player player, final Level level, final ItemInstance item) {
+        final int oldCount = item.count;
+        final ItemInstance itemInstance = item.use(level, player);
+        if (itemInstance != item || (itemInstance != null && itemInstance.count != oldCount)) {
+            player.inventory.items[player.inventory.selected] = itemInstance;
+            if (itemInstance.count == 0) {
+                player.inventory.items[player.inventory.selected] = null;
             }
             return true;
         }
         return false;
     }
     
-    public boolean useItemOn(final Player em, final Level dj, final ItemInstance fy, final int integer4, final int integer5, final int integer6, final int integer7) {
-        final int tile = dj.getTile(integer4, integer5, integer6);
-        return (tile > 0 && Tile.tiles[tile].use(dj, integer4, integer5, integer6, em)) || (fy != null && fy.useOn(em, dj, integer4, integer5, integer6, integer7));
+    public boolean useItemOn(final Player player, final Level level, final ItemInstance item, final int x, final int y, final int z, final int face) {
+        final int t = level.getTile(x, y, z);
+        return (t > 0 && Tile.tiles[t].use(level, x, y, z, player)) || (item != null && item.useOn(player, level, x, y, z, face));
     }
 }

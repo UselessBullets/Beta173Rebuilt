@@ -90,7 +90,7 @@ public class Level implements LevelSource
     private int maxRecurse = 0;
     private boolean spawnEnemies = true;
     private boolean spawnFriendlies = true;
-    static int maxLoop;
+    static int maxLoop = 0;
     private Set<ChunkPos> chunksToPoll = new HashSet<>();
     private int delayUntilNextMoodSound = this.random.nextInt(SharedConstants.TICKS_PER_SECOND * 60 * 10);
     private List<Entity> es = new ArrayList<>();
@@ -105,8 +105,10 @@ public class Level implements LevelSource
         this.levelData = new LevelData(seed, name);
         this.dimension = fixedDimension;
         this.savedDataStorage = new SavedDataStorage(levelStorage);
-        fixedDimension.init(this);
+
+        this.dimension.init(this);
         this.chunkSource = this.createChunkSource();
+
         this.updateSkyBrightness();
         this.prepareWeather();
     }
@@ -116,7 +118,9 @@ public class Level implements LevelSource
         this.levelStorage = level.levelStorage;
         this.levelData = new LevelData(level.levelData);
         this.savedDataStorage = new SavedDataStorage(this.levelStorage);
-        (this.dimension = dimension).init(this);
+
+        this.dimension = dimension;
+        this.dimension.init(this);
         this.chunkSource = this.createChunkSource();
         this.updateSkyBrightness();
         this.prepareWeather();
@@ -129,8 +133,10 @@ public class Level implements LevelSource
     public Level(final LevelStorage levelStorage, final String levelName, final long seed, final Dimension fixedDimension) {
         this.levelStorage = levelStorage;
         this.savedDataStorage = new SavedDataStorage(levelStorage);
+
         this.levelData = levelStorage.prepareLevel();
-        this.isNew = (this.levelData == null);
+        this.isNew = this.levelData == null;
+
         if (fixedDimension != null) {
             this.dimension = fixedDimension;
         }
@@ -140,19 +146,24 @@ public class Level implements LevelSource
         else {
             this.dimension = Dimension.getNew(0);
         }
-        boolean b = false;
+
+        boolean setInitialSpawn = false;
         if (this.levelData == null) {
             this.levelData = new LevelData(seed, levelName);
-            b = true;
+            setInitialSpawn = true;
         }
         else {
             this.levelData.setLevelName(levelName);
         }
+
         this.dimension.init(this);
+
         this.chunkSource = this.createChunkSource();
-        if (b) {
+
+        if (setInitialSpawn) {
             this.setInitialSpawn();
         }
+
         this.updateSkyBrightness();
         this.prepareWeather();
     }
@@ -163,11 +174,14 @@ public class Level implements LevelSource
     
     protected void setInitialSpawn() {
         this.isFindingSpawn = true;
-        int n = 0;
-        final int ySpawn = 64;
-        int n2;
-        for (n2 = 0; !this.dimension.isValidSpawn(n, n2); n += this.random.nextInt(64) - this.random.nextInt(64), n2 += this.random.nextInt(64) - this.random.nextInt(64)) {}
-        this.levelData.setSpawn(n, ySpawn, n2);
+        int xSpawn = 0;
+        int ySpawn = 64;
+        int zSpawn = 0;
+        while (!this.dimension.isValidSpawn(xSpawn, zSpawn)) {
+            xSpawn += this.random.nextInt(64) - this.random.nextInt(64);
+            zSpawn += this.random.nextInt(64) - this.random.nextInt(64);
+        }
+        this.levelData.setSpawn(xSpawn, ySpawn, zSpawn);
         this.isFindingSpawn = false;
     }
     
@@ -175,16 +189,22 @@ public class Level implements LevelSource
         if (this.levelData.getYSpawn() <= 0) {
             this.levelData.setYSpawn(64);
         }
-        int xSpawn;
-        int zSpawn;
-        for (xSpawn = this.levelData.getXSpawn(), zSpawn = this.levelData.getZSpawn(); this.getTopTile(xSpawn, zSpawn) == 0; xSpawn += this.random.nextInt(8) - this.random.nextInt(8), zSpawn += this.random.nextInt(8) - this.random.nextInt(8)) {}
+
+        int xSpawn = this.levelData.getXSpawn();
+        int zSpawn = this.levelData.getZSpawn();
+        while (this.getTopTile(xSpawn, zSpawn) == 0) {
+            xSpawn += this.random.nextInt(8) - this.random.nextInt(8);
+            zSpawn += this.random.nextInt(8) - this.random.nextInt(8);
+        }
         this.levelData.setXSpawn(xSpawn);
         this.levelData.setZSpawn(zSpawn);
     }
     
     public int getTopTile(final int x, final int z) {
-        int y;
-        for (y = 63; !this.isEmptyTile(x, y + 1, z); ++y) {}
+        int y = SEA_LEVEL;
+        while (!this.isEmptyTile(x, y + 1, z)) {
+            y++;
+        }
         return this.getTile(x, y, z);
     }
     
@@ -2233,8 +2253,5 @@ public class Level implements LevelSource
             this.listeners.get(i).levelEvent(source, type, x, y, z, data);
         }
     }
-    
-    static {
-        Level.maxLoop = 0;
-    }
+
 }

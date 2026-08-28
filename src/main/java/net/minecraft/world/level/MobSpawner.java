@@ -94,9 +94,8 @@ public final class MobSpawner {
                 final int yStart = start.y;
                 final int zStart = start.z;
 
-                if (level.isSolidBlockingTile(xStart, yStart, zStart)) continue categoryLoop;
-                if (level.getMaterial(xStart, yStart, zStart) != mobCategory.getSpawnPositionMaterial())
-                    continue categoryLoop;
+                if (level.isSolidBlockingTile(xStart, yStart, zStart)) continue;
+                if (level.getMaterial(xStart, yStart, zStart) != mobCategory.getSpawnPositionMaterial()) continue;
                 int clusterSize = 0;
 
                 for (int dd = 0; dd < 3; ++dd) {
@@ -113,12 +112,17 @@ public final class MobSpawner {
                             final float xx = x + 0.5f;
                             final float yy = (float) y;
                             final float zz = z + 0.5f;
-                            if (level.getNearestPlayer(xx, yy, zz, MIN_SPAWN_DISTANCE) != null) continue;
-
-                            final float xd = xx - spawnPos.x;
-                            final float yd = yy - spawnPos.y;
-                            final float zd = zz - spawnPos.z;
-                            if (xd * xd + yd * yd + zd * zd < MIN_SPAWN_DISTANCE * MIN_SPAWN_DISTANCE) continue;
+                            if (level.getNearestPlayer(xx, yy, zz, MIN_SPAWN_DISTANCE) != null) {
+                                continue;
+                            } else {
+                                final float xd = xx - spawnPos.x;
+                                final float yd = yy - spawnPos.y;
+                                final float zd = zz - spawnPos.z;
+                                float sd = xd * xd + yd * yd + zd * zd;
+                                if (sd < MIN_SPAWN_DISTANCE * MIN_SPAWN_DISTANCE) {
+                                    continue;
+                                }
+                            }
 
                             Mob mob;
                             try {
@@ -137,6 +141,7 @@ public final class MobSpawner {
                                 if (clusterSize >= mob.getMaxSpawnClusterSize()) continue chunkLoop;
                             }
                             count += clusterSize;
+
                         }
                     }
                 }

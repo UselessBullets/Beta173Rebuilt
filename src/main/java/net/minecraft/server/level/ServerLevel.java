@@ -115,7 +115,7 @@ public class ServerLevel extends Level
         final Explosion explosion = new Explosion(this, source, x, y, z, r);
         explosion.fire = fire;
         explosion.explode();
-        explosion.addParticles(false);
+        explosion.finalizeExplosion(false);
         this.server.players.broadcast(x, y, z, 64.0, this.dimension.id, new ExplodePacket(x, y, z, r, explosion.toBlow));
         return explosion;
     }

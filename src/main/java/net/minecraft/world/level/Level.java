@@ -1466,7 +1466,7 @@ public class Level implements LevelSource
         final Explosion explosion = new Explosion(this, source, x, y, z, r);
         explosion.fire = fire;
         explosion.explode();
-        explosion.addParticles(true);
+        explosion.finalizeExplosion(true);
         return explosion;
     }
     

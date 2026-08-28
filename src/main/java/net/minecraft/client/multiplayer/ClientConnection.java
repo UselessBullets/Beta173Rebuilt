@@ -559,7 +559,7 @@ public class ClientConnection extends PacketListener
     public void handleExplosion(final ExplodePacket packet) {
         final Explosion e = new Explosion(this.minecraft.level, null, packet.x, packet.y, packet.z, packet.r);
         e.toBlow = packet.toBlow;
-        e.addParticles(true);
+        e.finalizeExplosion(true);
     }
     
     @Override

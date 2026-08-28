@@ -4,10 +4,11 @@
 
 package net.minecraft.world.level;
 
+import net.minecraft.world.entity.Entity;
+
 public class ChunkPos
 {
-    public final int x;
-    public final int z;
+    public final int x, z;
     
     public ChunkPos(final int x, final int z) {
         this.x = x;
@@ -27,5 +28,16 @@ public class ChunkPos
     public boolean equals(final Object obj) {
         final ChunkPos chunkPos = (ChunkPos)obj;
         return chunkPos.x == this.x && chunkPos.z == this.z;
+    }
+
+    // Useless - In B1.2 and LCE leaks
+    public double distanceToSqr(Entity e) {
+        double xPos = this.x * 16 + 8;
+        double zPos = this.z * 16 + 8;
+
+        double xd = xPos - e.x;
+        double zd = zPos - e.z;
+
+        return xd * xd + zd * zd;
     }
 }

@@ -38,7 +38,13 @@ public class ServerLevelListener implements LevelListener
     
     public void setTilesDirty(final int x0, final int y0, final int z0, final int x1, final int y1, final int z1) {
     }
-    
+
+    @Override
+    // Useless - Exists here in b1.2 and LCE leaks
+    public void allChanged() {
+
+    }
+
     public void skyColorChanged() {
     }
     

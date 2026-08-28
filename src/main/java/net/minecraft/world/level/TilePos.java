@@ -6,9 +6,7 @@ package net.minecraft.world.level;
 
 public class TilePos
 {
-    public final int x;
-    public final int y;
-    public final int z;
+    public final int x, y, z;
     
     public TilePos(final int x, final int y, final int z) {
         this.x = x;
@@ -19,8 +17,8 @@ public class TilePos
     @Override
     public boolean equals(final Object o) {
         if (o instanceof TilePos) {
-            final TilePos tilePos = (TilePos)o;
-            return tilePos.x == this.x && tilePos.y == this.y && tilePos.z == this.z;
+            final TilePos tp = (TilePos)o;
+            return tp.x == this.x && tp.y == this.y && tp.z == this.z;
         }
         return false;
     }

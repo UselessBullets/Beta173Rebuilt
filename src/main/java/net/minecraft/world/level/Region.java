@@ -77,24 +77,16 @@ public class Region implements LevelSource
         if (propagate) {
             final int tile = this.getTile(x, y, z);
             if (tile == Tile.stoneSlabHalf.id || tile == Tile.farmland.id || tile == Tile.stairs_wood.id || tile == Tile.stairs_stone.id) {
-                int rawBrightness = this.getRawBrightness(x, y + 1, z, false);
-                final int rawBrightness2 = this.getRawBrightness(x + 1, y, z, false);
-                final int rawBrightness3 = this.getRawBrightness(x - 1, y, z, false);
-                final int rawBrightness4 = this.getRawBrightness(x, y, z + 1, false);
-                final int rawBrightness5 = this.getRawBrightness(x, y, z - 1, false);
-                if (rawBrightness2 > rawBrightness) {
-                    rawBrightness = rawBrightness2;
-                }
-                if (rawBrightness3 > rawBrightness) {
-                    rawBrightness = rawBrightness3;
-                }
-                if (rawBrightness4 > rawBrightness) {
-                    rawBrightness = rawBrightness4;
-                }
-                if (rawBrightness5 > rawBrightness) {
-                    rawBrightness = rawBrightness5;
-                }
-                return rawBrightness;
+                int br = this.getRawBrightness(x, y + 1, z, false);
+                final int br1 = this.getRawBrightness(x + 1, y, z, false);
+                final int br2 = this.getRawBrightness(x - 1, y, z, false);
+                final int br3 = this.getRawBrightness(x, y, z + 1, false);
+                final int br4 = this.getRawBrightness(x, y, z - 1, false);
+                if (br1 > br) br = br1;
+                if (br2 > br) br = br2;
+                if (br3 > br) br = br3;
+                if (br4 > br) br = br4;
+                return br;
             }
         }
         if (y < 0) {

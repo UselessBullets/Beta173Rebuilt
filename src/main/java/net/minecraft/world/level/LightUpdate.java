@@ -6,15 +6,11 @@ package net.minecraft.world.level;
 
 import net.minecraft.world.level.tile.Tile;
 
+// Useless - This class has no clear source avaiable. local var names and structure are largely guesswork
 public class LightUpdate
 {
     public final LightLayer layer;
-    public int x0;
-    public int y0;
-    public int z0;
-    public int x1;
-    public int y1;
-    public int z1;
+    public int x0, y0, z0, x1, y1, z1;
     
     public LightUpdate(final LightLayer layer, final int x0, final int y0, final int z0, final int x1, final int y1, final int z1) {
         this.layer = layer;
@@ -31,103 +27,69 @@ public class LightUpdate
             System.out.println("Light too large, skipping!");
             return;
         }
-        int n = 0;
-        int n2 = 0;
-        final boolean b = false;
-        int n3 = 0;
-        for (int i = this.x0; i <= this.x1; ++i) {
-            for (int j = this.z0; j <= this.z1; ++j) {
-                final int n4 = i >> 4;
-                final int n5 = j >> 4;
-                int hasChunks;
-                if (b && n4 == n && n5 == n2) {
-                    hasChunks = n3;
+
+        for (int x = this.x0; x <= this.x1; ++x) {
+            for (int z = this.z0; z <= this.z1; ++z) {
+                boolean hasChunks;
+                hasChunks = (level.hasChunksAt(x, 0, z, 1));
+                if (hasChunks && level.getChunk(x >> 4, z >> 4).isEmpty()) {
+                    hasChunks = false;
                 }
-                else {
-                    hasChunks = (level.hasChunksAt(i, 0, j, 1) ? 1 : 0);
-                    if (hasChunks != 0 && level.getChunk(i >> 4, j >> 4).isEmpty()) {
-                        hasChunks = 0;
-                    }
-                    n3 = hasChunks;
-                    n = n4;
-                    n2 = n5;
-                }
-                if (hasChunks != 0) {
-                    if (this.y0 < 0) {
-                        this.y0 = 0;
-                    }
-                    if (this.y1 >= 128) {
-                        this.y1 = 127;
-                    }
-                    for (int k = this.y0; k <= this.y1; ++k) {
-                        final int brightness = level.getBrightness(this.layer, i, k, j);
-                        final int tile = level.getTile(i, k, j);
-                        int n6 = Tile.lightBlock[tile];
-                        if (n6 == 0) {
-                            n6 = 1;
+
+                if (hasChunks) {
+                    if (this.y0 < Level.MIN_HEIGHT) this.y0 = Level.MIN_HEIGHT;
+                    if (this.y1 >= Level.MAX_HEIGHT) this.y1 = Level.MAX_HEIGHT - 1;
+
+                    for (int y = this.y0; y <= this.y1; ++y) {
+                        final int currentBr = level.getBrightness(this.layer, x, y, z);
+                        final int tile = level.getTile(x, y, z);
+
+                        int block = Tile.lightBlock[tile];
+                        if (block == 0) {
+                            block = 1;
                         }
-                        int n7 = 0;
+
+                        int emit = 0;
                         if (this.layer == LightLayer.Sky) {
-                            if (level.isSkyLit(i, k, j)) {
-                                n7 = 15;
-                            }
+                            if (level.isSkyLit(x, y, z)) emit = 15;
                         }
                         else if (this.layer == LightLayer.Block) {
-                            n7 = Tile.lightEmission[tile];
+                            emit = Tile.lightEmission[tile];
                         }
-                        int brightness2;
-                        if (n6 >= 15 && n7 == 0) {
-                            brightness2 = 0;
+
+                        int nextBr;
+                        if (block >= 15 && emit == 0) {
+                            nextBr = 0;
                         }
                         else {
-                            final int brightness3 = level.getBrightness(this.layer, i - 1, k, j);
-                            final int brightness4 = level.getBrightness(this.layer, i + 1, k, j);
-                            final int brightness5 = level.getBrightness(this.layer, i, k - 1, j);
-                            final int brightness6 = level.getBrightness(this.layer, i, k + 1, j);
-                            final int brightness7 = level.getBrightness(this.layer, i, k, j - 1);
-                            final int brightness8 = level.getBrightness(this.layer, i, k, j + 1);
-                            int n8 = brightness3;
-                            if (brightness4 > n8) {
-                                n8 = brightness4;
-                            }
-                            if (brightness5 > n8) {
-                                n8 = brightness5;
-                            }
-                            if (brightness6 > n8) {
-                                n8 = brightness6;
-                            }
-                            if (brightness7 > n8) {
-                                n8 = brightness7;
-                            }
-                            if (brightness8 > n8) {
-                                n8 = brightness8;
-                            }
-                            brightness2 = n8 - n6;
-                            if (brightness2 < 0) {
-                                brightness2 = 0;
-                            }
-                            if (n7 > brightness2) {
-                                brightness2 = n7;
-                            }
+                            final int br1 = level.getBrightness(this.layer, x - 1, y, z);
+                            final int br2 = level.getBrightness(this.layer, x + 1, y, z);
+                            final int br3 = level.getBrightness(this.layer, x, y - 1, z);
+                            final int br4 = level.getBrightness(this.layer, x, y + 1, z);
+                            final int br5 = level.getBrightness(this.layer, x, y, z - 1);
+                            final int br6 = level.getBrightness(this.layer, x, y, z + 1);
+                            nextBr = br1;
+                            if (br2 > nextBr) nextBr = br2;
+                            if (br3 > nextBr) nextBr = br3;
+                            if (br4 > nextBr) nextBr = br4;
+                            if (br5 > nextBr) nextBr = br5;
+                            if (br6 > nextBr) nextBr = br6;
+
+                            nextBr = nextBr - block;
+                            if (nextBr < 0) nextBr = 0;
+                            if (emit > nextBr) nextBr = emit;
                         }
-                        if (brightness != brightness2) {
-                            level.setBrightness(this.layer, i, k, j, brightness2);
-                            int n9 = brightness2 - 1;
-                            if (n9 < 0) {
-                                n9 = 0;
-                            }
-                            level.updateLightIfOtherThan(this.layer, i - 1, k, j, n9);
-                            level.updateLightIfOtherThan(this.layer, i, k - 1, j, n9);
-                            level.updateLightIfOtherThan(this.layer, i, k, j - 1, n9);
-                            if (i + 1 >= this.x1) {
-                                level.updateLightIfOtherThan(this.layer, i + 1, k, j, n9);
-                            }
-                            if (k + 1 >= this.y1) {
-                                level.updateLightIfOtherThan(this.layer, i, k + 1, j, n9);
-                            }
-                            if (j + 1 >= this.z1) {
-                                level.updateLightIfOtherThan(this.layer, i, k, j + 1, n9);
-                            }
+
+                        if (currentBr != nextBr) {
+                            level.setBrightness(this.layer, x, y, z, nextBr);
+                            int ajacentBr = nextBr - 1;
+                            if (ajacentBr < 0) ajacentBr = 0;
+                            level.updateLightIfOtherThan(this.layer, x - 1, y, z, ajacentBr);
+                            level.updateLightIfOtherThan(this.layer, x, y - 1, z, ajacentBr);
+                            level.updateLightIfOtherThan(this.layer, x, y, z - 1, ajacentBr);
+                            if (x + 1 >= this.x1) level.updateLightIfOtherThan(this.layer, x + 1, y, z, ajacentBr);
+                            if (y + 1 >= this.y1) level.updateLightIfOtherThan(this.layer, x, y + 1, z, ajacentBr);
+                            if (z + 1 >= this.z1) level.updateLightIfOtherThan(this.layer, x, y, z + 1, ajacentBr);
                         }
                     }
                 }
@@ -136,33 +98,27 @@ public class LightUpdate
     }
     
     public boolean expandToContain(int x0, int y0, int z0, int x2, int y2, int z2) {
-        if (x0 >= this.x0 && y0 >= this.y0 && z0 >= this.z0 && x2 <= this.x1 && y2 <= this.y1 && z2 <= this.z1) {
-            return true;
-        }
-        final int n = 1;
-        if (x0 >= this.x0 - n && y0 >= this.y0 - n && z0 >= this.z0 - n && x2 <= this.x1 + n && y2 <= this.y1 + n && z2 <= this.z1 + n) {
-            final int n2 = this.x1 - this.x0;
-            final int n3 = this.y1 - this.y0;
-            final int n4 = this.z1 - this.z0;
-            if (x0 > this.x0) {
-                x0 = this.x0;
-            }
-            if (y0 > this.y0) {
-                y0 = this.y0;
-            }
-            if (z0 > this.z0) {
-                z0 = this.z0;
-            }
-            if (x2 < this.x1) {
-                x2 = this.x1;
-            }
-            if (y2 < this.y1) {
-                y2 = this.y1;
-            }
-            if (z2 < this.z1) {
-                z2 = this.z1;
-            }
-            if ((x2 - x0) * (y2 - y0) * (z2 - z0) - n2 * n3 * n4 <= 2) {
+        if (x0 >= this.x0 && y0 >= this.y0 && z0 >= this.z0 && x2 <= this.x1 && y2 <= this.y1 && z2 <= this.z1) return true;
+
+        final int r = 1;
+        if (x0 >= this.x0 - r
+                && y0 >= this.y0 - r
+                && z0 >= this.z0 - r
+                && x2 <= this.x1 + r
+                && y2 <= this.y1 + r
+                && z2 <= this.z1 + r) {
+            final int xd = this.x1 - this.x0;
+            final int yd = this.y1 - this.y0;
+            final int zd = this.z1 - this.z0;
+
+            if (x0 > this.x0) x0 = this.x0;
+            if (y0 > this.y0) y0 = this.y0;
+            if (z0 > this.z0) z0 = this.z0;
+            if (x2 < this.x1) x2 = this.x1;
+            if (y2 < this.y1) y2 = this.y1;
+            if (z2 < this.z1) z2 = this.z1;
+
+            if ((x2 - x0) * (y2 - y0) * (z2 - z0) - xd * yd * zd <= 2) {
                 this.x0 = x0;
                 this.y0 = y0;
                 this.z0 = z0;

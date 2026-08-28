@@ -16,7 +16,9 @@ public class FoliageColor
         rain *= temp;
         int x = (int) ((1.0 - temp) * 255.0);
         int y = (int) ((1.0 - rain) * 255.0);
-        return FoliageColor.pixels[y << 8 | x];
+        int returnVal = FoliageColor.pixels[y << 8 | x];
+
+        return returnVal;
     }
     
     public static int getEvergreenColor() {

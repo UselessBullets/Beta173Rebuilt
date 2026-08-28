@@ -13,6 +13,7 @@ public interface LevelListener
     void tileChanged(final int x, final int y, final int z);
     
     void setTilesDirty(final int x0, final int y0, final int z0, final int x1, final int y1, final int z1);
+    void allChanged(); // Useless - Exists here in b1.2 and LCE leaks
     
     void playSound(final String name, final double x, final double y, final double z, final float volume, final float pitch);
     

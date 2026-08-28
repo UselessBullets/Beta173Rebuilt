@@ -223,7 +223,8 @@ public class LevelRenderer implements LevelListener
             this.allChanged();
         }
     }
-    
+
+    @Override
     public void allChanged() {
         Tile.leaves.setFancy(this.mc.options.fancyGraphics);
         this.lastViewDistance = this.mc.options.viewDistance;

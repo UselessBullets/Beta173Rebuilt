@@ -72,21 +72,24 @@ public class LevelData
     
     public CompoundTag createTag() {
         final CompoundTag tag = new CompoundTag();
+
         this.setTagData(tag, this.loadedPlayerTag);
+
         return tag;
     }
     
     public CompoundTag createTag(final List<Player> players) {
         final CompoundTag tag = new CompoundTag();
-        Entity entity = null;
+        Entity mainPlayer = null;
         CompoundTag compoundTag = null;
-        if (players.size() > 0) {
-            entity = players.get(0);
-        }
-        if (entity != null) {
+
+        if (!players.isEmpty()) mainPlayer = players.get(0);
+
+        if (mainPlayer != null) {
             compoundTag = new CompoundTag();
-            entity.saveWithoutId(compoundTag);
+            mainPlayer.saveWithoutId(compoundTag);
         }
+
         this.setTagData(tag, compoundTag);
         return tag;
     }
@@ -108,6 +111,10 @@ public class LevelData
         if (playerTag != null) {
             tag.putCompound("Player", playerTag);
         }
+    }
+    // Useless - Exists unused in LCE leak, most fields have setters seems reasonable this one would've existed aswell
+    public void setSeed(long seed) {
+        this.seed = seed;
     }
     
     public long getSeed() {
@@ -136,6 +143,10 @@ public class LevelData
     
     public CompoundTag getLoadedPlayerTag() {
         return this.loadedPlayerTag;
+    }
+    // Useless - LCE claims this was removed in tu9 because it was never used, presumably existed here
+    public void setDimension(int dimension) {
+        this.dimension = dimension;
     }
     
     public int getDimension() {

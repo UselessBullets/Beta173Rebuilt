@@ -47,6 +47,7 @@ public class LevelSummary implements Comparable<LevelSummary>
         if (this.lastPlayed > rhs.lastPlayed) {
             return -1;
         }
+
         return this.levelId.compareTo(rhs.levelId);
     }
 }

@@ -16,7 +16,9 @@ public class GrassColor
         rain *= temp;
         int x = (int) ((1.0 - temp) * 255.0);
         int y = (int) ((1.0 - rain) * 255.0);
-        return GrassColor.pixels[y << 8 | x];
+        int returnVal = GrassColor.pixels[y << 8 | x];
+
+        return returnVal;
     }
 
 }

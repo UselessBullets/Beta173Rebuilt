@@ -11,7 +11,7 @@ public enum LightLayer
     
     public final int surrounding;
     
-    private LightLayer(final int surrounding) {
+    LightLayer(final int surrounding) {
         this.surrounding = surrounding;
     }
 }

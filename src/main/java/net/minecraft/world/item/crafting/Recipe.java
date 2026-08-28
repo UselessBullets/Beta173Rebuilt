@@ -5,7 +5,7 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.world.item.ItemInstance;
-import net.minecraft.world.CraftingContainer;
+import net.minecraft.world.inventory.CraftingContainer;
 
 public interface Recipe
 {

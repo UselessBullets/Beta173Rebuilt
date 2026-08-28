@@ -190,7 +190,7 @@ public class Vec3
         double x = this.x * _cos + this.y * _sin;
         double y = this.y * _cos - this.x * _sin;
         double z = this.z;
-        
+
         this.x = x;
         this.y = y;
         this.z = z;

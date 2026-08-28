@@ -10,7 +10,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.Recipes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.Container;
-import net.minecraft.world.CraftingContainer;
 import net.minecraft.world.level.tile.Tile;
 
 public class InventoryMenu extends AbstractContainerMenu

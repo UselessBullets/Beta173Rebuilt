@@ -2,10 +2,10 @@
 // Decompiled by Procyon v0.6.0
 // 
 
-package net.minecraft.world;
+package net.minecraft.world.inventory;
 
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemInstance;
 
 public class CraftingContainer implements Container
@@ -43,21 +43,20 @@ public class CraftingContainer implements Container
     }
     
     public ItemInstance removeItem(final int slot, final int count) {
-        if (this.items[slot] == null) {
-            return null;
+        if (this.items[slot] != null) {
+            if (this.items[slot].count <= count) {
+                final ItemInstance item = this.items[slot];
+                this.items[slot] = null;
+                this.menu.slotsChanged(this);
+                return item;
+            } else {
+                final ItemInstance i = this.items[slot].remove(count);
+                if (this.items[slot].count == 0) this.items[slot] = null;
+                this.menu.slotsChanged(this);
+                return i;
+            }
         }
-        if (this.items[slot].count <= count) {
-            final ItemInstance itemInstance = this.items[slot];
-            this.items[slot] = null;
-            this.menu.slotsChanged(this);
-            return itemInstance;
-        }
-        final ItemInstance remove = this.items[slot].remove(count);
-        if (this.items[slot].count == 0) {
-            this.items[slot] = null;
-        }
-        this.menu.slotsChanged(this);
-        return remove;
+        return null;
     }
     
     public void setItem(final int slot, final ItemInstance item) {
@@ -66,7 +65,7 @@ public class CraftingContainer implements Container
     }
     
     public int getMaxStackSize() {
-        return 64;
+        return Container.LARGE_MAX_STACK_SIZE;
     }
     
     public void setChanged() {

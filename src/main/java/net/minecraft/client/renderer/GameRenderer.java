@@ -35,7 +35,7 @@ import util.Mth;
 import net.minecraft.client.MemoryTracker;
 import java.nio.FloatBuffer;
 import java.util.Random;
-import net.minecraft.world.SmoothFloat;
+import util.SmoothFloat;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.client.Minecraft;
 

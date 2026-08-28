@@ -4,7 +4,7 @@
 
 package net.minecraft.world.item.crafting;
 
-import net.minecraft.world.CraftingContainer;
+import net.minecraft.world.inventory.CraftingContainer;
 import java.util.HashMap;
 import java.util.Collections;
 

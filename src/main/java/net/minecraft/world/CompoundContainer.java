@@ -10,8 +10,7 @@ import net.minecraft.world.item.ItemInstance;
 public class CompoundContainer implements Container
 {
     private String name;
-    private Container c1;
-    private Container c2;
+    private Container c1, c2;
     
     public CompoundContainer(final String name, final Container c1, final Container c2) {
         this.name = name;
@@ -28,26 +27,18 @@ public class CompoundContainer implements Container
     }
     
     public ItemInstance getItem(final int slot) {
-        if (slot >= this.c1.getContainerSize()) {
-            return this.c2.getItem(slot - this.c1.getContainerSize());
-        }
+        if (slot >= this.c1.getContainerSize()) return this.c2.getItem(slot - this.c1.getContainerSize());
         return this.c1.getItem(slot);
     }
     
     public ItemInstance removeItem(final int slot, final int count) {
-        if (slot >= this.c1.getContainerSize()) {
-            return this.c2.removeItem(slot - this.c1.getContainerSize(), count);
-        }
+        if (slot >= this.c1.getContainerSize()) return this.c2.removeItem(slot - this.c1.getContainerSize(), count);
         return this.c1.removeItem(slot, count);
     }
     
     public void setItem(final int slot, final ItemInstance item) {
-        if (slot >= this.c1.getContainerSize()) {
-            this.c2.setItem(slot - this.c1.getContainerSize(), item);
-        }
-        else {
-            this.c1.setItem(slot, item);
-        }
+        if (slot >= this.c1.getContainerSize()) this.c2.setItem(slot - this.c1.getContainerSize(), item);
+        else this.c1.setItem(slot, item);
     }
     
     public int getMaxStackSize() {

@@ -5,7 +5,7 @@
 package net.minecraft.world.item.crafting;
 
 import java.util.ArrayList;
-import net.minecraft.world.CraftingContainer;
+import net.minecraft.world.inventory.CraftingContainer;
 import java.util.List;
 import net.minecraft.world.item.ItemInstance;
 

@@ -4,12 +4,9 @@
 
 package net.minecraft.client.player;
 
-import net.minecraft.SharedConstants;
-import net.minecraft.world.phys.Vec3;
 import util.Mth;
 import net.minecraft.stats.Achievement;
 import net.minecraft.stats.Stat;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.TakeAnimationParticle;
 import net.minecraft.client.gui.inventory.TrapScreen;
 import net.minecraft.world.level.tile.entity.DispenserTileEntity;
@@ -21,12 +18,11 @@ import net.minecraft.world.Container;
 import net.minecraft.client.gui.inventory.TextEditScreen;
 import net.minecraft.world.level.tile.entity.SignTileEntity;
 import com.mojang.nbt.CompoundTag;
-import net.minecraft.client.gui.Screen;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.stats.Achievements;
 import net.minecraft.client.User;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.SmoothFloat;
+import util.SmoothFloat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 

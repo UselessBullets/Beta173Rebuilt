@@ -4,7 +4,7 @@
 
 package net.minecraft.world.item.crafting;
 
-import net.minecraft.world.CraftingContainer;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemInstance;
 
 public class ShapedRecipe implements Recipe

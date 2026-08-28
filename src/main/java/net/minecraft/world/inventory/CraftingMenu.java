@@ -11,7 +11,6 @@ import net.minecraft.world.item.crafting.Recipes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.Container;
-import net.minecraft.world.CraftingContainer;
 
 public class CraftingMenu extends AbstractContainerMenu
 {

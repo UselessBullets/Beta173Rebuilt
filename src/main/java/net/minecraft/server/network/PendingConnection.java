@@ -5,6 +5,7 @@
 package net.minecraft.server.network;
 
 import net.minecraft.Pos;
+import net.minecraft.SharedConstants;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.packet.SetTimePacket;
@@ -30,25 +31,22 @@ import net.minecraft.network.packet.PacketListener;
 
 public class PendingConnection extends PacketListener
 {
-    public static Logger logger;
-    private static Random random;
+    private static final int FAKE_LAG = 0;
+    private static final int MAX_TICKS_BEFORE_LOGIN = SharedConstants.TICKS_PER_SECOND * 30;
+    public static Logger logger = Logger.getLogger("Minecraft");
+    private static Random random = new Random();
     public Connection connection;
-    public boolean done;
+    public boolean done = false;
     private MinecraftServer server;
-    private int tick;
-    private String name;
-    private LoginPacket acceptedLogin;
-    private String loginKey;
+    private int tick = 0;
+    private String name = null;
+    private LoginPacket acceptedLogin = null;
+    private String loginKey = "";
     
     public PendingConnection(final MinecraftServer server, final Socket socket, final String id) throws IOException {
-        this.done = false;
-        this.tick = 0;
-        this.name = null;
-        this.acceptedLogin = null;
-        this.loginKey = "";
         this.server = server;
         this.connection = new Connection(socket, id, this);
-        this.connection.fakeLag = 0;
+        this.connection.fakeLag = FAKE_LAG;
     }
     
     public void tick() {
@@ -56,7 +54,8 @@ public class PendingConnection extends PacketListener
             this.handleAcceptedLogin(this.acceptedLogin);
             this.acceptedLogin = null;
         }
-        if (this.tick++ == 600) {
+
+        if (this.tick++ == MAX_TICKS_BEFORE_LOGIN) {
             this.disconnect("Took too long to log in");
         }
         else {
@@ -71,8 +70,8 @@ public class PendingConnection extends PacketListener
             this.connection.sendAndQuit();
             this.done = true;
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
     }
     
@@ -90,8 +89,8 @@ public class PendingConnection extends PacketListener
     @Override
     public void handleLogin(final LoginPacket packet) {
         this.name = packet.userName;
-        if (packet.clientVersion != 14) {
-            if (packet.clientVersion > 14) {
+        if (packet.clientVersion != SharedConstants.NETWORK_PROTOCOL_VERSION) {
+            if (packet.clientVersion > SharedConstants.NETWORK_PROTOCOL_VERSION) {
                 this.disconnect("Outdated server!");
             }
             else {
@@ -99,25 +98,28 @@ public class PendingConnection extends PacketListener
             }
             return;
         }
+
         if (!this.server.onlineMode) {
             this.handleAcceptedLogin(packet);
         }
         else {
             new Thread(() -> {
                 try {
-                    final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new URL("http://www.minecraft.net/game/checkserver.jsp?user=" + URLEncoder.encode(packet.userName, "UTF-8") + "&serverId=" + URLEncoder.encode(loginKey, "UTF-8")).openStream()));
-                    final String line = bufferedReader.readLine();
-                    bufferedReader.close();
-                    if (line.equals("YES")) {
-                        acceptedLogin = packet;
+                    String key = this.loginKey;
+                    URL url = new URL("http://www.minecraft.net/game/checkserver.jsp?user=" + URLEncoder.encode(packet.userName, "UTF-8") + "&serverId=" + URLEncoder.encode(key, "UTF-8"));
+                    final BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+                    final String msg = br.readLine();
+                    br.close();
+                    if (msg.equals("YES")) {
+                        this.acceptedLogin = packet;
                     }
                     else {
                         disconnect("Failed to verify username!");
                     }
                 }
-                catch (final Exception obj) {
-                    disconnect("Failed to verify username! [internal error " + obj + "]");
-                    obj.printStackTrace();
+                catch (final Exception e) {
+                    disconnect("Failed to verify username! [internal error " + e + "]");
+                    e.printStackTrace();
                 }
             }).start();
         }
@@ -129,17 +131,21 @@ public class PendingConnection extends PacketListener
             this.server.players.load(playerForLogin);
             playerForLogin.setLevel(this.server.getLevel(playerForLogin.dimension));
             PendingConnection.logger.info(this.getName() + " logged in with entity id " + playerForLogin.entityId + " at (" + playerForLogin.x + ", " + playerForLogin.y + ", " + playerForLogin.z + ")");
+
             final ServerLevel level = this.server.getLevel(playerForLogin.dimension);
-            final Pos sharedSpawnPos = level.getSharedSpawnPos();
-            final PlayerConnection uc = new PlayerConnection(this.server, this.connection, playerForLogin);
-            uc.send(new LoginPacket("", playerForLogin.entityId, level.getSeed(), (byte)level.dimension.id));
-            uc.send(new SetSpawnPositionPacket(sharedSpawnPos.x, sharedSpawnPos.y, sharedSpawnPos.z));
+            final Pos spawnPos = level.getSharedSpawnPos();
+            final PlayerConnection playerConnection = new PlayerConnection(this.server, this.connection, playerForLogin);
+
+            playerConnection.send(new LoginPacket("", playerForLogin.entityId, level.getSeed(), (byte)level.dimension.id));
+            playerConnection.send(new SetSpawnPositionPacket(spawnPos.x, spawnPos.y, spawnPos.z));
+
             this.server.players.sendLevelInfo(playerForLogin, level);
             this.server.players.broadcastAll(new ChatPacket("§e" + playerForLogin.name + " joined the game."));
             this.server.players.add(playerForLogin);
-            uc.teleport(playerForLogin.x, playerForLogin.y, playerForLogin.z, playerForLogin.yRot, playerForLogin.xRot);
-            this.server.connection.addPlayerConnection(uc);
-            uc.send(new SetTimePacket(level.getTime()));
+
+            playerConnection.teleport(playerForLogin.x, playerForLogin.y, playerForLogin.z, playerForLogin.yRot, playerForLogin.xRot);
+            this.server.connection.addPlayerConnection(playerConnection);
+            playerConnection.send(new SetTimePacket(level.getTime()));
             playerForLogin.initMenu();
         }
         this.done = true;
@@ -157,9 +163,7 @@ public class PendingConnection extends PacketListener
     }
     
     public String getName() {
-        if (this.name != null) {
-            return this.name + " [" + this.connection.getRemoteAddress().toString() + "]";
-        }
+        if (this.name != null) return this.name + " [" + this.connection.getRemoteAddress().toString() + "]";
         return this.connection.getRemoteAddress().toString();
     }
     
@@ -167,9 +171,5 @@ public class PendingConnection extends PacketListener
     public boolean isServerPacketListener() {
         return true;
     }
-    
-    static {
-        PendingConnection.logger = Logger.getLogger("Minecraft");
-        PendingConnection.random = new Random();
-    }
+
 }

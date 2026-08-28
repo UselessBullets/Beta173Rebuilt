@@ -12,7 +12,7 @@ import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.entity.player.Player;
 
 public class ServerPlayerGameMode
-{ 
+{
     private ServerLevel level;
     public Player player;
     private float destroyProgress = 0.0f; // Useless - Assuming this class is copied from regular gamemode classes, this seems most likely to be destroyProgress still

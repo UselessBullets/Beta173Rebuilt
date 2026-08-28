@@ -6,7 +6,7 @@ package net.minecraft.world.level;
 
 public class GrassColor
 {
-    private static int[] pixels;
+    private static int[] pixels = new int[256 * 256];
     
     public static void init(final int[] pixels) {
         GrassColor.pixels = pixels;
@@ -14,10 +14,9 @@ public class GrassColor
     
     public static int get(final double temp, double rain) {
         rain *= temp;
-        return GrassColor.pixels[(int)((1.0 - rain) * 255.0) << 8 | (int)((1.0 - temp) * 255.0)];
+        int x = (int) ((1.0 - temp) * 255.0);
+        int y = (int) ((1.0 - rain) * 255.0);
+        return GrassColor.pixels[y << 8 | x];
     }
-    
-    static {
-        GrassColor.pixels = new int[65536];
-    }
+
 }

@@ -167,7 +167,7 @@ public class Explosion
                 xd *= speed;
                 yd *= speed;
                 zd *= speed;
-                
+
                 this.level.addParticle("explode", (xa + this.x * 1.0) / 2.0, (ya + this.y * 1.0) / 2.0, (za + this.z * 1.0) / 2.0, xd, yd, zd);
                 this.level.addParticle("smoke", xa, ya, za, xd, yd, zd);
             }

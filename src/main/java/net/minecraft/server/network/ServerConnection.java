@@ -16,43 +16,39 @@ import java.util.logging.Logger;
 
 public class ServerConnection
 {
-    public static Logger logger;
+    public static Logger logger = Logger.getLogger("Minecraft");
     private ServerSocket serverSocket;
     private Thread listenThread;
-    public volatile boolean running;
-    private int connectionCounter;
-    private ArrayList<PendingConnection> pending;
-    private ArrayList<PlayerConnection> players;
+    public volatile boolean running = false;
+    private int connectionCounter = 0;
+    private ArrayList<PendingConnection> pending = new ArrayList<>();
+    private ArrayList<PlayerConnection> players = new ArrayList<>();
     public MinecraftServer server;
     
     public ServerConnection(final MinecraftServer server, final InetAddress address, final int port) throws IOException {
-        this.running = false;
-        this.connectionCounter = 0;
-        this.pending = new ArrayList<>();
-        this.players = new ArrayList<>();
         this.server = server;
-        (this.serverSocket = new ServerSocket(port, 0, address)).setPerformancePreferences(0, 2, 1);
+        this.serverSocket = new ServerSocket(port, 0, address);
+        this.serverSocket.setPerformancePreferences(0, 2, 1);
         this.running = true;
         (this.listenThread = new Thread(() -> {
-            final HashMap<InetAddress, Long> hashMap = new HashMap<>();
-            while (running) {
+            final HashMap<InetAddress, Long> connections = new HashMap<>();
+            while (this.running) {
                 try {
-                    final Socket accept = serverSocket.accept();
-                    if (accept == null) {
-                        continue;
-                    }
+                    final Socket accept = this.serverSocket.accept();
+                    if (accept == null) continue;
                     final InetAddress inetAddress = accept.getInetAddress();
-                    if (hashMap.containsKey(inetAddress) && !"127.0.0.1".equals(inetAddress.getHostAddress()) && System.currentTimeMillis() - hashMap.get(inetAddress) < 5000L) {
-                        hashMap.put(inetAddress, System.currentTimeMillis());
+                    if (connections.containsKey(inetAddress) && !"127.0.0.1".equals(inetAddress.getHostAddress()) && System.currentTimeMillis() - connections.get(inetAddress) < 5000L) {
+                        connections.put(inetAddress, System.currentTimeMillis());
                         accept.close();
                     }
                     else {
-                        hashMap.put(inetAddress, System.currentTimeMillis());
-                        handleConnection(new PendingConnection(server, accept, "Connection #" + connectionCounter++));
+                        connections.put(inetAddress, System.currentTimeMillis());
+                        PendingConnection unconnectedClient = new PendingConnection(server, accept, "Connection #" + this.connectionCounter++);
+                        handleConnection(unconnectedClient);
                     }
                 }
-                catch (final IOException ex) {
-                    ex.printStackTrace();
+                catch (final IOException e) {
+                    e.printStackTrace();
                 }
             }
         })).start();
@@ -63,44 +59,36 @@ public class ServerConnection
     }
     
     private void handleConnection(final PendingConnection uc) {
-        if (uc == null) {
-            throw new IllegalArgumentException("Got null pendingconnection!");
-        }
+        if (uc == null) throw new IllegalArgumentException("Got null pendingconnection!");
         this.pending.add(uc);
     }
     
     public void tick() {
         for (int i = 0; i < this.pending.size(); ++i) {
-            final PendingConnection pendingConnection = this.pending.get(i);
+            final PendingConnection uc = this.pending.get(i);
             try {
-                pendingConnection.tick();
+                uc.tick();
             }
-            catch (final Exception ex) {
-                pendingConnection.disconnect("Internal server error");
-                ServerConnection.logger.log(Level.WARNING, "Failed to handle packet: " + ex, ex);
+            catch (final Exception e) {
+                uc.disconnect("Internal server error");
+                ServerConnection.logger.log(Level.WARNING, "Failed to handle packet: " + e, e);
             }
-            if (pendingConnection.done) {
-                this.pending.remove(i--);
-            }
-            pendingConnection.connection.flush();
+            if (uc.done) this.pending.remove(i--);
+            uc.connection.flush();
         }
-        for (int j = 0; j < this.players.size(); ++j) {
-            final PlayerConnection playerConnection = this.players.get(j);
+
+        for (int i = 0; i < this.players.size(); ++i) {
+            final PlayerConnection player = this.players.get(i);
             try {
-                playerConnection.tick();
+                player.tick();
             }
-            catch (final Exception ex2) {
-                ServerConnection.logger.log(Level.WARNING, "Failed to handle packet: " + ex2, ex2);
-                playerConnection.disconnect("Internal server error");
+            catch (final Exception e) {
+                ServerConnection.logger.log(Level.WARNING, "Failed to handle packet: " + e, e);
+                player.disconnect("Internal server error");
             }
-            if (playerConnection.done) {
-                this.players.remove(j--);
-            }
-            playerConnection.connection.flush();
+            if (player.done) this.players.remove(i--);
+            player.connection.flush();
         }
     }
-    
-    static {
-        ServerConnection.logger = Logger.getLogger("Minecraft");
-    }
+
 }

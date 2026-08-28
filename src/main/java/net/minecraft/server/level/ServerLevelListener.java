@@ -29,7 +29,7 @@ public class ServerLevelListener implements LevelListener
     }
     
     public void entityRemoved(final Entity entity) {
-        this.server.getTracker(this.level.dimension.id).removePlayer(entity);
+        this.server.getTracker(this.level.dimension.id).removeEntity(entity);
     }
     
     public void playSound(final String name, final double x, final double y, final double z, final float volume, final float pitch) {

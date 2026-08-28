@@ -7,7 +7,7 @@ package net.minecraft.server.players;
 import net.minecraft.network.packet.SetTimePacket;
 import net.minecraft.world.level.tile.entity.TileEntity;
 import net.minecraft.network.packet.ChatPacket;
-import java.util.Iterator;
+
 import java.io.PrintWriter;
 import java.io.FileWriter;
 import java.io.BufferedReader;
@@ -158,7 +158,7 @@ public class PlayerList
     
     public ServerPlayer respawn(final ServerPlayer serverPlayer, final int targetDimension) {
         this.server.getTracker(serverPlayer.dimension).clear(serverPlayer);
-        this.server.getTracker(serverPlayer.dimension).removePlayer(serverPlayer);
+        this.server.getTracker(serverPlayer.dimension).removeEntity(serverPlayer);
         this.getChunkMap(serverPlayer.dimension).remove(serverPlayer);
         this.players.remove(serverPlayer);
         this.server.getLevel(serverPlayer.dimension).removeEntityImmediately(serverPlayer);

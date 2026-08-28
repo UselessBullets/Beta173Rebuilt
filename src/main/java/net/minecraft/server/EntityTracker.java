@@ -28,15 +28,13 @@ import java.util.Set;
 
 public class EntityTracker
 {
-    private Set<TrackedEntity> entities;
-    private IntHashMap<TrackedEntity> entityMap;
+    private Set<TrackedEntity> entities = new HashSet<>();
+    private IntHashMap<TrackedEntity> entityMap = new IntHashMap<>();
     private MinecraftServer server;
     private int maxRange;
     private int dimension;
     
     public EntityTracker(final MinecraftServer server, final int dimension) {
-        this.entities = new HashSet<>();
-        this.entityMap = new IntHashMap<>();
         this.server = server;
         this.dimension = dimension;
         this.maxRange = server.players.getMaxRange();
@@ -44,53 +42,27 @@ public class EntityTracker
     
     public void addEntity(final Entity e) {
         if (e instanceof ServerPlayer) {
-            this.addEntity(e, 512, 2);
-            final ServerPlayer sp = (ServerPlayer)e;
-            for (final TrackedEntity trackedEntity : this.entities) {
-                if (trackedEntity.e != sp) {
-                    trackedEntity.updatePlayer(sp);
+            this.addEntity(e, 32 * 16, 2);
+            final ServerPlayer player = (ServerPlayer)e;
+            for (final TrackedEntity te : this.entities) {
+                if (te.e != player) {
+                    te.updatePlayer(player);
                 }
             }
         }
-        else if (e instanceof FishingHook) {
-            this.addEntity(e, 64, 5, true);
-        }
-        else if (e instanceof Arrow) {
-            this.addEntity(e, 64, 20, false);
-        }
-        else if (e instanceof Fireball) {
-            this.addEntity(e, 64, 10, false);
-        }
-        else if (e instanceof Snowball) {
-            this.addEntity(e, 64, 10, true);
-        }
-        else if (e instanceof ThrownEgg) {
-            this.addEntity(e, 64, 10, true);
-        }
-        else if (e instanceof ItemEntity) {
-            this.addEntity(e, 64, 20, true);
-        }
-        else if (e instanceof Minecart) {
-            this.addEntity(e, 160, 5, true);
-        }
-        else if (e instanceof Boat) {
-            this.addEntity(e, 160, 5, true);
-        }
-        else if (e instanceof Squid) {
-            this.addEntity(e, 160, 3, true);
-        }
-        else if (e instanceof Creature) {
-            this.addEntity(e, 160, 3);
-        }
-        else if (e instanceof PrimedTnt) {
-            this.addEntity(e, 160, 10, true);
-        }
-        else if (e instanceof FallingTile) {
-            this.addEntity(e, 160, 20, true);
-        }
-        else if (e instanceof Painting) {
-            this.addEntity(e, 160, Integer.MAX_VALUE, false);
-        }
+        else if (e instanceof FishingHook) this.addEntity(e, 16 * 4, 5, true);
+        else if (e instanceof Arrow) this.addEntity(e, 16 * 4, 20, false);
+        else if (e instanceof Fireball) this.addEntity(e, 16 * 4, 10, false);
+        else if (e instanceof Snowball) this.addEntity(e, 16 * 4, 10, true);
+        else if (e instanceof ThrownEgg) this.addEntity(e, 16 * 4, 10, true);
+        else if (e instanceof ItemEntity) this.addEntity(e, 16 * 4, 20, true);
+        else if (e instanceof Minecart) this.addEntity(e, 16 * 10, 5, true);
+        else if (e instanceof Boat) this.addEntity(e, 16 * 10, 5, true);
+        else if (e instanceof Squid) this.addEntity(e, 16 * 10, 3, true);
+        else if (e instanceof Creature) this.addEntity(e, 16 * 10, 3);
+        else if (e instanceof PrimedTnt) this.addEntity(e, 16 * 10, 10, true);
+        else if (e instanceof FallingTile) this.addEntity(e, 16 * 10, 20, true);
+        else if (e instanceof Painting) this.addEntity(e, 16 * 10, Integer.MAX_VALUE, false);
     }
     
     public void addEntity(final Entity e, final int range, final int updateInterval) {
@@ -98,69 +70,66 @@ public class EntityTracker
     }
     
     public void addEntity(final Entity e, int range, final int updateInterval, final boolean trackDeltas) {
-        if (range > this.maxRange) {
-            range = this.maxRange;
-        }
-        if (this.entityMap.containsKey(e.entityId)) {
-            throw new IllegalStateException("Entity is already tracked!");
-        }
-        final TrackedEntity value = new TrackedEntity(e, range, updateInterval, trackDeltas);
-        this.entities.add(value);
-        this.entityMap.put(e.entityId, value);
-        value.updatePlayers(this.server.getLevel(this.dimension).players);
+        if (range > this.maxRange) range = this.maxRange;
+        if (this.entityMap.containsKey(e.entityId)) throw new IllegalStateException("Entity is already tracked!");
+
+        final TrackedEntity te = new TrackedEntity(e, range, updateInterval, trackDeltas);
+        this.entities.add(te);
+        this.entityMap.put(e.entityId, te);
+        te.updatePlayers(this.server.getLevel(this.dimension).players);
     }
     
-    public void removePlayer(final Entity e) {
+    public void removeEntity(final Entity e) {
         if (e instanceof ServerPlayer) {
-            final ServerPlayer sp = (ServerPlayer)e;
-            final Iterator<TrackedEntity> iterator = this.entities.iterator();
-            while (iterator.hasNext()) {
-                iterator.next().removePlayer(sp);
+            final ServerPlayer player = (ServerPlayer)e;
+            for (TrackedEntity te : this.entities) {
+                te.removePlayer(player);
             }
         }
-        final TrackedEntity trackedEntity = (TrackedEntity)this.entityMap.remove(e.entityId);
-        if (trackedEntity != null) {
-            this.entities.remove(trackedEntity);
-            trackedEntity.broadcastRemoved();
+
+        final TrackedEntity te = (TrackedEntity)this.entityMap.remove(e.entityId);
+        if (te != null) {
+            this.entities.remove(te);
+            te.broadcastRemoved();
         }
     }
     
     public void tick() {
-        final ArrayList<Entity> list = new ArrayList<>();
-        for (final TrackedEntity trackedEntity : this.entities) {
-            trackedEntity.tick(this.server.getLevel(this.dimension).players);
-            if (trackedEntity.moved && trackedEntity.e instanceof ServerPlayer) {
-                list.add(trackedEntity.e);
+        final ArrayList<Entity> movedPlayers = new ArrayList<>();
+        for (final TrackedEntity te : this.entities) {
+            te.tick(this.server.getLevel(this.dimension).players);
+            if (te.moved && te.e instanceof ServerPlayer) {
+                movedPlayers.add(te.e);
             }
         }
-        for (int i = 0; i < list.size(); ++i) {
-            final ServerPlayer sp = (ServerPlayer)list.get(i);
-            for (final TrackedEntity trackedEntity2 : this.entities) {
-                if (trackedEntity2.e != sp) {
-                    trackedEntity2.updatePlayer(sp);
+
+        for (int i = 0; i < movedPlayers.size(); ++i) {
+            final ServerPlayer player = (ServerPlayer)movedPlayers.get(i);
+            for (final TrackedEntity te : this.entities) {
+                if (te.e != player) {
+                    te.updatePlayer(player);
                 }
             }
         }
     }
     
     public void broadcast(final Entity e, final Packet packet) {
-        final TrackedEntity trackedEntity = this.entityMap.get(e.entityId);
-        if (trackedEntity != null) {
-            trackedEntity.broadcast(packet);
+        final TrackedEntity te = this.entityMap.get(e.entityId);
+        if (te != null) {
+            te.broadcast(packet);
         }
     }
     
     public void broadcastAndSend(final Entity e, final Packet packet) {
-        final TrackedEntity trackedEntity = this.entityMap.get(e.entityId);
-        if (trackedEntity != null) {
-            trackedEntity.broadcastAndSend(packet);
+        final TrackedEntity te = this.entityMap.get(e.entityId);
+        if (te != null) {
+            te.broadcastAndSend(packet);
         }
     }
     
     public void clear(final ServerPlayer serverPlayer) {
-        final Iterator<TrackedEntity> iterator = this.entities.iterator();
-        while (iterator.hasNext()) {
-            iterator.next().clear(serverPlayer);
+        for (TrackedEntity te : this.entities) {
+            te.clear(serverPlayer);
         }
     }
 }

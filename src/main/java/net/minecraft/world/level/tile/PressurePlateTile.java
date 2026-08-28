@@ -171,7 +171,7 @@ public class PressurePlateTile extends Tile
     
     @Override
     public int getPistonPushReaction() {
-        return 1;
+        return Material.PUSH_DESTROY;
     }
 
     public enum Sensitivity

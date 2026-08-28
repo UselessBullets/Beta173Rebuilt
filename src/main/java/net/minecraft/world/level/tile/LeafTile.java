@@ -36,13 +36,14 @@ public class LeafTile extends TransparentTile
     }
     
     @Override
-    public int getColor(final int auxData) {
-        if ((auxData & LEAF_TYPE_MASK) == EVERGREEN_LEAF) {
+    public int getColor(final int data) {
+        if ((data & LEAF_TYPE_MASK) == EVERGREEN_LEAF) {
             return FoliageColor.getEvergreenColor();
         }
-        if ((auxData & LEAF_TYPE_MASK) == BIRCH_LEAF) {
+        if ((data & LEAF_TYPE_MASK) == BIRCH_LEAF) {
             return FoliageColor.getBirchColor();
         }
+
         return FoliageColor.getDefaultColor();
     }
     
@@ -55,20 +56,26 @@ public class LeafTile extends TransparentTile
         if ((data & LEAF_TYPE_MASK) == BIRCH_LEAF) {
             return FoliageColor.getBirchColor();
         }
+
         level.getBiomeSource().getBiomeBlock(x, z, 1, 1);
-        return FoliageColor.get(level.getBiomeSource().temperatures[0], level.getBiomeSource().downfalls[0]);
+        double temp = level.getBiomeSource().temperatures[0];
+        double rain = level.getBiomeSource().downfalls[0];
+        return FoliageColor.get(temp, rain);
     }
     
     @Override
     public void onRemove(final Level level, final int x, final int y, final int z) {
-        final int n = 1;
-        final int n2 = n + 1;
-        if (level.hasChunksAt(x - n2, y - n2, z - n2, x + n2, y + n2, z + n2)) {
-            for (int i = -n; i <= n; ++i) {
-                for (int j = -n; j <= n; ++j) {
-                    for (int k = -n; k <= n; ++k) {
-                        if (level.getTile(x + i, y + j, z + k) == Tile.leaves.id) {
-                            level.setDataNoUpdate(x + i, y + j, z + k, level.getData(x + i, y + j, z + k) | 0x8);
+        final int r = 1;
+        final int r2 = r + 1;
+
+        if (level.hasChunksAt(x - r2, y - r2, z - r2, x + r2, y + r2, z + r2)) {
+            for (int xo = -r; xo <= r; ++xo) {
+                for (int yo = -r; yo <= r; ++yo) {
+                    for (int zo = -r; zo <= r; ++zo) {
+                        int t = level.getTile(x + xo, y + yo, z + zo);
+                        if (t == Tile.leaves.id) {
+                            int currentData = level.getData(x + xo, y + yo, z + zo);
+                            level.setDataNoUpdate(x + xo, y + yo, z + zo, currentData | UPDATE_LEAF_BIT);
                         }
                     }
                 }
@@ -78,58 +85,60 @@ public class LeafTile extends TransparentTile
     
     @Override
     public void tick(final Level level, final int x, final int y, final int z, final Random random) {
-        if (level.isClientSide) {
-            return;
-        }
-        final int data = level.getData(x, y, z);
-        if ((data & 0x8) != 0x0) {
-            final int n = 4;
-            final int n2 = n + 1;
-            final int n3 = 32;
-            final int n4 = n3 * n3;
-            final int n5 = n3 / 2;
+        if (level.isClientSide) return;
+
+        final int currentData = level.getData(x, y, z);
+        if ((currentData & UPDATE_LEAF_BIT) != 0x0) {
+            final int r = REQUIRED_WOOD_RANGE;
+            final int r2 = r + 1;
+
+            final int W = 32;
+            final int WW = W * W;
+            final int WO = W / 2;
             if (this.checkBuffer == null) {
-                this.checkBuffer = new int[n3 * n3 * n3];
+                this.checkBuffer = new int[W * W * W];
             }
-            if (level.hasChunksAt(x - n2, y - n2, z - n2, x + n2, y + n2, z + n2)) {
-                for (int i = -n; i <= n; ++i) {
-                    for (int j = -n; j <= n; ++j) {
-                        for (int k = -n; k <= n; ++k) {
-                            final int tile = level.getTile(x + i, y + j, z + k);
-                            if (tile == Tile.treeTrunk.id) {
-                                this.checkBuffer[(i + n5) * n4 + (j + n5) * n3 + (k + n5)] = 0;
+
+            if (level.hasChunksAt(x - r2, y - r2, z - r2, x + r2, y + r2, z + r2)) {
+                for (int xo = -r; xo <= r; ++xo) {
+                    for (int zo = -r; zo <= r; ++zo) {
+                        for (int yo = -r; yo <= r; ++yo) {
+                            final int t = level.getTile(x + xo, y + zo, z + yo);
+                            if (t == Tile.treeTrunk.id) {
+                                this.checkBuffer[(xo + WO) * WW + (zo + WO) * W + (yo + WO)] = 0;
                             }
-                            else if (tile == Tile.leaves.id) {
-                                this.checkBuffer[(i + n5) * n4 + (j + n5) * n3 + (k + n5)] = -2;
+                            else if (t == Tile.leaves.id) {
+                                this.checkBuffer[(xo + WO) * WW + (zo + WO) * W + (yo + WO)] = -2;
                             }
                             else {
-                                this.checkBuffer[(i + n5) * n4 + (j + n5) * n3 + (k + n5)] = -1;
+                                this.checkBuffer[(xo + WO) * WW + (zo + WO) * W + (yo + WO)] = -1;
                             }
                         }
                     }
                 }
-                for (int l = 1; l <= 4; ++l) {
-                    for (int n6 = -n; n6 <= n; ++n6) {
-                        for (int n7 = -n; n7 <= n; ++n7) {
-                            for (int n8 = -n; n8 <= n; ++n8) {
-                                if (this.checkBuffer[(n6 + n5) * n4 + (n7 + n5) * n3 + (n8 + n5)] == l - 1) {
-                                    if (this.checkBuffer[(n6 + n5 - 1) * n4 + (n7 + n5) * n3 + (n8 + n5)] == -2) {
-                                        this.checkBuffer[(n6 + n5 - 1) * n4 + (n7 + n5) * n3 + (n8 + n5)] = l;
+
+                for (int i = 1; i <= REQUIRED_WOOD_RANGE; ++i) {
+                    for (int xo = -r; xo <= r; ++xo) {
+                        for (int yo = -r; yo <= r; ++yo) {
+                            for (int zo = -r; zo <= r; ++zo) {
+                                if (this.checkBuffer[(xo + WO) * WW + (yo + WO) * W + (zo + WO)] == i - 1) {
+                                    if (this.checkBuffer[(xo + WO - 1) * WW + (yo + WO) * W + (zo + WO)] == -2) {
+                                        this.checkBuffer[(xo + WO - 1) * WW + (yo + WO) * W + (zo + WO)] = i;
                                     }
-                                    if (this.checkBuffer[(n6 + n5 + 1) * n4 + (n7 + n5) * n3 + (n8 + n5)] == -2) {
-                                        this.checkBuffer[(n6 + n5 + 1) * n4 + (n7 + n5) * n3 + (n8 + n5)] = l;
+                                    if (this.checkBuffer[(xo + WO + 1) * WW + (yo + WO) * W + (zo + WO)] == -2) {
+                                        this.checkBuffer[(xo + WO + 1) * WW + (yo + WO) * W + (zo + WO)] = i;
                                     }
-                                    if (this.checkBuffer[(n6 + n5) * n4 + (n7 + n5 - 1) * n3 + (n8 + n5)] == -2) {
-                                        this.checkBuffer[(n6 + n5) * n4 + (n7 + n5 - 1) * n3 + (n8 + n5)] = l;
+                                    if (this.checkBuffer[(xo + WO) * WW + (yo + WO - 1) * W + (zo + WO)] == -2) {
+                                        this.checkBuffer[(xo + WO) * WW + (yo + WO - 1) * W + (zo + WO)] = i;
                                     }
-                                    if (this.checkBuffer[(n6 + n5) * n4 + (n7 + n5 + 1) * n3 + (n8 + n5)] == -2) {
-                                        this.checkBuffer[(n6 + n5) * n4 + (n7 + n5 + 1) * n3 + (n8 + n5)] = l;
+                                    if (this.checkBuffer[(xo + WO) * WW + (yo + WO + 1) * W + (zo + WO)] == -2) {
+                                        this.checkBuffer[(xo + WO) * WW + (yo + WO + 1) * W + (zo + WO)] = i;
                                     }
-                                    if (this.checkBuffer[(n6 + n5) * n4 + (n7 + n5) * n3 + (n8 + n5 - 1)] == -2) {
-                                        this.checkBuffer[(n6 + n5) * n4 + (n7 + n5) * n3 + (n8 + n5 - 1)] = l;
+                                    if (this.checkBuffer[(xo + WO) * WW + (yo + WO) * W + (zo + WO - 1)] == -2) {
+                                        this.checkBuffer[(xo + WO) * WW + (yo + WO) * W + (zo + WO - 1)] = i;
                                     }
-                                    if (this.checkBuffer[(n6 + n5) * n4 + (n7 + n5) * n3 + (n8 + n5 + 1)] == -2) {
-                                        this.checkBuffer[(n6 + n5) * n4 + (n7 + n5) * n3 + (n8 + n5 + 1)] = l;
+                                    if (this.checkBuffer[(xo + WO) * WW + (yo + WO) * W + (zo + WO + 1)] == -2) {
+                                        this.checkBuffer[(xo + WO) * WW + (yo + WO) * W + (zo + WO + 1)] = i;
                                     }
                                 }
                             }
@@ -137,8 +146,10 @@ public class LeafTile extends TransparentTile
                     }
                 }
             }
-            if (this.checkBuffer[n5 * n4 + n5 * n3 + n5] >= 0) {
-                level.setDataNoUpdate(x, y, z, data & 0xFFFFFFF7);
+
+            int mid = this.checkBuffer[WO * WW + WO * W + WO];
+            if (mid >= 0) {
+                level.setDataNoUpdate(x, y, z, currentData & ~UPDATE_LEAF_BIT);
             }
             else {
                 this.die(level, x, y, z);
@@ -165,7 +176,8 @@ public class LeafTile extends TransparentTile
     public void playerDestroy(final Level level, final Player player, final int x, final int y, final int z, final int data) {
         if (!level.isClientSide && player.getSelectedItem() != null && player.getSelectedItem().id == Item.shears.id) {
             player.awardStat(Stats.blockMined[this.id], 1);
-            this.popResource(level, x, y, z, new ItemInstance(Tile.leaves.id, 1, data & 0x3));
+            // drop leaf block instead of sapling
+            this.popResource(level, x, y, z, new ItemInstance(Tile.leaves.id, 1, data & LEAF_TYPE_MASK));
         }
         else {
             super.playerDestroy(level, player, x, y, z, data);
@@ -174,7 +186,7 @@ public class LeafTile extends TransparentTile
     
     @Override
     protected int getSpawnResourcesAuxValue(final int data) {
-        return data & 0x3;
+        return data & LEAF_TYPE_MASK;
     }
     
     @Override
@@ -184,7 +196,7 @@ public class LeafTile extends TransparentTile
     
     @Override
     public int getTexture(final int face, final int data) {
-        if ((data & 0x3) == 0x1) {
+        if ((data & LEAF_TYPE_MASK) == EVERGREEN_LEAF) {
             return this.tex + 80;
         }
         return this.tex;

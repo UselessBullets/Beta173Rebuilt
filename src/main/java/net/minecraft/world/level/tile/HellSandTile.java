@@ -11,13 +11,15 @@ import net.minecraft.world.level.material.Material;
 
 public class HellSandTile extends Tile
 {
+
     public HellSandTile(final int id, final int tex) {
         super(id, tex, Material.sand);
     }
     
     @Override
     public AABB getAABB(final Level level, final int x, final int y, final int z) {
-        return AABB.newTemp(x, y, z, x + 1, y + 1 - 0.125f, z + 1);
+        float r = 2 / 16.0f;
+        return AABB.newTemp(x, y, z, x + 1, y + 1 - r, z + 1);
     }
     
     @Override

@@ -15,6 +15,7 @@ import net.minecraft.world.level.material.Material;
 
 public class TntTile extends Tile
 {
+    public static final int EXPLODE_BIT = 1;
     public TntTile(final int id, final int tex) {
         super(id, tex, Material.explosive);
     }

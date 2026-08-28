@@ -56,7 +56,7 @@ public class BiomeSource
 
         for (int _x = 0; _x < w; ++_x) {
             for (int _z = 0; _z < h; ++_z) {
-                // Useless - Cannot find information on these local vars
+                // Useless - TODO Cannot find information on these local vars
                 final double n2 = this.noises[i] * 1.1 + 0.5;
                 final double n3 = 0.01;
                 final double n4 = (temperatures[i] * 0.15 + 0.7) * (1.0 - n3) + n2 * n3;

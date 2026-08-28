@@ -15,9 +15,7 @@ public class GravelTile extends SandTile
     
     @Override
     public int getResource(final int data, final Random random) {
-        if (random.nextInt(10) == 0) {
-            return Item.flint.id;
-        }
+        if (random.nextInt(10) == 0) return Item.flint.id;
         return this.id;
     }
 }

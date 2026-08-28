@@ -25,15 +25,15 @@ public class IceTile extends HalfTransparentTile
     }
     
     @Override
-    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int f) {
-        return super.isFaceVisible(level, x, y, z, 1 - f);
+    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int face) {
+        return super.isFaceVisible(level, x, y, z, 1 - face);
     }
     
     @Override
     public void playerDestroy(final Level level, final Player player, final int x, final int y, final int z, final int data) {
         super.playerDestroy(level, player, x, y, z, data);
-        final Material material = level.getMaterial(x, y - 1, z);
-        if (material.blocksMotion() || material.isLiquid()) {
+        final Material below = level.getMaterial(x, y - 1, z);
+        if (below.blocksMotion() || below.isLiquid()) {
             level.setTile(x, y, z, Tile.water.id);
         }
     }
@@ -53,6 +53,6 @@ public class IceTile extends HalfTransparentTile
     
     @Override
     public int getPistonPushReaction() {
-        return 0;
+        return Material.PUSH_NORMAL;
     }
 }

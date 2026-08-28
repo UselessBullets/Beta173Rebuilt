@@ -264,7 +264,7 @@ public class RailTile extends Tile
     
     @Override
     public int getPistonPushReaction() {
-        return 0;
+        return Material.PUSH_NORMAL;
     }
 
     static class Rail

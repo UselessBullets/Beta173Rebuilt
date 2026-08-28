@@ -144,7 +144,7 @@ public class EmptyLevelChunk extends LevelChunk
     }
 
     @Override
-    public <T extends Entity> void getEntitiesOfClass(Class<T> ec, AABB bb, List<Entity> es) {
+    public <T extends Entity> void getEntitiesOfClass(Class<T> ec, AABB bb, List<T> es) {
     }
 
     @Override

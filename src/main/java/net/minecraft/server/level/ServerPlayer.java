@@ -81,7 +81,7 @@ public class ServerPlayer extends Player implements ContainerListener
         int n = sharedSpawnPos.y;
         if (!level.dimension.hasCeiling) {
             x += this.random.nextInt(20) - 10;
-            n = level.f(x, z);
+            n = level.getTopSolidBlock(x, z);
             z += this.random.nextInt(20) - 10;
         }
         this.moveTo(x + 0.5, n, z + 0.5, 0.0f, 0.0f);

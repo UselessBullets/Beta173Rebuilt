@@ -136,7 +136,7 @@ public class Explosion
     }
     
     public void finalizeExplosion(final boolean generateParticles) {
-        this.level.playLocalSound(this.x, this.y, this.z, "random.explode", 4.0f, (1.0f + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2f) * 0.7f);
+        this.level.playSound(this.x, this.y, this.z, "random.explode", 4.0f, (1.0f + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2f) * 0.7f);
 
         final ArrayList<TilePos> toBlowArray = new ArrayList<>();
         toBlowArray.addAll(this.toBlow);

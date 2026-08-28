@@ -193,7 +193,7 @@ public abstract class LiquidTile extends Tile
             if (random.nextInt(64) == 0) {
                 final int d = level.getData(x, y, z);
                 if (d > 0 && d < 8) {
-                    level.playLocalSound(x + 0.5f, y + 0.5f, z + 0.5f, "liquid.water", random.nextFloat() * 0.25f + 0.75f, random.nextFloat() * 1.0f + 0.5f);
+                    level.playSound(x + 0.5f, y + 0.5f, z + 0.5f, "liquid.water", random.nextFloat() * 0.25f + 0.75f, random.nextFloat() * 1.0f + 0.5f);
                 }
             }
             // Useless - was in LCE leak, is set in such a way where it'd never run
@@ -282,7 +282,7 @@ public abstract class LiquidTile extends Tile
     }
     
     protected void fizz(final Level level, final int x, final int y, final int z) {
-        level.playLocalSound(x + 0.5f, y + 0.5f, z + 0.5f, "random.fizz", 0.5f, 2.6f + (level.random.nextFloat() - level.random.nextFloat()) * 0.8f);
+        level.playSound(x + 0.5f, y + 0.5f, z + 0.5f, "random.fizz", 0.5f, 2.6f + (level.random.nextFloat() - level.random.nextFloat()) * 0.8f);
         for (int i = 0; i < 8; ++i) {
             level.addParticle("largesmoke", x + Math.random(), y + 1.2, z + Math.random(), 0.0, 0.0, 0.0);
         }

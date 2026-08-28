@@ -166,7 +166,7 @@ public class PortalTile extends HalfTransparentTile
     @Override
     public void animateTick(final Level level, final int xt, final int yt, final int zt, final Random random) {
         if (random.nextInt(100) == 0) {
-            level.playLocalSound(xt + 0.5, yt + 0.5, zt + 0.5, "portal.portal", 1.0f, random.nextFloat() * 0.4f + 0.8f);
+            level.playSound(xt + 0.5, yt + 0.5, zt + 0.5, "portal.portal", 1.0f, random.nextFloat() * 0.4f + 0.8f);
         }
         for (int i = 0; i < 4; ++i) {
             double x = xt + random.nextFloat();

@@ -238,7 +238,7 @@ public class FireTile extends Tile
     @Override
     public void animateTick(final Level level, final int x, final int y, final int z, final Random random) {
         if (random.nextInt(24) == 0) {
-            level.playLocalSound(x + 0.5f, y + 0.5f, z + 0.5f, "fire.fire", 1.0f + random.nextFloat(), random.nextFloat() * 0.7f + 0.3f);
+            level.playSound(x + 0.5f, y + 0.5f, z + 0.5f, "fire.fire", 1.0f + random.nextFloat(), random.nextFloat() * 0.7f + 0.3f);
         }
 
         if (level.isSolidBlockingTile(x, y - 1, z) || Tile.fire.canBurn(level, x, y - 1, z)) {

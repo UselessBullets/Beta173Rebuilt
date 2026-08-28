@@ -164,7 +164,7 @@ public class PistonBaseTile extends Tile
         if (param1 == TRIGGER_EXTEND) {
             if (this.createPush(level, x, y, z, facing)) {
                 level.setData(x, y, z, facing | EXTENDED_BIT);
-                level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "tile.piston.out", 0.5f, level.random.nextFloat() * 0.25f + 0.6f);
+                level.playSound(x + 0.5, y + 0.5, z + 0.5, "tile.piston.out", 0.5f, level.random.nextFloat() * 0.25f + 0.6f);
             }
         }
         else if (param1 == TRIGGER_CONTRACT) {
@@ -227,7 +227,7 @@ public class PistonBaseTile extends Tile
                 this.ignoreUpdate = true;
             }
 
-            level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "tile.piston.in", 0.5f, level.random.nextFloat() * 0.15f + 0.6f);
+            level.playSound(x + 0.5, y + 0.5, z + 0.5, "tile.piston.in", 0.5f, level.random.nextFloat() * 0.15f + 0.6f);
         }
         this.ignoreUpdate = false;
     }

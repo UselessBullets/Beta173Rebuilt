@@ -143,7 +143,7 @@ public class LeverTile extends Tile
         level.setData(x, y, z, dir + open);
         level.setTilesDirty(x, y, z, x, y, z);
 
-        level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.click", 0.3f, (open > 0) ? 0.6f : 0.5f);
+        level.playSound(x + 0.5, y + 0.5, z + 0.5, "random.click", 0.3f, (open > 0) ? 0.6f : 0.5f);
 
         level.updateNeighborsAt(x, y, z, this.id);
         if (dir == 1) {

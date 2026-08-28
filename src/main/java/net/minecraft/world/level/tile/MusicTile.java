@@ -67,7 +67,7 @@ public class MusicTile extends EntityTile
         if (i == 3) sound = "hat";
         if (i == 4) sound = "bassattack";
 
-        level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "note." + sound, 3.0f, pitch);
+        level.playSound(x + 0.5, y + 0.5, z + 0.5, "note." + sound, 3.0f, pitch);
         level.addParticle("note", x + 0.5, y + 1.2, z + 0.5, note / 24.0, 0.0, 0.0);
     }
 }

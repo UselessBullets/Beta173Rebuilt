@@ -1322,15 +1322,15 @@ public class LevelRenderer implements LevelListener
         final Random random = this.level.random;
         switch (type) {
             case LevelEvent.SOUND_CLICK_FAIL: {
-                this.level.playLocalSound(x, y, z, "random.click", 1.0f, 1.2f);
+                this.level.playSound(x, y, z, "random.click", 1.0f, 1.2f);
                 break;
             }
             case LevelEvent.SOUND_CLICK: {
-                this.level.playLocalSound(x, y, z, "random.click", 1.0f, 1.0f);
+                this.level.playSound(x, y, z, "random.click", 1.0f, 1.0f);
                 break;
             }
             case LevelEvent.SOUND_LAUNCH: {
-                this.level.playLocalSound(x, y, z, "random.bow", 1.0f, 1.2f);
+                this.level.playSound(x, y, z, "random.bow", 1.0f, 1.2f);
                 break;
             }
             case LevelEvent.PARTICLES_SHOOT: {
@@ -1362,14 +1362,14 @@ public class LevelRenderer implements LevelListener
             }
             case LevelEvent.SOUND_OPEN_DOOR: {
                 if (Math.random() < 0.5) {
-                    this.level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.door_open", 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f);
+                    this.level.playSound(x + 0.5, y + 0.5, z + 0.5, "random.door_open", 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f);
                 } else {
-                    this.level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.door_close", 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f);
+                    this.level.playSound(x + 0.5, y + 0.5, z + 0.5, "random.door_close", 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f);
                 }
                 break;
             }
             case LevelEvent.SOUND_FIZZ: {
-                this.level.playLocalSound(x + 0.5f, y + 0.5f, z + 0.5f, "random.fizz", 0.5f, 2.6f + (random.nextFloat() - random.nextFloat()) * 0.8f);
+                this.level.playSound(x + 0.5f, y + 0.5f, z + 0.5f, "random.fizz", 0.5f, 2.6f + (random.nextFloat() - random.nextFloat()) * 0.8f);
                 break;
             }
             case LevelEvent.SOUND_PLAY_RECORDING: {

@@ -45,7 +45,7 @@ public class TileItem extends Item
                 Tile.tiles[this.tileId].setPlacedOnFace(level, x, y, z, face);
                 Tile.tiles[this.tileId].setPlacedBy(level, x, y, z, player);
 
-                level.playLocalSound(x + 0.5f, y + 0.5f, z + 0.5f, tile.soundType.getStepSound(), (tile.soundType.getVolume() + 1.0f) / 2.0f, tile.soundType.getPitch() * 0.8f);
+                level.playSound(x + 0.5f, y + 0.5f, z + 0.5f, tile.soundType.getStepSound(), (tile.soundType.getVolume() + 1.0f) / 2.0f, tile.soundType.getPitch() * 0.8f);
                 itemInstance.count--;
             }
             return true;

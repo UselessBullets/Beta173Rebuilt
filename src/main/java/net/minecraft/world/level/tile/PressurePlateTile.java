@@ -110,7 +110,7 @@ public class PressurePlateTile extends Tile
             level.updateNeighborsAt(x, y - 1, z, this.id);
             level.setTilesDirty(x, y, z, x, y, z);
 
-            level.playLocalSound(x + 0.5, y + 0.1, z + 0.5, "random.click", 0.3f, 0.6f);
+            level.playSound(x + 0.5, y + 0.1, z + 0.5, "random.click", 0.3f, 0.6f);
         }
 
         if (!shouldBePressed && wasPressed) {
@@ -119,7 +119,7 @@ public class PressurePlateTile extends Tile
             level.updateNeighborsAt(x, y - 1, z, this.id);
             level.setTilesDirty(x, y, z, x, y, z);
 
-            level.playLocalSound(x + 0.5, y + 0.1, z + 0.5, "random.click", 0.3f, 0.5f);
+            level.playSound(x + 0.5, y + 0.1, z + 0.5, "random.click", 0.3f, 0.5f);
         }
 
         if (shouldBePressed) {

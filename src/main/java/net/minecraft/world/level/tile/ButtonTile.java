@@ -140,7 +140,7 @@ public class ButtonTile extends Tile
         level.setData(x, y, z, dir + open);
         level.setTilesDirty(x, y, z, x, y, z);
 
-        level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.click", 0.3f, 0.6f);
+        level.playSound(x + 0.5, y + 0.5, z + 0.5, "random.click", 0.3f, 0.6f);
 
         level.updateNeighborsAt(x, y, z, this.id);
         if (dir == 1) level.updateNeighborsAt(x - 1, y, z, this.id);
@@ -212,7 +212,7 @@ public class ButtonTile extends Tile
         else if (dir == 4) level.updateNeighborsAt(x, y, z + 1, this.id);
         else level.updateNeighborsAt(x, y - 1, z, this.id);
 
-        level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.click", 0.3f, 0.5f);
+        level.playSound(x + 0.5, y + 0.5, z + 0.5, "random.click", 0.3f, 0.5f);
         level.setTilesDirty(x, y, z, x, y, z);
     }
     

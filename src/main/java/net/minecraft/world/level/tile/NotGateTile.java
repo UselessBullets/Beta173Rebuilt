@@ -117,7 +117,7 @@ public class NotGateTile extends TorchTile
                 level.setTileAndData(x, y, z, Tile.notGate_off.id, level.getData(x, y, z));
 
                 if (this.isToggledTooFrequently(level, x, y, z, true)) {
-                    level.playLocalSound(x + 0.5f, y + 0.5f, z + 0.5f, "random.fizz", 0.5f, 2.6f + (level.random.nextFloat() - level.random.nextFloat()) * 0.8f);
+                    level.playSound(x + 0.5f, y + 0.5f, z + 0.5f, "random.fizz", 0.5f, 2.6f + (level.random.nextFloat() - level.random.nextFloat()) * 0.8f);
                     for (int i = 0; i < 5; ++i) {
                         double xx = x + random.nextDouble() * 0.6 + 0.2;
                         double yy = y + random.nextDouble() * 0.6 + 0.2;

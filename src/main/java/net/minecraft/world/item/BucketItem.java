@@ -81,7 +81,7 @@ public class BucketItem extends Item
 
                 if (level.isEmptyTile(xt, yt, zt) || !level.getMaterial(xt, yt, zt).isSolid()) {
                     if (level.dimension.ultraWarm && this.content == Tile.water.id) {
-                        level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "random.fizz", 0.5f, 2.6f + (level.random.nextFloat() - level.random.nextFloat()) * 0.8f);
+                        level.playSound(x + 0.5, y + 0.5, z + 0.5, "random.fizz", 0.5f, 2.6f + (level.random.nextFloat() - level.random.nextFloat()) * 0.8f);
 
                         for (int i = 0; i < 8; ++i) {
                             level.addParticle("largesmoke", xt + Math.random(), yt + Math.random(), zt + Math.random(), 0.0, 0.0, 0.0);

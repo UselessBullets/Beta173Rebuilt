@@ -8,12 +8,11 @@ import java.util.Iterator;
 import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.ChatPacket;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.server.level.ServerPlayer;
-import util.ProgressListener;
+
 import java.util.logging.Logger;
 
 public class ConsoleCommands
@@ -185,13 +184,13 @@ public class ConsoleCommands
                 if ("add".equalsIgnoreCase(s2)) {
                     for (int n = 0; n < this.server.levels.length; ++n) {
                         final ServerLevel serverLevel = this.server.levels[n];
-                        serverLevel.b(serverLevel.getTime() + int3);
+                        serverLevel.setTimeAndAdjustTileTicks(serverLevel.getTime() + int3);
                     }
                     this.commandResponse(consoleName, "Added " + int3 + " to time");
                 }
                 else if ("set".equalsIgnoreCase(s2)) {
                     for (int n2 = 0; n2 < this.server.levels.length; ++n2) {
-                        this.server.levels[n2].b(int3);
+                        this.server.levels[n2].setTimeAndAdjustTileTicks(int3);
                     }
                     this.commandResponse(consoleName, "Set time to " + int3);
                 }

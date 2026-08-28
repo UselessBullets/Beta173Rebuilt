@@ -582,7 +582,7 @@ public class SkyIslandRandomLevelSource implements ChunkSource
             for (int z = zo + 8; z < zo + 8 + 16; ++z) {
                 final int xx = x - (xo + 8);
                 final int zz = z - (zo + 8);
-                final int y = this.level.getTopSolidBlock(x, z);
+                final int y = this.level.getTopRainBlock(x, z);
                 double snow = this.temperatures[xx * 16 + zz] - (y - (Level.SEA_LEVEL + 1.0)) / (Level.SEA_LEVEL + 1.0) * SNOW_SCALE;
                 if (snow < SNOW_CUTOFF
                         && y > 0

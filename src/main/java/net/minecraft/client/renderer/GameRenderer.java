@@ -719,7 +719,7 @@ public class GameRenderer
         for (int i = 0; i < rainCount; ++i) {
             final int x = x0 + this.random.nextInt(r) - this.random.nextInt(r);
             final int z = z0 + this.random.nextInt(r) - this.random.nextInt(r);
-            final int y = level.getTopSolidBlock(x, z);
+            final int y = level.getTopRainBlock(x, z);
             final int t = level.getTile(x, y - 1, z);
             if (y <= y0 + r && y >= y0 - r && level.getBiomeSource().getBiome(x, z).hasRain()) {
                 final float xa = this.random.nextFloat();
@@ -742,11 +742,11 @@ public class GameRenderer
 
         if (rainPosSamples > 0 && this.random.nextInt(3) < this.rainSoundTime++) {
             this.rainSoundTime = 0;
-            if (rainPosY > player.y + 1.0 && level.getTopSolidBlock(Mth.floor(player.x), Mth.floor(player.z)) > Mth.floor(player.y)) {
-                this.mc.level.playLocalSound(rainPosX, rainPosY, rainPosZ, "ambient.weather.rain", 0.1f, 0.5f);
+            if (rainPosY > player.y + 1.0 && level.getTopRainBlock(Mth.floor(player.x), Mth.floor(player.z)) > Mth.floor(player.y)) {
+                this.mc.level.playSound(rainPosX, rainPosY, rainPosZ, "ambient.weather.rain", 0.1f, 0.5f);
             }
             else {
-                this.mc.level.playLocalSound(rainPosX, rainPosY, rainPosZ, "ambient.weather.rain", 0.2f, 1.0f);
+                this.mc.level.playSound(rainPosX, rainPosY, rainPosZ, "ambient.weather.rain", 0.2f, 1.0f);
             }
         }
     }
@@ -787,7 +787,7 @@ public class GameRenderer
                 for (int z = z0 - r; z <= z0 + r; ++z) {
                     if (!biomeBlock[i++].hasSnow()) continue;
 
-                    int floor = level.getTopSolidBlock(x, z);
+                    int floor = level.getTopRainBlock(x, z);
                     if (floor < 0) floor = 0;
 
                     int y = floor;
@@ -841,7 +841,7 @@ public class GameRenderer
                 for (int z = z0 - r; z <= z0 + r; ++z) {
                     if (!biomeBlock[i++].hasRain()) continue;
 
-                    final int floor = level.getTopSolidBlock(x, z);
+                    final int floor = level.getTopRainBlock(x, z);
 
                     int yy0 = y0 - r;
                     int yy1 = y0 + r;

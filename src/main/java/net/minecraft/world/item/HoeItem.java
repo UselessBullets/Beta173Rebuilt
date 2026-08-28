@@ -23,7 +23,7 @@ public class HoeItem extends Item
 
         if ((face != 0 && above == 0 && targetType == Tile.grass.id) || targetType == Tile.dirt.id) {
             final Tile tile = Tile.farmland;
-            level.playLocalSound(x + 0.5f, y + 0.5f, z + 0.5f, tile.soundType.getStepSound(), (tile.soundType.getVolume() + 1.0f) / 2.0f, tile.soundType.getPitch() * 0.8f);
+            level.playSound(x + 0.5f, y + 0.5f, z + 0.5f, tile.soundType.getStepSound(), (tile.soundType.getVolume() + 1.0f) / 2.0f, tile.soundType.getPitch() * 0.8f);
 
             if (level.isClientSide) return true;
             level.setTile(x, y, z, tile.id);

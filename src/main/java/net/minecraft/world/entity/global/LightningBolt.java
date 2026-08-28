@@ -52,8 +52,8 @@ public class LightningBolt extends GlobalEntity
         super.tick();
 
         if (this.life == START_LIFE) {
-            this.level.playLocalSound(this.x, this.y, this.z, "ambient.weather.thunder", 10000.0f, 0.8f + this.random.nextFloat() * 0.2f);
-            this.level.playLocalSound(this.x, this.y, this.z, "random.explode", 2.0f, 0.5f + this.random.nextFloat() * 0.2f);
+            this.level.playSound(this.x, this.y, this.z, "ambient.weather.thunder", 10000.0f, 0.8f + this.random.nextFloat() * 0.2f);
+            this.level.playSound(this.x, this.y, this.z, "random.explode", 2.0f, 0.5f + this.random.nextFloat() * 0.2f);
         }
 
         this.life--;

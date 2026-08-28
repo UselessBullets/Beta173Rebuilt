@@ -519,7 +519,7 @@ public class LevelChunk
         }
     }
     
-    public <T extends Entity>  void getEntitiesOfClass(final Class<T> ec, final AABB bb, final List<Entity> es) {
+    public <T extends Entity>  void getEntitiesOfClass(final Class<T> ec, final AABB bb, final List<T> es) {
         int yc0 = Mth.floor((bb.y0 - 2.0) / 16.0);
         int yc1 = Mth.floor((bb.y1 + 2.0) / 16.0);
 
@@ -531,7 +531,7 @@ public class LevelChunk
             for (int i = 0; i < entities.size(); ++i) {
                 final Entity e = entities.get(i);
                 if (ec.isAssignableFrom(e.getClass()) && e.bb.intersects(bb)) {
-                    es.add(e);
+                    es.add((T) e);
                 }
             }
         }

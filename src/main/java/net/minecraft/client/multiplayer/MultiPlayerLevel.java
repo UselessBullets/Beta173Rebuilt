@@ -95,7 +95,7 @@ public class MultiPlayerLevel extends Level
     }
     
     @Override
-    public boolean tickPendingTiles(final boolean force) {
+    public boolean tickPendingTicks(final boolean force) {
         return false;
     }
     

@@ -454,7 +454,7 @@ public class ClientConnection extends PacketListener
                 final String msg = br.readLine();
                 br.close();
 
-                if (msg.equalsIgnoreCase("ok")) {
+                if ("ok".equalsIgnoreCase(msg)) {
                     this.send(new LoginPacket(this.minecraft.user.name, SharedConstants.NETWORK_PROTOCOL_VERSION));
                 }
                 else {

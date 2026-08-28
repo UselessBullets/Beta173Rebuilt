@@ -670,7 +670,7 @@ public class Tile implements Descriptive<Tile> {
         if (f == Facing.SOUTH) z++;
         if (f == Facing.WEST) x--;
         if (f == Facing.EAST) x++;
-        return !level.isSolidTile(x, y, z);
+        return !level.isSolidRenderTile(x, y, z);
     }
 
     public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
@@ -680,7 +680,7 @@ public class Tile implements Descriptive<Tile> {
         if (f == Facing.SOUTH && this.zz1 < 1.0) return true;
         if (f == Facing.WEST && this.xx0 > 0.0) return true;
         if (f == Facing.EAST && this.xx1 < 1.0) return true;
-        return !level.isSolidTile(x, y, z);
+        return !level.isSolidRenderTile(x, y, z);
     }
     
     public boolean isSolidFace(final LevelSource level, final int x, final int y, final int z, final int face) {

@@ -240,7 +240,7 @@ public class PortalForcer
                 }
             }
         }
-        
+
         return true;
     }
 }

@@ -84,12 +84,12 @@ public class RedStoneOreTile extends Tile
             double xx = x + random.nextFloat();
             double yy = y + random.nextFloat();
             double zz = z + random.nextFloat();
-            if (i == 0 && !level.isSolidTile(x, y + 1, z)) yy = y + 1 + r;
-            if (i == 1 && !level.isSolidTile(x, y - 1, z)) yy = y + 0 - r;
-            if (i == 2 && !level.isSolidTile(x, y, z + 1)) zz = z + 1 + r;
-            if (i == 3 && !level.isSolidTile(x, y, z - 1)) zz = z + 0 - r;
-            if (i == 4 && !level.isSolidTile(x + 1, y, z)) xx = x + 1 + r;
-            if (i == 5 && !level.isSolidTile(x - 1, y, z)) xx = x + 0 - r;
+            if (i == 0 && !level.isSolidRenderTile(x, y + 1, z)) yy = y + 1 + r;
+            if (i == 1 && !level.isSolidRenderTile(x, y - 1, z)) yy = y + 0 - r;
+            if (i == 2 && !level.isSolidRenderTile(x, y, z + 1)) zz = z + 1 + r;
+            if (i == 3 && !level.isSolidRenderTile(x, y, z - 1)) zz = z + 0 - r;
+            if (i == 4 && !level.isSolidRenderTile(x + 1, y, z)) xx = x + 1 + r;
+            if (i == 5 && !level.isSolidRenderTile(x - 1, y, z)) xx = x + 0 - r;
             if (xx < x || xx > x + 1 || yy < 0.0 || yy > y + 1 || zz < z || zz > z + 1) {
                 level.addParticle("reddust", xx, yy, zz, 0.0, 0.0, 0.0);
             }

@@ -232,7 +232,7 @@ public abstract class LiquidTile extends Tile
 //            }
         }
         if (this.material == Material.lava) {
-            if (level.getMaterial(x, y + 1, z) == Material.air && !level.isSolidTile(x, y + 1, z)) {
+            if (level.getMaterial(x, y + 1, z) == Material.air && !level.isSolidRenderTile(x, y + 1, z)) {
                 if (random.nextInt(100) == 0) {
                     level.addParticle("lava", x + random.nextFloat(), y + this.yy1, z + random.nextFloat(), 0.0, 0.0, 0.0);
                 }

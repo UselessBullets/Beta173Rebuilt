@@ -22,7 +22,7 @@ public interface LevelSource
     
     Material getMaterial(final int x, final int y, final int z);
     
-    boolean isSolidTile(final int x, final int y, final int z);
+    boolean isSolidRenderTile(final int x, final int y, final int z);
     
     boolean isSolidBlockingTile(final int x, final int y, final int z);
     

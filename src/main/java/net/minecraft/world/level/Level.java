@@ -1445,7 +1445,7 @@ public class Level implements LevelSource
         }
     }
     
-    public boolean isSolidTile(final int x, final int y, final int z) {
+    public boolean isSolidRenderTile(final int x, final int y, final int z) {
         final Tile tile = Tile.tiles[this.getTile(x, y, z)];
         return tile != null && tile.isSolidRender();
     }

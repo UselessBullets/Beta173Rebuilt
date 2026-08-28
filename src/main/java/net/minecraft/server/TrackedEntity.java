@@ -44,40 +44,29 @@ import net.minecraft.world.entity.Entity;
 
 public class TrackedEntity
 {
+    private static final int TOLERANCE_LEVEL = 8;
     public Entity e;
-    public int range;
-    public int updateInterval;
-    public int xp;
-    public int yp;
-    public int zp;
-    public int yRotp;
-    public int xRotp;
-    public double xap;
-    public double yap;
-    public double zap;
-    public int tickCount;
-    private double xpu;
-    private double ypu;
-    private double zpu;
-    private boolean updatedPlayerVisibility;
+    public int range, updateInterval;
+    public int xp, yp, zp, yRotp, xRotp;
+    public double xap, yap, zap;
+    public int tickCount = 0;
+    private double xpu, ypu, zpu;
+    private boolean updatedPlayerVisibility = false;
     private boolean trackDelta;
-    private int teleportDelay;
-    public boolean moved;
-    public Set seenBy;
+    private int teleportDelay = 0;
+    public boolean moved = false;
+    public Set<ServerPlayer> seenBy = new HashSet<>();
     
     public TrackedEntity(final Entity e, final int range, final int updateInterval, final boolean trackDelta) {
-        this.tickCount = 0;
-        this.updatedPlayerVisibility = false;
-        this.teleportDelay = 0;
-        this.moved = false;
-        this.seenBy = new HashSet();
         this.e = e;
         this.range = range;
         this.updateInterval = updateInterval;
         this.trackDelta = trackDelta;
+
         this.xp = Mth.floor(e.x * 32.0);
         this.yp = Mth.floor(e.y * 32.0);
         this.zp = Mth.floor(e.z * 32.0);
+
         this.yRotp = Mth.floor(e.yRot * 256.0f / 360.0f);
         this.xRotp = Mth.floor(e.xRot * 256.0f / 360.0f);
     }
@@ -92,7 +81,7 @@ public class TrackedEntity
         return this.e.entityId;
     }
     
-    public void tick(final List players) {
+    public void tick(final List<Player> players) {
         this.moved = false;
         if (!this.updatedPlayerVisibility || this.e.distanceToSqr(this.xpu, this.ypu, this.zpu) > 16.0) {
             this.xpu = this.e.x;
@@ -102,65 +91,78 @@ public class TrackedEntity
             this.moved = true;
             this.updatePlayers(players);
         }
-        ++this.teleportDelay;
-        if (++this.tickCount % this.updateInterval == 0) {
-            final int floor = Mth.floor(this.e.x * 32.0);
-            final int floor2 = Mth.floor(this.e.y * 32.0);
-            final int floor3 = Mth.floor(this.e.z * 32.0);
-            final int floor4 = Mth.floor(this.e.yRot * 256.0f / 360.0f);
-            final int floor5 = Mth.floor(this.e.xRot * 256.0f / 360.0f);
-            final int n = floor - this.xp;
-            final int n2 = floor2 - this.yp;
-            final int n3 = floor3 - this.zp;
+
+        this.teleportDelay++;
+        if (this.tickCount++ % this.updateInterval == 0) {
+            final int xn = Mth.floor(this.e.x * 32.0);
+            final int yn = Mth.floor(this.e.y * 32.0);
+            final int zn = Mth.floor(this.e.z * 32.0);
+            final int yRotn = Mth.floor(this.e.yRot * 256.0f / 360.0f);
+            final int zRotn = Mth.floor(this.e.xRot * 256.0f / 360.0f);
+
+            final int xa = xn - this.xp;
+            final int ya = yn - this.yp;
+            final int za = zn - this.zp;
+
             Packet packet = null;
-            final boolean b = Math.abs(floor) >= 8 || Math.abs(floor2) >= 8 || Math.abs(floor3) >= 8;
-            final boolean b2 = Math.abs(floor4 - this.yRotp) >= 8 || Math.abs(floor5 - this.xRotp) >= 8;
-            if (n < -128 || n >= 128 || n2 < -128 || n2 >= 128 || n3 < -128 || n3 >= 128 || this.teleportDelay > 400) {
+
+            final boolean pos = Math.abs(xn) >= TOLERANCE_LEVEL || Math.abs(yn) >= TOLERANCE_LEVEL || Math.abs(zn) >= TOLERANCE_LEVEL;
+            final boolean rot = Math.abs(yRotn - this.yRotp) >= TOLERANCE_LEVEL || Math.abs(zRotn - this.xRotp) >= TOLERANCE_LEVEL;
+
+            if (xa < -128 || xa >= 128 || ya < -128 || ya >= 128 || za < -128 || za >= 128 || this.teleportDelay > 400) {
                 this.teleportDelay = 0;
-                this.e.x = floor / 32.0;
-                this.e.y = floor2 / 32.0;
-                this.e.z = floor3 / 32.0;
-                packet = new TeleportEntityPacket(this.e.entityId, floor, floor2, floor3, (byte)floor4, (byte)floor5);
+                this.e.x = xn / 32.0;
+                this.e.y = yn / 32.0;
+                this.e.z = zn / 32.0;
+                packet = new TeleportEntityPacket(this.e.entityId, xn, yn, zn, (byte)yRotn, (byte)zRotn);
             }
-            else if (b && b2) {
-                packet = new MoveEntityPacket.PosRot(this.e.entityId, (byte)n, (byte)n2, (byte)n3, (byte)floor4, (byte)floor5);
+            else if (pos && rot) {
+                packet = new MoveEntityPacket.PosRot(this.e.entityId, (byte)xa, (byte)ya, (byte)za, (byte)yRotn, (byte)zRotn);
             }
-            else if (b) {
-                packet = new MoveEntityPacket.Pos(this.e.entityId, (byte)n, (byte)n2, (byte)n3);
+            else if (pos) {
+                packet = new MoveEntityPacket.Pos(this.e.entityId, (byte)xa, (byte)ya, (byte)za);
             }
-            else if (b2) {
-                packet = new MoveEntityPacket.Rot(this.e.entityId, (byte)floor4, (byte)floor5);
+            else if (rot) {
+                packet = new MoveEntityPacket.Rot(this.e.entityId, (byte)yRotn, (byte)zRotn);
             }
+
             if (this.trackDelta) {
-                final double n4 = this.e.xd - this.xap;
-                final double n5 = this.e.yd - this.yap;
-                final double n6 = this.e.zd - this.zap;
-                final double n7 = 0.02;
-                final double n8 = n4 * n4 + n5 * n5 + n6 * n6;
-                if (n8 > n7 * n7 || (n8 > 0.0 && this.e.xd == 0.0 && this.e.yd == 0.0 && this.e.zd == 0.0)) {
+                final double xad = this.e.xd - this.xap;
+                final double yad = this.e.yd - this.yap;
+                final double zad = this.e.zd - this.zap;
+
+                final double max = 0.02;
+
+                final double diff = xad * xad + yad * yad + zad * zad;
+
+                if (diff > max * max || (diff > 0.0 && this.e.xd == 0.0 && this.e.yd == 0.0 && this.e.zd == 0.0)) {
                     this.xap = this.e.xd;
                     this.yap = this.e.yd;
                     this.zap = this.e.zd;
                     this.broadcast(new SetEntityMotionPacket(this.e.entityId, this.xap, this.yap, this.zap));
                 }
             }
+
             if (packet != null) {
                 this.broadcast(packet);
             }
+
             final SynchedEntityData entityData = this.e.getEntityData();
             if (entityData.isDirty()) {
                 this.broadcastAndSend(new SetEntityDataPacket(this.e.entityId, entityData));
             }
-            if (b) {
-                this.xp = floor;
-                this.yp = floor2;
-                this.zp = floor3;
+
+            if (pos) {
+                this.xp = xn;
+                this.yp = yn;
+                this.zp = zn;
             }
-            if (b2) {
-                this.yRotp = floor4;
-                this.xRotp = floor5;
+            if (rot) {
+                this.yRotp = yRotn;
+                this.xRotp = zRotn;
             }
         }
+
         if (this.e.hurtMarked) {
             this.broadcastAndSend(new SetEntityMotionPacket(this.e));
             this.e.hurtMarked = false;
@@ -168,16 +170,16 @@ public class TrackedEntity
     }
     
     public void broadcast(final Packet packet) {
-        final Iterator iterator = this.seenBy.iterator();
-        while (iterator.hasNext()) {
-            ((ServerPlayer)iterator.next()).connection.send(packet);
+        for (ServerPlayer serverPlayer : this.seenBy) {
+            serverPlayer.connection.send(packet);
         }
     }
     
     public void broadcastAndSend(final Packet packet) {
         this.broadcast(packet);
         if (this.e instanceof ServerPlayer) {
-            ((ServerPlayer)this.e).connection.send(packet);
+            ServerPlayer player = (ServerPlayer) this.e;
+            player.connection.send(packet);
         }
     }
     
@@ -192,26 +194,32 @@ public class TrackedEntity
     }
     
     public void updatePlayer(final ServerPlayer sp) {
-        if (sp == this.e) {
-            return;
-        }
-        final double n = sp.x - this.xp / 32;
-        final double n2 = sp.z - this.zp / 32;
-        if (n >= -this.range && n <= this.range && n2 >= -this.range && n2 <= this.range) {
+        if (sp == this.e) return;
+
+        final double xd = sp.x - this.xp / 32;
+        final double zd = sp.z - this.zp / 32;
+        if (xd >= -this.range && xd <= this.range && zd >= -this.range && zd <= this.range) {
             if (!this.seenBy.contains(sp)) {
                 this.seenBy.add(sp);
-                sp.connection.send(this.getAddEntityPacket());
+                Packet packet = this.getAddEntityPacket();
+                sp.connection.send(packet);
+
                 if (this.trackDelta) {
                     sp.connection.send(new SetEntityMotionPacket(this.e.entityId, this.e.xd, this.e.yd, this.e.zd));
                 }
-                final ItemInstance[] equipmentSlots = this.e.getEquipmentSlots();
-                if (equipmentSlots != null) {
-                    for (int i = 0; i < equipmentSlots.length; ++i) {
-                        sp.connection.send(new SetEquippedItemPacket(this.e.entityId, i, equipmentSlots[i]));
+
+                final ItemInstance[] equipped = this.e.getEquipmentSlots();
+                if (equipped != null) {
+                    for (int i = 0; i < equipped.length; ++i) {
+                        sp.connection.send(new SetEquippedItemPacket(this.e.entityId, i, equipped[i]));
                     }
                 }
-                if (this.e instanceof Player && ((Player)this.e).isSleeping()) {
-                    sp.connection.send(new EntityActionAtPositionPacket(this.e, EntityActionAtPositionPacket.START_SLEEP, Mth.floor(this.e.x), Mth.floor(this.e.y), Mth.floor(this.e.z)));
+
+                if (this.e instanceof Player) {
+                    Player spe = (Player) this.e;
+                    if (spe.isSleeping()) {
+                        sp.connection.send(new EntityActionAtPositionPacket(this.e, EntityActionAtPositionPacket.START_SLEEP, Mth.floor(this.e.x), Mth.floor(this.e.y), Mth.floor(this.e.z)));
+                    }
                 }
             }
         }
@@ -221,7 +229,7 @@ public class TrackedEntity
         }
     }
     
-    public void updatePlayers(final List players) {
+    public void updatePlayers(final List<Player> players) {
         for (int i = 0; i < players.size(); ++i) {
             this.updatePlayer((ServerPlayer)players.get(i));
         }
@@ -229,27 +237,22 @@ public class TrackedEntity
     
     private Packet getAddEntityPacket() {
         if (this.e instanceof ItemEntity) {
-            final ItemEntity itemEntity = (ItemEntity)this.e;
-            final AddItemEntityPacket addItemEntityPacket = new AddItemEntityPacket(itemEntity);
-            itemEntity.x = addItemEntityPacket.x / 32.0;
-            itemEntity.y = addItemEntityPacket.y / 32.0;
-            itemEntity.z = addItemEntityPacket.z / 32.0;
-            return addItemEntityPacket;
+            final ItemEntity item = (ItemEntity)this.e;
+            final AddItemEntityPacket packet = new AddItemEntityPacket(item);
+            item.x = packet.x / 32.0;
+            item.y = packet.y / 32.0;
+            item.z = packet.z / 32.0;
+            return packet;
         }
         if (this.e instanceof ServerPlayer) {
-            return new AddPlayerPacket((Player)this.e);
+            Player player = (Player) this.e;
+            return new AddPlayerPacket(player);
         }
         if (this.e instanceof Minecart) {
             final Minecart minecart = (Minecart)this.e;
-            if (minecart.type == 0) {
-                return new AddEntityPacket(this.e, AddEntityPacket.MINECART_RIDEABLE);
-            }
-            if (minecart.type == 1) {
-                return new AddEntityPacket(this.e, AddEntityPacket.MINECART_CHEST);
-            }
-            if (minecart.type == 2) {
-                return new AddEntityPacket(this.e, AddEntityPacket.MINECART_FURNACE);
-            }
+            if (minecart.type == Minecart.RIDEABLE) return new AddEntityPacket(this.e, AddEntityPacket.MINECART_RIDEABLE);
+            if (minecart.type == Minecart.CHEST) return new AddEntityPacket(this.e, AddEntityPacket.MINECART_CHEST);
+            if (minecart.type == Minecart.FURNACE) return new AddEntityPacket(this.e, AddEntityPacket.MINECART_FURNACE);
         }
         if (this.e instanceof Boat) {
             return new AddEntityPacket(this.e, AddEntityPacket.BOAT);
@@ -268,12 +271,12 @@ public class TrackedEntity
             return new AddEntityPacket(this.e, AddEntityPacket.SNOWBALL);
         }
         if (this.e instanceof Fireball) {
-            final Fireball fireball = (Fireball)this.e;
-            final AddEntityPacket addEntityPacket = new AddEntityPacket(this.e, AddEntityPacket.FIREBALL, ((Fireball)this.e).owner.entityId);
-            addEntityPacket.xa = (int)(fireball.xPower * 8000.0);
-            addEntityPacket.ya = (int)(fireball.yPower * 8000.0);
-            addEntityPacket.za = (int)(fireball.zPower * 8000.0);
-            return addEntityPacket;
+            final Fireball fb = (Fireball)this.e;
+            final AddEntityPacket aep = new AddEntityPacket(this.e, AddEntityPacket.FIREBALL, ((Fireball)this.e).owner.entityId);
+            aep.xa = (int)(fb.xPower * 8000.0);
+            aep.ya = (int)(fb.yPower * 8000.0);
+            aep.za = (int)(fb.zPower * 8000.0);
+            return aep;
         }
         if (this.e instanceof ThrownEgg) {
             return new AddEntityPacket(this.e, AddEntityPacket.EGG);
@@ -282,13 +285,9 @@ public class TrackedEntity
             return new AddEntityPacket(this.e, AddEntityPacket.PRIMED_TNT);
         }
         if (this.e instanceof FallingTile) {
-            final FallingTile fallingTile = (FallingTile)this.e;
-            if (fallingTile.tile == Tile.sand.id) {
-                return new AddEntityPacket(this.e, AddEntityPacket.FALLING_SAND);
-            }
-            if (fallingTile.tile == Tile.gravel.id) {
-                return new AddEntityPacket(this.e, AddEntityPacket.FALLING_GRAVEL);
-            }
+            final FallingTile ft = (FallingTile)this.e;
+            if (ft.tile == Tile.sand.id) return new AddEntityPacket(this.e, AddEntityPacket.FALLING_SAND);
+            if (ft.tile == Tile.gravel.id) return new AddEntityPacket(this.e, AddEntityPacket.FALLING_GRAVEL);
         }
         if (this.e instanceof Painting) {
             return new AddPaintingPacket((Painting)this.e);
@@ -296,10 +295,10 @@ public class TrackedEntity
         throw new IllegalArgumentException("Don't know how to add " + this.e.getClass() + "!");
     }
     
-    public void clear(final ServerPlayer dl) {
-        if (this.seenBy.contains(dl)) {
-            this.seenBy.remove(dl);
-            dl.connection.send(new RemoveEntityPacket(this.e.entityId));
+    public void clear(final ServerPlayer sp) {
+        if (this.seenBy.contains(sp)) {
+            this.seenBy.remove(sp);
+            sp.connection.send(new RemoveEntityPacket(this.e.entityId));
         }
     }
 }

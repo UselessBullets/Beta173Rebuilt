@@ -14,6 +14,8 @@ import net.minecraft.world.level.material.Material;
 
 public class PistonExtensionTile extends Tile
 {
+    // i'm reusing this block for the sticky pistons
+    public static final int STICKY_BIT = 8;
     private int overrideTopTexture;
     
     public PistonExtensionTile(final int id, final int tex) {

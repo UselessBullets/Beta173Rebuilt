@@ -49,21 +49,22 @@ public class PistonBaseTile extends Tile
     @Override
     public int getTexture(final int face, final int data) {
         final int facing = getFacing(data);
+
         if (facing > 5) {
             return this.tex; // Useless - this is the platform tex
         }
+
         if (face == facing) {
             if (isExtended(data) || this.xx0 > 0.0 || this.yy0 > 0.0 || this.zz0 > 0.0 || this.xx1 < 1.0 || this.yy1 < 1.0 || this.zz1 < 1.0) {
                 return INSIDE_TEX;
             }
             return this.tex; // Useless - this is the platform tex
         }
-        else {
-            if (face == Facing.OPPOSITE_FACING[facing]) {
-                return BACK_TEX;
-            }
-            return EDGE_TEX;
+        if (face == Facing.OPPOSITE_FACING[facing]) {
+            return BACK_TEX;
         }
+
+        return EDGE_TEX;
     }
     
     @Override
@@ -83,7 +84,8 @@ public class PistonBaseTile extends Tile
     
     @Override
     public void setPlacedBy(final Level level, final int x, final int y, final int z, final Mob by) {
-        level.setData(x, y, z, getNewFacing(level, x, y, z, (Player)by));
+        int targetData = getNewFacing(level, x, y, z, (Player) by);
+        level.setData(x, y, z, targetData);
         if (!level.isClientSide) {
             this.checkIfExtend(level, x, y, z);
         }
@@ -106,82 +108,125 @@ public class PistonBaseTile extends Tile
     private void checkIfExtend(final Level level, final int x, final int y, final int z) {
         final int data = level.getData(x, y, z);
         final int facing = getFacing(data);
-        final boolean neighborSignal = this.getNeighborSignal(level, x, y, z, facing);
-        if (data == 7) {
+        final boolean extend = this.getNeighborSignal(level, x, y, z, facing);
+
+        if (data == UNDEFINED_FACING) {
             return;
         }
-        if (neighborSignal && !isExtended(data)) {
+
+        if (extend && !isExtended(data)) {
             if (canPush(level, x, y, z, facing)) {
-                level.setDataNoUpdate(x, y, z, facing | 0x8);
-                level.tileEvent(x, y, z, 0, facing);
+                level.setDataNoUpdate(x, y, z, facing | EXTENDED_BIT);
+                level.tileEvent(x, y, z, TRIGGER_EXTEND, facing);
             }
         }
-        else if (!neighborSignal && isExtended(data)) {
+        else if (!extend && isExtended(data)) {
             level.setDataNoUpdate(x, y, z, facing);
-            level.tileEvent(x, y, z, 1, facing);
+            level.tileEvent(x, y, z, TRIGGER_CONTRACT, facing);
         }
     }
-    
+
+    /**
+     * This method checks neighbor signals for this block and the block above,
+     * and directly beneath. However, it avoids checking blocks that would be
+     * pushed by this block.
+     *
+     * @param level
+     * @param x
+     * @param y
+     * @param z
+     * @return
+     */
     private boolean getNeighborSignal(final Level level, final int x, final int y, final int z, final int facing) {
-        return (facing != 0 && level.getSignal(x, y - 1, z, 0)) || (facing != 1 && level.getSignal(x, y + 1, z, 1)) || (facing != 2 && level.getSignal(x, y, z - 1, 2)) || (facing != 3 && level.getSignal(x, y, z + 1, 3)) || (facing != 5 && level.getSignal(x + 1, y, z, 5)) || (facing != 4 && level.getSignal(x - 1, y, z, 4)) || level.getSignal(x, y, z, 0) || level.getSignal(x, y + 2, z, 1) || level.getSignal(x, y + 1, z - 1, 2) || level.getSignal(x, y + 1, z + 1, 3) || level.getSignal(x - 1, y + 1, z, 4) || level.getSignal(x + 1, y + 1, z, 5);
+        // check adjacent neighbors, but not in push direction
+        if (facing != Facing.DOWN) if (level.getSignal(x, y - 1, z, Facing.DOWN)) return true;
+        if (facing != Facing.UP) if (level.getSignal(x, y + 1, z, Facing.UP)) return true;
+        if (facing != Facing.NORTH) if (level.getSignal(x, y, z - 1, Facing.NORTH)) return true;
+        if (facing != Facing.SOUTH) if (level.getSignal(x, y, z + 1, Facing.SOUTH)) return true;
+        if (facing != Facing.EAST) if (level.getSignal(x + 1, y, z, Facing.EAST)) return true;
+        if (facing != Facing.WEST) if (level.getSignal(x - 1, y, z, Facing.WEST)) return true;
+
+        // check signals above
+        if (level.getSignal(x, y, z, 0)) return true;
+        if (level.getSignal(x, y + 2, z, 1)) return true;
+        if (level.getSignal(x, y + 1, z - 1, 2)) return true;
+        if (level.getSignal(x, y + 1, z + 1, 3)) return true;
+        if (level.getSignal(x - 1, y + 1, z, 4)) return true;
+        if (level.getSignal(x + 1, y + 1, z, 5)) return true;
+
+        return false;
     }
     
     @Override
-    public void triggerEvent(final Level level, int x, int y, int z, final int b0, final int b1) {
+    public void triggerEvent(final Level level, int x, int y, int z, final int param1, final int facing) {
         this.ignoreUpdate = true;
-        if (b0 == 0) {
-            if (this.createPush(level, x, y, z, b1)) {
-                level.setData(x, y, z, b1 | 0x8);
+
+        if (param1 == TRIGGER_EXTEND) {
+            if (this.createPush(level, x, y, z, facing)) {
+                level.setData(x, y, z, facing | EXTENDED_BIT);
                 level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "tile.piston.out", 0.5f, level.random.nextFloat() * 0.25f + 0.6f);
             }
         }
-        else if (b0 == 1) {
-            final TileEntity tileEntity = level.getTileEntity(x + Facing.STEP_X[b1], y + Facing.STEP_Y[b1], z + Facing.STEP_Z[b1]);
-            if (tileEntity != null && tileEntity instanceof PistonPieceEntity) {
-                ((PistonPieceEntity)tileEntity).finalTick();
+        else if (param1 == TRIGGER_CONTRACT) {
+            final TileEntity prevTileEntity = level.getTileEntity(x + Facing.STEP_X[facing], y + Facing.STEP_Y[facing], z + Facing.STEP_Z[facing]);
+            if (prevTileEntity != null && prevTileEntity instanceof PistonPieceEntity) {
+                ((PistonPieceEntity)prevTileEntity).finalTick();
             }
-            level.setTileAndDataNoUpdate(x, y, z, Tile.pistonMovingPiece.id, b1);
-            level.setTileEntity(x, y, z, PistonMovingPiece.newMovingPieceEntity(this.id, b1, b1, false, true));
+
+            level.setTileAndDataNoUpdate(x, y, z, Tile.pistonMovingPiece.id, facing);
+            level.setTileEntity(x, y, z, PistonMovingPiece.newMovingPieceEntity(this.id, facing, facing, false, true));
+
+            // sticky movement
             if (this.isSticky) {
-                final int x2 = x + Facing.STEP_X[b1] * 2;
-                final int y2 = y + Facing.STEP_Y[b1] * 2;
-                final int z2 = z + Facing.STEP_Z[b1] * 2;
-                int n = level.getTile(x2, y2, z2);
-                int n2 = level.getData(x2, y2, z2);
-                boolean b2 = false;
-                if (n == Tile.pistonMovingPiece.id) {
-                    final TileEntity tileEntity2 = level.getTileEntity(x2, y2, z2);
-                    if (tileEntity2 != null && tileEntity2 instanceof PistonPieceEntity) {
-                        final PistonPieceEntity pistonPieceEntity = (PistonPieceEntity)tileEntity2;
-                        if (pistonPieceEntity.getFacing() == b1 && pistonPieceEntity.isExtending()) {
-                            pistonPieceEntity.finalTick();
-                            n = pistonPieceEntity.getId();
-                            n2 = pistonPieceEntity.getData();
-                            b2 = true;
+                final int twoX = x + Facing.STEP_X[facing] * 2;
+                final int twoY = y + Facing.STEP_Y[facing] * 2;
+                final int twoZ = z + Facing.STEP_Z[facing] * 2;
+                int block = level.getTile(twoX, twoY, twoZ);
+                int blockData = level.getData(twoX, twoY, twoZ);
+                boolean pistonPiece = false;
+
+                if (block == Tile.pistonMovingPiece.id) {
+                    // the block two steps away is a moving piston block piece,
+                    // so replace it with the real data, since it's probably
+                    // this piston which is changing too fast
+                    final TileEntity tileEntity = level.getTileEntity(twoX, twoY, twoZ);
+                    if (tileEntity != null && tileEntity instanceof PistonPieceEntity) {
+                        final PistonPieceEntity ppe = (PistonPieceEntity)tileEntity;
+                        if (ppe.getFacing() == facing && ppe.isExtending()) {
+                            // force the tile to air before pushing
+                            ppe.finalTick();
+                            block = ppe.getId();
+                            blockData = ppe.getData();
+                            pistonPiece = true;
                         }
                     }
                 }
-                if (!b2 && n > 0 && isPushable(n, level, x2, y2, z2, false) && (Tile.tiles[n].getPistonPushReaction() == 0 || n == Tile.pistonBase.id || n == Tile.pistonStickyBase.id)) {
+
+                if (!pistonPiece && block > 0 && isPushable(block, level, twoX, twoY, twoZ, false)
+                        && (Tile.tiles[block].getPistonPushReaction() == Material.PUSH_NORMAL || block == Tile.pistonBase.id || block == Tile.pistonStickyBase.id)) {
                     this.ignoreUpdate = false;
-                    level.setTile(x2, y2, z2, 0);
+                    level.setTile(twoX, twoY, twoZ, 0);
                     this.ignoreUpdate = true;
-                    x += Facing.STEP_X[b1];
-                    y += Facing.STEP_Y[b1];
-                    z += Facing.STEP_Z[b1];
-                    level.setTileAndDataNoUpdate(x, y, z, Tile.pistonMovingPiece.id, n2);
-                    level.setTileEntity(x, y, z, PistonMovingPiece.newMovingPieceEntity(n, n2, b1, false, false));
+
+                    x += Facing.STEP_X[facing];
+                    y += Facing.STEP_Y[facing];
+                    z += Facing.STEP_Z[facing];
+
+                    level.setTileAndDataNoUpdate(x, y, z, Tile.pistonMovingPiece.id, blockData);
+                    level.setTileEntity(x, y, z, PistonMovingPiece.newMovingPieceEntity(block, blockData, facing, false, false));
                 }
-                else if (!b2) {
+                else if (!pistonPiece) {
                     this.ignoreUpdate = false;
-                    level.setTile(x + Facing.STEP_X[b1], y + Facing.STEP_Y[b1], z + Facing.STEP_Z[b1], 0);
+                    level.setTile(x + Facing.STEP_X[facing], y + Facing.STEP_Y[facing], z + Facing.STEP_Z[facing], 0);
                     this.ignoreUpdate = true;
                 }
             }
             else {
                 this.ignoreUpdate = false;
-                level.setTile(x + Facing.STEP_X[b1], y + Facing.STEP_Y[b1], z + Facing.STEP_Z[b1], 0);
+                level.setTile(x + Facing.STEP_X[facing], y + Facing.STEP_Y[facing], z + Facing.STEP_Z[facing], 0);
                 this.ignoreUpdate = true;
             }
+
             level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "tile.piston.in", 0.5f, level.random.nextFloat() * 0.15f + 0.6f);
         }
         this.ignoreUpdate = false;
@@ -190,32 +235,28 @@ public class PistonBaseTile extends Tile
     @Override
     public void updateShape(final LevelSource level, final int x, final int y, final int z) {
         final int data = level.getData(x, y, z);
+
         if (isExtended(data)) {
+            final float thickness = PLATFORM_THICKNESS / 16.0f;
             switch (getFacing(data)) {
-                case 0: {
-                    this.setShape(0.0f, 0.25f, 0.0f, 1.0f, 1.0f, 1.0f);
+                case Facing.DOWN:
+                    this.setShape(0.0f, thickness, 0.0f, 1.0f, 1.0f, 1.0f);
                     break;
-                }
-                case 1: {
-                    this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.75f, 1.0f);
+                case Facing.UP:
+                    this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1 - thickness, 1.0f);
                     break;
-                }
-                case 2: {
-                    this.setShape(0.0f, 0.0f, 0.25f, 1.0f, 1.0f, 1.0f);
+                case Facing.NORTH:
+                    this.setShape(0.0f, 0.0f, thickness, 1.0f, 1.0f, 1.0f);
                     break;
-                }
-                case 3: {
-                    this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.75f);
+                case Facing.SOUTH:
+                    this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1 - thickness);
                     break;
-                }
-                case 4: {
-                    this.setShape(0.25f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+                case Facing.WEST:
+                    this.setShape(thickness, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
                     break;
-                }
-                case 5: {
-                    this.setShape(0.0f, 0.0f, 0.0f, 0.75f, 1.0f, 1.0f);
+                case Facing.EAST:
+                    this.setShape(0.0f, 0.0f, 0.0f, 1 - thickness, 1.0f, 1.0f);
                     break;
-                }
             }
         }
         else {
@@ -244,40 +285,38 @@ public class PistonBaseTile extends Tile
     }
     
     public static boolean isExtended(final int data) {
-        return (data & 0x8) != 0x0;
+        return (data & EXTENDED_BIT) != 0x0;
     }
     
     private static int getNewFacing(final Level level, final int x, final int y, final int z, final Player player) {
         if (Mth.abs((float)player.x - x) < 2.0f && Mth.abs((float)player.z - z) < 2.0f) {
-            final double n = player.y + 1.82 - player.heightOffset;
-            if (n - y > 2.0) {
-                return 1;
+            // If the player is above the block, the slot is on the top
+            final double py = player.y + 1.82 - player.heightOffset;
+            if (py - y > 2.0) {
+                return Facing.UP;
             }
-            if (y - n > 0.0) {
-                return 0;
+            // If the player is below the block, the slot is on the bottom
+            if (y - py > 0.0) {
+                return Facing.DOWN;
             }
         }
-        final int n2 = Mth.floor(player.yRot * 4.0f / 360.0f + 0.5) & 0x3;
-        if (n2 == 0) {
-            return 2;
-        }
-        if (n2 == 1) {
-            return 5;
-        }
-        if (n2 == 2) {
-            return 3;
-        }
-        if (n2 == 3) {
-            return 4;
-        }
+        // The slot is on the side
+        final int i = Mth.floor(player.yRot * 4.0f / 360.0f + 0.5) & 0x3;
+        if (i == 0) return Facing.NORTH;
+        if (i == 1) return Facing.EAST;
+        if (i == 2) return Facing.SOUTH;
+        if (i == 3) return Facing.WEST;
         return 0;
     }
     
     private static boolean isPushable(final int block, final Level level, final int cx, final int cy, final int cz, final boolean allowDestroyable) {
+        // special case for obsidian
         if (block == Tile.obsidian.id) {
             return false;
         }
+
         if (block == Tile.pistonBase.id || block == Tile.pistonStickyBase.id) {
+            // special case for piston bases
             if (isExtended(level.getData(cx, cy, cz))) {
                 return false;
             }
@@ -286,89 +325,124 @@ public class PistonBaseTile extends Tile
             if (Tile.tiles[block].getDestroySpeed() == -1.0f) {
                 return false;
             }
+
             if (Tile.tiles[block].getPistonPushReaction() == 2) {
                 return false;
             }
+
             if (!allowDestroyable && Tile.tiles[block].getPistonPushReaction() == 1) {
                 return false;
             }
         }
-        return level.getTileEntity(cx, cy, cz) == null;
+
+        if (level.getTileEntity(cx, cy, cz) == null) {
+            // may not push tile entities
+            return true;
+        }
+
+        return false;
     }
     
     private static boolean canPush(final Level level, final int sx, final int sy, final int sz, final int facing) {
-        int n = sx + Facing.STEP_X[facing];
-        int n2 = sy + Facing.STEP_Y[facing];
-        int n3 = sz + Facing.STEP_Z[facing];
-        for (int i = 0; i < 13; ++i) {
-            if (n2 <= 0 || n2 >= 127) {
+        int cx = sx + Facing.STEP_X[facing];
+        int cy = sy + Facing.STEP_Y[facing];
+        int cz = sz + Facing.STEP_Z[facing];
+        
+        for (int i = 0; i < MAX_PUSH_DEPTH + 1; ++i) {
+            if (cy <= 0 || cy >= (Level.MAX_HEIGHT - 1)) {
+                // out of bounds
                 return false;
             }
-            final int tile = level.getTile(n, n2, n3);
-            if (tile == 0) {
+
+            final int block = level.getTile(cx, cy, cz);
+            if (block == 0) {
                 break;
             }
-            if (!isPushable(tile, level, n, n2, n3, true)) {
+
+            if (!isPushable(block, level, cx, cy, cz, true)) {
                 return false;
             }
-            if (Tile.tiles[tile].getPistonPushReaction() == 1) {
+
+            if (Tile.tiles[block].getPistonPushReaction() == Material.PUSH_DESTROY) {
                 break;
             }
-            if (i == 12) {
+
+            if (i == MAX_PUSH_DEPTH) {
+                // we've reached the maximum push depth
+                // without finding air or a breakable block
                 return false;
             }
-            n += Facing.STEP_X[facing];
-            n2 += Facing.STEP_Y[facing];
-            n3 += Facing.STEP_Z[facing];
+
+            cx += Facing.STEP_X[facing];
+            cy += Facing.STEP_Y[facing];
+            cz += Facing.STEP_Z[facing];
         }
+
         return true;
     }
     
     private boolean createPush(final Level level, final int sx, final int sy, final int sz, final int facing) {
-        int x = sx + Facing.STEP_X[facing];
-        int y = sy + Facing.STEP_Y[facing];
-        int z = sz + Facing.STEP_Z[facing];
-        for (int i = 0; i < 13; ++i) {
-            if (y <= 0 || y >= 127) {
+        int cx = sx + Facing.STEP_X[facing];
+        int cy = sy + Facing.STEP_Y[facing];
+        int cz = sz + Facing.STEP_Z[facing];
+
+        for (int i = 0; i < (MAX_PUSH_DEPTH + 1); ++i) {
+            if (cy <= 0 || cy >= (Level.MAX_HEIGHT - 1)) {
+                // out of bounds
                 return false;
             }
-            final int tile = level.getTile(x, y, z);
-            if (tile == 0) {
+
+            final int block = level.getTile(cx, cy, cz);
+            if (block == 0) {
                 break;
             }
-            if (!isPushable(tile, level, x, y, z, true)) {
+
+            if (!isPushable(block, level, cx, cy, cz, true)) {
                 return false;
             }
-            if (Tile.tiles[tile].getPistonPushReaction() == 1) {
-                Tile.tiles[tile].spawnResources(level, x, y, z, level.getData(x, y, z));
-                level.setTile(x, y, z, 0);
+
+            if (Tile.tiles[block].getPistonPushReaction() == Material.PUSH_DESTROY) {
+                // this block is destroyed when pushed
+                Tile.tiles[block].spawnResources(level, cx, cy, cz, level.getData(cx, cy, cz));
+                // setting the tile to air is actually superflous, but
+                // helps vs multiplayer problems
+                level.setTile(cx, cy, cz, 0);
                 break;
             }
-            if (i == 12) {
+
+            if (i == MAX_PUSH_DEPTH) {
+                // we've reached the maximum push depth
+                // without finding air or a breakable block
                 return false;
             }
-            x += Facing.STEP_X[facing];
-            y += Facing.STEP_Y[facing];
-            z += Facing.STEP_Z[facing];
+
+            cx += Facing.STEP_X[facing];
+            cy += Facing.STEP_Y[facing];
+            cz += Facing.STEP_Z[facing];
         }
-        while (x != sx || y != sy || z != sz) {
-            final int n = x - Facing.STEP_X[facing];
-            final int n2 = y - Facing.STEP_Y[facing];
-            final int n3 = z - Facing.STEP_Z[facing];
-            final int tile2 = level.getTile(n, n2, n3);
-            final int data = level.getData(n, n2, n3);
-            if (tile2 == this.id && n == sx && n2 == sy && n3 == sz) {
-                level.setTileAndDataNoUpdate(x, y, z, Tile.pistonMovingPiece.id, facing | (this.isSticky ? 8 : 0));
-                level.setTileEntity(x, y, z, PistonMovingPiece.newMovingPieceEntity(Tile.pistonExtension.id, facing | (this.isSticky ? 8 : 0), facing, true, false));
+
+        while (cx != sx || cy != sy || cz != sz) {
+            final int nx = cx - Facing.STEP_X[facing];
+            final int ny = cy - Facing.STEP_Y[facing];
+            final int nz = cz - Facing.STEP_Z[facing];
+
+            final int block = level.getTile(nx, ny, nz);
+            final int data = level.getData(nx, ny, nz);
+
+            if (block == this.id && nx == sx && ny == sy && nz == sz) {
+                level.setTileAndDataNoUpdate(cx, cy, cz, Tile.pistonMovingPiece.id, facing | (this.isSticky ? PistonExtensionTile.STICKY_BIT : 0));
+                level.setTileEntity(cx, cy, cz, PistonMovingPiece.newMovingPieceEntity(Tile.pistonExtension.id, facing | (this.isSticky ? PistonExtensionTile.STICKY_BIT : 0), facing, true, false));
             }
             else {
-                level.setTileAndDataNoUpdate(x, y, z, Tile.pistonMovingPiece.id, data);
-                level.setTileEntity(x, y, z, PistonMovingPiece.newMovingPieceEntity(tile2, data, facing, true, false));
+                level.setTileAndDataNoUpdate(cx, cy, cz, Tile.pistonMovingPiece.id, data);
+                level.setTileEntity(cx, cy, cz, PistonMovingPiece.newMovingPieceEntity(block, data, facing, true, false));
             }
-            x = n;
-            y = n2;
-            z = n3;
+
+            cx = nx;
+            cy = ny;
+            cz = nz;
         }
+
         return true;
     }
 }

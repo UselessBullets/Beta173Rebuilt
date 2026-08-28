@@ -22,8 +22,9 @@ public class PressurePlateTile extends Tile
         super(id, tex, material);
         this.sensitivity = sensitivity;
         this.setTicking(true);
-        final float n = 0.0625f;
-        this.setShape(n, 0.0f, n, 1.0f - n, 0.03125f, 1.0f - n);
+
+        final float o = 1 / 16.0f;
+        this.setShape(o, 0.0f, o, 1.0f - o, 0.5f / 16.0f, 1.0f - o);
     }
     
     @Override
@@ -57,11 +58,11 @@ public class PressurePlateTile extends Tile
     
     @Override
     public void neighborChanged(final Level level, final int x, final int y, final int z, final int type) {
-        boolean b = false;
-        if (!level.isSolidBlockingTile(x, y - 1, z)) {
-            b = true;
-        }
-        if (b) {
+        boolean replace = false;
+
+        if (!level.isSolidBlockingTile(x, y - 1, z)) replace = true;
+
+        if (replace) {
             this.spawnResources(level, x, y, z, level.getData(x, y, z));
             level.setTile(x, y, z, 0);
         }
@@ -69,58 +70,59 @@ public class PressurePlateTile extends Tile
     
     @Override
     public void tick(final Level level, final int x, final int y, final int z, final Random random) {
-        if (level.isClientSide) {
-            return;
-        }
+        if (level.isClientSide) return;
         if (level.getData(x, y, z) == 0) {
             return;
         }
+
         this.checkPressed(level, x, y, z);
     }
     
     @Override
     public void entityInside(final Level level, final int x, final int y, final int z, final Entity entity) {
-        if (level.isClientSide) {
-            return;
-        }
+        if (level.isClientSide) return;
+
         if (level.getData(x, y, z) == 1) {
             return;
         }
+
         this.checkPressed(level, x, y, z);
     }
     
     private void checkPressed(final Level level, final int x, final int y, final int z) {
-        final boolean b = level.getData(x, y, z) == 1;
-        boolean b2 = false;
-        final float n = 0.125f;
-        List list = null;
-        if (this.sensitivity == Sensitivity.everything) {
-            list = level.getEntities(null, AABB.newTemp(x + n, y, z + n, x + 1 - n, y + 0.25, z + 1 - n));
+        final boolean wasPressed = level.getData(x, y, z) == 1;
+        boolean shouldBePressed = false;
+
+        final float b = 2 / 16.0f;
+        List<? extends Entity> list = null;
+
+        if (this.sensitivity == Sensitivity.everything) list = level.getEntities(null, AABB.newTemp(x + b, y, z + b, x + 1 - b, y + 0.25, z + 1 - b));
+        if (this.sensitivity == Sensitivity.mobs) list = level.getEntitiesOfClass(Mob.class, AABB.newTemp(x + b, y, z + b, x + 1 - b, y + 0.25, z + 1 - b));
+        if (this.sensitivity == Sensitivity.players) list = level.getEntitiesOfClass(Player.class, AABB.newTemp(x + b, y, z + b, x + 1 - b, y + 0.25, z + 1 - b));
+
+        if (!list.isEmpty()) {
+            shouldBePressed = true;
         }
-        if (this.sensitivity == Sensitivity.mobs) {
-            list = level.getEntitiesOfClass(Mob.class, AABB.newTemp(x + n, y, z + n, x + 1 - n, y + 0.25, z + 1 - n));
-        }
-        if (this.sensitivity == Sensitivity.players) {
-            list = level.getEntitiesOfClass(Player.class, AABB.newTemp(x + n, y, z + n, x + 1 - n, y + 0.25, z + 1 - n));
-        }
-        if (list.size() > 0) {
-            b2 = true;
-        }
-        if (b2 && !b) {
+
+        if (shouldBePressed && !wasPressed) {
             level.setData(x, y, z, 1);
             level.updateNeighborsAt(x, y, z, this.id);
             level.updateNeighborsAt(x, y - 1, z, this.id);
             level.setTilesDirty(x, y, z, x, y, z);
+
             level.playLocalSound(x + 0.5, y + 0.1, z + 0.5, "random.click", 0.3f, 0.6f);
         }
-        if (!b2 && b) {
+
+        if (!shouldBePressed && wasPressed) {
             level.setData(x, y, z, 0);
             level.updateNeighborsAt(x, y, z, this.id);
             level.updateNeighborsAt(x, y - 1, z, this.id);
             level.setTilesDirty(x, y, z, x, y, z);
+
             level.playLocalSound(x + 0.5, y + 0.1, z + 0.5, "random.click", 0.3f, 0.5f);
         }
-        if (b2) {
+
+        if (shouldBePressed) {
             level.addToTickNextTick(x, y, z, this.id, this.getTickDelay());
         }
     }
@@ -136,13 +138,13 @@ public class PressurePlateTile extends Tile
     
     @Override
     public void updateShape(final LevelSource level, final int x, final int y, final int z) {
-        final boolean b = level.getData(x, y, z) == 1;
-        final float n = 0.0625f;
-        if (b) {
-            this.setShape(n, 0.0f, n, 1.0f - n, 0.03125f, 1.0f - n);
+        final boolean pressed = level.getData(x, y, z) == 1;
+        final float o = 1 / 16.0f;
+        if (pressed) {
+            this.setShape(o, 0.0f, o, 1.0f - o, 0.5f / 16.0f, 1.0f - o);
         }
         else {
-            this.setShape(n, 0.0f, n, 1.0f - n, 0.0625f, 1.0f - n);
+            this.setShape(o, 0.0f, o, 1.0f - o, 1 / 16.0f, 1.0f - o);
         }
     }
     
@@ -153,7 +155,8 @@ public class PressurePlateTile extends Tile
     
     @Override
     public boolean getDirectSignal(final Level level, final int x, final int y, final int z, final int dir) {
-        return level.getData(x, y, z) != 0 && dir == 1;
+        if (level.getData(x, y, z) == 0) return false;
+        return dir == 1;
     }
     
     @Override
@@ -163,10 +166,10 @@ public class PressurePlateTile extends Tile
     
     @Override
     public void updateDefaultShape() {
-        final float n = 0.5f;
-        final float n2 = 0.125f;
-        final float n3 = 0.5f;
-        this.setShape(0.5f - n, 0.5f - n2, 0.5f - n3, 0.5f + n, 0.5f + n2, 0.5f + n3);
+        final float x = 8 / 16.0f;
+        final float y = 2 / 16.0f;
+        final float z = 8 / 16.0f;
+        this.setShape(0.5f - x, 0.5f - y, 0.5f - z, 0.5f + x, 0.5f + y, 0.5f + z);
     }
     
     @Override

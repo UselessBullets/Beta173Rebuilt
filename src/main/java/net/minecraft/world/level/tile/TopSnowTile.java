@@ -7,7 +7,6 @@ package net.minecraft.world.level.tile;
 import net.minecraft.world.level.LightLayer;
 import java.util.Random;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.Item;
@@ -98,7 +97,7 @@ public class TopSnowTile extends Tile
     }
     
     @Override
-    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int f) {
-        return f == 1 || super.isFaceVisible(level, x, y, z, f);
+    public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
+        return f == 1 || super.shouldRenderFace(level, x, y, z, f);
     }
 }

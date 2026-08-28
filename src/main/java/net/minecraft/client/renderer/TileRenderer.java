@@ -233,7 +233,7 @@ public class TileRenderer
             }
         }
 
-        if (skipEdge != Facing.NORTH && (this.noCulling || tt.isFaceVisible(this.level, x, y, z - 1, Facing.NORTH))) {
+        if (skipEdge != Facing.NORTH && (this.noCulling || tt.shouldRenderFace(this.level, x, y, z - 1, Facing.NORTH))) {
             float br = tt.getBrightness(this.level, x, y, z - 1);
             if (tt.zz0 > 0.0) br = centerBrightness;
             t.color(r2 * br, g2 * br, b2 * br);
@@ -242,7 +242,7 @@ public class TileRenderer
             this.renderNorth(tt, x, y, z, tt.getTexture(this.level, x, y, z, 2));
         }
 
-        if (skipEdge != Facing.SOUTH && (this.noCulling || tt.isFaceVisible(this.level, x, y, z + 1, Facing.SOUTH))) {
+        if (skipEdge != Facing.SOUTH && (this.noCulling || tt.shouldRenderFace(this.level, x, y, z + 1, Facing.SOUTH))) {
             float br = tt.getBrightness(this.level, x, y, z + 1);
             if (tt.zz1 < 1.0) br = centerBrightness;
             t.color(r2 * br, g2 * br, b2 * br);
@@ -251,7 +251,7 @@ public class TileRenderer
             this.renderSouth(tt, x, y, z, tt.getTexture(this.level, x, y, z, 3));
         }
 
-        if (skipEdge != Facing.WEST && (this.noCulling || tt.isFaceVisible(this.level, x - 1, y, z, Facing.WEST))) {
+        if (skipEdge != Facing.WEST && (this.noCulling || tt.shouldRenderFace(this.level, x - 1, y, z, Facing.WEST))) {
             float br = tt.getBrightness(this.level, x - 1, y, z);
             if (tt.xx0 > 0.0) br = centerBrightness;
             t.color(r3 * br, g3 * br, b3 * br);
@@ -260,7 +260,7 @@ public class TileRenderer
             this.renderWest(tt, x, y, z, tt.getTexture(this.level, x, y, z, 4));
         }
 
-        if (skipEdge != Facing.EAST && (this.noCulling || tt.isFaceVisible(this.level, x + 1, y, z, Facing.EAST))) {
+        if (skipEdge != Facing.EAST && (this.noCulling || tt.shouldRenderFace(this.level, x + 1, y, z, Facing.EAST))) {
             float br = tt.getBrightness(this.level, x + 1, y, z);
             if (tt.xx1 < 1.0) br = centerBrightness;
             t.color(r3 * br, g3 * br, b3 * br);
@@ -1529,13 +1529,13 @@ public class TileRenderer
         final float r = (col >> 16 & 0xFF) / 255.0f;
         final float g = (col >> 8 & 0xFF) / 255.0f;
         final float b = (col & 0xFF) / 255.0f;
-        final boolean up = tt.isFaceVisible(this.level, x, y + 1, z, 1);
-        final boolean down = tt.isFaceVisible(this.level, x, y - 1, z, 0);
+        final boolean up = tt.shouldRenderFace(this.level, x, y + 1, z, 1);
+        final boolean down = tt.shouldRenderFace(this.level, x, y - 1, z, 0);
         final boolean[] dirs = {
-                tt.isFaceVisible(this.level, x, y, z - 1, 2),
-                tt.isFaceVisible(this.level, x, y, z + 1, 3),
-                tt.isFaceVisible(this.level, x - 1, y, z, 4),
-                tt.isFaceVisible(this.level, x + 1, y, z, 5)
+                tt.shouldRenderFace(this.level, x, y, z - 1, 2),
+                tt.shouldRenderFace(this.level, x, y, z + 1, 3),
+                tt.shouldRenderFace(this.level, x - 1, y, z, 4),
+                tt.shouldRenderFace(this.level, x + 1, y, z, 5)
         };
 
         if (!up && !down && !dirs[0] && !dirs[1] && !dirs[2] && !dirs[3]) return false;
@@ -1794,7 +1794,7 @@ public class TileRenderer
         if (tt.tex == 3) tint0 = tint2 = tint3 = tint4 = tint5 = false;
         if (this.fixedTexture >= 0) tint0 = tint2 = tint3 = tint4 = tint5 = false;
 
-        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY - 1, pZ, Facing.DOWN)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, pX, pY - 1, pZ, Facing.DOWN)) {
             if (this.blsmooth > 0) {
                 --pY;
                 this.llxy0 = tt.getBrightness(this.level, pX - 1, pY, pZ);
@@ -1844,7 +1844,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY + 1, pZ, Facing.UP)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, pX, pY + 1, pZ, Facing.UP)) {
             if (this.blsmooth > 0) {
                 ++pY;
                 this.llxY0 = tt.getBrightness(this.level, pX - 1, pY, pZ);
@@ -1893,7 +1893,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY, pZ - 1, Facing.NORTH)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, pX, pY, pZ - 1, Facing.NORTH)) {
             if (this.blsmooth > 0) {
                 --pZ;
                 this.llx0z = tt.getBrightness(this.level, pX - 1, pY, pZ);
@@ -1960,7 +1960,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, pX, pY, pZ + 1, Facing.SOUTH)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, pX, pY, pZ + 1, Facing.SOUTH)) {
             if (this.blsmooth > 0) {
                 ++pZ;
                 this.llx0Z = tt.getBrightness(this.level, pX - 1, pY, pZ);
@@ -2026,7 +2026,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, pX - 1, pY, pZ, Facing.WEST)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, pX - 1, pY, pZ, Facing.WEST)) {
             if (this.blsmooth > 0) {
                 --pX;
                 this.llxy0 = tt.getBrightness(this.level, pX, pY - 1, pZ);
@@ -2093,7 +2093,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, pX + 1, pY, pZ, Facing.EAST)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, pX + 1, pY, pZ, Facing.EAST)) {
             if (this.blsmooth > 0) {
                 ++pX;
                 this.llXy0 = tt.getBrightness(this.level, pX, pY - 1, pZ);
@@ -2207,7 +2207,7 @@ public class TileRenderer
 
         final float centerBrightness = tt.getBrightness(this.level, x, y, z);
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x, y - 1, z, Facing.DOWN)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x, y - 1, z, Facing.DOWN)) {
             final float br = tt.getBrightness(this.level, x, y - 1, z);
             t.color(r10 * br, g10 * br, b10 * br);
 
@@ -2215,7 +2215,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x, y + 1, z, Facing.UP)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x, y + 1, z, Facing.UP)) {
             float br = tt.getBrightness(this.level, x, y + 1, z);
             if (tt.yy1 != 1.0 && !tt.material.isLiquid()) br = centerBrightness;
             t.color(r11 * br, g11 * br, b11 * br);
@@ -2224,7 +2224,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x, y, z - 1, Facing.NORTH)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x, y, z - 1, Facing.NORTH)) {
             float br = tt.getBrightness(this.level, x, y, z - 1);
             if (tt.zz0 > 0.0) br = centerBrightness;
             t.color(r2 * br, g2 * br, b2 * br);
@@ -2238,7 +2238,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x, y, z + 1, Facing.SOUTH)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x, y, z + 1, Facing.SOUTH)) {
             float br = tt.getBrightness(this.level, x, y, z + 1);
             if (tt.zz1 < 1.0) br = centerBrightness;
             t.color(r2 * br, g2 * br, b2 * br);
@@ -2252,7 +2252,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x - 1, y, z, Facing.WEST)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x - 1, y, z, Facing.WEST)) {
             float br = tt.getBrightness(this.level, x - 1, y, z);
             if (tt.xx0 > 0.0) br = centerBrightness;
             t.color(r3 * br, g3 * br, b3 * br);
@@ -2266,7 +2266,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x + 1, y, z, Facing.EAST)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x + 1, y, z, Facing.EAST)) {
             float br = tt.getBrightness(this.level, x + 1, y, z);
             if (tt.xx1 < 1.0) br = centerBrightness;
             t.color(r3 * br, g3 * br, b3 * br);
@@ -2328,7 +2328,7 @@ public class TileRenderer
 
         final float centerBrightness = tt.getBrightness(this.level, x, y, z);
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x, y - 1, z, Facing.DOWN)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x, y - 1, z, Facing.DOWN)) {
             final float br = tt.getBrightness(this.level, x, y - 1, z);
             t.color(r10 * br, g10 * br, b10 * br);
 
@@ -2336,7 +2336,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x, y + 1, z, Facing.UP)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x, y + 1, z, Facing.UP)) {
             float br = tt.getBrightness(this.level, x, y + 1, z);
             if (tt.yy1 != 1.0 && !tt.material.isLiquid()) br = centerBrightness;
             t.color(r11 * br, g11 * br, b11 * br);
@@ -2345,7 +2345,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x, y, z - 1, Facing.NORTH)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x, y, z - 1, Facing.NORTH)) {
             float br = tt.getBrightness(this.level, x, y, z - 1);
             if (tt.zz0 > 0.0) br = centerBrightness;
             t.color(r2 * br, g2 * br, b2 * br);
@@ -2356,7 +2356,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x, y, z + 1, Facing.SOUTH)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x, y, z + 1, Facing.SOUTH)) {
             float br = tt.getBrightness(this.level, x, y, z + 1);
             if (tt.zz1 < 1.0) br = centerBrightness;
             t.color(r2 * br, g2 * br, b2 * br);
@@ -2367,7 +2367,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x - 1, y, z, Facing.WEST)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x - 1, y, z, Facing.WEST)) {
             float br = tt.getBrightness(this.level, x - 1, y, z);
             if (tt.xx0 > 0.0) br = centerBrightness;
             t.color(r3 * br, g3 * br, b3 * br);
@@ -2378,7 +2378,7 @@ public class TileRenderer
             changed = true;
         }
 
-        if (this.noCulling || tt.isFaceVisible(this.level, x + 1, y, z, Facing.EAST)) {
+        if (this.noCulling || tt.shouldRenderFace(this.level, x + 1, y, z, Facing.EAST)) {
             float br = tt.getBrightness(this.level, x + 1, y, z);
             if (tt.xx1 < 1.0) br = centerBrightness;
             t.color(r3 * br, g3 * br, b3 * br);

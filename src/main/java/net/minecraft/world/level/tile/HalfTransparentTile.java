@@ -22,9 +22,9 @@ public class HalfTransparentTile extends Tile
     }
     
     @Override
-    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int f) {
+    public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
         final int id = level.getTile(x, y, z);
         if (!this.allowSame && id == this.id) return false;
-        return super.isFaceVisible(level, x, y, z, f);
+        return super.shouldRenderFace(level, x, y, z, f);
     }
 }

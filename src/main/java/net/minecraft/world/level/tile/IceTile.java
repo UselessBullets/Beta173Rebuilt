@@ -25,8 +25,8 @@ public class IceTile extends HalfTransparentTile
     }
     
     @Override
-    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int face) {
-        return super.isFaceVisible(level, x, y, z, 1 - face);
+    public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int face) {
+        return super.shouldRenderFace(level, x, y, z, 1 - face);
     }
     
     @Override

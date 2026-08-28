@@ -89,7 +89,7 @@ public class DiodeTile extends Tile
     }
     
     @Override
-    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int f) {
+    public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
         if (f == Facing.DOWN || f == Facing.UP) {
             // up and down is a special case handled by the shape renderer
             return false;

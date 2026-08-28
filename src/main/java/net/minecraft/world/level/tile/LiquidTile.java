@@ -81,12 +81,12 @@ public abstract class LiquidTile extends Tile
     }
     
     @Override
-    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int f) {
+    public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
         final Material m = level.getMaterial(x, y, z);
         if (m == this.material) return false;
         if (f == Facing.UP) return true;
         if (m == Material.ice) return false;
-        return super.isFaceVisible(level, x, y, z, f);
+        return super.shouldRenderFace(level, x, y, z, f);
     }
     
     @Override

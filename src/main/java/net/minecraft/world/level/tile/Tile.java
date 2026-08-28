@@ -295,7 +295,7 @@ public class Tile implements Descriptive<Tile> {
         return level.getBrightness(x, y, z, Tile.lightEmission[this.id]);
     }
     
-    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int f) {
+    public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
         return (f == 0 && this.yy0 > 0.0) || (f == 1 && this.yy1 < 1.0) || (f == 2 && this.zz0 > 0.0) || (f == 3 && this.zz1 < 1.0) || (f == 4 && this.xx0 > 0.0) || (f == 5 && this.xx1 < 1.0) || !level.isSolidTile(x, y, z);
     }
     

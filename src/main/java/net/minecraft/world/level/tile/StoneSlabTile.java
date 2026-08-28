@@ -104,11 +104,11 @@ public class StoneSlabTile extends Tile
     }
     
     @Override
-    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int f) {
+    public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
         if (this != Tile.stoneSlabHalf) {
-            super.isFaceVisible(level, x, y, z, f);
+            super.shouldRenderFace(level, x, y, z, f);
         }
-        return f == 1 || (super.isFaceVisible(level, x, y, z, f) && (f == 0 || level.getTile(x, y, z) != this.id));
+        return f == 1 || (super.shouldRenderFace(level, x, y, z, f) && (f == 0 || level.getTile(x, y, z) != this.id));
     }
 
 }

@@ -54,8 +54,8 @@ public class StairTile extends Tile
     }
     
     @Override
-    public boolean isFaceVisible(final LevelSource level, final int x, final int y, final int z, final int f) {
-        return super.isFaceVisible(level, x, y, z, f);
+    public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
+        return super.shouldRenderFace(level, x, y, z, f);
     }
     
     @Override

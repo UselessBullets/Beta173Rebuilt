@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.Facing;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import java.util.Random;
@@ -35,16 +36,18 @@ public class TreeTile extends Tile
     
     @Override
     public void onRemove(final Level level, final int x, final int y, final int z) {
-        final int n = 4;
-        final int n2 = n + 1;
-        if (level.hasChunksAt(x - n2, y - n2, z - n2, x + n2, y + n2, z + n2)) {
-            for (int i = -n; i <= n; ++i) {
-                for (int j = -n; j <= n; ++j) {
-                    for (int k = -n; k <= n; ++k) {
-                        if (level.getTile(x + i, y + j, z + k) == Tile.leaves.id) {
-                            final int data = level.getData(x + i, y + j, z + k);
-                            if ((data & 0x8) == 0x0) {
-                                level.setDataNoUpdate(x + i, y + j, z + k, data | 0x8);
+        final int r = LeafTile.REQUIRED_WOOD_RANGE;
+        final int r2 = r + 1;
+
+        if (level.hasChunksAt(x - r2, y - r2, z - r2, x + r2, y + r2, z + r2)) {
+            for (int xo = -r; xo <= r; ++xo) {
+                for (int yo = -r; yo <= r; ++yo) {
+                    for (int zo = -r; zo <= r; ++zo) {
+                        int t = level.getTile(x + xo, y + yo, z + zo);
+                        if (t == Tile.leaves.id) {
+                            final int currentData = level.getData(x + xo, y + yo, z + zo);
+                            if ((currentData & LeafTile.UPDATE_LEAF_BIT) == 0x0) {
+                                level.setDataNoUpdate(x + xo, y + yo, z + zo, currentData | LeafTile.UPDATE_LEAF_BIT);
                             }
                         }
                     }
@@ -55,18 +58,9 @@ public class TreeTile extends Tile
     
     @Override
     public int getTexture(final int face, final int data) {
-        if (face == 1) {
-            return 21;
-        }
-        if (face == 0) {
-            return 21;
-        }
-        if (data == 1) {
-            return 116;
-        }
-        if (data == 2) {
-            return 117;
-        }
+        if (face == Facing.UP || face == Facing.DOWN) return 21;
+        if (data == DARK_TRUNK) return 116;
+        if (data == BIRCH_TRUNK) return 117;
         return 20;
     }
     

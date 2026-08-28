@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.Facing;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Material;
@@ -17,15 +18,9 @@ public class WorkbenchTile extends Tile
     
     @Override
     public int getTexture(final int face) {
-        if (face == 1) {
-            return this.tex - 16;
-        }
-        if (face == 0) {
-            return Tile.wood.getTexture(0);
-        }
-        if (face == 2 || face == 4) {
-            return this.tex + 1;
-        }
+        if (face == Facing.UP) return this.tex - 16;
+        if (face == Facing.DOWN) return Tile.wood.getTexture(0);
+        if (face == Facing.NORTH || face == Facing.WEST) return this.tex + 1;
         return this.tex;
     }
     

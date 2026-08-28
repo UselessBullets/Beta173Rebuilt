@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.Facing;
 import net.minecraft.locale.Descriptive;
 import net.minecraft.world.item.TileItem;
 import net.minecraft.world.item.PistonTileItem;
@@ -86,129 +87,497 @@ public class Tile implements Descriptive<Tile> {
     public static final int[] lightEmission = new int[TILE_NUM_COUNT];
     public static final boolean[] sendTileData = new boolean[TILE_NUM_COUNT];
 
-    public static final Tile rock = new StoneTile(1, 1).setDestroyTime(1.5f).setExplodeable(10.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("stone");
-    public static final GrassTile grass = (GrassTile)new GrassTile(2).setDestroyTime(0.6f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("grass");
-    public static final Tile dirt = new DirtTile(3, 2).setDestroyTime(0.5f).setSoundType(Tile.SOUND_GRAVEL).setDescriptionId("dirt");
-    public static final Tile stoneBrick = new Tile(4, 16, Material.stone).setDestroyTime(2.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("stonebrick");
-    public static final Tile wood = new Tile(5, 4, Material.wood).setDestroyTime(2.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("wood").sendTileData();
-    public static final Tile sapling = new Sapling(6, 15).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("sapling").sendTileData();
-    public static final Tile unbreakable = new Tile(7, 17, Material.stone).setIndestructible().setExplodeable(6000000.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("bedrock").setNotCollectStatistics();
-    public static final Tile water = new LiquidTileDynamic(8, Material.water).setDestroyTime(100.0f).setLightBlock(3).setDescriptionId("water").setNotCollectStatistics().sendTileData();
-    public static final Tile calmWater = new LiquidTileStatic(9, Material.water).setDestroyTime(100.0f).setLightBlock(3).setDescriptionId("water").setNotCollectStatistics().sendTileData();
-    public static final Tile lava = new LiquidTileDynamic(10, Material.lava).setDestroyTime(0.0f).setLightEmission(1.0f).setLightBlock(255).setDescriptionId("lava").setNotCollectStatistics().sendTileData();
-    public static final Tile calmLava = new LiquidTileStatic(11, Material.lava).setDestroyTime(100.0f).setLightEmission(1.0f).setLightBlock(255).setDescriptionId("lava").setNotCollectStatistics().sendTileData();
-    public static final Tile sand = new SandTile(12, 18).setDestroyTime(0.5f).setSoundType(Tile.SOUND_SAND).setDescriptionId("sand");
-    public static final Tile gravel = new GravelTile(13, 19).setDestroyTime(0.6f).setSoundType(Tile.SOUND_GRAVEL).setDescriptionId("gravel");
-    public static final Tile goldOre = new OreTile(14, 32).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreGold");
-    public static final Tile ironOre = new OreTile(15, 33).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreIron");
-    public static final Tile coalOre = new OreTile(16, 34).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreCoal");
-    public static final Tile treeTrunk = new TreeTile(17).setDestroyTime(2.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("log").sendTileData();
-    public static final LeafTile leaves = (LeafTile)new LeafTile(18, 52).setDestroyTime(0.2f).setLightBlock(1).setSoundType(Tile.SOUND_GRASS).setDescriptionId("leaves").setNotCollectStatistics().sendTileData();
-    public static final Tile sponge = new Sponge(19).setDestroyTime(0.6f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("sponge");
-    public static final Tile glass = new GlassTile(20, 49, Material.glass, false).setDestroyTime(0.3f).setSoundType(Tile.SOUND_GLASS).setDescriptionId("glass");
-    public static final Tile lapisOre = new OreTile(21, 160).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreLapis");
-    public static final Tile lapisBlock = new Tile(22, 144, Material.stone).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("blockLapis");
-    public static final Tile dispenser = new DispenserTile(23).setDestroyTime(3.5f).setSoundType(Tile.SOUND_STONE).setDescriptionId("dispenser").sendTileData();
-    public static final Tile sandStone = new SandStoneTile(24).setSoundType(Tile.SOUND_STONE).setDestroyTime(0.8f).setDescriptionId("sandStone");
-    public static final Tile musicBlock = new MusicTile(25).setDestroyTime(0.8f).setDescriptionId("musicBlock").sendTileData();
-    public static final Tile bed = new BedTile(26).setDestroyTime(0.2f).setDescriptionId("bed").setNotCollectStatistics().sendTileData();
-    public static final Tile goldenRail = new RailTile(27, 179, true).setDestroyTime(0.7f).setSoundType(Tile.SOUND_METAL).setDescriptionId("goldenRail").sendTileData();
-    public static final Tile detectorRail = new DetectorRailTile(28, 195).setDestroyTime(0.7f).setSoundType(Tile.SOUND_METAL).setDescriptionId("detectorRail").sendTileData();
-    public static final Tile pistonStickyBase = new PistonBaseTile(29, PistonBaseTile.PLATFORM_STICKY_TEX, true).setDescriptionId("pistonStickyBase").sendTileData();
-    public static final Tile web = new WebTile(30, 11).setLightBlock(1).setDestroyTime(4.0f).setDescriptionId("web");
-    public static final TallGrass tallgrass = (TallGrass)new TallGrass(31, 39).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("tallgrass");
-    public static final DeadBushTile deadBush = (DeadBushTile)new DeadBushTile(32, 55).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("deadbush");
-    public static final Tile pistonBase = new PistonBaseTile(33, PistonBaseTile.PLATFORM_STICKY_TEX, false).setDescriptionId("pistonBase").sendTileData();
-    public static final PistonExtensionTile pistonExtension = (PistonExtensionTile)new PistonExtensionTile(34, 107).sendTileData();
-    public static final Tile cloth = new ClothTile().setDestroyTime(0.8f).setSoundType(Tile.SOUND_CLOTH).setDescriptionId("cloth").sendTileData();
+    public static final Tile rock = new StoneTile(1, 1)
+            .setDestroyTime(1.5f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("stone");
+    public static final GrassTile grass = (GrassTile)new GrassTile(2)
+            .setDestroyTime(0.6f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("grass");
+    public static final Tile dirt = new DirtTile(3, 2)
+            .setDestroyTime(0.5f)
+            .setSoundType(Tile.SOUND_GRAVEL)
+            .setDescriptionId("dirt");
+    public static final Tile stoneBrick = new Tile(4, 16, Material.stone)
+            .setDestroyTime(2.0f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("stonebrick");
+    public static final Tile wood = new Tile(5, 4, Material.wood)
+            .setDestroyTime(2.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("wood")
+            .sendTileData();
+    public static final Tile sapling = new Sapling(6, 15)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("sapling")
+            .sendTileData();
+    public static final Tile unbreakable = new Tile(7, 17, Material.stone)
+            .setIndestructible()
+            .setExplodeable(6000000.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("bedrock")
+            .setNotCollectStatistics();
+    public static final Tile water = new LiquidTileDynamic(8, Material.water)
+            .setDestroyTime(100.0f)
+            .setLightBlock(3)
+            .setDescriptionId("water")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile calmWater = new LiquidTileStatic(9, Material.water)
+            .setDestroyTime(100.0f)
+            .setLightBlock(3)
+            .setDescriptionId("water")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile lava = new LiquidTileDynamic(10, Material.lava)
+            .setDestroyTime(0.0f)
+            .setLightEmission(1.0f)
+            .setLightBlock(255)
+            .setDescriptionId("lava")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile calmLava = new LiquidTileStatic(11, Material.lava)
+            .setDestroyTime(100.0f)
+            .setLightEmission(1.0f)
+            .setLightBlock(255)
+            .setDescriptionId("lava")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile sand = new SandTile(12, 18)
+            .setDestroyTime(0.5f)
+            .setSoundType(Tile.SOUND_SAND)
+            .setDescriptionId("sand");
+    public static final Tile gravel = new GravelTile(13, 19)
+            .setDestroyTime(0.6f)
+            .setSoundType(Tile.SOUND_GRAVEL)
+            .setDescriptionId("gravel");
+    public static final Tile goldOre = new OreTile(14, 32)
+            .setDestroyTime(3.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("oreGold");
+    public static final Tile ironOre = new OreTile(15, 33)
+            .setDestroyTime(3.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("oreIron");
+    public static final Tile coalOre = new OreTile(16, 34)
+            .setDestroyTime(3.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("oreCoal");
+    public static final Tile treeTrunk = new TreeTile(17)
+            .setDestroyTime(2.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("log")
+            .sendTileData();
+    public static final LeafTile leaves = (LeafTile)new LeafTile(18, 52)
+            .setDestroyTime(0.2f)
+            .setLightBlock(1)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("leaves")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile sponge = new Sponge(19)
+            .setDestroyTime(0.6f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("sponge");
+    public static final Tile glass = new GlassTile(20, 49, Material.glass, false)
+            .setDestroyTime(0.3f)
+            .setSoundType(Tile.SOUND_GLASS)
+            .setDescriptionId("glass");
+    public static final Tile lapisOre = new OreTile(21, 160)
+            .setDestroyTime(3.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("oreLapis");
+    public static final Tile lapisBlock = new Tile(22, 144, Material.stone)
+            .setDestroyTime(3.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("blockLapis");
+    public static final Tile dispenser = new DispenserTile(23)
+            .setDestroyTime(3.5f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("dispenser")
+            .sendTileData();
+    public static final Tile sandStone = new SandStoneTile(24)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDestroyTime(0.8f)
+            .setDescriptionId("sandStone");
+    public static final Tile musicBlock = new MusicTile(25)
+            .setDestroyTime(0.8f)
+            .setDescriptionId("musicBlock")
+            .sendTileData();
+    public static final Tile bed = new BedTile(26)
+            .setDestroyTime(0.2f)
+            .setDescriptionId("bed")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile goldenRail = new RailTile(27, 179, true)
+            .setDestroyTime(0.7f)
+            .setSoundType(Tile.SOUND_METAL)
+            .setDescriptionId("goldenRail")
+            .sendTileData();
+    public static final Tile detectorRail = new DetectorRailTile(28, 195)
+            .setDestroyTime(0.7f)
+            .setSoundType(Tile.SOUND_METAL)
+            .setDescriptionId("detectorRail")
+            .sendTileData();
+    public static final Tile pistonStickyBase = new PistonBaseTile(29, PistonBaseTile.PLATFORM_STICKY_TEX, true)
+            .setDescriptionId("pistonStickyBase")
+            .sendTileData();
+    public static final Tile web = new WebTile(30, 11)
+            .setLightBlock(1)
+            .setDestroyTime(4.0f)
+            .setDescriptionId("web");
+    public static final TallGrass tallgrass = (TallGrass)new TallGrass(31, 39)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("tallgrass");
+    public static final DeadBushTile deadBush = (DeadBushTile)new DeadBushTile(32, 55)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("deadbush");
+    public static final Tile pistonBase = new PistonBaseTile(33, PistonBaseTile.PLATFORM_STICKY_TEX, false)
+            .setDescriptionId("pistonBase")
+            .sendTileData();
+    public static final PistonExtensionTile pistonExtension = (PistonExtensionTile)new PistonExtensionTile(34, 107)
+            .sendTileData();
+    public static final Tile cloth = new ClothTile()
+            .setDestroyTime(0.8f)
+            .setSoundType(Tile.SOUND_CLOTH)
+            .setDescriptionId("cloth")
+            .sendTileData();
     public static final PistonMovingPiece pistonMovingPiece = new PistonMovingPiece(36);
-    public static final Bush flower = (Bush)new Bush(37, 13).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("flower");
-    public static final Bush rose = (Bush)new Bush(38, 12).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("rose");
-    public static final Bush mushroom1 = (Bush)new Mushroom(39, 29).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setLightEmission(0.125f).setDescriptionId("mushroom");
-    public static final Bush mushroom2 = (Bush)new Mushroom(40, 28).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("mushroom");
-    public static final Tile goldBlock = new MetalTile(41, 23).setDestroyTime(3.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_METAL).setDescriptionId("blockGold");
-    public static final Tile ironBlock = new MetalTile(42, 22).setDestroyTime(5.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_METAL).setDescriptionId("blockIron");
-    public static final Tile stoneSlab = new StoneSlabTile(43, true).setDestroyTime(2.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("stoneSlab");
-    public static final Tile stoneSlabHalf = new StoneSlabTile(44, false).setDestroyTime(2.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("stoneSlab");
-    public static final Tile redBrick = new Tile(45, 7, Material.stone).setDestroyTime(2.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("brick");
-    public static final Tile tnt = new TntTile(46, 8).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("tnt");
-    public static final Tile bookshelf = new BookshelfTile(47, 35).setDestroyTime(1.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("bookshelf");
-    public static final Tile mossStone = new Tile(48, 36, Material.stone).setDestroyTime(2.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("stoneMoss");
-    public static final Tile obsidian = new ObsidianTile(49, 37).setDestroyTime(10.0f).setExplodeable(2000.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("obsidian");
-    public static final Tile torch = new TorchTile(50, 80).setDestroyTime(0.0f).setLightEmission(0.9375f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("torch").sendTileData();
-    public static final FireTile fire = (FireTile)new FireTile(51, 31).setDestroyTime(0.0f).setLightEmission(1.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("fire").setNotCollectStatistics().sendTileData();
-    public static final Tile mobSpawner = new MobSpawnerTile(52, 65).setDestroyTime(5.0f).setSoundType(Tile.SOUND_METAL).setDescriptionId("mobSpawner").setNotCollectStatistics();
-    public static final Tile stairs_wood = new StairTile(53, Tile.wood).setDescriptionId("stairsWood").sendTileData();
-    public static final Tile chest = new ChestTile(54).setDestroyTime(2.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("chest").sendTileData();
-    public static final Tile redStoneDust = new RedStoneDustTile(55, 164).setDestroyTime(0.0f).setSoundType(Tile.SOUND_NORMAL).setDescriptionId("redstoneDust").setNotCollectStatistics().sendTileData();
-    public static final Tile diamondOre = new OreTile(56, 50).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreDiamond");
-    public static final Tile diamondBlock = new MetalTile(57, 24).setDestroyTime(5.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_METAL).setDescriptionId("blockDiamond");
-    public static final Tile workBench = new WorkbenchTile(58).setDestroyTime(2.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("workbench");
-    public static final Tile crops = new CropTile(59, 88).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("crops").setNotCollectStatistics().sendTileData();
-    public static final Tile farmland = new FarmTile(60).setDestroyTime(0.6f).setSoundType(Tile.SOUND_GRAVEL).setDescriptionId("farmland");
-    public static final Tile furnace = new FurnaceTile(61, false).setDestroyTime(3.5f).setSoundType(Tile.SOUND_STONE).setDescriptionId("furnace").sendTileData();
-    public static final Tile furnace_lit = new FurnaceTile(62, true).setDestroyTime(3.5f).setSoundType(Tile.SOUND_STONE).setLightEmission(0.875f).setDescriptionId("furnace").sendTileData();
-    public static final Tile sign = new SignTile(63, SignTileEntity.class, true).setDestroyTime(1.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("sign").setNotCollectStatistics().sendTileData();
-    public static final Tile door_wood = new DoorTile(64, Material.wood).setDestroyTime(3.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("doorWood").setNotCollectStatistics().sendTileData();
-    public static final Tile ladder = new LadderTile(65, 83).setDestroyTime(0.4f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("ladder").sendTileData();
-    public static final Tile rail = new RailTile(66, 128, false).setDestroyTime(0.7f).setSoundType(Tile.SOUND_METAL).setDescriptionId("rail").sendTileData();
-    public static final Tile stairs_stone = new StairTile(67, Tile.stoneBrick).setDescriptionId("stairsStone").sendTileData();
-    public static final Tile wallSign = new SignTile(68, SignTileEntity.class, false).setDestroyTime(1.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("sign").setNotCollectStatistics().sendTileData();
-    public static final Tile lever = new LeverTile(69, 96).setDestroyTime(0.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("lever").sendTileData();
-    public static final Tile pressurePlate_stone = new PressurePlateTile(70, Tile.rock.tex, PressurePlateTile.Sensitivity.mobs, Material.stone).setDestroyTime(0.5f).setSoundType(Tile.SOUND_STONE).setDescriptionId("pressurePlate").sendTileData();
-    public static final Tile door_iron = new DoorTile(71, Material.metal).setDestroyTime(5.0f).setSoundType(Tile.SOUND_METAL).setDescriptionId("doorIron").setNotCollectStatistics().sendTileData();
-    public static final Tile pressurePlate_wood = new PressurePlateTile(72, Tile.wood.tex, PressurePlateTile.Sensitivity.everything, Material.wood).setDestroyTime(0.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("pressurePlate").sendTileData();
-    public static final Tile redStoneOre = new RedStoneOreTile(73, 51, false).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreRedstone").sendTileData();
-    public static final Tile redStoneOre_lit = new RedStoneOreTile(74, 51, true).setLightEmission(0.625f).setDestroyTime(3.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("oreRedstone").sendTileData();
-    public static final Tile notGate_off = new NotGateTile(75, 115, false).setDestroyTime(0.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("notGate").sendTileData();
-    public static final Tile notGate_on = new NotGateTile(76, 99, true).setDestroyTime(0.0f).setLightEmission(0.5f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("notGate").sendTileData();
-    public static final Tile button = new ButtonTile(77, Tile.rock.tex).setDestroyTime(0.5f).setSoundType(Tile.SOUND_STONE).setDescriptionId("button").sendTileData();
-    public static final Tile topSnow = new TopSnowTile(78, 66).setDestroyTime(0.1f).setSoundType(Tile.SOUND_CLOTH).setDescriptionId("snow");
-    public static final Tile ice = new IceTile(79, 67).setDestroyTime(0.5f).setLightBlock(3).setSoundType(Tile.SOUND_GLASS).setDescriptionId("ice");
-    public static final Tile snow = new SnowTile(80, 66).setDestroyTime(0.2f).setSoundType(Tile.SOUND_CLOTH).setDescriptionId("snow");
-    public static final Tile cactus = new CactusTile(81, 70).setDestroyTime(0.4f).setSoundType(Tile.SOUND_CLOTH).setDescriptionId("cactus");
-    public static final Tile clay = new ClayTile(82, 72).setDestroyTime(0.6f).setSoundType(Tile.SOUND_GRAVEL).setDescriptionId("clay");
-    public static final Tile reeds = new ReedTile(83, 73).setDestroyTime(0.0f).setSoundType(Tile.SOUND_GRASS).setDescriptionId("reeds").setNotCollectStatistics();
-    public static final Tile recordPlayer = new RecordPlayerTile(84, 74).setDestroyTime(2.0f).setExplodeable(10.0f).setSoundType(Tile.SOUND_STONE).setDescriptionId("jukebox").sendTileData();
-    public static final Tile fence = new FenceTile(85, 4).setDestroyTime(2.0f).setExplodeable(5.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("fence").sendTileData();
-    public static final Tile pumpkin = new PumpkinTile(86, 102, false).setDestroyTime(1.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("pumpkin").sendTileData();
-    public static final Tile hellRock = new HellStoneTile(87, 103).setDestroyTime(0.4f).setSoundType(Tile.SOUND_STONE).setDescriptionId("hellrock");
-    public static final Tile hellSand = new HellSandTile(88, 104).setDestroyTime(0.5f).setSoundType(Tile.SOUND_SAND).setDescriptionId("hellsand");
-    public static final Tile lightGem = new LightGemTile(89, 105, Material.stone).setDestroyTime(0.3f).setSoundType(Tile.SOUND_GLASS).setLightEmission(1.0f).setDescriptionId("lightgem");
-    public static final PortalTile portalTile = (PortalTile)new PortalTile(90, 14).setDestroyTime(-1.0f).setSoundType(Tile.SOUND_GLASS).setLightEmission(0.75f).setDescriptionId("portal");
-    public static final Tile litPumpkin = new PumpkinTile(91, 102, true).setDestroyTime(1.0f).setSoundType(Tile.SOUND_WOOD).setLightEmission(1.0f).setDescriptionId("litpumpkin").sendTileData();
-    public static final Tile cake = new CakeTile(92, 121).setDestroyTime(0.5f).setSoundType(Tile.SOUND_CLOTH).setDescriptionId("cake").setNotCollectStatistics().sendTileData();
-    public static final Tile diode_off = new DiodeTile(93, false).setDestroyTime(0.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("diode").setNotCollectStatistics().sendTileData();
-    public static final Tile diode_on = new DiodeTile(94, true).setDestroyTime(0.0f).setLightEmission(0.625f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("diode").setNotCollectStatistics().sendTileData();
-    public static final Tile aprilFoolsJoke = new LockedChestTile(95).setDestroyTime(0.0f).setLightEmission(1.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("lockedchest").setTicking(true).sendTileData();
-    public static final Tile trapdoor = new TrapDoorTile(96, Material.wood).setDestroyTime(3.0f).setSoundType(Tile.SOUND_WOOD).setDescriptionId("trapdoor").setNotCollectStatistics().sendTileData();
+    public static final Bush flower = (Bush)new Bush(37, 13)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("flower");
+    public static final Bush rose = (Bush)new Bush(38, 12)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("rose");
+    public static final Bush mushroom1 = (Bush)new Mushroom(39, 29)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setLightEmission(0.125f)
+            .setDescriptionId("mushroom");
+    public static final Bush mushroom2 = (Bush)new Mushroom(40, 28)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("mushroom");
+    public static final Tile goldBlock = new MetalTile(41, 23)
+            .setDestroyTime(3.0f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_METAL)
+            .setDescriptionId("blockGold");
+    public static final Tile ironBlock = new MetalTile(42, 22)
+            .setDestroyTime(5.0f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_METAL)
+            .setDescriptionId("blockIron");
+    public static final Tile stoneSlab = new StoneSlabTile(43, true)
+            .setDestroyTime(2.0f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("stoneSlab");
+    public static final Tile stoneSlabHalf = new StoneSlabTile(44, false)
+            .setDestroyTime(2.0f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("stoneSlab");
+    public static final Tile redBrick = new Tile(45, 7, Material.stone)
+            .setDestroyTime(2.0f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("brick");
+    public static final Tile tnt = new TntTile(46, 8)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("tnt");
+    public static final Tile bookshelf = new BookshelfTile(47, 35)
+            .setDestroyTime(1.5f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("bookshelf");
+    public static final Tile mossStone = new Tile(48, 36, Material.stone)
+            .setDestroyTime(2.0f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("stoneMoss");
+    public static final Tile obsidian = new ObsidianTile(49, 37)
+            .setDestroyTime(10.0f)
+            .setExplodeable(2000.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("obsidian");
+    public static final Tile torch = new TorchTile(50, 80)
+            .setDestroyTime(0.0f)
+            .setLightEmission(0.9375f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("torch")
+            .sendTileData();
+    public static final FireTile fire = (FireTile)new FireTile(51, 31)
+            .setDestroyTime(0.0f)
+            .setLightEmission(1.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("fire")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile mobSpawner = new MobSpawnerTile(52, 65)
+            .setDestroyTime(5.0f)
+            .setSoundType(Tile.SOUND_METAL)
+            .setDescriptionId("mobSpawner")
+            .setNotCollectStatistics();
+    public static final Tile stairs_wood = new StairTile(53, Tile.wood)
+            .setDescriptionId("stairsWood")
+            .sendTileData();
+    public static final Tile chest = new ChestTile(54)
+            .setDestroyTime(2.5f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("chest")
+            .sendTileData();
+    public static final Tile redStoneDust = new RedStoneDustTile(55, 164)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_NORMAL)
+            .setDescriptionId("redstoneDust")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile diamondOre = new OreTile(56, 50)
+            .setDestroyTime(3.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("oreDiamond");
+    public static final Tile diamondBlock = new MetalTile(57, 24)
+            .setDestroyTime(5.0f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_METAL)
+            .setDescriptionId("blockDiamond");
+    public static final Tile workBench = new WorkbenchTile(58)
+            .setDestroyTime(2.5f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("workbench");
+    public static final Tile crops = new CropTile(59, 88)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("crops")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile farmland = new FarmTile(60)
+            .setDestroyTime(0.6f)
+            .setSoundType(Tile.SOUND_GRAVEL)
+            .setDescriptionId("farmland");
+    public static final Tile furnace = new FurnaceTile(61, false)
+            .setDestroyTime(3.5f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("furnace")
+            .sendTileData();
+    public static final Tile furnace_lit = new FurnaceTile(62, true)
+            .setDestroyTime(3.5f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setLightEmission(0.875f)
+            .setDescriptionId("furnace")
+            .sendTileData();
+    public static final Tile sign = new SignTile(63, SignTileEntity.class, true)
+            .setDestroyTime(1.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("sign")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile door_wood = new DoorTile(64, Material.wood)
+            .setDestroyTime(3.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("doorWood")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile ladder = new LadderTile(65, 83)
+            .setDestroyTime(0.4f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("ladder")
+            .sendTileData();
+    public static final Tile rail = new RailTile(66, 128, false)
+            .setDestroyTime(0.7f)
+            .setSoundType(Tile.SOUND_METAL)
+            .setDescriptionId("rail")
+            .sendTileData();
+    public static final Tile stairs_stone = new StairTile(67, Tile.stoneBrick)
+            .setDescriptionId("stairsStone")
+            .sendTileData();
+    public static final Tile wallSign = new SignTile(68, SignTileEntity.class, false)
+            .setDestroyTime(1.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("sign")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile lever = new LeverTile(69, 96)
+            .setDestroyTime(0.5f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("lever")
+            .sendTileData();
+    public static final Tile pressurePlate_stone = new PressurePlateTile(70, Tile.rock.tex, PressurePlateTile.Sensitivity.mobs, Material.stone)
+            .setDestroyTime(0.5f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("pressurePlate")
+            .sendTileData();
+    public static final Tile door_iron = new DoorTile(71, Material.metal)
+            .setDestroyTime(5.0f)
+            .setSoundType(Tile.SOUND_METAL)
+            .setDescriptionId("doorIron")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile pressurePlate_wood = new PressurePlateTile(72, Tile.wood.tex, PressurePlateTile.Sensitivity.everything, Material.wood)
+            .setDestroyTime(0.5f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("pressurePlate")
+            .sendTileData();
+    public static final Tile redStoneOre = new RedStoneOreTile(73, 51, false)
+            .setDestroyTime(3.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("oreRedstone")
+            .sendTileData();
+    public static final Tile redStoneOre_lit = new RedStoneOreTile(74, 51, true)
+            .setLightEmission(0.625f)
+            .setDestroyTime(3.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("oreRedstone")
+            .sendTileData();
+    public static final Tile notGate_off = new NotGateTile(75, 115, false)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("notGate")
+            .sendTileData();
+    public static final Tile notGate_on = new NotGateTile(76, 99, true)
+            .setDestroyTime(0.0f)
+            .setLightEmission(0.5f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("notGate")
+            .sendTileData();
+    public static final Tile button = new ButtonTile(77, Tile.rock.tex)
+            .setDestroyTime(0.5f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("button")
+            .sendTileData();
+    public static final Tile topSnow = new TopSnowTile(78, 66)
+            .setDestroyTime(0.1f)
+            .setSoundType(Tile.SOUND_CLOTH)
+            .setDescriptionId("snow");
+    public static final Tile ice = new IceTile(79, 67)
+            .setDestroyTime(0.5f)
+            .setLightBlock(3)
+            .setSoundType(Tile.SOUND_GLASS)
+            .setDescriptionId("ice");
+    public static final Tile snow = new SnowTile(80, 66)
+            .setDestroyTime(0.2f)
+            .setSoundType(Tile.SOUND_CLOTH)
+            .setDescriptionId("snow");
+    public static final Tile cactus = new CactusTile(81, 70)
+            .setDestroyTime(0.4f)
+            .setSoundType(Tile.SOUND_CLOTH)
+            .setDescriptionId("cactus");
+    public static final Tile clay = new ClayTile(82, 72)
+            .setDestroyTime(0.6f)
+            .setSoundType(Tile.SOUND_GRAVEL)
+            .setDescriptionId("clay");
+    public static final Tile reeds = new ReedTile(83, 73)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_GRASS)
+            .setDescriptionId("reeds")
+            .setNotCollectStatistics();
+    public static final Tile recordPlayer = new RecordPlayerTile(84, 74)
+            .setDestroyTime(2.0f)
+            .setExplodeable(10.0f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("jukebox")
+            .sendTileData();
+    public static final Tile fence = new FenceTile(85, 4)
+            .setDestroyTime(2.0f)
+            .setExplodeable(5.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("fence")
+            .sendTileData();
+    public static final Tile pumpkin = new PumpkinTile(86, 102, false)
+            .setDestroyTime(1.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("pumpkin")
+            .sendTileData();
+    public static final Tile hellRock = new HellStoneTile(87, 103)
+            .setDestroyTime(0.4f)
+            .setSoundType(Tile.SOUND_STONE)
+            .setDescriptionId("hellrock");
+    public static final Tile hellSand = new HellSandTile(88, 104)
+            .setDestroyTime(0.5f)
+            .setSoundType(Tile.SOUND_SAND)
+            .setDescriptionId("hellsand");
+    public static final Tile lightGem = new LightGemTile(89, 105, Material.stone)
+            .setDestroyTime(0.3f)
+            .setSoundType(Tile.SOUND_GLASS)
+            .setLightEmission(1.0f)
+            .setDescriptionId("lightgem");
+    public static final PortalTile portalTile = (PortalTile)new PortalTile(90, 14)
+            .setDestroyTime(-1.0f)
+            .setSoundType(Tile.SOUND_GLASS)
+            .setLightEmission(0.75f)
+            .setDescriptionId("portal");
+    public static final Tile litPumpkin = new PumpkinTile(91, 102, true)
+            .setDestroyTime(1.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setLightEmission(1.0f)
+            .setDescriptionId("litpumpkin")
+            .sendTileData();
+    public static final Tile cake = new CakeTile(92, 121)
+            .setDestroyTime(0.5f)
+            .setSoundType(Tile.SOUND_CLOTH)
+            .setDescriptionId("cake")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile diode_off = new DiodeTile(93, false)
+            .setDestroyTime(0.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("diode")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile diode_on = new DiodeTile(94, true)
+            .setDestroyTime(0.0f)
+            .setLightEmission(0.625f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("diode")
+            .setNotCollectStatistics()
+            .sendTileData();
+    public static final Tile aprilFoolsJoke = new LockedChestTile(95)
+            .setDestroyTime(0.0f)
+            .setLightEmission(1.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("lockedchest")
+            .setTicking(true)
+            .sendTileData();
+    public static final Tile trapdoor = new TrapDoorTile(96, Material.wood)
+            .setDestroyTime(3.0f)
+            .setSoundType(Tile.SOUND_WOOD)
+            .setDescriptionId("trapdoor")
+            .setNotCollectStatistics()
+            .sendTileData();
+
     public int tex;
     public final int id;
     protected float destroySpeed;
     protected float explosionResistance;
-    protected boolean isInventoryItem;
-    protected boolean collectStatistics;
-    public double xx0;
-    public double yy0;
-    public double zz0;
-    public double xx1;
-    public double yy1;
-    public double zz1;
-    public SoundType soundType;
-    public float gravity;
+    protected boolean isInventoryItem = true;
+    protected boolean collectStatistics = true;
+    public double xx0, yy0, zz0, xx1, yy1, zz1;
+    public SoundType soundType = Tile.SOUND_NORMAL;
+    public float gravity = 1.0f;
     public final Material material;
-    public float friction;
+    public float friction = 0.6f;
     private String descriptionId;
     
     protected Tile(final int id, final Material material) {
-        this.isInventoryItem = true;
-        this.collectStatistics = true;
-        this.soundType = Tile.SOUND_NORMAL;
-        this.gravity = 1.0f;
-        this.friction = 0.6f;
-        if (Tile.tiles[id] != null) {
-            throw new IllegalArgumentException("Slot " + id + " is already occupied by " + Tile.tiles[id] + " when adding " + this);
-        }
+        if (Tile.tiles[id] != null) throw new IllegalArgumentException("Slot " + id + " is already occupied by " + Tile.tiles[id] + " when adding " + this);
         this.material = material;
         Tile.tiles[id] = this;
         this.id = id;
@@ -243,7 +612,7 @@ public class Tile implements Descriptive<Tile> {
     }
     
     protected Tile setLightEmission(final float f) {
-        Tile.lightEmission[this.id] = (int)(15.0f * f);
+        Tile.lightEmission[this.id] = (int)(Level.MAX_BRIGHTNESS * f);
         return this;
     }
     
@@ -262,9 +631,7 @@ public class Tile implements Descriptive<Tile> {
     
     protected Tile setDestroyTime(final float destroySpeed) {
         this.destroySpeed = destroySpeed;
-        if (this.explosionResistance < destroySpeed * 5.0f) {
-            this.explosionResistance = destroySpeed * 5.0f;
-        }
+        if (this.explosionResistance < destroySpeed * 5.0f) this.explosionResistance = destroySpeed * 5.0f;
         return this;
     }
     
@@ -294,9 +661,26 @@ public class Tile implements Descriptive<Tile> {
     public float getBrightness(final LevelSource level, final int x, final int y, final int z) {
         return level.getBrightness(x, y, z, Tile.lightEmission[this.id]);
     }
-    
+
+    // Useless - Exists in b1.2 and LCE leaks
+    public static boolean isFaceVisible(Level level, int x, int y, int z, int f) {
+        if (f == Facing.DOWN) y--;
+        if (f == Facing.UP) y++;
+        if (f == Facing.NORTH) z--;
+        if (f == Facing.SOUTH) z++;
+        if (f == Facing.WEST) x--;
+        if (f == Facing.EAST) x++;
+        return !level.isSolidTile(x, y, z);
+    }
+
     public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
-        return (f == 0 && this.yy0 > 0.0) || (f == 1 && this.yy1 < 1.0) || (f == 2 && this.zz0 > 0.0) || (f == 3 && this.zz1 < 1.0) || (f == 4 && this.xx0 > 0.0) || (f == 5 && this.xx1 < 1.0) || !level.isSolidTile(x, y, z);
+        if (f == Facing.DOWN && this.yy0 > 0.0) return true;
+        if (f == Facing.UP && this.yy1 < 1.0) return true;
+        if (f == Facing.NORTH && this.zz0 > 0.0) return true;
+        if (f == Facing.SOUTH && this.zz1 < 1.0) return true;
+        if (f == Facing.WEST && this.xx0 > 0.0) return true;
+        if (f == Facing.EAST && this.xx1 < 1.0) return true;
+        return !level.isSolidTile(x, y, z);
     }
     
     public boolean isSolidFace(final LevelSource level, final int x, final int y, final int z, final int face) {
@@ -319,11 +703,9 @@ public class Tile implements Descriptive<Tile> {
         return AABB.newTemp(x + this.xx0, y + this.yy0, z + this.zz0, x + this.xx1, y + this.yy1, z + this.zz1);
     }
     
-    public void addAABBs(final Level level, final int x, final int y, final int z, final AABB box, final ArrayList boxes) {
+    public void addAABBs(final Level level, final int x, final int y, final int z, final AABB box, final ArrayList<AABB> boxes) {
         final AABB aabb = this.getAABB(level, x, y, z);
-        if (aabb != null && box.intersects(aabb)) {
-            boxes.add(aabb);
-        }
+        if (aabb != null && box.intersects(aabb)) boxes.add(aabb);
     }
     
     public AABB getAABB(final Level level, final int x, final int y, final int z) {
@@ -373,12 +755,8 @@ public class Tile implements Descriptive<Tile> {
     }
     
     public float getDestroyProgress(final Player player) {
-        if (this.destroySpeed < 0.0f) {
-            return 0.0f;
-        }
-        if (!player.canDestroy(this)) {
-            return 1.0f / this.destroySpeed / 100.0f;
-        }
+        if (this.destroySpeed < 0.0f) return 0.0f;
+        if (!player.canDestroy(this)) return 1.0f / this.destroySpeed / 100.0f;
         return player.getDestroySpeed(this) / this.destroySpeed / 30.0f;
     }
     
@@ -387,27 +765,27 @@ public class Tile implements Descriptive<Tile> {
     }
     
     public void spawnResources(final Level level, final int x, final int y, final int z, final int data, final float odds) {
-        if (level.isClientSide) {
-            return;
-        }
-        for (int resourceCount = this.getResourceCount(level.random), i = 0; i < resourceCount; ++i) {
-            if (level.random.nextFloat() <= odds) {
-                final int resource = this.getResource(data, level.random);
-                if (resource > 0) {
-                    this.popResource(level, x, y, z, new ItemInstance(resource, 1, this.getSpawnResourcesAuxValue(data)));
-                }
-            }
+        if (level.isClientSide) return;
+        int count = this.getResourceCount(level.random);
+        for (int i = 0; i < count; ++i) {
+            if (level.random.nextFloat() > odds) continue;
+            final int type = this.getResource(data, level.random);
+            if (type <= 0) continue;
+
+            this.popResource(level, x, y, z, new ItemInstance(type, 1, this.getSpawnResourcesAuxValue(data)));
         }
     }
     
     protected void popResource(final Level level, final int x, final int y, final int z, final ItemInstance itemInstance) {
-        if (level.isClientSide) {
-            return;
-        }
-        final float n = 0.7f;
-        final ItemEntity e = new ItemEntity(level, x + (level.random.nextFloat() * n + (1.0f - n) * 0.5), y + (level.random.nextFloat() * n + (1.0f - n) * 0.5), z + (level.random.nextFloat() * n + (1.0f - n) * 0.5), itemInstance);
-        e.throwTime = 10;
-        level.addEntity(e);
+        if (level.isClientSide) return;
+
+        final float s = 0.7f;
+        double xo = level.random.nextFloat() * s + (1.0f - s) * 0.5;
+        double yo = level.random.nextFloat() * s + (1.0f - s) * 0.5;
+        double zo = level.random.nextFloat() * s + (1.0f - s) * 0.5;
+        final ItemEntity item = new ItemEntity(level, x + xo, y + yo, z + zo, itemInstance);
+        item.throwTime = 10;
+        level.addEntity(item);
     }
     
     protected int getSpawnResourcesAuxValue(final int data) {
@@ -420,86 +798,60 @@ public class Tile implements Descriptive<Tile> {
     
     public HitResult clip(final Level level, final int xt, final int yt, final int zt, Vec3 a, Vec3 b) {
         this.updateShape(level, xt, yt, zt);
+
         a = a.add(-xt, -yt, -zt);
         b = b.add(-xt, -yt, -zt);
-        Vec3 clipX = a.clipX(b, this.xx0);
-        Vec3 clipX2 = a.clipX(b, this.xx1);
-        Vec3 clipY = a.clipY(b, this.yy0);
-        Vec3 clipY2 = a.clipY(b, this.yy1);
-        Vec3 clipZ = a.clipZ(b, this.zz0);
-        Vec3 clipZ2 = a.clipZ(b, this.zz1);
-        if (!this.containsX(clipX)) {
-            clipX = null;
-        }
-        if (!this.containsX(clipX2)) {
-            clipX2 = null;
-        }
-        if (!this.containsY(clipY)) {
-            clipY = null;
-        }
-        if (!this.containsY(clipY2)) {
-            clipY2 = null;
-        }
-        if (!this.containsZ(clipZ)) {
-            clipZ = null;
-        }
-        if (!this.containsZ(clipZ2)) {
-            clipZ2 = null;
-        }
-        Vec3 vec3 = null;
-        if (clipX != null && (vec3 == null || a.distanceTo(clipX) < a.distanceTo(vec3))) {
-            vec3 = clipX;
-        }
-        if (clipX2 != null && (vec3 == null || a.distanceTo(clipX2) < a.distanceTo(vec3))) {
-            vec3 = clipX2;
-        }
-        if (clipY != null && (vec3 == null || a.distanceTo(clipY) < a.distanceTo(vec3))) {
-            vec3 = clipY;
-        }
-        if (clipY2 != null && (vec3 == null || a.distanceTo(clipY2) < a.distanceTo(vec3))) {
-            vec3 = clipY2;
-        }
-        if (clipZ != null && (vec3 == null || a.distanceTo(clipZ) < a.distanceTo(vec3))) {
-            vec3 = clipZ;
-        }
-        if (clipZ2 != null && (vec3 == null || a.distanceTo(clipZ2) < a.distanceTo(vec3))) {
-            vec3 = clipZ2;
-        }
-        if (vec3 == null) {
-            return null;
-        }
-        int f = -1;
-        if (vec3 == clipX) {
-            f = 4;
-        }
-        if (vec3 == clipX2) {
-            f = 5;
-        }
-        if (vec3 == clipY) {
-            f = 0;
-        }
-        if (vec3 == clipY2) {
-            f = 1;
-        }
-        if (vec3 == clipZ) {
-            f = 2;
-        }
-        if (vec3 == clipZ2) {
-            f = 3;
-        }
-        return new HitResult(xt, yt, zt, f, vec3.add(xt, yt, zt));
+
+        Vec3 xh0 = a.clipX(b, this.xx0);
+        Vec3 xh1 = a.clipX(b, this.xx1);
+
+        Vec3 yh0 = a.clipY(b, this.yy0);
+        Vec3 yh1 = a.clipY(b, this.yy1);
+
+        Vec3 zh0 = a.clipZ(b, this.zz0);
+        Vec3 zh1 = a.clipZ(b, this.zz1);
+
+        if (!this.containsX(xh0)) xh0 = null;
+        if (!this.containsX(xh1)) xh1 = null;
+        if (!this.containsY(yh0)) yh0 = null;
+        if (!this.containsY(yh1)) yh1 = null;
+        if (!this.containsZ(zh0)) zh0 = null;
+        if (!this.containsZ(zh1)) zh1 = null;
+
+        Vec3 closest = null;
+        if (xh0 != null && (closest == null || a.distanceTo(xh0) < a.distanceTo(closest))) closest = xh0;
+        if (xh1 != null && (closest == null || a.distanceTo(xh1) < a.distanceTo(closest))) closest = xh1;
+        if (yh0 != null && (closest == null || a.distanceTo(yh0) < a.distanceTo(closest))) closest = yh0;
+        if (yh1 != null && (closest == null || a.distanceTo(yh1) < a.distanceTo(closest))) closest = yh1;
+        if (zh0 != null && (closest == null || a.distanceTo(zh0) < a.distanceTo(closest))) closest = zh0;
+        if (zh1 != null && (closest == null || a.distanceTo(zh1) < a.distanceTo(closest))) closest = zh1;
+
+        if (closest == null) return null;
+
+        int face = -1;
+        if (closest == xh0) face = Facing.WEST;
+        if (closest == xh1) face = Facing.EAST;
+        if (closest == yh0) face = Facing.DOWN;
+        if (closest == yh1) face = Facing.UP;
+        if (closest == zh0) face = Facing.NORTH;
+        if (closest == zh1) face = Facing.SOUTH;
+
+        return new HitResult(xt, yt, zt, face, closest.add(xt, yt, zt));
     }
     
     private boolean containsX(final Vec3 v) {
-        return v != null && v.y >= this.yy0 && v.y <= this.yy1 && v.z >= this.zz0 && v.z <= this.zz1;
+        if (v == null) return false;
+        return v.y >= this.yy0 && v.y <= this.yy1 && v.z >= this.zz0 && v.z <= this.zz1;
     }
     
     private boolean containsY(final Vec3 v) {
-        return v != null && v.x >= this.xx0 && v.x <= this.xx1 && v.z >= this.zz0 && v.z <= this.zz1;
+        if (v == null) return false;
+        return v.x >= this.xx0 && v.x <= this.xx1 && v.z >= this.zz0 && v.z <= this.zz1;
     }
     
     private boolean containsZ(final Vec3 v) {
-        return v != null && v.x >= this.xx0 && v.x <= this.xx1 && v.y >= this.yy0 && v.y <= this.yy1;
+        if (v == null) return false;
+        return v.x >= this.xx0 && v.x <= this.xx1 && v.y >= this.yy0 && v.y <= this.yy1;
     }
     
     public void wasExploded(final Level level, final int x, final int y, final int z) {
@@ -514,8 +866,8 @@ public class Tile implements Descriptive<Tile> {
     }
     
     public boolean mayPlace(final Level level, final int x, final int y, final int z) {
-        final int tile = level.getTile(x, y, z);
-        return tile == 0 || Tile.tiles[tile].material.isReplaceable();
+        final int t = level.getTile(x, y, z);
+        return t == 0 || Tile.tiles[t].material.isReplaceable();
     }
     
     public boolean use(final Level level, final int x, final int y, final int z, final Player player) {
@@ -526,6 +878,10 @@ public class Tile implements Descriptive<Tile> {
     }
     
     public void setPlacedOnFace(final Level level, final int x, final int y, final int z, final int face) {
+    }
+
+    // Useless - Exists in b1.2 and LCE leaks
+    public void prepareRender(Level level, int x, int y, int z) {
     }
     
     public void attack(final Level level, final int x, final int y, final int z, final Player player) {
@@ -538,11 +894,11 @@ public class Tile implements Descriptive<Tile> {
     }
     
     public int getColor(final int auxData) {
-        return 16777215;
+        return 0xffffff;
     }
     
     public int getColor(final LevelSource level, final int x, final int y, final int z) {
-        return 16777215;
+        return 0xffffff;
     }
     
     public boolean getSignal(final LevelSource level, final int x, final int y, final int z, final int dir) {
@@ -574,16 +930,18 @@ public class Tile implements Descriptive<Tile> {
     
     public void setPlacedBy(final Level level, final int x, final int y, final int z, final Mob by) {
     }
-    
+
+    public String getName() {
+        return I18n.get(this.getDescriptionId() + ".name");
+    }
+
+    @Override
     public Tile setDescriptionId(final String id) {
         this.descriptionId = TILE_DESCRIPTION_PREFIX + id;
         return this;
     }
-    
-    public String getName() {
-        return I18n.get(this.getDescriptionId() + ".name");
-    }
-    
+
+    @Override
     public String getDescriptionId() {
         return this.descriptionId;
     }

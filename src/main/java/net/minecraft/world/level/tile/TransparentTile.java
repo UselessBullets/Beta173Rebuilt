@@ -24,6 +24,7 @@ public class TransparentTile extends Tile
     @Override
     public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
         final int tile = level.getTile(x, y, z);
-        return (this.allowSame || tile != this.id) && super.shouldRenderFace(level, x, y, z, f);
+        if (!this.allowSame && tile == this.id) return false;
+        return super.shouldRenderFace(level, x, y, z, f);
     }
 }

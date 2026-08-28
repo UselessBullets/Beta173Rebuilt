@@ -39,41 +39,41 @@ public class TorchTile extends Tile
     }
     
     private boolean isConnection(final Level level, final int x, final int y, final int z) {
-        return level.isSolidBlockingTile(x, y, z) || level.getTile(x, y, z) == Tile.fence.id;
+        if (level.isSolidBlockingTile(x, y, z)) return true;
+        int tile = level.getTile(x, y, z);
+        if (tile == Tile.fence.id) {
+            return true;
+        }
+        return false;
     }
     
     @Override
     public boolean mayPlace(final Level level, final int x, final int y, final int z) {
-        return level.isSolidBlockingTile(x - 1, y, z) || level.isSolidBlockingTile(x + 1, y, z) || level.isSolidBlockingTile(x, y, z - 1) || level.isSolidBlockingTile(x, y, z + 1) || this.isConnection(level, x, y - 1, z);
+        if (level.isSolidBlockingTile(x - 1, y, z)) return true;
+        if (level.isSolidBlockingTile(x + 1, y, z)) return true;
+        if (level.isSolidBlockingTile(x, y, z - 1)) return true;
+        if (level.isSolidBlockingTile(x, y, z + 1)) return true;
+        if (this.isConnection(level, x, y - 1, z)) return true;
+        return false;
     }
     
     @Override
     public void setPlacedOnFace(final Level level, final int x, final int y, final int z, final int face) {
-        int data = level.getData(x, y, z);
-        if (face == 1 && this.isConnection(level, x, y - 1, z)) {
-            data = 5;
-        }
-        if (face == 2 && level.isSolidBlockingTile(x, y, z + 1)) {
-            data = 4;
-        }
-        if (face == 3 && level.isSolidBlockingTile(x, y, z - 1)) {
-            data = 3;
-        }
-        if (face == 4 && level.isSolidBlockingTile(x + 1, y, z)) {
-            data = 2;
-        }
-        if (face == 5 && level.isSolidBlockingTile(x - 1, y, z)) {
-            data = 1;
-        }
-        level.setData(x, y, z, data);
+        int dir = level.getData(x, y, z);
+
+        if (face == 1 && this.isConnection(level, x, y - 1, z)) dir = 5;
+        if (face == 2 && level.isSolidBlockingTile(x, y, z + 1)) dir = 4;
+        if (face == 3 && level.isSolidBlockingTile(x, y, z - 1)) dir = 3;
+        if (face == 4 && level.isSolidBlockingTile(x + 1, y, z)) dir = 2;
+        if (face == 5 && level.isSolidBlockingTile(x - 1, y, z)) dir = 1;
+
+        level.setData(x, y, z, dir);
     }
     
     @Override
     public void tick(final Level level, final int x, final int y, final int z, final Random random) {
         super.tick(level, x, y, z, random);
-        if (level.getData(x, y, z) == 0) {
-            this.onPlace(level, x, y, z);
-        }
+        if (level.getData(x, y, z) == 0) this.onPlace(level, x, y, z);
     }
     
     @Override
@@ -99,24 +99,16 @@ public class TorchTile extends Tile
     @Override
     public void neighborChanged(final Level level, final int x, final int y, final int z, final int type) {
         if (this.checkCanSurvive(level, x, y, z)) {
-            final int data = level.getData(x, y, z);
-            boolean b = false;
-            if (!level.isSolidBlockingTile(x - 1, y, z) && data == 1) {
-                b = true;
-            }
-            if (!level.isSolidBlockingTile(x + 1, y, z) && data == 2) {
-                b = true;
-            }
-            if (!level.isSolidBlockingTile(x, y, z - 1) && data == 3) {
-                b = true;
-            }
-            if (!level.isSolidBlockingTile(x, y, z + 1) && data == 4) {
-                b = true;
-            }
-            if (!this.isConnection(level, x, y - 1, z) && data == 5) {
-                b = true;
-            }
-            if (b) {
+            final int dir = level.getData(x, y, z);
+            boolean replace = false;
+
+            if (!level.isSolidBlockingTile(x - 1, y, z) && dir == 1) replace = true;
+            if (!level.isSolidBlockingTile(x + 1, y, z) && dir == 2) replace = true;
+            if (!level.isSolidBlockingTile(x, y, z - 1) && dir == 3) replace = true;
+            if (!level.isSolidBlockingTile(x, y, z + 1) && dir == 4) replace = true;
+            if (!this.isConnection(level, x, y - 1, z) && dir == 5) replace = true;
+
+            if (replace) {
                 this.spawnResources(level, x, y, z, level.getData(x, y, z));
                 level.setTile(x, y, z, 0);
             }
@@ -134,54 +126,55 @@ public class TorchTile extends Tile
     
     @Override
     public HitResult clip(final Level level, final int xt, final int yt, final int zt, final Vec3 a, final Vec3 b) {
-        final int n = level.getData(xt, yt, zt) & 0x7;
-        final float n2 = 0.15f;
-        if (n == 1) {
-            this.setShape(0.0f, 0.2f, 0.5f - n2, n2 * 2.0f, 0.8f, 0.5f + n2);
+        final int dir = level.getData(xt, yt, zt) & 0x7;
+
+        float r = 0.15f;
+        if (dir == 1) {
+            this.setShape(0.0f, 0.2f, 0.5f - r, r * 2.0f, 0.8f, 0.5f + r);
         }
-        else if (n == 2) {
-            this.setShape(1.0f - n2 * 2.0f, 0.2f, 0.5f - n2, 1.0f, 0.8f, 0.5f + n2);
+        else if (dir == 2) {
+            this.setShape(1.0f - r * 2.0f, 0.2f, 0.5f - r, 1.0f, 0.8f, 0.5f + r);
         }
-        else if (n == 3) {
-            this.setShape(0.5f - n2, 0.2f, 0.0f, 0.5f + n2, 0.8f, n2 * 2.0f);
+        else if (dir == 3) {
+            this.setShape(0.5f - r, 0.2f, 0.0f, 0.5f + r, 0.8f, r * 2.0f);
         }
-        else if (n == 4) {
-            this.setShape(0.5f - n2, 0.2f, 1.0f - n2 * 2.0f, 0.5f + n2, 0.8f, 1.0f);
+        else if (dir == 4) {
+            this.setShape(0.5f - r, 0.2f, 1.0f - r * 2.0f, 0.5f + r, 0.8f, 1.0f);
         }
         else {
-            final float n3 = 0.1f;
-            this.setShape(0.5f - n3, 0.0f, 0.5f - n3, 0.5f + n3, 0.6f, 0.5f + n3);
+            r = 0.1f;
+            this.setShape(0.5f - r, 0.0f, 0.5f - r, 0.5f + r, 0.6f, 0.5f + r);
         }
         return super.clip(level, xt, yt, zt, a, b);
     }
     
     @Override
-    public void animateTick(final Level level, final int x, final int y, final int z, final Random random) {
-        final int data = level.getData(x, y, z);
-        final double n = x + 0.5f;
-        final double n2 = y + 0.7f;
-        final double n3 = z + 0.5f;
-        final double n4 = 0.2199999988079071;
-        final double n5 = 0.27000001072883606;
+    public void animateTick(final Level level, final int xt, final int yt, final int zt, final Random random) {
+        final int data = level.getData(xt, yt, zt);
+        final double x = xt + 0.5f;
+        final double y = yt + 0.7f;
+        final double z = zt + 0.5f;
+        final double h = 0.22f;
+        final double r = 0.27f;
         if (data == 1) {
-            level.addParticle("smoke", n - n5, n2 + n4, n3, 0.0, 0.0, 0.0);
-            level.addParticle("flame", n - n5, n2 + n4, n3, 0.0, 0.0, 0.0);
+            level.addParticle("smoke", x - r, y + h, z, 0.0, 0.0, 0.0);
+            level.addParticle("flame", x - r, y + h, z, 0.0, 0.0, 0.0);
         }
         else if (data == 2) {
-            level.addParticle("smoke", n + n5, n2 + n4, n3, 0.0, 0.0, 0.0);
-            level.addParticle("flame", n + n5, n2 + n4, n3, 0.0, 0.0, 0.0);
+            level.addParticle("smoke", x + r, y + h, z, 0.0, 0.0, 0.0);
+            level.addParticle("flame", x + r, y + h, z, 0.0, 0.0, 0.0);
         }
         else if (data == 3) {
-            level.addParticle("smoke", n, n2 + n4, n3 - n5, 0.0, 0.0, 0.0);
-            level.addParticle("flame", n, n2 + n4, n3 - n5, 0.0, 0.0, 0.0);
+            level.addParticle("smoke", x, y + h, z - r, 0.0, 0.0, 0.0);
+            level.addParticle("flame", x, y + h, z - r, 0.0, 0.0, 0.0);
         }
         else if (data == 4) {
-            level.addParticle("smoke", n, n2 + n4, n3 + n5, 0.0, 0.0, 0.0);
-            level.addParticle("flame", n, n2 + n4, n3 + n5, 0.0, 0.0, 0.0);
+            level.addParticle("smoke", x, y + h, z + r, 0.0, 0.0, 0.0);
+            level.addParticle("flame", x, y + h, z + r, 0.0, 0.0, 0.0);
         }
         else {
-            level.addParticle("smoke", n, n2, n3, 0.0, 0.0, 0.0);
-            level.addParticle("flame", n, n2, n3, 0.0, 0.0, 0.0);
+            level.addParticle("smoke", x, y, z, 0.0, 0.0, 0.0);
+            level.addParticle("flame", x, y, z, 0.0, 0.0, 0.0);
         }
     }
 }

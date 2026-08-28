@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.Facing;
 import net.minecraft.world.level.LightLayer;
 import java.util.Random;
 import net.minecraft.stats.Stats;
@@ -18,6 +19,8 @@ import net.minecraft.world.level.material.Material;
 
 public class TopSnowTile extends Tile
 {
+    public static final int MAX_HEIGHT = 6;
+    public static final int HEIGHT_MASK = 7; // max 8 steps
     protected TopSnowTile(final int id, final int tex) {
         super(id, tex, Material.topSnow);
         this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.125f, 1.0f);
@@ -26,7 +29,8 @@ public class TopSnowTile extends Tile
     
     @Override
     public AABB getAABB(final Level level, final int x, final int y, final int z) {
-        if ((level.getData(x, y, z) & 0x7) >= 3) {
+        int height = level.getData(x, y, z) & HEIGHT_MASK;
+        if (height >= (MAX_HEIGHT / 2)) {
             return AABB.newTemp(x + this.xx0, y + this.yy0, z + this.zz0, x + this.xx1, y + 0.5f, z + this.zz1);
         }
         return null;
@@ -44,13 +48,17 @@ public class TopSnowTile extends Tile
     
     @Override
     public void updateShape(final LevelSource level, final int x, final int y, final int z) {
-        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 2 * (1 + (level.getData(x, y, z) & 0x7)) / 16.0f, 1.0f);
+        int data = level.getData(x, y, z);
+        int height = data & HEIGHT_MASK;
+        float o = 2 * (1 + height) / 16.0f;
+        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, o, 1.0f);
     }
     
     @Override
     public boolean mayPlace(final Level level, final int x, final int y, final int z) {
-        final int tile = level.getTile(x, y - 1, z);
-        return tile != 0 && Tile.tiles[tile].isSolidRender() && level.getMaterial(x, y - 1, z).blocksMotion();
+        final int t = level.getTile(x, y - 1, z);
+        if (t == 0 || !Tile.tiles[t].isSolidRender()) return false;
+        return level.getMaterial(x, y - 1, z).blocksMotion();
     }
     
     @Override
@@ -69,11 +77,14 @@ public class TopSnowTile extends Tile
     
     @Override
     public void playerDestroy(final Level level, final Player player, final int x, final int y, final int z, final int data) {
-        final int id = Item.snowBall.id;
-        final float n = 0.7f;
-        final ItemEntity e = new ItemEntity(level, x + (level.random.nextFloat() * n + (1.0f - n) * 0.5), y + (level.random.nextFloat() * n + (1.0f - n) * 0.5), z + (level.random.nextFloat() * n + (1.0f - n) * 0.5), new ItemInstance(id, 1, 0));
-        e.throwTime = 10;
-        level.addEntity(e);
+        final int type = Item.snowBall.id;
+        final float s = 0.7f;
+        double xo = level.random.nextFloat() * s + (1.0f - s) * 0.5;
+        double yo = level.random.nextFloat() * s + (1.0f - s) * 0.5;
+        double zo = level.random.nextFloat() * s + (1.0f - s) * 0.5;
+        final ItemEntity item = new ItemEntity(level, x + xo, y + yo, z + zo, new ItemInstance(type, 1, 0));
+        item.throwTime = 10;
+        level.addEntity(item);
         level.setTile(x, y, z, 0);
         player.awardStat(Stats.blockMined[this.id], 1);
     }
@@ -98,6 +109,7 @@ public class TopSnowTile extends Tile
     
     @Override
     public boolean shouldRenderFace(final LevelSource level, final int x, final int y, final int z, final int f) {
-        return f == 1 || super.shouldRenderFace(level, x, y, z, f);
+        if (f == Facing.UP) return true;
+        return super.shouldRenderFace(level, x, y, z, f);
     }
 }

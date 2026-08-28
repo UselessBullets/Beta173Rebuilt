@@ -65,7 +65,7 @@ public class StairTile extends Tile
     }
     
     @Override
-    public void addAABBs(final Level level, final int x, final int y, final int z, final AABB box, final ArrayList boxes) {
+    public void addAABBs(final Level level, final int x, final int y, final int z, final AABB box, final ArrayList<AABB> boxes) {
         final int data = level.getData(x, y, z);
         if (data == DIR_EAST) {
             this.setShape(0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 1.0f);
@@ -189,7 +189,13 @@ public class StairTile extends Tile
     public void onRemove(final Level level, final int x, final int y, final int z) {
         this.base.onRemove(level, x, y, z);
     }
-    
+
+    @Override
+    // Useless - Exists in b1.2 and LCE leaks
+    public void prepareRender(Level level, int x, int y, int z) {
+        this.base.prepareRender(level, x, y, z);
+    }
+
     @Override
     public void spawnResources(final Level level, final int x, final int y, final int z, final int data, final float odds) {
         this.base.spawnResources(level, x, y, z, data, odds);

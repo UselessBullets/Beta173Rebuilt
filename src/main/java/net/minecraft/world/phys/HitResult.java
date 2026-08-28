@@ -9,10 +9,7 @@ import net.minecraft.world.entity.Entity;
 public class HitResult
 {
     public Type type;
-    public int x;
-    public int y;
-    public int z;
-    public int f;
+    public int x, y, z, f;
     public Vec3 pos;
     public Entity entity;
     
@@ -29,6 +26,13 @@ public class HitResult
         this.type = Type.ENTITY;
         this.entity = entity;
         this.pos = Vec3.newTemp(entity.x, entity.y, entity.z);
+    }
+
+    public double distanceTo(Entity e) {
+        double xd = this.pos.x - e.x;
+        double yd = this.pos.y - e.y;
+        double zd = this.pos.z - e.z;
+        return xd * xd + yd * yd + zd * zd;
     }
 
     public enum Type

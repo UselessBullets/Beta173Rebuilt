@@ -2058,13 +2058,15 @@ public class Level implements LevelSource
     }
     
     public void ensureAdded(final Entity entity) {
-        final int floor = Mth.floor(entity.x / 16.0);
-        final int floor2 = Mth.floor(entity.z / 16.0);
-        for (int n = 2, i = floor - n; i <= floor + n; ++i) {
-            for (int j = floor2 - n; j <= floor2 + n; ++j) {
-                this.getChunk(i, j);
+        final int xc = Mth.floor(entity.x / 16.0);
+        final int zc = Mth.floor(entity.z / 16.0);
+        int r = 2;
+        for (int x = xc - r; x <= xc + r; ++x) {
+            for (int z = zc - r; z <= zc + r; ++z) {
+                this.getChunk(x, z);
             }
         }
+
         if (!this.entities.contains(entity)) {
             this.entities.add(entity);
         }
@@ -2079,35 +2081,40 @@ public class Level implements LevelSource
     
     public void removeAllPendingEntityRemovals() {
         this.entities.removeAll(this.entitiesToRemove);
+
         for (int i = 0; i < this.entitiesToRemove.size(); ++i) {
             final Entity e = this.entitiesToRemove.get(i);
-            final int xChunk = e.xChunk;
-            final int zChunk = e.zChunk;
-            if (e.inChunk && this.hasChunk(xChunk, zChunk)) {
-                this.getChunk(xChunk, zChunk).removeEntity(e);
+            final int xc = e.xChunk;
+            final int zc = e.zChunk;
+            if (e.inChunk && this.hasChunk(xc, zc)) {
+                this.getChunk(xc, zc).removeEntity(e);
             }
         }
-        for (int j = 0; j < this.entitiesToRemove.size(); ++j) {
-            this.entityRemoved((Entity)this.entitiesToRemove.get(j));
+
+        for (int i = 0; i < this.entitiesToRemove.size(); ++i) {
+            this.entityRemoved(this.entitiesToRemove.get(i));
         }
         this.entitiesToRemove.clear();
-        for (int k = 0; k < this.entities.size(); ++k) {
-            final Entity entity = this.entities.get(k);
-            if (entity.riding != null) {
-                if (!entity.riding.removed && entity.riding.rider == entity) {
+
+        for (int i = 0; i < this.entities.size(); ++i) {
+            final Entity e = this.entities.get(i);
+            if (e.riding != null) {
+                if (e.riding.removed || e.riding.rider != e) {
+                    e.riding.rider = null;
+                    e.riding = null;
+                } else {
                     continue;
                 }
-                entity.riding.rider = null;
-                entity.riding = null;
             }
-            if (entity.removed) {
-                final int xChunk2 = entity.xChunk;
-                final int zChunk2 = entity.zChunk;
-                if (entity.inChunk && this.hasChunk(xChunk2, zChunk2)) {
-                    this.getChunk(xChunk2, zChunk2).removeEntity(entity);
+
+            if (e.removed) {
+                final int xc = e.xChunk;
+                final int zc = e.zChunk;
+                if (e.inChunk && this.hasChunk(xc, zc)) {
+                    this.getChunk(xc, zc).removeEntity(e);
                 }
-                this.entities.remove(k--);
-                this.entityRemoved(entity);
+                this.entities.remove(i--);
+                this.entityRemoved(e);
             }
         }
     }
@@ -2118,9 +2125,7 @@ public class Level implements LevelSource
     
     public void tileEvent(final int x, final int y, final int z, final int b0, final int b1) {
         final int tile = this.getTile(x, y, z);
-        if (tile > 0) {
-            Tile.tiles[tile].triggerEvent(this, x, y, z, b0, b1);
-        }
+        if (tile > 0) Tile.tiles[tile].triggerEvent(this, x, y, z, b0, b1);
     }
 
     public LevelStorage getLevelStorage() {
@@ -2148,16 +2153,20 @@ public class Level implements LevelSource
                 player.stopSleepInBed(false, false, true);
             }
         }
+
         this.stopWeather();
     }
     
     public boolean allPlayersAreSleeping() {
         if (this.allPlayersSleeping && !this.isClientSide) {
+            // all players are sleeping, but have they slept long enough?
             for (Player player : this.players) {
+//                System.out.println(player.entityId + ": " + player.getSleepTimer());
                 if (!player.isSleepingLongEnough()) {
                     return false;
                 }
             }
+            // yep
             return true;
         }
         return false;
@@ -2185,24 +2194,20 @@ public class Level implements LevelSource
     }
     
     public boolean isRainingAt(final int x, final int y, final int z) {
-        if (!this.isRaining()) {
-            return false;
-        }
-        if (!this.canSeeSky(x, y, z)) {
-            return false;
-        }
-        if (this.getTopRainBlock(x, z) > y) {
-            return false;
-        }
+        if (!this.isRaining()) return false;
+        if (!this.canSeeSky(x, y, z)) return false;
+        if (this.getTopRainBlock(x, z) > y) return false;
+
         final Biome biome = this.getBiomeSource().getBiome(x, z);
-        return !biome.hasSnow() && biome.hasRain();
+        if (biome.hasSnow()) return false;
+        return biome.hasRain();
     }
     
     public void setSavedData(final String id, final SavedData data) {
         this.savedDataStorage.set(id, data);
     }
     
-    public SavedData getSavedData(final Class clazz, final String id) {
+    public SavedData getSavedData(final Class<? extends SavedData> clazz, final String id) {
         return this.savedDataStorage.get(clazz, id);
     }
     

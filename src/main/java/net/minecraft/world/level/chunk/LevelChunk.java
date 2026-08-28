@@ -566,7 +566,7 @@ public class LevelChunk
             for (int z = z0; z < z1; ++z) {
                 final int slot = x << 11 | z << 7 | y0;
                 final int len = y1 - y0;
-                System.arraycopy(data, p, this.blocks, slot, len);
+                System.arraycopy(this.blocks, slot, data, p, len);
                 p += len;
             }
         }
@@ -577,7 +577,7 @@ public class LevelChunk
             for (int z = z0; z < z1; ++z) {
                 final int slot = (x << 11 | z << 7 | y0) >> 1;
                 final int len = (y1 - y0) / 2;
-                System.arraycopy(data, p, this.data.data, slot, len);
+                System.arraycopy(this.data.data, slot, data, p, len);
                 p += len;
             }
         }
@@ -586,7 +586,7 @@ public class LevelChunk
             for (int z = z0; z < z1; ++z) {
                 final int slot = (x << 11 | z << 7 | y0) >> 1;
                 final int len = (y1 - y0) / 2;
-                System.arraycopy(data, p, this.blockLight.data, slot, len);
+                System.arraycopy(this.blockLight.data, slot, data, p, len);
                 p += len;
             }
         }
@@ -595,7 +595,7 @@ public class LevelChunk
             for (int z = z0; z < z1; ++z) {
                 final int slot = (x << 11 | z << 7 | y0) >> 1;
                 final int len = (y1 - y0) / 2;
-                System.arraycopy(data, p, this.skyLight.data, slot, len);
+                System.arraycopy(this.skyLight.data, slot, data, p, len);
                 p += len;
             }
         }

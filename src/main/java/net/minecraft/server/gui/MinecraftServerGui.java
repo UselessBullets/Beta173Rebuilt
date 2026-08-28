@@ -103,7 +103,12 @@ public class MinecraftServerGui extends JComponent implements ConsoleInputSource
     public void info(final String string) {
         MinecraftServerGui.logger.info(string);
     }
-    
+
+    @Override
+    public void warn(String string) {
+        MinecraftServerGui.logger.warning(string);
+    }
+
     public String getConsoleName() {
         return "CONSOLE";
     }

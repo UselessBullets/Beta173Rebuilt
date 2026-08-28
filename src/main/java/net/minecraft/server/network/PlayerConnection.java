@@ -480,7 +480,13 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
     public void info(final String string) {
         this.send(new ChatPacket("§7" + string));
     }
-    
+
+    @Override
+    // Useless - In LCE
+    public void warn(String string) {
+        this.send(new ChatPacket("§9" + string));
+    }
+
     public String getConsoleName() {
         return this.player.name;
     }

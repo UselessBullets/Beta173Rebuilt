@@ -88,15 +88,15 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
     private boolean initServer() throws UnknownHostException {
         this.commands = new ConsoleCommands(this);
         final Thread t = new Thread(() -> {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+            final BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             try {
                 String line;
-                while (!this.stopped && this.running && (line = bufferedReader.readLine()) != null) {
+                while (!this.stopped && this.running && (line = br.readLine()) != null) {
                     handleConsoleInput(line, MinecraftServer.this);
                 }
             }
-            catch (final IOException ex) {
-                ex.printStackTrace();
+            catch (final IOException e) {
+                e.printStackTrace();
             }
         });
         t.setDaemon(true);

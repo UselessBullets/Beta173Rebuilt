@@ -57,36 +57,35 @@ public class ServerPlayer extends Player implements ContainerListener
     public ServerPlayerGameMode gameMode;
     public double lastMoveX;
     public double lastMoveZ;
-    public List<ChunkPos> chunksToSend;
-    public Set<ChunkPos> seenChunks;
-    private int lastSentHealth;
-    private int invulnerableTime2;
-    private ItemInstance[] lastCarried;
-    private int containerCounter;
+    public List<ChunkPos> chunksToSend = new LinkedList<>();
+    public Set<ChunkPos> seenChunks = new HashSet<>();
+    private int lastSentHealth = -99999999;
+    private int invulnerableTime = 60;
+    private ItemInstance[] lastCarried = new ItemInstance[] { null, null, null, null, null };
+    private int containerCounter = 0;
     public boolean ignoreSlotUpdateHack;
     
     public ServerPlayer(final MinecraftServer server, final Level level, final String name, final ServerPlayerGameMode gameMode) {
         super(level);
-        this.chunksToSend = new LinkedList<>();
-        this.seenChunks = new HashSet<>();
-        this.lastSentHealth = -99999999;
-        this.invulnerableTime2 = 60;
-        this.lastCarried = new ItemInstance[] { null, null, null, null, null };
-        this.containerCounter = 0;
         gameMode.player = this;
         this.gameMode = gameMode;
-        final Pos sharedSpawnPos = level.getSharedSpawnPos();
-        int x = sharedSpawnPos.x;
-        int z = sharedSpawnPos.z;
-        int n = sharedSpawnPos.y;
+
+        final Pos spawnPos = level.getSharedSpawnPos();
+        int xx = spawnPos.x;
+        int zz = spawnPos.z;
+        int yy = spawnPos.y;
+
         if (!level.dimension.hasCeiling) {
-            x += this.random.nextInt(20) - 10;
-            n = level.getTopSolidBlock(x, z);
-            z += this.random.nextInt(20) - 10;
+            xx += this.random.nextInt(20) - 10;
+            yy = level.getTopSolidBlock(xx, zz);
+            zz += this.random.nextInt(20) - 10;
         }
-        this.moveTo(x + 0.5, n, z + 0.5, 0.0f, 0.0f);
+
+        this.moveTo(xx + 0.5, yy, zz + 0.5, 0.0f, 0.0f);
+
         this.server = server;
         this.footSize = 0.0f;
+
         this.name = name;
         this.heightOffset = 0.0f;
     }
@@ -120,21 +119,21 @@ public class ServerPlayer extends Player implements ContainerListener
     @Override
     public void tick() {
         this.gameMode.tick();
-        --this.invulnerableTime2;
+
+        this.invulnerableTime--;
         this.containerMenu.broadcastChanges();
+
         for (int i = 0; i < 5; ++i) {
-            final ItemInstance carried = this.getCarried(i);
-            if (carried != this.lastCarried[i]) {
-                this.server.getTracker(this.dimension).broadcast(this, new SetEquippedItemPacket(this.entityId, i, carried));
-                this.lastCarried[i] = carried;
+            final ItemInstance currentCarried = this.getCarried(i);
+            if (currentCarried != this.lastCarried[i]) {
+                this.server.getTracker(this.dimension).broadcast(this, new SetEquippedItemPacket(this.entityId, i, currentCarried));
+                this.lastCarried[i] = currentCarried;
             }
         }
     }
     
     public ItemInstance getCarried(final int slot) {
-        if (slot == 0) {
-            return this.inventory.getSelected();
-        }
+        if (slot == 0) return this.inventory.getSelected();
         return this.inventory.armor[slot - 1];
     }
     
@@ -145,9 +144,8 @@ public class ServerPlayer extends Player implements ContainerListener
     
     @Override
     public boolean hurt(final Entity source, final int dmg) {
-        if (this.invulnerableTime2 > 0) {
-            return false;
-        }
+        if (this.invulnerableTime > 0) return false;
+
         if (!this.server.pvp) {
             if (source instanceof Player) {
                 return false;
@@ -172,32 +170,41 @@ public class ServerPlayer extends Player implements ContainerListener
     public void doTick(final boolean sendChunks) {
         super.tick();
         for (int i = 0; i < this.inventory.getContainerSize(); ++i) {
-            final ItemInstance item = this.inventory.getItem(i);
-            if (item != null && Item.items[item.id].isComplex() && this.connection.countDelayedPackets() <= 2) {
-                final Packet updatePacket = ((ComplexItem)Item.items[item.id]).getUpdatePacket(item, this.level, this);
-                if (updatePacket != null) {
-                    this.connection.send(updatePacket);
-                }
-            }
-        }
-        if (sendChunks && !this.chunksToSend.isEmpty()) {
-            final ChunkPos chunkPos = this.chunksToSend.get(0);
-            if (chunkPos != null) {
-                boolean b = false;
-                if (this.connection.countDelayedPackets() < 4) {
-                    b = true;
-                }
-                if (b) {
-                    final ServerLevel level = this.server.getLevel(this.dimension);
-                    this.chunksToSend.remove(chunkPos);
-                    this.connection.send(new BlockRegionUpdatePacket(chunkPos.x * 16, 0, chunkPos.z * 16, 16, 128, 16, level));
-                    final List tileEntitiesInRegion = level.getTileEntitiesInRegion(chunkPos.x * 16, 0, chunkPos.z * 16, chunkPos.x * 16 + 16, 128, chunkPos.z * 16 + 16);
-                    for (int j = 0; j < tileEntitiesInRegion.size(); ++j) {
-                        this.broadcast((TileEntity)tileEntitiesInRegion.get(j));
+            final ItemInstance ie = this.inventory.getItem(i);
+            if (ie != null) {
+                if (Item.items[ie.id].isComplex() && this.connection.countDelayedPackets() <= 2) {
+                    final Packet packet = ((ComplexItem) Item.items[ie.id]).getUpdatePacket(ie, this.level, this);
+                    if (packet != null) {
+                        this.connection.send(packet);
                     }
                 }
             }
         }
+
+        if (sendChunks) {
+            if (!this.chunksToSend.isEmpty()) {
+                final ChunkPos nearest = this.chunksToSend.get(0);
+                if (nearest != null) {
+                    boolean okToSend = false;
+
+                    if (this.connection.countDelayedPackets() < 4) {
+                        okToSend = true;
+                    }
+
+                    if (okToSend) {
+                        final ServerLevel level = this.server.getLevel(this.dimension);
+                        this.chunksToSend.remove(nearest);
+                        BlockRegionUpdatePacket packet = new BlockRegionUpdatePacket(nearest.x * 16, Level.MIN_HEIGHT, nearest.z * 16, 16, Level.MAX_HEIGHT, 16, level);
+                        this.connection.send(packet);
+                        final List<TileEntity> tes = level.getTileEntitiesInRegion(nearest.x * 16, Level.MIN_HEIGHT, nearest.z * 16, nearest.x * 16 + 16, Level.MAX_HEIGHT, nearest.z * 16 + 16);
+                        for (int i = 0; i < tes.size(); ++i) {
+                            this.broadcast(tes.get(i));
+                        }
+                    }
+                }
+            }
+        }
+
         if (this.isInsidePortal) {
             if (this.server.settings.getBoolean("allow-nether", true)) {
                 if (this.containerMenu != this.inventoryMenu) {
@@ -207,7 +214,7 @@ public class ServerPlayer extends Player implements ContainerListener
                     this.ride(this.riding);
                 }
                 else {
-                    this.portalTime += 0.0125f;
+                    this.portalTime += 1 / 80.0f;
                     if (this.portalTime >= 1.0f) {
                         this.portalTime = 1.0f;
                         this.changingDimensionDelay = 10;
@@ -218,16 +225,11 @@ public class ServerPlayer extends Player implements ContainerListener
             }
         }
         else {
-            if (this.portalTime > 0.0f) {
-                this.portalTime -= 0.05f;
-            }
-            if (this.portalTime < 0.0f) {
-                this.portalTime = 0.0f;
-            }
+            if (this.portalTime > 0.0f) this.portalTime -= 1 / 20f;
+            if (this.portalTime < 0.0f) this.portalTime = 0.0f;
         }
-        if (this.changingDimensionDelay > 0) {
-            --this.changingDimensionDelay;
-        }
+        if (this.changingDimensionDelay > 0) --this.changingDimensionDelay;
+
         if (this.health != this.lastSentHealth) {
             this.connection.send(new SetHealthPacket(this.health));
             this.lastSentHealth = this.health;
@@ -236,9 +238,9 @@ public class ServerPlayer extends Player implements ContainerListener
     
     private void broadcast(final TileEntity te) {
         if (te != null) {
-            final Packet updatePacket = te.getUpdatePacket();
-            if (updatePacket != null) {
-                this.connection.send(updatePacket);
+            final Packet p = te.getUpdatePacket();
+            if (p != null) {
+                this.connection.send(p);
             }
         }
     }
@@ -251,12 +253,12 @@ public class ServerPlayer extends Player implements ContainerListener
     @Override
     public void take(final Entity e, final int orgCount) {
         if (!e.removed) {
-            final EntityTracker tracker = this.server.getTracker(this.dimension);
+            final EntityTracker entityTracker = this.server.getTracker(this.dimension);
             if (e instanceof ItemEntity) {
-                tracker.broadcast(e, new TakeItemEntityPacket(e.entityId, this.entityId));
+                entityTracker.broadcast(e, new TakeItemEntityPacket(e.entityId, this.entityId));
             }
             if (e instanceof Arrow) {
-                tracker.broadcast(e, new TakeItemEntityPacket(e.entityId, this.entityId));
+                entityTracker.broadcast(e, new TakeItemEntityPacket(e.entityId, this.entityId));
             }
         }
         super.take(e, orgCount);
@@ -268,7 +270,7 @@ public class ServerPlayer extends Player implements ContainerListener
         if (!this.swinging) {
             this.swingTime = -1;
             this.swinging = true;
-            this.server.getTracker(this.dimension).broadcast(this, new AnimatePacket(this, 1));
+            this.server.getTracker(this.dimension).broadcast(this, new AnimatePacket(this, AnimatePacket.SWING));
         }
     }
 
@@ -276,21 +278,18 @@ public class ServerPlayer extends Player implements ContainerListener
     public void animateRespawn() {
 
     }
-
-    public void x() { // TODO find proper name
-    }
     
     @Override
     public BedSleepingResult startSleepInBed(final int x, final int y, final int z) {
-        final BedSleepingResult startSleepInBed = super.startSleepInBed(x, y, z);
-        if (startSleepInBed == BedSleepingResult.OK) {
+        final BedSleepingResult result = super.startSleepInBed(x, y, z);
+        if (result == BedSleepingResult.OK) {
             final EntityTracker tracker = this.server.getTracker(this.dimension);
-            final EntityActionAtPositionPacket entityActionAtPositionPacket = new EntityActionAtPositionPacket(this, EntityActionAtPositionPacket.START_SLEEP, x, y, z);
-            tracker.broadcast(this, entityActionAtPositionPacket);
+            final Packet p = new EntityActionAtPositionPacket(this, EntityActionAtPositionPacket.START_SLEEP, x, y, z);
+            tracker.broadcast(this, p);
             this.connection.teleport(this.x, this.y, this.z, this.yRot, this.xRot);
-            this.connection.send(entityActionAtPositionPacket);
+            this.connection.send(p);
         }
-        return startSleepInBed;
+        return result;
     }
     
     @Override
@@ -299,9 +298,7 @@ public class ServerPlayer extends Player implements ContainerListener
             this.server.getTracker(this.dimension).broadcastAndSend(this, new AnimatePacket(this, 3));
         }
         super.stopSleepInBed(forcefulWakeUp, updateLevelList, saveRespawnPoint);
-        if (this.connection != null) {
-            this.connection.teleport(this.x, this.y, this.z, this.yRot, this.xRot);
-        }
+        if (this.connection != null) this.connection.teleport(this.x, this.y, this.z, this.yRot, this.xRot);
     }
     
     @Override
@@ -326,7 +323,7 @@ public class ServerPlayer extends Player implements ContainerListener
     @Override
     public void startCrafting(final int x, final int y, final int z) {
         this.nextContainerCounter();
-        this.connection.send(new ContainerOpenPacket(this.containerCounter, 1, "Crafting", 9));
+        this.connection.send(new ContainerOpenPacket(this.containerCounter, ContainerOpenPacket.WORKBENCH, "Crafting", 9));
         this.containerMenu = new CraftingMenu(this.inventory, this.level, x, y, z);
         this.containerMenu.containerId = this.containerCounter;
         this.containerMenu.addSlotListener(this);
@@ -335,7 +332,7 @@ public class ServerPlayer extends Player implements ContainerListener
     @Override
     public void openContainer(final Container container) {
         this.nextContainerCounter();
-        this.connection.send(new ContainerOpenPacket(this.containerCounter, 0, container.getName(), container.getContainerSize()));
+        this.connection.send(new ContainerOpenPacket(this.containerCounter, ContainerOpenPacket.CONTAINER, container.getName(), container.getContainerSize()));
         this.containerMenu = new ContainerMenu(this.inventory, container);
         this.containerMenu.containerId = this.containerCounter;
         this.containerMenu.addSlotListener(this);
@@ -344,7 +341,7 @@ public class ServerPlayer extends Player implements ContainerListener
     @Override
     public void openFurnace(final FurnaceTileEntity furnace) {
         this.nextContainerCounter();
-        this.connection.send(new ContainerOpenPacket(this.containerCounter, 2, furnace.getName(), furnace.getContainerSize()));
+        this.connection.send(new ContainerOpenPacket(this.containerCounter, ContainerOpenPacket.FURNACE, furnace.getName(), furnace.getContainerSize()));
         this.containerMenu = new FurnaceMenu(this.inventory, furnace);
         this.containerMenu.containerId = this.containerCounter;
         this.containerMenu.addSlotListener(this);
@@ -353,7 +350,7 @@ public class ServerPlayer extends Player implements ContainerListener
     @Override
     public void openTrap(final DispenserTileEntity trap) {
         this.nextContainerCounter();
-        this.connection.send(new ContainerOpenPacket(this.containerCounter, 3, trap.getName(), trap.getContainerSize()));
+        this.connection.send(new ContainerOpenPacket(this.containerCounter, ContainerOpenPacket.TRAP, trap.getName(), trap.getContainerSize()));
         this.containerMenu = new TrapMenu(this.inventory, trap);
         this.containerMenu.containerId = this.containerCounter;
         this.containerMenu.addSlotListener(this);
@@ -363,9 +360,16 @@ public class ServerPlayer extends Player implements ContainerListener
         if (container.getSlot(slotIndex) instanceof ResultSlot) {
             return;
         }
+
         if (this.ignoreSlotUpdateHack) {
+            // Do not send this packet!
+            //
+            // This is a horrible hack that makes sure that inventory clicks
+            // that the client correctly predicted don't get sent out to the
+            // client again.
             return;
         }
+
         this.connection.send(new ContainerSetSlotPacket(container.containerId, slotIndex, item));
     }
     
@@ -393,6 +397,10 @@ public class ServerPlayer extends Player implements ContainerListener
     
     public void broadcastCarriedItem() {
         if (this.ignoreSlotUpdateHack) {
+            // Do not send this packet!
+            // This is a horrible hack that makes sure that inventory clicks
+            // that the client correctly predicted don't get sent out to the
+            // client again.
             return;
         }
         this.connection.send(new ContainerSetSlotPacket(-1, -1, this.inventory.getCarried()));
@@ -414,9 +422,8 @@ public class ServerPlayer extends Player implements ContainerListener
     
     @Override
     public void awardStat(final Stat stat, int count) {
-        if (stat == null) {
-            return;
-        }
+        if (stat == null) return;
+
         if (!stat.awardLocallyOnly) {
             while (count > 100) {
                 this.connection.send(new AwardStatPacket(stat.id, 100));
@@ -427,12 +434,8 @@ public class ServerPlayer extends Player implements ContainerListener
     }
     
     public void disconnect() {
-        if (this.riding != null) {
-            this.ride(this.riding);
-        }
-        if (this.rider != null) {
-            this.rider.ride(this);
-        }
+        if (this.riding != null) this.ride(this.riding);
+        if (this.rider != null) this.rider.ride(this);
         if (this.isSleeping) {
             this.stopSleepInBed(true, false, false);
         }

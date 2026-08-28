@@ -182,7 +182,7 @@ public class PlayerList
         level.addEntity(serverPlayer2);
         this.players.add(serverPlayer2);
         serverPlayer2.initMenu();
-        serverPlayer2.x();
+        serverPlayer2.animateRespawn();
         return serverPlayer2;
     }
     

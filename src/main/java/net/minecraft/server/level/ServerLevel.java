@@ -10,6 +10,7 @@ import net.minecraft.network.packet.ExplodePacket;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.network.packet.EntityEventPacket;
 import net.minecraft.network.packet.AddGlobalEntityPacketPacket;
+import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import util.Mth;
 import net.minecraft.world.level.tile.entity.TileEntity;
 import java.util.ArrayList;
@@ -56,28 +57,28 @@ public class ServerLevel extends Level
     
     @Override
     protected ChunkSource createChunkSource() {
-        return this.cache = new ServerChunkCache(this, this.levelStorage.createChunkStorage(this.dimension), this.dimension.createRandomLevelSource());
+        ChunkStorage storage = this.levelStorage.createChunkStorage(this.dimension);
+        this.cache = new ServerChunkCache(this, storage, this.dimension.createRandomLevelSource());
+        return this.cache;
     }
     
     public List<TileEntity> getTileEntitiesInRegion(final int x0, final int y0, final int z0, final int x1, final int y1, final int z1) {
-        final ArrayList<TileEntity> list = new ArrayList<>();
+        final ArrayList<TileEntity> result = new ArrayList<>();
         for (int i = 0; i < this.tileEntityList.size(); ++i) {
-            final TileEntity tileEntity = this.tileEntityList.get(i);
-            if (tileEntity.x >= x0 && tileEntity.y >= y0 && tileEntity.z >= z0 && tileEntity.x < x1 && tileEntity.y < y1 && tileEntity.z < z1) {
-                list.add(tileEntity);
+            final TileEntity te = this.tileEntityList.get(i);
+            if (te.x >= x0 && te.y >= y0 && te.z >= z0 && te.x < x1 && te.y < y1 && te.z < z1) {
+                result.add(te);
             }
         }
-        return list;
+        return result;
     }
     
     @Override
     public boolean mayInteract(final Player player, final int xt, final int yt, final int zt) {
-        final int n = (int)Mth.abs((float)(xt - this.levelData.getXSpawn()));
-        int n2 = (int)Mth.abs((float)(zt - this.levelData.getZSpawn()));
-        if (n > n2) {
-            n2 = n;
-        }
-        return n2 > 16 || this.server.players.isOp(player.name);
+        int xd = (int)Mth.abs((float)(xt - this.levelData.getXSpawn()));
+        int zd = (int)Mth.abs((float)(zt - this.levelData.getZSpawn()));
+        if (xd > zd) zd = xd;
+        return zd > 16 || this.server.players.isOp(player.name);
     }
     
     @Override
@@ -93,7 +94,7 @@ public class ServerLevel extends Level
     }
     
     public Entity getEntity(final int id) {
-        return (Entity)this.entitiesById.get(id);
+        return this.entitiesById.get(id);
     }
     
     @Override
@@ -107,15 +108,19 @@ public class ServerLevel extends Level
     
     @Override
     public void broadcastEntityEvent(final Entity e, final byte event) {
-        this.server.getTracker(this.dimension.id).broadcastAndSend(e, new EntityEventPacket(e.entityId, event));
+        EntityEventPacket p = new EntityEventPacket(e.entityId, event);
+        this.server.getTracker(this.dimension.id).broadcastAndSend(e, p);
     }
     
     @Override
     public Explosion explode(final Entity source, final double x, final double y, final double z, final float r, final boolean fire) {
+        // instead of calling super, we run the same explosion code here except
+        // we don't generate any particles
         final Explosion explosion = new Explosion(this, source, x, y, z, r);
         explosion.fire = fire;
         explosion.explode();
         explosion.finalizeExplosion(false);
+
         this.server.players.broadcast(x, y, z, 64.0, this.dimension.id, new ExplodePacket(x, y, z, r, explosion.toBlow));
         return explosion;
     }
@@ -132,10 +137,10 @@ public class ServerLevel extends Level
     
     @Override
     protected void tickWeather() {
-        final boolean raining = this.isRaining();
+        final boolean wasRaining = this.isRaining();
         super.tickWeather();
-        if (raining != this.isRaining()) {
-            if (raining) {
+        if (wasRaining != this.isRaining()) {
+            if (wasRaining) {
                 this.server.players.broadcastAll(new GameEventPacket(GameEventPacket.STOP_RAINING));
             }
             else {

@@ -4,10 +4,8 @@
 
 package net.minecraft.server;
 
-import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.util.logging.Level;
-import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.File;
 import java.util.Properties;
@@ -15,19 +13,19 @@ import java.util.logging.Logger;
 
 public class Settings
 {
-    public static Logger logger;
-    private Properties properties;
+    public static Logger logger = Logger.getLogger("Minecraft");
+    private Properties properties = new Properties();
     private File file;
     
     public Settings(final File file) {
-        this.properties = new Properties();
         this.file = file;
         if (file.exists()) {
             try {
-                this.properties.load(new FileInputStream(file));
+                FileInputStream fis = new FileInputStream(file);
+                this.properties.load(fis);
             }
-            catch (final Exception thrown) {
-                Settings.logger.log(Level.WARNING, "Failed to load " + file, thrown);
+            catch (final Exception e) {
+                Settings.logger.log(Level.WARNING, "Failed to load " + file, e);
                 this.generateNewProperties();
             }
         }
@@ -44,10 +42,11 @@ public class Settings
     
     public void saveProperties() {
         try {
-            this.properties.store(new FileOutputStream(this.file), "Minecraft server properties");
+            FileOutputStream fos = new FileOutputStream(this.file);
+            this.properties.store(fos, "Minecraft server properties");
         }
-        catch (final Exception thrown) {
-            Settings.logger.log(Level.WARNING, "Failed to save " + this.file, thrown);
+        catch (final Exception e) {
+            Settings.logger.log(Level.WARNING, "Failed to save " + this.file, e);
             this.generateNewProperties();
         }
     }
@@ -64,7 +63,7 @@ public class Settings
         try {
             return Integer.parseInt(this.getString(key, "" + defaultVal));
         }
-        catch (final Exception ex) {
+        catch (final Exception e) {
             this.properties.setProperty(key, "" + defaultVal);
             return defaultVal;
         }
@@ -84,8 +83,5 @@ public class Settings
         this.properties.setProperty(key, "" + value);
         this.saveProperties();
     }
-    
-    static {
-        Settings.logger = Logger.getLogger("Minecraft");
-    }
+
 }

@@ -37,10 +37,8 @@ public class NbtIo
     }
     
     public static CompoundTag read(final DataInput dis) throws IOException {
-        final Tag namedTag = Tag.readNamedTag(dis);
-        if (namedTag instanceof CompoundTag) {
-            return (CompoundTag)namedTag;
-        }
+        final Tag tag = Tag.readNamedTag(dis);
+        if (tag instanceof CompoundTag) return (CompoundTag) tag;
         throw new IOException("Root tag must be a named compound tag");
     }
     

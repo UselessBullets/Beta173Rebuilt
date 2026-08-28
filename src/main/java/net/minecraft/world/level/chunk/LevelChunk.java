@@ -601,8 +601,7 @@ public class LevelChunk
         }
         return p;
     }
-
-    // Useless - in B1.2 and LCE leaks
+    
     public int setBlocksAndData(byte[] data, int x0, int y0, int z0, int x1, int y1, int z1, int p) {
         for (int x = x0; x < x1; x++) {
             for (int z = z0; z < z1; z++) {

@@ -31,28 +31,31 @@ public class StatsComponent extends JComponent
     }
     
     private void tick() {
-        final long n = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        final long used = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         System.gc();
-        this.msgs[0] = "Memory use: " + n / 1024L / 1024L + " mb (" + Runtime.getRuntime().freeMemory() * 100L / Runtime.getRuntime().maxMemory() + "% free)";
+        this.msgs[0] = "Memory use: " + used / 1024L / 1024L + " mb (" + Runtime.getRuntime().freeMemory() * 100L / Runtime.getRuntime().maxMemory() + "% free)";
         this.msgs[1] = "Threads: " + Connection.readThreads + " + " + Connection.writeThreads;
-        this.values[this.vp++ & 0xFF] = (int)(n * 100L / Runtime.getRuntime().maxMemory());
+        this.values[this.vp++ & 0xFF] = (int)(used * 100L / Runtime.getRuntime().maxMemory());
         this.repaint();
     }
     
     @Override
     public void paint(final Graphics graphics) {
-        graphics.setColor(new Color(16777215));
+        graphics.setColor(new Color(0xffffff));
         graphics.fillRect(0, 0, 256, 192);
+
         for (int i = 0; i < 256; ++i) {
-            final int n = this.values[i + this.vp & 0xFF];
-            graphics.setColor(new Color(n + 28 << 16));
-            graphics.fillRect(i, 100 - n, 1, n);
+            final int value = this.values[i + this.vp & 0xFF];
+            graphics.setColor(new Color(value + 28 << 16));
+            graphics.fillRect(i, 100 - value, 1, value);
         }
+
         graphics.setColor(Color.BLACK);
-        for (int j = 0; j < this.msgs.length; ++j) {
-            final String s = this.msgs[j];
-            if (s != null) {
-                graphics.drawString(s, 32, 116 + j * 16);
+
+        for (int i = 0; i < this.msgs.length; ++i) {
+            final String msg = this.msgs[i];
+            if (msg != null) {
+                graphics.drawString(msg, 32, 116 + i * 16);
             }
         }
     }

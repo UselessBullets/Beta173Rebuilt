@@ -22,21 +22,17 @@ import net.minecraft.world.level.chunk.ChunkSource;
 
 public class ServerChunkCache implements ChunkSource
 {
-    private Set<Integer> toDrop;
+    private Set<Integer> toDrop = new HashSet<>();
     private LevelChunk emptyChunk;
     private ChunkSource source;
     private ChunkStorage storage;
-    public boolean autoCreate;
-    private Map<Integer, LevelChunk> cache;
-    private List<LevelChunk> loadedChunkList;
+    public boolean autoCreate = false;
+    private Map<Integer, LevelChunk> cache = new HashMap<>();
+    private List<LevelChunk> loadedChunkList = new ArrayList<>();
     private ServerLevel level;
     
     public ServerChunkCache(final ServerLevel level, final ChunkStorage storage, final ChunkSource source) {
-        this.toDrop = new HashSet<>();
-        this.autoCreate = false;
-        this.cache = new HashMap<>();
-        this.loadedChunkList = new ArrayList<>();
-        this.emptyChunk = new EmptyLevelChunk(level, new byte[32768], 0, 0);
+        this.emptyChunk = new EmptyLevelChunk(level, new byte[Level.CHUNK_TILE_COUNT], 0, 0);
         this.level = level;
         this.storage = storage;
         this.source = source;
@@ -47,11 +43,11 @@ public class ServerChunkCache implements ChunkSource
     }
     
     public void drop(final int x, final int z) {
-        final Pos sharedSpawnPos = this.level.getSharedSpawnPos();
-        final int n = x * 16 + 8 - sharedSpawnPos.x;
-        final int n2 = z * 16 + 8 - sharedSpawnPos.z;
-        final int n3 = 128;
-        if (n < -n3 || n > n3 || n2 < -n3 || n2 > n3) {
+        final Pos spawnPos = this.level.getSharedSpawnPos();
+        final int xd = x * 16 + 8 - spawnPos.x;
+        final int zd = z * 16 + 8 - spawnPos.z;
+        final int r = 128;
+        if (xd < -r || xd > r || zd < -r || zd > r) {
             this.toDrop.add(ChunkPos.hashCode(x, z));
         }
     }
@@ -93,10 +89,9 @@ public class ServerChunkCache implements ChunkSource
     }
     
     public LevelChunk getChunk(final int x, final int z) {
-        final LevelChunk levelChunk = this.cache.get(ChunkPos.hashCode(x, z));
-        if (levelChunk != null) {
-            return levelChunk;
-        }
+        final LevelChunk lc = this.cache.get(ChunkPos.hashCode(x, z));
+        if (lc != null) return lc;
+
         if (this.level.isFindingSpawn || this.autoCreate) {
             return this.create(x, z);
         }

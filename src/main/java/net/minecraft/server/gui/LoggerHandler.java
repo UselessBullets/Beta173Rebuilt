@@ -14,41 +14,30 @@ import java.util.logging.Handler;
 
 public class LoggerHandler extends Handler
 {
-    private int[] b; // TODO find proper name
-    private int c; // TODO find proper name
+    private static final int MAX_LOGGER_LINES = 1024;
+    private int[] lineLengths; // Useles - TODO find proper name current is just a best guess
+    private int currentLine; // Useless - TODO find proper name current is just a best guess
     Formatter formatter;
     private JTextArea textArea;
     
     public LoggerHandler(final JTextArea textArea) {
-        this.b = new int[1024];
-        this.c = 0;
+        this.lineLengths = new int[MAX_LOGGER_LINES];
+        this.currentLine = 0;
         this.setFormatter(this.formatter = new Formatter() {
 
             @Override
             public String format(final LogRecord logRecord) {
                 final StringBuilder sb = new StringBuilder();
                 final Level level = logRecord.getLevel();
-                if (level == Level.FINEST) {
-                    sb.append("[FINEST] ");
-                }
-                else if (level == Level.FINER) {
-                    sb.append("[FINER] ");
-                }
-                else if (level == Level.FINE) {
-                    sb.append("[FINE] ");
-                }
-                else if (level == Level.INFO) {
-                    sb.append("[INFO] ");
-                }
-                else if (level == Level.WARNING) {
-                    sb.append("[WARNING] ");
-                }
-                else if (level == Level.SEVERE) {
-                    sb.append("[SEVERE] ");
-                }
-                else if (level == Level.SEVERE) {
-                    sb.append("[" + level.getLocalizedName() + "] ");
-                }
+
+                if (level == Level.FINEST) sb.append("[FINEST] ");
+                else if (level == Level.FINER) sb.append("[FINER] ");
+                else if (level == Level.FINE) sb.append("[FINE] ");
+                else if (level == Level.INFO) sb.append("[INFO] ");
+                else if (level == Level.WARNING) sb.append("[WARNING] ");
+                else if (level == Level.SEVERE) sb.append("[SEVERE] ");
+                else if (level == Level.SEVERE) sb.append("[").append(level.getLocalizedName()).append("] ");
+
                 sb.append(logRecord.getMessage());
                 sb.append('\n');
                 final Throwable thrown = logRecord.getThrown();
@@ -76,11 +65,11 @@ public class LoggerHandler extends Handler
         final int length = this.textArea.getDocument().getLength();
         this.textArea.append(this.formatter.format(logRecord));
         this.textArea.setCaretPosition(this.textArea.getDocument().getLength());
-        final int n = this.textArea.getDocument().getLength() - length;
-        if (this.b[this.c] != 0) {
-            this.textArea.replaceRange("", 0, this.b[this.c]);
+        final int lenDelta = this.textArea.getDocument().getLength() - length;
+        if (this.lineLengths[this.currentLine] != 0) {
+            this.textArea.replaceRange("", 0, this.lineLengths[this.currentLine]);
         }
-        this.b[this.c] = n;
-        this.c = (this.c + 1) % 1024;
+        this.lineLengths[this.currentLine] = lenDelta;
+        this.currentLine = (this.currentLine + 1) % MAX_LOGGER_LINES;
     }
 }

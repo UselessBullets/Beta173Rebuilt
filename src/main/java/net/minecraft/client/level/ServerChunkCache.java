@@ -31,7 +31,7 @@ public class ServerChunkCache implements ChunkSource
     private Level level;
     
     public ServerChunkCache(final Level level, final ChunkStorage storage, final ChunkSource source) {
-        this.emptyChunk = new EmptyLevelChunk(level, new byte[32768], 0, 0);
+        this.emptyChunk = new EmptyLevelChunk(level, new byte[Level.CHUNK_TILE_COUNT], 0, 0);
         this.level = level;
         this.storage = storage;
         this.source = source;

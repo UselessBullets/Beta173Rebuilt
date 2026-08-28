@@ -4,22 +4,17 @@
 
 package util;
 
+// Useless - Limited information of internal class info, besides a couple constants from b1.2 leaks
 public class IntHashMap<V>
 {
     private static final int DEFAULT_INITIAL_CAPACITY = 16;
     private static final int MAXIMUM_CAPACITY = 1073741824;
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;
-    private transient Entry<V>[] table;
+    private transient Entry<V>[] table = new Entry[DEFAULT_INITIAL_CAPACITY];
     private transient int size;
-    private int threshold;
-    private final float loadFactor;
+    private int threshold = 12;
+    private final float loadFactor = DEFAULT_LOAD_FACTOR;
     private transient volatile int modCount;
-    
-    public IntHashMap() {
-        this.loadFactor = DEFAULT_LOAD_FACTOR;
-        this.threshold = 12;
-        this.table = new Entry[DEFAULT_INITIAL_CAPACITY];
-    }
     
     private static int hash(int i) {
         i ^= (i >>> 20 ^ i >>> 12);
@@ -29,13 +24,26 @@ public class IntHashMap<V>
     private static int indexFor(final int hash, final int length) {
         return hash & length - 1;
     }
-    
+
+    // Useless - Exists in b1.2 leak
+    public int size() {
+        return this.size;
+    }
+
+    // Useless - Exists in b1.2 leak
+    public boolean isEmpty() {
+        return this.size == 0;
+    }
+
     public V get(final int key) {
-        for (Entry<V> next = this.table[indexFor(hash(key), this.table.length)]; next != null; next = next.next) {
-            if (next.key == key) {
-                return next.value;
+        int hash = hash(key);
+
+        for (Entry<V> entry = this.table[indexFor(hash, this.table.length)]; entry != null; entry = entry.next) {
+            if (entry.key == key) {
+                return entry.value;
             }
         }
+
         return null;
     }
 
@@ -44,35 +52,40 @@ public class IntHashMap<V>
     }
 
     final Entry<V> getEntry(final int key) {
-        for (Entry<V> next = this.table[indexFor(hash(key), this.table.length)]; next != null; next = next.next) {
-            if (next.key == key) {
-                return next;
+        int hash = hash(key);
+
+        for (Entry<V> entry = this.table[indexFor(hash, this.table.length)]; entry != null; entry = entry.next) {
+            if (entry.key == key) {
+                return entry;
             }
         }
+
         return null;
     }
     
     public void put(final int key, final V value) {
         final int hash = hash(key);
         final int index = indexFor(hash, this.table.length);
-        for (Entry<V> next = this.table[index]; next != null; next = next.next) {
-            if (next.key == key) {
-                next.value = value;
+
+        for (Entry<V> entry = this.table[index]; entry != null; entry = entry.next) {
+            if (entry.key == key) {
+                entry.value = value;
             }
         }
-        ++this.modCount;
+
+        this.modCount++;
         this.addEntry(hash, key, value, index);
     }
     
     private void resize(final int newSize) {
         if (this.table.length == MAXIMUM_CAPACITY) {
             this.threshold = Integer.MAX_VALUE;
-            return;
+        } else {
+            final Entry<V>[] newTable = new Entry[newSize];
+            this.transfer(newTable);
+            this.table = newTable;
+            this.threshold = (int) (newSize * this.loadFactor);
         }
-        final Entry<V>[] array = new Entry[newSize];
-        this.transfer(array);
-        this.table = array;
-        this.threshold = (int)(newSize * this.loadFactor);
     }
     
     private void transfer(final Entry<V>[] newTable) {
@@ -82,6 +95,7 @@ public class IntHashMap<V>
             Entry<V> entry = table[i];
             if (entry != null) {
                 table[i] = null;
+
                 do {
                     final Entry<V> next = entry.next;
                     final int index = indexFor(entry.hash, length);
@@ -94,30 +108,33 @@ public class IntHashMap<V>
     }
     
     public Object remove(final int key) {
-        final Entry<V> removeEntryForKey = this.removeEntryForKey(key);
-        return (removeEntryForKey == null) ? null : removeEntryForKey.value;
+        final Entry<V> removed = this.removeEntryForKey(key);
+        return (removed == null) ? null : removed.value;
     }
     
     final Entry<V> removeEntryForKey(final int key) {
-        final int index = indexFor(hash(key), this.table.length);
-        Entry<V> entry2;
-        Entry<V> next;
-        for (Entry<V> entry = entry2 = this.table[index]; entry2 != null; entry2 = next) {
-            next = entry2.next;
-            if (entry2.key == key) {
-                ++this.modCount;
-                --this.size;
-                if (entry == entry2) {
+        int hash = hash(key);
+        final int index = indexFor(hash, this.table.length);
+        Entry<V> current = this.table[index];
+        Entry<V> last = current;
+
+        while (current != null) {
+            Entry<V> next = current.next;
+            if (current.key == key) {
+                this.modCount++;
+                this.size--;
+                if (last == current) {
                     this.table[index] = next;
                 }
                 else {
-                    entry.next = next;
+                    last.next = next;
                 }
-                return entry2;
+                return current;
             }
-            entry = entry2;
+            last = current;
+            current = next;
         }
-        return entry2;
+        return current;
     }
     
     public void clear() {
@@ -127,6 +144,38 @@ public class IntHashMap<V>
             table[i] = null;
         }
         this.size = 0;
+    }
+
+    // Useless - Exists in b1.2 leak
+    public boolean containsValue(Object value) {
+        if (value == null) {
+            return this.containsNullValue();
+        }
+
+        Entry<V>[] entries = this.table;
+
+        for (int i = 0; i < entries.length; i++) {
+            for (Entry<V> entry = entries[i]; entry != null; entry = entry.next) {
+                if (value.equals(entry.value)) return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Useless - Exists in b1.2 leak
+    private boolean containsNullValue() {
+        Entry<V>[] var1 = this.table;
+
+        for (int var2 = 0; var2 < var1.length; var2++) {
+            for (Entry<V> var3 = var1[var2]; var3 != null; var3 = var3.next) {
+                if (var3.value == null) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
     
     private void addEntry(final int hash, final int key, final V value, final int next) {
@@ -163,15 +212,13 @@ public class IntHashMap<V>
             if (!(o instanceof Entry)) {
                 return false;
             }
-            final Entry entry = (Entry)o;
-            final Integer value = this.getKey();
-            final Integer value2 = entry.getKey();
-            if (value == value2 || (value != null && value.equals(value2))) {
-                final Object value3 = this.getValue();
-                final Object value4 = entry.getValue();
-                if (value3 == value4 || (value3 != null && value3.equals(value4))) {
-                    return true;
-                }
+            final Entry<?> other = (Entry<?>)o;
+            final Integer k1 = this.getKey();
+            final Integer k2 = other.getKey();
+            if (k1 == k2 || (k1 != null && k1.equals(k2))) {
+                final Object v1 = this.getValue();
+                final Object v2 = other.getValue();
+                return v1 == v2 || (v1 != null && v1.equals(v2));
             }
             return false;
         }

@@ -13,9 +13,7 @@ public class LiquidTileStatic extends LiquidTile
     protected LiquidTileStatic(final int id, final Material material) {
         super(id, material);
         this.setTicking(false);
-        if (material == Material.lava) {
-            this.setTicking(true);
-        }
+        if (material == Material.lava) this.setTicking(true);
     }
     
     @Override
@@ -27,9 +25,9 @@ public class LiquidTileStatic extends LiquidTile
     }
     
     private void setDynamic(final Level level, final int x, final int y, final int z) {
-        final int data = level.getData(x, y, z);
+        final int d = level.getData(x, y, z);
         level.noNeighborUpdate = true;
-        level.setTileAndDataNoUpdate(x, y, z, this.id - 1, data);
+        level.setTileAndDataNoUpdate(x, y, z, this.id - 1, d);
         level.setTilesDirty(x, y, z, x, y, z);
         level.addToTickNextTick(x, y, z, this.id - 1, this.getTickDelay());
         level.noNeighborUpdate = false;
@@ -38,18 +36,25 @@ public class LiquidTileStatic extends LiquidTile
     @Override
     public void tick(final Level level, int x, int y, int z, final Random random) {
         if (this.material == Material.lava) {
-            for (int nextInt = random.nextInt(3), i = 0; i < nextInt; ++i) {
+            int h = random.nextInt(3);
+            for (int i = 0; i < h; ++i) {
                 x += random.nextInt(3) - 1;
-                ++y;
+                y++;
                 z += random.nextInt(3) - 1;
-                final int tile = level.getTile(x, y, z);
-                if (tile == 0) {
-                    if (this.isFlammable(level, x - 1, y, z) || this.isFlammable(level, x + 1, y, z) || this.isFlammable(level, x, y, z - 1) || this.isFlammable(level, x, y, z + 1) || this.isFlammable(level, x, y - 1, z) || this.isFlammable(level, x, y + 1, z)) {
+                final int t = level.getTile(x, y, z);
+                if (t == 0) {
+                    if (this.isFlammable(level, x - 1, y, z) ||
+                        this.isFlammable(level, x + 1, y, z) ||
+                        this.isFlammable(level, x, y, z - 1) ||
+                        this.isFlammable(level, x, y, z + 1) ||
+                        this.isFlammable(level, x, y - 1, z) ||
+                        this.isFlammable(level, x, y + 1, z))
+                    {
                         level.setTile(x, y, z, Tile.fire.id);
                         return;
                     }
                 }
-                else if (Tile.tiles[tile].material.blocksMotion()) {
+                else if (Tile.tiles[t].material.blocksMotion()) {
                     return;
                 }
             }

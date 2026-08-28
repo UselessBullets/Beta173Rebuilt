@@ -5,6 +5,8 @@
 package net.minecraft.world.level.tile;
 
 import java.util.Random;
+
+import net.minecraft.Facing;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSource;
 import net.minecraft.world.level.material.Material;
@@ -18,43 +20,27 @@ public class LockedChestTile extends Tile
     
     @Override
     public int getTexture(final LevelSource level, final int x, final int y, final int z, final int face) {
-        if (face == 1) {
-            return this.tex - 1;
-        }
-        if (face == 0) {
-            return this.tex - 1;
-        }
-        final int tile = level.getTile(x, y, z - 1);
-        final int tile2 = level.getTile(x, y, z + 1);
-        final int tile3 = level.getTile(x - 1, y, z);
-        final int tile4 = level.getTile(x + 1, y, z);
-        int n = 3;
-        if (Tile.solid[tile] && !Tile.solid[tile2]) {
-            n = 3;
-        }
-        if (Tile.solid[tile2] && !Tile.solid[tile]) {
-            n = 2;
-        }
-        if (Tile.solid[tile3] && !Tile.solid[tile4]) {
-            n = 5;
-        }
-        if (Tile.solid[tile4] && !Tile.solid[tile3]) {
-            n = 4;
-        }
-        return (face == n) ? (this.tex + 1) : this.tex;
+        if (face == Facing.UP) return this.tex - 1;
+        if (face == Facing.DOWN) return this.tex - 1;
+
+        final int n = level.getTile(x, y, z - 1); // face = 2
+        final int s = level.getTile(x, y, z + 1); // face = 3
+        final int w = level.getTile(x - 1, y, z); // face = 4
+        final int e = level.getTile(x + 1, y, z); // face = 5
+
+        int lockDir = 3;
+        if (Tile.solid[n] && !Tile.solid[s]) lockDir = 3;
+        if (Tile.solid[s] && !Tile.solid[n]) lockDir = 2;
+        if (Tile.solid[w] && !Tile.solid[e]) lockDir = 5;
+        if (Tile.solid[e] && !Tile.solid[w]) lockDir = 4;
+        return (face == lockDir) ? (this.tex + 1) : this.tex;
     }
     
     @Override
     public int getTexture(final int face) {
-        if (face == 1) {
-            return this.tex - 1;
-        }
-        if (face == 0) {
-            return this.tex - 1;
-        }
-        if (face == 3) {
-            return this.tex + 1;
-        }
+        if (face == Facing.UP) return this.tex - 1;
+        if (face == Facing.DOWN) return this.tex - 1;
+        if (face == Facing.SOUTH) return this.tex + 1;
         return this.tex;
     }
     

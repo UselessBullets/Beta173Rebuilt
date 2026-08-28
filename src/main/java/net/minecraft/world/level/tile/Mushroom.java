@@ -11,8 +11,8 @@ public class Mushroom extends Bush
 {
     protected Mushroom(final int id, final int tex) {
         super(id, tex);
-        final float n = 0.2f;
-        this.setShape(0.5f - n, 0.0f, 0.5f - n, 0.5f + n, n * 2.0f, 0.5f + n);
+        final float ss = 0.2f;
+        this.setShape(0.5f - ss, 0.0f, 0.5f - ss, 0.5f + ss, ss * 2.0f, 0.5f + ss);
         this.setTicking(true);
     }
     
@@ -39,6 +39,8 @@ public class Mushroom extends Bush
     
     @Override
     public boolean canSurvive(final Level level, final int x, final int y, final int z) {
-        return y >= 0 && y < 128 && level.getDaytimeRawBrightness(x, y, z) < 13 && this.mayPlaceOn(level.getTile(x, y - 1, z));
+        if (y < 0 || y >= Level.MAX_HEIGHT) return false;
+
+        return level.getDaytimeRawBrightness(x, y, z) < 13 && this.mayPlaceOn(level.getTile(x, y - 1, z));
     }
 }

@@ -1,6 +1,7 @@
 package net.minecraft.world.level;
 
-public class LevelEvent { // Useless - Class exists in LCE, thinking since it just stored static constants it got compiled away, and level events did not exist in b1.2 so wouldn't be in that jar either
+// Useless - Class exists in LCE, thinking since it just stored static constants it got compiled away, and level events did not exist in b1.2 so wouldn't be in that jar either
+public class LevelEvent {
     public static final int SOUND_CLICK = 1000;
     public static final int SOUND_CLICK_FAIL = 1001;
     public static final int SOUND_LAUNCH = 1002;

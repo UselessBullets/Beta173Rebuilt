@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.tile;
 
+import net.minecraft.world.item.DyePowderItem;
 import net.minecraft.world.item.Item;
 import java.util.Random;
 import net.minecraft.world.level.material.Material;
@@ -16,31 +17,21 @@ public class OreTile extends Tile
     
     @Override
     public int getResource(final int data, final Random random) {
-        if (this.id == Tile.coalOre.id) {
-            return Item.coal.id;
-        }
-        if (this.id == Tile.diamondOre.id) {
-            return Item.diamond.id;
-        }
-        if (this.id == Tile.lapisOre.id) {
-            return Item.dye_powder.id;
-        }
+        if (this.id == Tile.coalOre.id) return Item.coal.id;
+        if (this.id == Tile.diamondOre.id) return Item.diamond.id;
+        if (this.id == Tile.lapisOre.id) return Item.dye_powder.id;
         return this.id;
     }
     
     @Override
     public int getResourceCount(final Random random) {
-        if (this.id == Tile.lapisOre.id) {
-            return 4 + random.nextInt(5);
-        }
+        if (this.id == Tile.lapisOre.id) return 4 + random.nextInt(5);
         return 1;
     }
     
     @Override
     protected int getSpawnResourcesAuxValue(final int data) {
-        if (this.id == Tile.lapisOre.id) {
-            return 4;
-        }
+        if (this.id == Tile.lapisOre.id) return DyePowderItem.BLUE;
         return 0;
     }
 }

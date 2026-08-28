@@ -24,34 +24,32 @@ public class MusicTile extends EntityTile
     @Override
     public void neighborChanged(final Level level, final int x, final int y, final int z, final int type) {
         if (type > 0 && Tile.tiles[type].isSignalSource()) {
-            final boolean hasDirectSignal = level.hasDirectSignal(x, y, z);
-            final MusicTileEntity musicTileEntity = (MusicTileEntity)level.getTileEntity(x, y, z);
-            if (musicTileEntity.on != hasDirectSignal) {
-                if (hasDirectSignal) {
-                    musicTileEntity.playNote(level, x, y, z);
+            final boolean signal = level.hasDirectSignal(x, y, z);
+            final MusicTileEntity mte = (MusicTileEntity)level.getTileEntity(x, y, z);
+            if (mte.on != signal) {
+                if (signal) {
+                    mte.playNote(level, x, y, z);
                 }
-                musicTileEntity.on = hasDirectSignal;
+                mte.on = signal;
             }
         }
     }
     
     @Override
     public boolean use(final Level level, final int x, final int y, final int z, final Player player) {
-        if (level.isClientSide) {
-            return true;
-        }
-        final MusicTileEntity musicTileEntity = (MusicTileEntity)level.getTileEntity(x, y, z);
-        musicTileEntity.tune();
-        musicTileEntity.playNote(level, x, y, z);
+        if (level.isClientSide) return true;
+
+        final MusicTileEntity mte = (MusicTileEntity)level.getTileEntity(x, y, z);
+        mte.tune();
+        mte.playNote(level, x, y, z);
         return true;
     }
     
     @Override
     public void attack(final Level level, final int x, final int y, final int z, final Player player) {
-        if (level.isClientSide) {
-            return;
-        }
-        ((MusicTileEntity)level.getTileEntity(x, y, z)).playNote(level, x, y, z);
+        if (level.isClientSide) return;
+        MusicTileEntity mte = (MusicTileEntity) level.getTileEntity(x, y, z);
+        mte.playNote(level, x, y, z);
     }
     
     @Override
@@ -60,22 +58,16 @@ public class MusicTile extends EntityTile
     }
     
     @Override
-    public void triggerEvent(final Level level, final int x, final int y, final int z, final int b0, final int b1) {
-        final float pitch = (float)Math.pow(2.0, (b1 - 12) / 12.0);
-        String str = "harp";
-        if (b0 == 1) {
-            str = "bd";
-        }
-        if (b0 == 2) {
-            str = "snare";
-        }
-        if (b0 == 3) {
-            str = "hat";
-        }
-        if (b0 == 4) {
-            str = "bassattack";
-        }
-        level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "note." + str, 3.0f, pitch);
-        level.addParticle("note", x + 0.5, y + 1.2, z + 0.5, b1 / 24.0, 0.0, 0.0);
+    public void triggerEvent(final Level level, final int x, final int y, final int z, final int i, final int note) {
+        final float pitch = (float)Math.pow(2.0, (note - 12) / 12.0);
+
+        String sound = "harp";
+        if (i == 1) sound = "bd";
+        if (i == 2) sound = "snare";
+        if (i == 3) sound = "hat";
+        if (i == 4) sound = "bassattack";
+
+        level.playLocalSound(x + 0.5, y + 0.5, z + 0.5, "note." + sound, 3.0f, pitch);
+        level.addParticle("note", x + 0.5, y + 1.2, z + 0.5, note / 24.0, 0.0, 0.0);
     }
 }

@@ -165,6 +165,11 @@ public class MinecraftServer implements Runnable, ConsoleInputSource
                 public void progressStartNoAbort(final String string) {
                 }
 
+                @Override
+                public void progressStart(String var1) {
+
+                }
+
                 public void progressStagePercentage(final int i) {
                     if (System.currentTimeMillis() - this.lastCheckTime >= 1000L) {
                         this.lastCheckTime = System.currentTimeMillis();

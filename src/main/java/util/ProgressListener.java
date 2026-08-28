@@ -7,6 +7,7 @@ package util;
 public interface ProgressListener
 {
     void progressStartNoAbort(final String string);
+    void progressStart(final String string);
     
     void progressStage(final String status);
     

@@ -4,6 +4,7 @@
 
 package net.minecraft.server.network;
 
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.tile.entity.TileEntity;
 import net.minecraft.world.level.tile.entity.SignTileEntity;
 import net.minecraft.network.packet.SignUpdatePacket;
@@ -47,27 +48,23 @@ import net.minecraft.network.packet.PacketListener;
 
 public class PlayerConnection extends PacketListener implements ConsoleInputSource
 {
-    public static Logger logger;
+    public static Logger logger = Logger.getLogger("Minecraft");
     public Connection connection;
-    public boolean done;
+    public boolean done = false;
     private MinecraftServer server;
     private ServerPlayer player;
     private int tickCount;
     private int lastKeepAliveTick;
     private int aboveGroundTickCount;
     private boolean didTick;
-    private double xLastOk;
-    private double yLastOk;
-    private double zLastOk;
-    private boolean synched;
-    private Map<Integer, Short> expectedAcks;
+    private double xLastOk, yLastOk, zLastOk;
+    private boolean synched = true;
+    private Map<Integer, Short> expectedAcks = new HashMap<>();
     
     public PlayerConnection(final MinecraftServer server, final Connection connection, final ServerPlayer player) {
-        this.done = false;
-        this.synched = true;
-        this.expectedAcks = new HashMap<>();
         this.server = server;
-        (this.connection = connection).setListener(this);
+        this.connection = connection;
+        this.connection.setListener(this);
         this.player = player;
         player.connection = this;
     }
@@ -75,7 +72,7 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
     public void tick() {
         this.didTick = false;
         this.connection.tick();
-        if (this.tickCount - this.lastKeepAliveTick > 20) {
+        if (this.tickCount - this.lastKeepAliveTick > SharedConstants.TICKS_PER_SECOND * 1) {
             this.send(new KeepAlivePacket());
         }
     }
@@ -85,6 +82,7 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
         this.send(new DisconnectPacket(reason));
         this.connection.sendAndQuit();
         this.server.players.broadcastAll(new ChatPacket("§e" + this.player.name + " left the game."));
+
         this.server.players.remove(this.player);
         this.done = true;
     }
@@ -97,43 +95,43 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
     @Override
     public void handleMovePlayer(final MovePlayerPacket packet) {
         final ServerLevel level = this.server.getLevel(this.player.dimension);
+
         this.didTick = true;
         if (!this.synched) {
-            final double n = packet.y - this.yLastOk;
-            if (packet.x == this.xLastOk && n * n < 0.01 && packet.z == this.zLastOk) {
+            final double yDiff = packet.y - this.yLastOk;
+            if (packet.x == this.xLastOk && yDiff * yDiff < 0.01 && packet.z == this.zLastOk) {
                 this.synched = true;
             }
         }
+
         if (this.synched) {
             if (this.player.riding != null) {
-                float yRot = this.player.yRot;
-                float xRot = this.player.xRot;
+                float yRotT = this.player.yRot;
+                float xRotT = this.player.xRot;
                 this.player.riding.positionRider();
-                final double x = this.player.x;
-                final double y = this.player.y;
-                final double z = this.player.z;
-                double x2 = 0.0;
-                double z2 = 0.0;
+                final double xt = this.player.x;
+                final double yt = this.player.y;
+                final double zt = this.player.z;
+                double xxa = 0.0;
+                double zza = 0.0;
                 if (packet.hasRot) {
-                    yRot = packet.yRot;
-                    xRot = packet.xRot;
+                    yRotT = packet.yRot;
+                    xRotT = packet.xRot;
                 }
                 if (packet.hasPos && packet.y == -999.0 && packet.yView == -999.0) {
-                    x2 = packet.x;
-                    z2 = packet.z;
+                    xxa = packet.x;
+                    zza = packet.z;
                 }
+
                 this.player.onGround = packet.onGround;
+
                 this.player.doTick(true);
-                this.player.move(x2, 0.0, z2);
-                this.player.absMoveTo(x, y, z, yRot, xRot);
-                this.player.xd = x2;
-                this.player.zd = z2;
-                if (this.player.riding != null) {
-                    level.forceTick(this.player.riding, true);
-                }
-                if (this.player.riding != null) {
-                    this.player.riding.positionRider();
-                }
+                this.player.move(xxa, 0.0, zza);
+                this.player.absMoveTo(xt, yt, zt, yRotT, xRotT);
+                this.player.xd = xxa;
+                this.player.zd = zza;
+                if (this.player.riding != null) level.forceTick(this.player.riding, true);
+                if (this.player.riding != null) this.player.riding.positionRider();
                 this.server.players.move(this.player);
                 this.xLastOk = this.player.x;
                 this.yLastOk = this.player.y;
@@ -141,84 +139,97 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
                 level.tick(this.player);
                 return;
             }
+
             if (this.player.isSleeping()) {
                 this.player.doTick(true);
                 this.player.absMoveTo(this.xLastOk, this.yLastOk, this.zLastOk, this.player.yRot, this.player.xRot);
                 level.tick(this.player);
                 return;
             }
-            final double y2 = this.player.y;
+
+            final double startY = this.player.y;
             this.xLastOk = this.player.x;
             this.yLastOk = this.player.y;
             this.zLastOk = this.player.z;
-            double n2 = this.player.x;
-            double n3 = this.player.y;
-            double n4 = this.player.z;
-            float yRot2 = this.player.yRot;
-            float xRot2 = this.player.xRot;
+
+            double xt = this.player.x;
+            double yt = this.player.y;
+            double zt = this.player.z;
+
+            float yRotT = this.player.yRot;
+            float xRotT = this.player.xRot;
+
             if (packet.hasPos && packet.y == -999.0 && packet.yView == -999.0) {
                 packet.hasPos = false;
             }
+
             if (packet.hasPos) {
-                n2 = packet.x;
-                n3 = packet.y;
-                n4 = packet.z;
-                final double d = packet.yView - packet.y;
-                if (!this.player.isSleeping() && (d > 1.65 || d < 0.1)) {
+                xt = packet.x;
+                yt = packet.y;
+                zt = packet.z;
+                final double yd = packet.yView - packet.y;
+                if (!this.player.isSleeping() && (yd > 1.65 || yd < 0.1)) {
                     this.disconnect("Illegal stance");
-                    PlayerConnection.logger.warning(this.player.name + " had an illegal stance: " + d);
+                    PlayerConnection.logger.warning(this.player.name + " had an illegal stance: " + yd);
                     return;
                 }
-                if (Math.abs(packet.x) > 3.2E7 || Math.abs(packet.z) > 3.2E7) {
+                if (Math.abs(packet.x) > Level.MAX_LEVEL_SIZE || Math.abs(packet.z) > Level.MAX_LEVEL_SIZE) {
                     this.disconnect("Illegal position");
                     return;
                 }
             }
             if (packet.hasRot) {
-                yRot2 = packet.yRot;
-                xRot2 = packet.xRot;
+                yRotT = packet.yRot;
+                xRotT = packet.xRot;
             }
+
             this.player.doTick(true);
             this.player.ySlideOffset = 0.0f;
-            this.player.absMoveTo(this.xLastOk, this.yLastOk, this.zLastOk, yRot2, xRot2);
-            if (!this.synched) {
-                return;
-            }
-            final double xa = n2 - this.player.x;
-            final double ya = n3 - this.player.y;
-            final double za = n4 - this.player.z;
-            if (xa * xa + ya * ya + za * za > 100.0) {
+            this.player.absMoveTo(this.xLastOk, this.yLastOk, this.zLastOk, yRotT, xRotT);
+
+            if (!this.synched) return;
+
+            double xDist = xt - this.player.x;
+            double yDist = yt - this.player.y;
+            double zDist = zt - this.player.z;
+            double dist = xDist * xDist + yDist * yDist + zDist * zDist;
+            if (dist > 100.0) {
                 PlayerConnection.logger.warning(this.player.name + " moved too quickly!");
                 this.disconnect("You moved too quickly :( (Hacking?)");
                 return;
             }
-            final float n5 = 0.0625f;
-            final boolean b = level.getCubes(this.player, this.player.bb.copy().shrink(n5, n5, n5)).size() == 0;
-            this.player.move(xa, ya, za);
-            final double n6 = n2 - this.player.x;
-            double n7 = n3 - this.player.y;
-            if (n7 > -0.5 || n7 < 0.5) {
-                n7 = 0.0;
+
+            final float r = 1 / 16.0f;
+            final boolean oldOk = level.getCubes(this.player, this.player.bb.copy().shrink(r, r, r)).isEmpty();
+            this.player.move(xDist, yDist, zDist);
+
+            xDist = xt - this.player.x;
+            yDist = yt - this.player.y;
+            if (yDist > -0.5 || yDist < 0.5) {
+                yDist = 0.0;
             }
-            final double n8 = n4 - this.player.z;
-            final double n9 = n6 * n6 + n7 * n7 + n8 * n8;
-            boolean b2 = false;
-            if (n9 > 0.0625 && !this.player.isSleeping()) {
-                b2 = true;
+            zDist = zt - this.player.z;
+
+            dist = xDist * xDist + yDist * yDist + zDist * zDist;
+            boolean fail = false;
+            if (dist > (0.25 * 0.25) && !this.player.isSleeping()) {
+                fail = true;
                 PlayerConnection.logger.warning(this.player.name + " moved wrongly!");
-                System.out.println("Got position " + n2 + ", " + n3 + ", " + n4);
+                System.out.println("Got position " + xt + ", " + yt + ", " + zt);
                 System.out.println("Expected " + this.player.x + ", " + this.player.y + ", " + this.player.z);
             }
-            this.player.absMoveTo(n2, n3, n4, yRot2, xRot2);
-            final boolean b3 = level.getCubes(this.player, this.player.bb.copy().shrink(n5, n5, n5)).size() == 0;
-            if (b && (b2 || !b3) && !this.player.isSleeping()) {
-                this.teleport(this.xLastOk, this.yLastOk, this.zLastOk, yRot2, xRot2);
+            this.player.absMoveTo(xt, yt, zt, yRotT, xRotT);
+
+            final boolean newOk = level.getCubes(this.player, this.player.bb.copy().shrink(r, r, r)).isEmpty();
+            if (oldOk && (fail || !newOk) && !this.player.isSleeping()) {
+                this.teleport(this.xLastOk, this.yLastOk, this.zLastOk, yRotT, xRotT);
                 return;
             }
-            final AABB expand = this.player.bb.copy().grow(n5, n5, n5).expand(0.0, -0.55, 0.0);
-            if (!this.server.isFlightAllowed && !level.containsAnyBlocks(expand)) {
-                if (n7 >= -0.03125) {
-                    ++this.aboveGroundTickCount;
+
+            final AABB testBox = this.player.bb.copy().grow(r, r, r).expand(0.0, -0.55, 0.0);
+            if (!this.server.isFlightAllowed && !level.containsAnyBlocks(testBox)) {
+                if (yDist >= -0.5f / 16.0f) {
+                    this.aboveGroundTickCount++;
                     if (this.aboveGroundTickCount > 80) {
                         PlayerConnection.logger.warning(this.player.name + " was kicked for floating too long!");
                         this.disconnect("Flying is not enabled on this server");
@@ -229,9 +240,10 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
             else {
                 this.aboveGroundTickCount = 0;
             }
+
             this.player.onGround = packet.onGround;
             this.server.players.move(this.player);
-            this.player.doCheckFallDamage(this.player.y - y2, packet.onGround);
+            this.player.doCheckFallDamage(this.player.y - startY, packet.onGround);
         }
     }
     
@@ -241,130 +253,113 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
         this.yLastOk = y;
         this.zLastOk = z;
         this.player.absMoveTo(x, y, z, yRot, xRot);
-        this.player.connection.send(new MovePlayerPacket.PosRot(x, y + 1.6200000047683716, y, z, yRot, xRot, false));
+        this.player.connection.send(new MovePlayerPacket.PosRot(x, y + 1.62f, y, z, yRot, xRot, false));
     }
     
     @Override
     public void handlePlayerAction(final PlayerActionPacket packet) {
         final ServerLevel level = this.server.getLevel(this.player.dimension);
-        if (packet.action == 4) {
+
+        if (packet.action == PlayerActionPacket.DROP_ITEM) {
             this.player.drop();
             return;
         }
-        final ServerLevel serverLevel = level;
+
         final boolean canEditSpawn = level.dimension.id != 0 || this.server.players.isOp(this.player.name);
-        serverLevel.canEditSpawn = canEditSpawn;
-        final boolean b = canEditSpawn;
-        boolean b2 = false;
-        if (packet.action == 0) {
-            b2 = true;
-        }
-        if (packet.action == 2) {
-            b2 = true;
-        }
+        level.canEditSpawn = canEditSpawn;
+        boolean shouldVerifyLocation = false;
+        if (packet.action == PlayerActionPacket.START_DESTROY_BLOCK) shouldVerifyLocation = true;
+        if (packet.action == PlayerActionPacket.STOP_DESTROY_BLOCK) shouldVerifyLocation = true;
+
         final int x = packet.x;
         final int y = packet.y;
         final int z = packet.z;
-        if (b2) {
-            final double n = this.player.x - (x + 0.5);
-            final double n2 = this.player.y - (y + 0.5);
-            final double n3 = this.player.z - (z + 0.5);
-            if (n * n + n2 * n2 + n3 * n3 > 36.0) {
-                return;
-            }
+        if (shouldVerifyLocation) {
+            final double xDist = this.player.x - (x + 0.5);
+            final double yDist = this.player.y - (y + 0.5);
+            final double zDist = this.player.z - (z + 0.5);
+            if (xDist * xDist + yDist * yDist + zDist * zDist > 6 * 6) return;
         }
-        final Pos sharedSpawnPos = level.getSharedSpawnPos();
-        final int n4 = (int)Mth.abs((float)(x - sharedSpawnPos.x));
-        int n5 = (int)Mth.abs((float)(z - sharedSpawnPos.z));
-        if (n4 > n5) {
-            n5 = n4;
+
+        final Pos spawnPos = level.getSharedSpawnPos();
+        int xd = (int)Mth.abs((float)(x - spawnPos.x));
+        int zd = (int)Mth.abs((float)(z - spawnPos.z));
+        if (xd > zd) zd = xd;
+
+        if (packet.action == PlayerActionPacket.START_DESTROY_BLOCK) {
+            if (zd > 16 || canEditSpawn) this.player.gameMode.startDestroyBlock(x, y, z, packet.face);
+            else this.player.connection.send(new TileUpdatePacket(x, y, z, level));
         }
-        if (packet.action == 0) {
-            if (n5 > 16 || b) {
-                this.player.gameMode.startDestroyBlock(x, y, z, packet.face);
-            }
-            else {
-                this.player.connection.send(new TileUpdatePacket(x, y, z, level));
-            }
-        }
-        else if (packet.action == 2) {
+        else if (packet.action == PlayerActionPacket.STOP_DESTROY_BLOCK) {
             this.player.gameMode.stopDestroyBlock(x, y, z);
-            if (level.getTile(x, y, z) != 0) {
+            if (level.getTile(x, y, z) != 0) this.player.connection.send(new TileUpdatePacket(x, y, z, level));
+        }
+        else if (packet.action == PlayerActionPacket.GET_UPDATED_BLOCK) {
+            final double xDist = this.player.x - (x + 0.5);
+            final double yDist = this.player.y - (y + 0.5);
+            final double zDist = this.player.z - (z + 0.5);
+            if (xDist * xDist + yDist * yDist + zDist * zDist < 16 * 16) {
                 this.player.connection.send(new TileUpdatePacket(x, y, z, level));
             }
         }
-        else if (packet.action == 3) {
-            final double n6 = this.player.x - (x + 0.5);
-            final double n7 = this.player.y - (y + 0.5);
-            final double n8 = this.player.z - (z + 0.5);
-            if (n6 * n6 + n7 * n7 + n8 * n8 < 256.0) {
-                this.player.connection.send(new TileUpdatePacket(x, y, z, level));
-            }
-        }
+
         level.canEditSpawn = false;
     }
     
     @Override
     public void handleUseItem(final UseItemPacket packet) {
-        final ServerLevel level = this.server.getLevel(this.player.dimension);
-        final ItemInstance selected = this.player.inventory.getSelected();
-        final ServerLevel serverLevel = level;
-        final boolean canEditSpawn = level.dimension.id != 0 || this.server.players.isOp(this.player.name);
-        serverLevel.canEditSpawn = canEditSpawn;
-        final boolean b = canEditSpawn;
+        ServerLevel level = this.server.getLevel(this.player.dimension);
+        ItemInstance item = this.player.inventory.getSelected();
+
+        final boolean canEditSpawn = level.canEditSpawn = level.dimension.id != 0 || this.server.players.isOp(this.player.name);
         if (packet.face == 255) {
-            if (selected == null) {
-                return;
-            }
-            this.player.gameMode.useItem(this.player, level, selected);
+            if (item == null) return;
+            this.player.gameMode.useItem(this.player, level, item);
         }
         else {
             int x = packet.x;
             int y = packet.y;
             int z = packet.z;
             final int face = packet.face;
-            final Pos sharedSpawnPos = level.getSharedSpawnPos();
-            final int n = (int)Mth.abs((float)(x - sharedSpawnPos.x));
-            int n2 = (int)Mth.abs((float)(z - sharedSpawnPos.z));
-            if (n > n2) {
-                n2 = n;
+
+            final Pos spawnPos = level.getSharedSpawnPos();
+            int xd = (int)Mth.abs((float)(x - spawnPos.x));
+            int zd = (int)Mth.abs((float)(z - spawnPos.z));
+            if (xd > zd) zd = xd;
+
+            if (this.synched && this.player.distanceToSqr(x + 0.5, y + 0.5, z + 0.5) < 8 * 8) {
+                if (zd > 16 || canEditSpawn) {
+                    this.player.gameMode.useItemOn(this.player, level, item, x, y, z, face);
+                }
             }
-            if (this.synched && this.player.distanceToSqr(x + 0.5, y + 0.5, z + 0.5) < 64.0 && (n2 > 16 || b)) {
-                this.player.gameMode.useItemOn(this.player, level, selected, x, y, z, face);
-            }
+
             this.player.connection.send(new TileUpdatePacket(x, y, z, level));
-            if (face == 0) {
-                --y;
-            }
-            if (face == 1) {
-                ++y;
-            }
-            if (face == 2) {
-                --z;
-            }
-            if (face == 3) {
-                ++z;
-            }
-            if (face == 4) {
-                --x;
-            }
-            if (face == 5) {
-                ++x;
-            }
+
+            if (face == 0) y--;
+            if (face == 1) y++;
+            if (face == 2) z--;
+            if (face == 3) z++;
+            if (face == 4) x--;
+            if (face == 5) x++;
+
             this.player.connection.send(new TileUpdatePacket(x, y, z, level));
         }
-        final ItemInstance selected2 = this.player.inventory.getSelected();
-        if (selected2 != null && selected2.count == 0) {
+
+        item = this.player.inventory.getSelected();
+        if (item != null && item.count == 0) {
             this.player.inventory.items[this.player.inventory.selected] = null;
         }
+
         this.player.ignoreSlotUpdateHack = true;
         this.player.inventory.items[this.player.inventory.selected] = ItemInstance.clone(this.player.inventory.items[this.player.inventory.selected]);
-        final Slot slot = this.player.containerMenu.getSlotFor(this.player.inventory, this.player.inventory.selected);
+        final Slot s = this.player.containerMenu.getSlotFor(this.player.inventory, this.player.inventory.selected);
         this.player.containerMenu.broadcastChanges();
         this.player.ignoreSlotUpdateHack = false;
+
         if (!ItemInstance.matches(this.player.inventory.getSelected(), packet.item)) {
-            this.send(new ContainerSetSlotPacket(this.player.containerMenu.containerId, slot.index, this.player.inventory.getSelected()));
+            this.send(new ContainerSetSlotPacket(this.player.containerMenu.containerId, s.index, this.player.inventory.getSelected()));
         }
+
         level.canEditSpawn = false;
     }
     
@@ -398,23 +393,24 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
     
     @Override
     public void handleChat(final ChatPacket packet) {
-        final String message = packet.message;
-        if (message.length() > 100) {
+        String message = packet.message;
+        if (message.length() > SharedConstants.maxChatLength) {
             this.disconnect("Chat message too long");
             return;
         }
-        final String trim = message.trim();
-        for (int i = 0; i < trim.length(); ++i) {
-            if (SharedConstants.acceptableLetters.indexOf(trim.charAt(i)) < 0) {
+        message = message.trim();
+        for (int i = 0; i < message.length(); ++i) {
+            if (SharedConstants.acceptableLetters.indexOf(message.charAt(i)) < 0) {
                 this.disconnect("Illegal characters in chat");
                 return;
             }
         }
-        if (trim.startsWith("/")) {
-            this.handleCommand(trim);
+
+        if (message.startsWith("/")) {
+            this.handleCommand(message);
         }
         else {
-            final String string = "<" + this.player.name + "> " + trim;
+            final String string = "<" + this.player.name + "> " + message;
             PlayerConnection.logger.info(string);
             this.server.players.broadcastAll(new ChatPacket(string));
         }
@@ -442,9 +438,9 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
             }
         }
         else if (this.server.players.isOp(this.player.name)) {
-            final String substring = message.substring(1);
-            PlayerConnection.logger.info(this.player.name + " issued server command: " + substring);
-            this.server.handleConsoleInput(substring, this);
+            final String command = message.substring(1);
+            PlayerConnection.logger.info(this.player.name + " issued server command: " + command);
+            this.server.handleConsoleInput(command, this);
         }
         else {
             PlayerConnection.logger.info(this.player.name + " tried command: " + message.substring(1));
@@ -453,20 +449,20 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
     
     @Override
     public void handleAnimate(final AnimatePacket packet) {
-        if (packet.action == 1) {
+        if (packet.action == AnimatePacket.SWING) {
             this.player.swing();
         }
     }
     
     @Override
     public void handlePlayerCommand(final PlayerCommandPacket packet) {
-        if (packet.action == 1) {
+        if (packet.action == PlayerCommandPacket.START_SNEAKING) {
             this.player.setSneaking(true);
         }
-        else if (packet.action == 2) {
+        else if (packet.action == PlayerCommandPacket.STOP_SNEAKING) {
             this.player.setSneaking(false);
         }
-        else if (packet.action == 3) {
+        else if (packet.action == PlayerCommandPacket.STOP_SLEEPING) {
             this.player.stopSleepInBed(false, true, true);
             this.synched = false;
         }
@@ -491,22 +487,22 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
     
     @Override
     public void handleInteract(final InteractPacket packet) {
-        final Entity entity = this.server.getLevel(this.player.dimension).getEntity(packet.target);
-        if (entity != null && this.player.canSee(entity) && this.player.distanceToSqr(entity) < 36.0) {
-            if (packet.action == 0) {
-                this.player.interact(entity);
+        ServerLevel level = this.server.getLevel(this.player.dimension);
+        final Entity target = level.getEntity(packet.target);
+
+        if (target != null && this.player.canSee(target) && this.player.distanceToSqr(target) < 36.0) {
+            if (packet.action == InteractPacket.INTERACT) {
+                this.player.interact(target);
             }
-            else if (packet.action == 1) {
-                this.player.attack(entity);
+            else if (packet.action == InteractPacket.ATTACK) {
+                this.player.attack(target);
             }
         }
     }
     
     @Override
     public void handleRespawn(final RespawnPacket packet) {
-        if (this.player.health > 0) {
-            return;
-        }
+        if (this.player.health > 0) return;
         this.player = this.server.players.respawn(this.player, 0);
     }
     
@@ -518,7 +514,10 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
     @Override
     public void handleContainerClick(final ContainerClickPacket packet) {
         if (this.player.containerMenu.containerId == packet.containerId && this.player.containerMenu.isSynched(this.player)) {
-            if (ItemInstance.matches(packet.item, this.player.containerMenu.clicked(packet.slotNum, packet.buttonNum, packet.quickKey, this.player))) {
+            ItemInstance clicked = this.player.containerMenu.clicked(packet.slotNum, packet.buttonNum, packet.quickKey, this.player);
+
+            if (ItemInstance.matches(packet.item, clicked)) {
+                // Yep, you sure did click what you claimed to click!
                 this.player.connection.send(new ContainerAckPacket(packet.containerId, packet.uid, true));
                 this.player.ignoreSlotUpdateHack = true;
                 this.player.containerMenu.broadcastChanges();
@@ -526,6 +525,7 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
                 this.player.ignoreSlotUpdateHack = false;
             }
             else {
+                // No, you clicked the wrong thing!
                 this.expectedAcks.put(this.player.containerMenu.containerId, packet.uid);
                 this.player.connection.send(new ContainerAckPacket(packet.containerId, packet.uid, false));
                 this.player.containerMenu.setSynched(this.player, false);
@@ -534,14 +534,16 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
                     items.add(this.player.containerMenu.slots.get(i).getItem());
                 }
                 this.player.refreshContainer(this.player.containerMenu, items);
+
+//                this.player.containerMenu.broadcastChanges();
             }
         }
     }
     
     @Override
     public void handleContainerAck(final ContainerAckPacket packet) {
-        final Short n = this.expectedAcks.get(this.player.containerMenu.containerId);
-        if (n != null && packet.uid == n && this.player.containerMenu.containerId == packet.containerId && !this.player.containerMenu.isSynched(this.player)) {
+        final Short ack = this.expectedAcks.get(this.player.containerMenu.containerId);
+        if (ack != null && packet.uid == ack && this.player.containerMenu.containerId == packet.containerId && !this.player.containerMenu.isSynched(this.player)) {
             this.player.containerMenu.setSynched(this.player, true);
         }
     }
@@ -550,37 +552,39 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
     public void handleSignUpdate(final SignUpdatePacket packet) {
         final ServerLevel level = this.server.getLevel(this.player.dimension);
         if (level.hasChunkAt(packet.x, packet.y, packet.z)) {
-            final TileEntity tileEntity = level.getTileEntity(packet.x, packet.y, packet.z);
-            if (tileEntity instanceof SignTileEntity && !((SignTileEntity)tileEntity).isEditable()) {
-                this.server.warn("Player " + this.player.name + " just tried to change non-editable sign");
-                return;
+            final TileEntity te = level.getTileEntity(packet.x, packet.y, packet.z);
+            if (te instanceof SignTileEntity) {
+                SignTileEntity ste = (SignTileEntity) te;
+                if (!ste.isEditable()) {
+                    this.server.warn("Player " + this.player.name + " just tried to change non-editable sign");
+                    return;
+                }
             }
+
             for (int i = 0; i < 4; ++i) {
-                boolean b = true;
-                if (packet.lines[i].length() > 15) {
-                    b = false;
+                boolean validLine = true;
+                if (packet.lines[i].length() > SignTileEntity.MAX_LINE_LENGTH) {
+                    validLine = false;
                 }
                 else {
-                    for (int j = 0; j < packet.lines[i].length(); ++j) {
-                        if (SharedConstants.acceptableLetters.indexOf(packet.lines[i].charAt(j)) < 0) {
-                            b = false;
-                        }
+                    for (int c = 0; c < packet.lines[i].length(); ++c) {
+                        char ch = packet.lines[i].charAt(c);
+                        if (SharedConstants.acceptableLetters.indexOf(ch) < 0) validLine = false;
                     }
                 }
-                if (!b) {
-                    packet.lines[i] = "!?";
-                }
+                if (!validLine) packet.lines[i] = "!?";
             }
-            if (tileEntity instanceof SignTileEntity) {
+
+            if (te instanceof SignTileEntity) {
                 final int x = packet.x;
                 final int y = packet.y;
                 final int z = packet.z;
-                final SignTileEntity signTileEntity = (SignTileEntity)tileEntity;
-                for (int k = 0; k < 4; ++k) {
-                    signTileEntity.messages[k] = packet.lines[k];
+                final SignTileEntity ste = (SignTileEntity)te;
+                for (int i = 0; i < SignTileEntity.MAX_SIGN_LINES; ++i) {
+                    ste.messages[i] = packet.lines[i];
                 }
-                signTileEntity.setEditable(false);
-                signTileEntity.setChanged();
+                ste.setEditable(false);
+                ste.setChanged();
                 level.sendTileUpdated(x, y, z);
             }
         }
@@ -590,8 +594,5 @@ public class PlayerConnection extends PacketListener implements ConsoleInputSour
     public boolean isServerPacketListener() {
         return true;
     }
-    
-    static {
-        PlayerConnection.logger = Logger.getLogger("Minecraft");
-    }
+
 }

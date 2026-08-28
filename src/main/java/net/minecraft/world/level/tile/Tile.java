@@ -269,7 +269,7 @@ public class Tile implements Descriptive<Tile> {
     }
     
     protected Tile setIndestructible() {
-        this.setDestroyTime(-1.0f);
+        this.setDestroyTime(INDESTRUCTIBLE_DESTROY_TIME);
         return this;
     }
     

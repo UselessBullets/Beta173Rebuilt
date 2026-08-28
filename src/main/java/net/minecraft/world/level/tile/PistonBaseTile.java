@@ -347,7 +347,7 @@ public class PistonBaseTile extends Tile
         int cx = sx + Facing.STEP_X[facing];
         int cy = sy + Facing.STEP_Y[facing];
         int cz = sz + Facing.STEP_Z[facing];
-        
+
         for (int i = 0; i < MAX_PUSH_DEPTH + 1; ++i) {
             if (cy <= 0 || cy >= (Level.MAX_HEIGHT - 1)) {
                 // out of bounds

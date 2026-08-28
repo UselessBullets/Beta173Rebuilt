@@ -18,7 +18,7 @@ public class PistonMovingPiece extends EntityTile
 {
     public PistonMovingPiece(final int id) {
         super(id, Material.piston);
-        this.setDestroyTime(-1.0f);
+        this.setDestroyTime(Tile.INDESTRUCTIBLE_DESTROY_TIME);
     }
     
     @Override
@@ -68,7 +68,9 @@ public class PistonMovingPiece extends EntityTile
     
     @Override
     public boolean use(final Level level, final int x, final int y, final int z, final Player player) {
+        // this is a special case in order to help removing invisible, unbreakable, blocks in the world
         if (!level.isClientSide && level.getTileEntity(x, y, z) == null) {
+            // this block is no longer valid
             level.setTile(x, y, z, 0);
             return true;
         }
@@ -82,19 +84,20 @@ public class PistonMovingPiece extends EntityTile
     
     @Override
     public void spawnResources(final Level level, final int x, final int y, final int z, final int data, final float odds) {
-        if (level.isClientSide) {
-            return;
-        }
+        if (level.isClientSide) return;
+
         final PistonPieceEntity entity = this.getEntity(level, x, y, z);
         if (entity == null) {
             return;
         }
+
         Tile.tiles[entity.getId()].spawnResources(level, x, y, z, entity.getData());
     }
     
     @Override
     public void neighborChanged(final Level level, final int x, final int y, final int z, final int type) {
-        if (level.isClientSide || level.getTileEntity(x, y, z) == null) {}
+        if (!level.isClientSide && level.getTileEntity(x, y, z) != null) {
+        }
     }
     
     public static TileEntity newMovingPieceEntity(final int block, final int data, final int facing, final boolean extending, final boolean isSourcePiston) {
@@ -107,6 +110,8 @@ public class PistonMovingPiece extends EntityTile
         if (entity == null) {
             return null;
         }
+
+        // move the aabb depending on the animation
         float progress = entity.getProgress(0.0f);
         if (entity.isExtending()) {
             progress = 1.0f - progress;
@@ -123,6 +128,7 @@ public class PistonMovingPiece extends EntityTile
                 return;
             }
             tile.updateShape(level, x, y, z);
+
             float progress = entity.getProgress(0.0f);
             if (entity.isExtending()) {
                 progress = 1.0f - progress;
@@ -142,21 +148,18 @@ public class PistonMovingPiece extends EntityTile
             return null;
         }
         final AABB aabb = Tile.tiles[tile].getAABB(level, x, y, z);
+
         if (aabb == null) {
             return null;
         }
-        final AABB aabb2 = aabb;
-        aabb2.x0 -= Facing.STEP_X[facing] * progress;
-        final AABB aabb3 = aabb;
-        aabb3.x1 -= Facing.STEP_X[facing] * progress;
-        final AABB aabb4 = aabb;
-        aabb4.y0 -= Facing.STEP_Y[facing] * progress;
-        final AABB aabb5 = aabb;
-        aabb5.y1 -= Facing.STEP_Y[facing] * progress;
-        final AABB aabb6 = aabb;
-        aabb6.z0 -= Facing.STEP_Z[facing] * progress;
-        final AABB aabb7 = aabb;
-        aabb7.z1 -= Facing.STEP_Z[facing] * progress;
+
+        // move the aabb depending on the animation
+        aabb.x0 -= Facing.STEP_X[facing] * progress;
+        aabb.x1 -= Facing.STEP_X[facing] * progress;
+        aabb.y0 -= Facing.STEP_Y[facing] * progress;
+        aabb.y1 -= Facing.STEP_Y[facing] * progress;
+        aabb.z0 -= Facing.STEP_Z[facing] * progress;
+        aabb.z1 -= Facing.STEP_Z[facing] * progress;
         return aabb;
     }
     

@@ -16,11 +16,10 @@ public class PistonExtensionTile extends Tile
 {
     // i'm reusing this block for the sticky pistons
     public static final int STICKY_BIT = 8;
-    private int overrideTopTexture;
+    private int overrideTopTexture = -1;
     
     public PistonExtensionTile(final int id, final int tex) {
         super(id, tex, Material.piston);
-        this.overrideTopTexture = -1;
         this.setSoundType(PistonExtensionTile.SOUND_STONE);
         this.setDestroyTime(0.5f);
     }
@@ -36,15 +35,17 @@ public class PistonExtensionTile extends Tile
     @Override
     public void onRemove(final Level level, int x, int y, int z) {
         super.onRemove(level, x, y, z);
-        final int n = Facing.OPPOSITE_FACING[getFacing(level.getData(x, y, z))];
-        x += Facing.STEP_X[n];
-        y += Facing.STEP_Y[n];
-        z += Facing.STEP_Z[n];
-        final int tile = level.getTile(x, y, z);
-        if (tile == Tile.pistonBase.id || tile == Tile.pistonStickyBase.id) {
+        final int facing = Facing.OPPOSITE_FACING[getFacing(level.getData(x, y, z))];
+        x += Facing.STEP_X[facing];
+        y += Facing.STEP_Y[facing];
+        z += Facing.STEP_Z[facing];
+
+        final int t = level.getTile(x, y, z);
+
+        if (t == Tile.pistonBase.id || t == Tile.pistonStickyBase.id) {
             final int data = level.getData(x, y, z);
             if (PistonBaseTile.isExtended(data)) {
-                Tile.tiles[tile].spawnResources(level, x, y, z, data);
+                Tile.tiles[t].spawnResources(level, x, y, z, data);
                 level.setTile(x, y, z, 0);
             }
         }
@@ -57,16 +58,16 @@ public class PistonExtensionTile extends Tile
             if (this.overrideTopTexture >= 0) {
                 return this.overrideTopTexture;
             }
-            if ((data & 0x8) != 0x0) {
+            if ((data & STICKY_BIT) != 0x0) {
                 return this.tex - 1;
             }
             return this.tex;
         }
         else {
             if (face == Facing.OPPOSITE_FACING[facing]) {
-                return 107;
+                return PistonBaseTile.PLATFORM_TEX;
             }
-            return 108;
+            return PistonBaseTile.EDGE_TEX;
         }
     }
     
@@ -102,80 +103,86 @@ public class PistonExtensionTile extends Tile
     
     @Override
     public void addAABBs(final Level level, final int x, final int y, final int z, final AABB box, final ArrayList boxes) {
-        switch (getFacing(level.getData(x, y, z))) {
+        int data = level.getData(x, y, z);
+
+        final float thickness = PistonBaseTile.PLATFORM_THICKNESS / 16.0f;
+        final float smallEdge1 = (8.0f - (PistonBaseTile.PLATFORM_THICKNESS / 2.0f)) / 16.0f;
+        final float smallEdge2 = (8.0f + (PistonBaseTile.PLATFORM_THICKNESS / 2.0f)) / 16.0f;
+        final float largeEdge1 = (8.0f - PistonBaseTile.PLATFORM_THICKNESS) / 16.0f;
+        final float largeEdge2 = (8.0f + PistonBaseTile.PLATFORM_THICKNESS) / 16.0f;
+
+        switch (getFacing(data)) {
             case 0: {
-                this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.25f, 1.0f);
+                this.setShape(0, 0, 0, 1, thickness, 1);
                 super.addAABBs(level, x, y, z, box, boxes);
-                this.setShape(0.375f, 0.25f, 0.375f, 0.625f, 1.0f, 0.625f);
+                this.setShape(smallEdge1, thickness, smallEdge1, smallEdge2, 1, smallEdge2);
                 super.addAABBs(level, x, y, z, box, boxes);
                 break;
             }
             case 1: {
-                this.setShape(0.0f, 0.75f, 0.0f, 1.0f, 1.0f, 1.0f);
+                this.setShape(0, 1 - thickness, 0, 1, 1, 1);
                 super.addAABBs(level, x, y, z, box, boxes);
-                this.setShape(0.375f, 0.0f, 0.375f, 0.625f, 0.75f, 0.625f);
+                this.setShape(smallEdge1, 0, smallEdge1, smallEdge2, 1 - thickness, smallEdge2);
                 super.addAABBs(level, x, y, z, box, boxes);
                 break;
             }
             case 2: {
-                this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.25f);
+                this.setShape(0, 0, 0, 1, 1, thickness);
                 super.addAABBs(level, x, y, z, box, boxes);
-                this.setShape(0.25f, 0.375f, 0.25f, 0.75f, 0.625f, 1.0f);
+                this.setShape(largeEdge1, smallEdge1, thickness, largeEdge2, smallEdge2, 1);
                 super.addAABBs(level, x, y, z, box, boxes);
                 break;
             }
             case 3: {
-                this.setShape(0.0f, 0.0f, 0.75f, 1.0f, 1.0f, 1.0f);
+                this.setShape(0, 0, 1 - thickness, 1, 1, 1);
                 super.addAABBs(level, x, y, z, box, boxes);
-                this.setShape(0.25f, 0.375f, 0.0f, 0.75f, 0.625f, 0.75f);
+                this.setShape(largeEdge1, smallEdge1, 0, largeEdge2, smallEdge2, 1 - thickness);
                 super.addAABBs(level, x, y, z, box, boxes);
                 break;
             }
             case 4: {
-                this.setShape(0.0f, 0.0f, 0.0f, 0.25f, 1.0f, 1.0f);
+                this.setShape(0, 0, 0, thickness, 1, 1);
                 super.addAABBs(level, x, y, z, box, boxes);
-                this.setShape(0.375f, 0.25f, 0.25f, 0.625f, 0.75f, 1.0f);
+                this.setShape(smallEdge1, largeEdge1, thickness, smallEdge2, largeEdge2, 1);
                 super.addAABBs(level, x, y, z, box, boxes);
                 break;
             }
             case 5: {
-                this.setShape(0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+                this.setShape(1 - thickness, 0, 0, 1, 1, 1);
                 super.addAABBs(level, x, y, z, box, boxes);
-                this.setShape(0.0f, 0.375f, 0.25f, 0.75f, 0.625f, 0.75f);
+                this.setShape(0, smallEdge1, largeEdge1, 1 - thickness, smallEdge2, largeEdge2);
                 super.addAABBs(level, x, y, z, box, boxes);
                 break;
             }
         }
-        this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+        this.setShape(0, 0, 0, 1, 1, 1);
     }
     
     @Override
     public void updateShape(final LevelSource level, final int x, final int y, final int z) {
-        switch (getFacing(level.getData(x, y, z))) {
-            case 0: {
-                this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 0.25f, 1.0f);
+        int data = level.getData(x, y, z);
+
+        final float thickness = PistonBaseTile.PLATFORM_THICKNESS / 16.0f;
+
+        switch (getFacing(data)) {
+            case Facing.DOWN:
+                this.setShape(0.0f, 0.0f, 0.0f, 1.0f, thickness, 1.0f);
                 break;
-            }
-            case 1: {
-                this.setShape(0.0f, 0.75f, 0.0f, 1.0f, 1.0f, 1.0f);
+            case Facing.UP:
+                this.setShape(0.0f, 1 - thickness, 0.0f, 1.0f, 1.0f, 1.0f);
                 break;
-            }
-            case 2: {
-                this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.25f);
+            case Facing.NORTH:
+                this.setShape(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, thickness);
                 break;
-            }
-            case 3: {
-                this.setShape(0.0f, 0.0f, 0.75f, 1.0f, 1.0f, 1.0f);
+            case Facing.SOUTH:
+                this.setShape(0.0f, 0.0f, 1 - thickness, 1.0f, 1.0f, 1.0f);
                 break;
-            }
-            case 4: {
-                this.setShape(0.0f, 0.0f, 0.0f, 0.25f, 1.0f, 1.0f);
+            case Facing.WEST:
+                this.setShape(0.0f, 0.0f, 0.0f, thickness, 1.0f, 1.0f);
                 break;
-            }
-            case 5: {
-                this.setShape(0.75f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+            case Facing.EAST:
+                this.setShape(1 - thickness, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
                 break;
-            }
         }
     }
     

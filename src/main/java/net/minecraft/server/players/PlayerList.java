@@ -33,39 +33,33 @@ import java.util.logging.Logger;
 
 public class PlayerList
 {
-    public static Logger logger;
-    public List<ServerPlayer> players;
+    public static Logger logger = Logger.getLogger("Minecraft");
+    public List<ServerPlayer> players = new ArrayList<>();
     private MinecraftServer server;
-    private PlayerChunkMap[] chunkMaps;
+    private PlayerChunkMap[] chunkMaps = new PlayerChunkMap[2];
     private int maxPlayers;
-    private Set<String> bans;
-    private Set<String> ipBans;
-    private Set<String> ops;
-    private Set<String> whitelist;
-    private File banFile;
-    private File ipBanFile;
-    private File opFile;
-    private File whiteListFile;
+    private Set<String> bans = new HashSet<>();
+    private Set<String> ipBans = new HashSet<>();
+    private Set<String> ops = new HashSet<>();
+    private Set<String> whitelist = new HashSet<>();
+    private File banFile, ipBanFile, opFile, whiteListFile;
     private PlayerIO playerIo;
     private boolean doWhiteList;
     
     public PlayerList(final MinecraftServer server) {
-        this.players = new ArrayList<>();
-        this.bans = new HashSet<>();
-        this.ipBans = new HashSet<>();
-        this.ops = new HashSet<>();
-        this.whitelist = new HashSet<>();
-        this.chunkMaps = new PlayerChunkMap[2];
         this.server = server;
         this.banFile = server.getFile("banned-players.txt");
         this.ipBanFile = server.getFile("banned-ips.txt");
         this.opFile = server.getFile("ops.txt");
         this.whiteListFile = server.getFile("white-list.txt");
-        final int int1 = server.settings.getInt("view-distance", 10);
-        this.chunkMaps[0] = new PlayerChunkMap(server, 0, int1);
-        this.chunkMaps[1] = new PlayerChunkMap(server, -1, int1);
+
+        final int viewDistance = server.settings.getInt("view-distance", 10);
+        this.chunkMaps[0] = new PlayerChunkMap(server, 0, viewDistance);
+        this.chunkMaps[1] = new PlayerChunkMap(server, -1, viewDistance);
+
         this.maxPlayers = server.settings.getInt("max-players", 20);
         this.doWhiteList = server.settings.getBoolean("white-list", false);
+
         this.loadBans();
         this.loadIpBans();
         this.loadOps();
@@ -83,8 +77,11 @@ public class PlayerList
     public void changeDimension(final ServerPlayer player) {
         this.chunkMaps[0].remove(player);
         this.chunkMaps[1].remove(player);
+
         this.getChunkMap(player.dimension).add(player);
-        this.server.getLevel(player.dimension).cache.create((int)player.x >> 4, (int)player.z >> 4);
+
+        ServerLevel to = this.server.getLevel(player.dimension);
+        to.cache.create((int)player.x >> 4, (int)player.z >> 4);
     }
     
     public int getMaxRange() {
@@ -101,11 +98,14 @@ public class PlayerList
     
     public void add(final ServerPlayer player) {
         this.players.add(player);
+
+        // Ensure the area the player is spawning in is loaded!
         final ServerLevel level = this.server.getLevel(player.dimension);
         level.cache.create((int)player.x >> 4, (int)player.z >> 4);
-        while (level.getCubes(player, player.bb).size() != 0) {
+        while (!level.getCubes(player, player.bb).isEmpty()) {
             player.setPos(player.x, player.y + 1.0, player.z);
         }
+
         level.addEntity(player);
         this.getChunkMap(player.dimension).add(player);
     }
@@ -116,7 +116,8 @@ public class PlayerList
     
     public void remove(final ServerPlayer player) {
         this.playerIo.save(player);
-        this.server.getLevel(player.dimension).removeEntity(player);
+        ServerLevel level = this.server.getLevel(player.dimension);
+        level.removeEntity(player);
         this.players.remove(player);
         this.getChunkMap(player.dimension).remove(player);
     }
@@ -126,26 +127,32 @@ public class PlayerList
             pendingConnection.disconnect("You are banned from this server!");
             return null;
         }
+
         if (!this.isWhiteListed(userName)) {
             pendingConnection.disconnect("You are not white-listed on this server!");
             return null;
         }
-        final String string = pendingConnection.connection.getRemoteAddress().toString();
-        final String substring = string.substring(string.indexOf("/") + 1);
-        if (this.ipBans.contains(substring.substring(0, substring.indexOf(":")))) {
+
+        String ip = pendingConnection.connection.getRemoteAddress().toString();
+        ip = ip.substring(ip.indexOf("/") + 1);
+        ip = ip.substring(0, ip.indexOf(":"));
+        if (this.ipBans.contains(ip)) {
             pendingConnection.disconnect("Your IP address is banned from this server!");
             return null;
         }
+
         if (this.players.size() >= this.maxPlayers) {
             pendingConnection.disconnect("The server is full!");
             return null;
         }
+
         for (int i = 0; i < this.players.size(); ++i) {
-            final ServerPlayer serverPlayer = this.players.get(i);
-            if (serverPlayer.name.equalsIgnoreCase(userName)) {
-                serverPlayer.connection.disconnect("You logged in from another location");
+            final ServerPlayer player = this.players.get(i);
+            if (player.name.equalsIgnoreCase(userName)) {
+                player.connection.disconnect("You logged in from another location");
             }
         }
+
         return new ServerPlayer(this.server, this.server.getLevel(0), userName, new ServerPlayerGameMode(this.server.getLevel(0)));
     }
     
@@ -155,84 +162,96 @@ public class PlayerList
         this.getChunkMap(serverPlayer.dimension).remove(serverPlayer);
         this.players.remove(serverPlayer);
         this.server.getLevel(serverPlayer.dimension).removeEntityImmediately(serverPlayer);
-        final Pos respawnPosition = serverPlayer.getRespawnPosition();
+
+        final Pos bedPosition = serverPlayer.getRespawnPosition();
         serverPlayer.dimension = targetDimension;
-        final ServerPlayer serverPlayer2 = new ServerPlayer(this.server, this.server.getLevel(serverPlayer.dimension), serverPlayer.name, new ServerPlayerGameMode(this.server.getLevel(serverPlayer.dimension)));
-        serverPlayer2.entityId = serverPlayer.entityId;
-        serverPlayer2.connection = serverPlayer.connection;
+
+        final ServerPlayer player = new ServerPlayer(this.server, this.server.getLevel(serverPlayer.dimension), serverPlayer.name, new ServerPlayerGameMode(this.server.getLevel(serverPlayer.dimension)));
+        player.entityId = serverPlayer.entityId;
+        player.connection = serverPlayer.connection;
+
         final ServerLevel level = this.server.getLevel(serverPlayer.dimension);
-        if (respawnPosition != null) {
-            final Pos checkBedValidRespawnPosition = Player.checkBedValidRespawnPosition(this.server.getLevel(serverPlayer.dimension), respawnPosition);
-            if (checkBedValidRespawnPosition != null) {
-                serverPlayer2.moveTo(checkBedValidRespawnPosition.x + 0.5f, checkBedValidRespawnPosition.y + 0.1f, checkBedValidRespawnPosition.z + 0.5f, 0.0f, 0.0f);
-                serverPlayer2.setRespawnPosition(respawnPosition);
+
+        if (bedPosition != null) {
+            final Pos respawnPosition = Player.checkBedValidRespawnPosition(this.server.getLevel(serverPlayer.dimension), bedPosition);
+            if (respawnPosition != null) {
+                player.moveTo(respawnPosition.x + 0.5f, respawnPosition.y + 0.1f, respawnPosition.z + 0.5f, 0.0f, 0.0f);
+                player.setRespawnPosition(bedPosition);
             }
             else {
-                serverPlayer2.connection.send(new GameEventPacket(GameEventPacket.NO_RESPAWN_BED_AVAILABLE));
+                player.connection.send(new GameEventPacket(GameEventPacket.NO_RESPAWN_BED_AVAILABLE));
             }
         }
-        level.cache.create((int)serverPlayer2.x >> 4, (int)serverPlayer2.z >> 4);
-        while (level.getCubes(serverPlayer2, serverPlayer2.bb).size() != 0) {
-            serverPlayer2.setPos(serverPlayer2.x, serverPlayer2.y + 1.0, serverPlayer2.z);
+
+        // Ensure the area the player is spawning in is loaded!
+        level.cache.create((int)player.x >> 4, (int)player.z >> 4);
+        while (!level.getCubes(player, player.bb).isEmpty()) {
+            player.setPos(player.x, player.y + 1.0, player.z);
         }
-        serverPlayer2.connection.send(new RespawnPacket((byte)serverPlayer2.dimension));
-        serverPlayer2.connection.teleport(serverPlayer2.x, serverPlayer2.y, serverPlayer2.z, serverPlayer2.yRot, serverPlayer2.xRot);
-        this.sendLevelInfo(serverPlayer2, level);
-        this.getChunkMap(serverPlayer2.dimension).add(serverPlayer2);
-        level.addEntity(serverPlayer2);
-        this.players.add(serverPlayer2);
-        serverPlayer2.initMenu();
-        serverPlayer2.animateRespawn();
-        return serverPlayer2;
+
+        player.connection.send(new RespawnPacket((byte)player.dimension));
+        player.connection.teleport(player.x, player.y, player.z, player.yRot, player.xRot);
+
+        this.sendLevelInfo(player, level);
+
+        this.getChunkMap(player.dimension).add(player);
+        level.addEntity(player);
+        this.players.add(player);
+
+        player.initMenu();
+
+        player.animateRespawn();
+        return player;
     }
     
     public void toggleDimension(final ServerPlayer player) {
-        final ServerLevel level = this.server.getLevel(player.dimension);
-        int dimension;
-        if (player.dimension == -1) {
-            dimension = 0;
-        }
-        else {
-            dimension = -1;
-        }
-        player.dimension = dimension;
-        final ServerLevel level2 = this.server.getLevel(player.dimension);
+        final ServerLevel oldLevel = this.server.getLevel(player.dimension);
+
+        int targetDimension;
+        if (player.dimension == -1) targetDimension = 0;
+        else targetDimension = -1;
+
+        player.dimension = targetDimension;
+        final ServerLevel newLevel = this.server.getLevel(player.dimension);
         player.connection.send(new RespawnPacket((byte)player.dimension));
-        level.removeEntityImmediately(player);
+
+        oldLevel.removeEntityImmediately(player);
         player.removed = false;
-        final double x = player.x;
-        final double z = player.z;
-        final double n = 8.0;
-        double x2;
-        double z2;
+
+        double xt = player.x;
+        double zt = player.z;
+        double scale = 8.0;
         if (player.dimension == -1) {
-            x2 = x / n;
-            z2 = z / n;
-            player.moveTo(x2, player.y, z2, player.yRot, player.xRot);
+            xt /= scale;
+            zt /= scale;
+            player.moveTo(xt, player.y, zt, player.yRot, player.xRot);
             if (player.isAlive()) {
-                level.tick(player, false);
+                oldLevel.tick(player, false);
             }
         }
         else {
-            x2 = x * n;
-            z2 = z * n;
-            player.moveTo(x2, player.y, z2, player.yRot, player.xRot);
+            xt *= scale;
+            zt *= scale;
+            player.moveTo(xt, player.y, zt, player.yRot, player.xRot);
             if (player.isAlive()) {
-                level.tick(player, false);
+                oldLevel.tick(player, false);
             }
         }
+
         if (player.isAlive()) {
-            level2.addEntity(player);
-            player.moveTo(x2, player.y, z2, player.yRot, player.xRot);
-            level2.tick(player, false);
-            level2.cache.autoCreate = true;
-            new PortalForcer().force(level2, player);
-            level2.cache.autoCreate = false;
+            newLevel.addEntity(player);
+            player.moveTo(xt, player.y, zt, player.yRot, player.xRot);
+            newLevel.tick(player, false);
+            newLevel.cache.autoCreate = true;
+            new PortalForcer().force(newLevel, player);
+            newLevel.cache.autoCreate = false;
         }
+
         this.changeDimension(player);
         player.connection.teleport(player.x, player.y, player.z, player.yRot, player.xRot);
-        player.setLevel(level2);
-        this.sendLevelInfo(player, level2);
+        player.setLevel(newLevel);
+
+        this.sendLevelInfo(player, newLevel);
         this.sendAllPlayerInfo(player);
     }
     
@@ -248,28 +267,25 @@ public class PlayerList
     
     public void broadcastAll(final Packet packet) {
         for (int i = 0; i < this.players.size(); ++i) {
-            this.players.get(i).connection.send(packet);
+            ServerPlayer player = this.players.get(i);
+            player.connection.send(packet);
         }
     }
     
     public void broadcastAll(final Packet packet, final int dimension) {
         for (int i = 0; i < this.players.size(); ++i) {
-            final ServerPlayer serverPlayer = this.players.get(i);
-            if (serverPlayer.dimension == dimension) {
-                serverPlayer.connection.send(packet);
-            }
+            final ServerPlayer player = this.players.get(i);
+            if (player.dimension == dimension) player.connection.send(packet);
         }
     }
     
     public String getPlayerNames() {
-        String s = "";
+        String msg = "";
         for (int i = 0; i < this.players.size(); ++i) {
-            if (i > 0) {
-                s += ", ";
-            }
-            s += this.players.get(i).name;
+            if (i > 0) msg += ", ";
+            msg += this.players.get(i).name;
         }
-        return s;
+        return msg;
     }
     
     public void ban(final String name) {
@@ -285,29 +301,28 @@ public class PlayerList
     private void loadBans() {
         try {
             this.bans.clear();
-            final BufferedReader bufferedReader = new BufferedReader(new FileReader(this.banFile));
+            final BufferedReader br = new BufferedReader(new FileReader(this.banFile));
             String line;
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
                 this.bans.add(line.trim().toLowerCase());
             }
-            bufferedReader.close();
+            br.close();
         }
-        catch (final Exception obj) {
-            PlayerList.logger.warning("Failed to load ban list: " + obj);
+        catch (final Exception e) {
+            PlayerList.logger.warning("Failed to load ban list: " + e);
         }
     }
     
     private void saveBans() {
         try {
-            final PrintWriter printWriter = new PrintWriter(new FileWriter(this.banFile, false));
-            final Iterator<String> iterator = this.bans.iterator();
-            while (iterator.hasNext()) {
-                printWriter.println(iterator.next());
+            final PrintWriter pw = new PrintWriter(new FileWriter(this.banFile, false));
+            for (String ban : this.bans) {
+                pw.println(ban);
             }
-            printWriter.close();
+            pw.close();
         }
-        catch (final Exception obj) {
-            PlayerList.logger.warning("Failed to save ban list: " + obj);
+        catch (final Exception e) {
+            PlayerList.logger.warning("Failed to save ban list: " + e);
         }
     }
     
@@ -324,29 +339,28 @@ public class PlayerList
     private void loadIpBans() {
         try {
             this.ipBans.clear();
-            final BufferedReader bufferedReader = new BufferedReader(new FileReader(this.ipBanFile));
+            final BufferedReader br = new BufferedReader(new FileReader(this.ipBanFile));
             String line;
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
                 this.ipBans.add(line.trim().toLowerCase());
             }
-            bufferedReader.close();
+            br.close();
         }
-        catch (final Exception obj) {
-            PlayerList.logger.warning("Failed to load ip ban list: " + obj);
+        catch (final Exception e) {
+            PlayerList.logger.warning("Failed to load ip ban list: " + e);
         }
     }
     
     private void saveIpBans() {
         try {
-            final PrintWriter printWriter = new PrintWriter(new FileWriter(this.ipBanFile, false));
-            final Iterator<String> iterator = this.ipBans.iterator();
-            while (iterator.hasNext()) {
-                printWriter.println(iterator.next());
+            final PrintWriter pw = new PrintWriter(new FileWriter(this.ipBanFile, false));
+            for (String ipBan : this.ipBans) {
+                pw.println(ipBan);
             }
-            printWriter.close();
+            pw.close();
         }
-        catch (final Exception obj) {
-            PlayerList.logger.warning("Failed to save ip ban list: " + obj);
+        catch (final Exception e) {
+            PlayerList.logger.warning("Failed to save ip ban list: " + e);
         }
     }
     
@@ -363,58 +377,56 @@ public class PlayerList
     private void loadOps() {
         try {
             this.ops.clear();
-            final BufferedReader bufferedReader = new BufferedReader(new FileReader(this.opFile));
+            final BufferedReader br = new BufferedReader(new FileReader(this.opFile));
             String line;
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
                 this.ops.add(line.trim().toLowerCase());
             }
-            bufferedReader.close();
+            br.close();
         }
-        catch (final Exception obj) {
-            PlayerList.logger.warning("Failed to load ip ban list: " + obj);
+        catch (final Exception e) {
+            PlayerList.logger.warning("Failed to load ip ban list: " + e);
         }
     }
     
     private void saveOps() {
         try {
-            final PrintWriter printWriter = new PrintWriter(new FileWriter(this.opFile, false));
-            final Iterator<String> iterator = this.ops.iterator();
-            while (iterator.hasNext()) {
-                printWriter.println(iterator.next());
+            final PrintWriter pw = new PrintWriter(new FileWriter(this.opFile, false));
+            for (String op : this.ops) {
+                pw.println(op);
             }
-            printWriter.close();
+            pw.close();
         }
-        catch (final Exception obj) {
-            PlayerList.logger.warning("Failed to save ip ban list: " + obj);
+        catch (final Exception e) {
+            PlayerList.logger.warning("Failed to save ip ban list: " + e);
         }
     }
     
     private void loadWhitelist() {
         try {
             this.whitelist.clear();
-            final BufferedReader bufferedReader = new BufferedReader(new FileReader(this.whiteListFile));
+            final BufferedReader br = new BufferedReader(new FileReader(this.whiteListFile));
             String line;
-            while ((line = bufferedReader.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
                 this.whitelist.add(line.trim().toLowerCase());
             }
-            bufferedReader.close();
+            br.close();
         }
-        catch (final Exception obj) {
-            PlayerList.logger.warning("Failed to load white-list: " + obj);
+        catch (final Exception e) {
+            PlayerList.logger.warning("Failed to load white-list: " + e);
         }
     }
     
     private void saveWhitelist() {
         try {
-            final PrintWriter printWriter = new PrintWriter(new FileWriter(this.whiteListFile, false));
-            final Iterator<String> iterator = this.whitelist.iterator();
-            while (iterator.hasNext()) {
-                printWriter.println(iterator.next());
+            final PrintWriter pw = new PrintWriter(new FileWriter(this.whiteListFile, false));
+            for (String string : this.whitelist) {
+                pw.println(string);
             }
-            printWriter.close();
+            pw.close();
         }
-        catch (final Exception obj) {
-            PlayerList.logger.warning("Failed to save white-list: " + obj);
+        catch (final Exception e) {
+            PlayerList.logger.warning("Failed to save white-list: " + e);
         }
     }
     
@@ -429,9 +441,9 @@ public class PlayerList
     
     public ServerPlayer getPlayer(final String name) {
         for (int i = 0; i < this.players.size(); ++i) {
-            final ServerPlayer serverPlayer = this.players.get(i);
-            if (serverPlayer.name.equalsIgnoreCase(name)) {
-                return serverPlayer;
+            final ServerPlayer p = this.players.get(i);
+            if (p.name.equalsIgnoreCase(name)) {
+                return p;
             }
         }
         return null;
@@ -450,26 +462,25 @@ public class PlayerList
     
     public void broadcast(final Player except, final double x, final double y, final double z, final double range, final int dimension, final Packet packet) {
         for (int i = 0; i < this.players.size(); ++i) {
-            final ServerPlayer serverPlayer = this.players.get(i);
-            if (serverPlayer != except) {
-                if (serverPlayer.dimension == dimension) {
-                    final double n = x - serverPlayer.x;
-                    final double n2 = y - serverPlayer.y;
-                    final double n3 = z - serverPlayer.z;
-                    if (n * n + n2 * n2 + n3 * n3 < range * range) {
-                        serverPlayer.connection.send(packet);
-                    }
-                }
+            final ServerPlayer p = this.players.get(i);
+            if (p == except) continue;
+            if (p.dimension != dimension) continue;
+
+            final double xd = x - p.x;
+            final double yd = y - p.y;
+            final double zd = z - p.z;
+            if (xd * xd + yd * yd + zd * zd < range * range) {
+                p.connection.send(packet);
             }
         }
     }
     
     public void broadcastToAllOps(final String message) {
-        final ChatPacket packet = new ChatPacket(message);
+        final ChatPacket chatPacket = new ChatPacket(message);
         for (int i = 0; i < this.players.size(); ++i) {
-            final ServerPlayer serverPlayer = this.players.get(i);
-            if (this.isOp(serverPlayer.name)) {
-                serverPlayer.connection.send(packet);
+            final ServerPlayer p = this.players.get(i);
+            if (this.isOp(p.name)) {
+                p.connection.send(chatPacket);
             }
         }
     }
@@ -485,7 +496,7 @@ public class PlayerList
     
     public void saveAll() {
         for (int i = 0; i < this.players.size(); ++i) {
-            this.playerIo.save((Player)this.players.get(i));
+            this.playerIo.save(this.players.get(i));
         }
     }
     
@@ -521,8 +532,5 @@ public class PlayerList
         player.refreshContainer(player.inventoryMenu);
         player.resetSentInfo();
     }
-    
-    static {
-        PlayerList.logger = Logger.getLogger("Minecraft");
-    }
+
 }

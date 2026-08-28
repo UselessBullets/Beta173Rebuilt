@@ -169,7 +169,7 @@ public class PlayerChunkMap
                 }
             }
         }
-        
+
         player.lastMoveX = player.x;
         player.lastMoveZ = player.z;
     }

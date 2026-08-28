@@ -22,6 +22,7 @@ import net.minecraft.world.level.chunk.ChunkSource;
 
 public class ServerChunkCache implements ChunkSource
 {
+    private static final int MAX_SAVES = 24;
     private Set<Integer> toDrop = new HashSet<>();
     private LevelChunk emptyChunk;
     private ChunkSource source;
@@ -55,37 +56,28 @@ public class ServerChunkCache implements ChunkSource
     public LevelChunk create(final int x, final int z) {
         final int hashCode = ChunkPos.hashCode(x, z);
         this.toDrop.remove(hashCode);
-        LevelChunk levelChunk = this.cache.get(hashCode);
-        if (levelChunk == null) {
-            levelChunk = this.load(x, z);
-            if (levelChunk == null) {
-                if (this.source == null) {
-                    levelChunk = this.emptyChunk;
-                }
-                else {
-                    levelChunk = this.source.getChunk(x, z);
-                }
+        LevelChunk chunk = this.cache.get(hashCode);
+        if (chunk == null) {
+            chunk = this.load(x, z);
+            if (chunk == null) {
+                if (this.source == null) chunk = this.emptyChunk;
+                else chunk = this.source.getChunk(x, z);
             }
-            this.cache.put(hashCode, levelChunk);
-            this.loadedChunkList.add(levelChunk);
-            if (levelChunk != null) {
-                levelChunk.lightLava();
-                levelChunk.load();
+
+            this.cache.put(hashCode, chunk);
+            this.loadedChunkList.add(chunk);
+
+            if (chunk != null) {
+                chunk.lightLava();
+                chunk.load();
             }
-            if (!levelChunk.terrainPopulated && this.hasChunk(x + 1, z + 1) && this.hasChunk(x, z + 1) && this.hasChunk(x + 1, z)) {
-                this.postProcess(this, x, z);
-            }
-            if (this.hasChunk(x - 1, z) && !this.getChunk(x - 1, z).terrainPopulated && this.hasChunk(x - 1, z + 1) && this.hasChunk(x, z + 1) && this.hasChunk(x - 1, z)) {
-                this.postProcess(this, x - 1, z);
-            }
-            if (this.hasChunk(x, z - 1) && !this.getChunk(x, z - 1).terrainPopulated && this.hasChunk(x + 1, z - 1) && this.hasChunk(x, z - 1) && this.hasChunk(x + 1, z)) {
-                this.postProcess(this, x, z - 1);
-            }
-            if (this.hasChunk(x - 1, z - 1) && !this.getChunk(x - 1, z - 1).terrainPopulated && this.hasChunk(x - 1, z - 1) && this.hasChunk(x, z - 1) && this.hasChunk(x - 1, z)) {
-                this.postProcess(this, x - 1, z - 1);
-            }
+
+            if (!chunk.terrainPopulated && this.hasChunk(x + 1, z + 1) && this.hasChunk(x, z + 1) && this.hasChunk(x + 1, z)) this.postProcess(this, x, z);
+            if (this.hasChunk(x - 1, z) && !this.getChunk(x - 1, z).terrainPopulated && this.hasChunk(x - 1, z + 1) && this.hasChunk(x, z + 1) && this.hasChunk(x - 1, z)) this.postProcess(this, x - 1, z);
+            if (this.hasChunk(x, z - 1) && !this.getChunk(x, z - 1).terrainPopulated && this.hasChunk(x + 1, z - 1) && this.hasChunk(x, z - 1) && this.hasChunk(x + 1, z)) this.postProcess(this, x, z - 1);
+            if (this.hasChunk(x - 1, z - 1) && !this.getChunk(x - 1, z - 1).terrainPopulated && this.hasChunk(x - 1, z - 1) && this.hasChunk(x, z - 1) && this.hasChunk(x - 1, z)) this.postProcess(this, x - 1, z - 1);
         }
-        return levelChunk;
+        return chunk;
     }
     
     public LevelChunk getChunk(final int x, final int z) {
@@ -99,44 +91,43 @@ public class ServerChunkCache implements ChunkSource
     }
     
     private LevelChunk load(final int x, final int z) {
-        if (this.storage == null) {
-            return null;
-        }
+        if (this.storage == null) return null;
+
         try {
-            final LevelChunk load = this.storage.load(this.level, x, z);
-            if (load != null) {
-                load.lastSaveTime = this.level.getTime();
+            final LevelChunk levelChunk = this.storage.load(this.level, x, z);
+
+            if (levelChunk != null) {
+                levelChunk.lastSaveTime = this.level.getTime();
             }
-            return load;
+
+            return levelChunk;
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
     
     private void saveEntities(final LevelChunk levelChunk) {
-        if (this.storage == null) {
-            return;
-        }
+        if (this.storage == null) return;
+
         try {
             this.storage.saveEntities(this.level, levelChunk);
         }
-        catch (final Exception ex) {
-            ex.printStackTrace();
+        catch (final Exception e) {
+            e.printStackTrace();
         }
     }
     
     private void save(final LevelChunk levelChunk) {
-        if (this.storage == null) {
-            return;
-        }
+        if (this.storage == null) return;
+
         try {
             levelChunk.lastSaveTime = this.level.getTime();
             this.storage.save(this.level, levelChunk);
         }
-        catch (final IOException ex) {
-            ex.printStackTrace();
+        catch (final IOException e) {
+            e.printStackTrace();
         }
     }
     
@@ -152,26 +143,25 @@ public class ServerChunkCache implements ChunkSource
     }
     
     public boolean save(final boolean force, final ProgressListener progressListener) {
-        int n = 0;
+        int saves = 0;
         for (int i = 0; i < this.loadedChunkList.size(); ++i) {
-            final LevelChunk levelChunk = this.loadedChunkList.get(i);
-            if (force && !levelChunk.dontSave) {
-                this.saveEntities(levelChunk);
-            }
-            if (levelChunk.shouldSave(force)) {
-                this.save(levelChunk);
-                levelChunk.unsaved = false;
-                if (++n == 24 && !force) {
+            final LevelChunk chunk = this.loadedChunkList.get(i);
+            if (force && !chunk.dontSave) this.saveEntities(chunk);
+
+            if (chunk.shouldSave(force)) {
+                this.save(chunk);
+                chunk.unsaved = false;
+                if (++saves == MAX_SAVES && !force) {
                     return false;
                 }
             }
         }
+
         if (force) {
-            if (this.storage == null) {
-                return true;
-            }
+            if (this.storage == null) return true;
             this.storage.flush();
         }
+
         return true;
     }
     
@@ -179,20 +169,20 @@ public class ServerChunkCache implements ChunkSource
         if (!this.level.noSave) {
             for (int i = 0; i < 100; ++i) {
                 if (!this.toDrop.isEmpty()) {
-                    final Integer n = this.toDrop.iterator().next();
-                    final LevelChunk levelChunk = this.cache.get(n);
-                    levelChunk.unload();
-                    this.save(levelChunk);
-                    this.saveEntities(levelChunk);
-                    this.toDrop.remove(n);
-                    this.cache.remove(n);
-                    this.loadedChunkList.remove(levelChunk);
+                    final Integer hash = this.toDrop.iterator().next();
+                    final LevelChunk chunk = this.cache.get(hash);
+                    chunk.unload();
+                    this.save(chunk);
+                    this.saveEntities(chunk);
+
+                    this.toDrop.remove(hash);
+                    this.cache.remove(hash);
+                    this.loadedChunkList.remove(chunk);
                 }
             }
-            if (this.storage != null) {
-                this.storage.tick();
-            }
+            if (this.storage != null) this.storage.tick();
         }
+
         return this.source.tick();
     }
 

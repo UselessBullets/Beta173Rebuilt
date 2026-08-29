@@ -4,14 +4,12 @@
 
 package net.minecraft.stats;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.FileWriter;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
+
 import net.minecraft.client.User;
 
-import java.io.File;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Map;
 
 // Useless - Theres very little on the local variable names and method structures of this class, alot of it will be guesses
@@ -39,7 +37,7 @@ public class StatsSyncher
         this.unsentFileTmp = new File(dir, "stats_" + user.name.toLowerCase() + "_unsent.tmp");
         this.lastServerFileTmp = new File(dir, "stats_" + user.name.toLowerCase() + ".tmp");
 
-        // Useless - appears to be a converstion step from a time where user names in stats files were case sensitive
+        // Useless - appears to be a conversion step from a time when usernames in stats files were case-sensitive
         if (!user.name.toLowerCase().equals(user.name)) {
             this.attemptRename(dir, "stats_" + user.name + "_unsent.dat", this.unsentFile);
             this.attemptRename(dir, "stats_" + user.name + ".dat", this.lastServerFile);
@@ -86,8 +84,42 @@ public class StatsSyncher
         return null;
     }
 
-    private void doSend(Map<Stat, Integer> stats) {
-        // Useless - Known to exist from LCE StatsSyncher header file, but method contents are unknown
+    // Useless - Method is known to exist from StatsSyncher header file, Method contents are from the 1.3 prerelease, internal variable names are guesses
+    private void doSend(Map<Stat, Integer> stats) throws IOException {
+        String statsUrl = "http://stats.minecraft.net/?name=" + this.user.name + "&sessionid=" + this.user.sessionId;
+        HttpURLConnection httpConnection = (HttpURLConnection)new URL(statsUrl).openConnection();
+        httpConnection.setRequestMethod("POST");
+        httpConnection.setDoInput(true);
+        httpConnection.setDoOutput(true);
+        BufferedReader br = null;
+        PrintWriter pw = null;
+
+        try {
+            pw = new PrintWriter(new OutputStreamWriter(httpConnection.getOutputStream()));
+            pw.print(StatsCounter.saveStatsToString(this.user.name, this.user.sessionId, stats));
+            pw.flush();
+            br = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
+            int response = httpConnection.getResponseCode();
+            if (response != HttpURLConnection.HTTP_OK) {
+                throw new IOException("Bad response code saving stats");
+            }
+
+            String statsString = "";
+
+            for (String line = ""; line != null; line = br.readLine()) {
+                statsString = statsString + line;
+            }
+            // Useless - Presumably the server stats retrieved from the website would've been used here in a theoretical line like this
+//            StatsCounter.loadStatsFromString(statsString);
+        } finally {
+            if (pw != null) {
+                pw.close();
+            }
+
+            if (br != null) {
+                br.close();
+            }
+        }
     }
     
     private void doSave(final Map<Stat, Integer> stats, final File file, final File tmp, final File old) throws IOException {
@@ -100,9 +132,28 @@ public class StatsSyncher
         tmp.renameTo(file);
     }
 
-    protected Map<Stat, Integer> doGetStats() {
-        // Useless - Known to exist from LCE StatsSyncher header file, but method contents are unknown
-        throw new UnsupportedOperationException();
+    // Useless - Method is known to exist from StatsSyncher header file, Method contents are from the 1.3 prerelease, internal variable names are guesses
+    protected Map<Stat, Integer> doGetStats() throws IOException {
+        String statsUrl = "http://stats.minecraft.net/?name=" + this.user.name + "&sessionid=" + this.user.sessionId;
+        HttpURLConnection httpConnection = (HttpURLConnection)new URL(statsUrl).openConnection();
+        httpConnection.setDoInput(true);
+        httpConnection.setDoOutput(false);
+        BufferedReader br = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
+
+        Map<Stat, Integer> stats;
+        try {
+            String statsString = "";
+
+            for (String line = ""; line != null; line = br.readLine()) {
+                statsString = statsString + line;
+            }
+
+            stats = StatsCounter.loadStatsFromString(statsString);
+        } finally {
+            br.close();
+        }
+
+        return stats;
     }
     
     public void getStatsFromServer() {
@@ -119,8 +170,8 @@ public class StatsSyncher
                     this.serverStats = loadStatsFromDisk(this.lastServerFile, this.lastServerFileTmp, this.lastServerFileOld);
                 }
             }
-            catch (final Exception ex) {
-                ex.printStackTrace();
+            catch (final Exception e) {
+                e.printStackTrace();
             }
             finally {
                 this.busy = false;
@@ -146,12 +197,47 @@ public class StatsSyncher
         }).start();
     }
 
+    // Useless - Method is known to exist from StatsSyncher header file, Method contents are from the 1.3 prerelease, internal variable names are guesses
     public void sendUnsent(final Map<Stat, Integer> stats, final Map<Stat, Integer> fullStats) {
-        // Useless - Known to exist from LCE StatsSyncher header file, but method contents are unknown
+        if (this.busy) {
+            throw new IllegalStateException("Can't send stats while StatsSyncher is busy!");
+        } else {
+            this.noSendIn = SEND_INTERVAL;
+            this.busy = true;
+            new Thread(() -> {
+                try {
+                    StatsSyncher.this.doSend(stats);
+                    StatsSyncher.this.doSave(fullStats, StatsSyncher.this.lastServerFile, StatsSyncher.this.lastServerFileTmp, StatsSyncher.this.lastServerFileOld);
+                } catch (Exception e) {
+                    StatsSyncher.this.failedSentStats = stats;
+                    e.printStackTrace();
+                } finally {
+                    StatsSyncher.this.busy = false;
+                }
+            }).start();
+        }
     }
 
+    // Useless - Method is known to exist from StatsSyncher header file, Method contents are from the 1.3 prerelease, internal variable names are guesses
     public void forceSendUnsent(final Map<Stat, Integer> stats) {
-        // Useless - Known to exist from LCE StatsSyncher header file, but method contents are unknown
+        int decaseconds = 30;
+        while (this.busy && --decaseconds > 0) {
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        this.busy = true;
+        try {
+            this.doSend(stats);
+        } catch (Exception e) {
+            this.failedSentStats = stats;
+            this.noSaveIn = 0;
+            e.printStackTrace();
+        } finally {
+            this.busy = false;
+        }
     }
     
     public void forceSaveUnsent(final Map<Stat, Integer> stats) {

@@ -58,10 +58,10 @@ tasks.register("runServer", JavaExec::class.java, {
 })
 
 tasks.register("runClient", JavaExec::class.java, {
-    dependsOn("copyNatives", "downloadAssets")
+    dependsOn("copyNatives"/*, "downloadAssets"*/)
     mainClass.set("net.minecraft.client.Minecraft")
     classpath = sourceSets["main"].runtimeClasspath
-//    args = listOf("-Dhttp.proxyHost=betacraft.ee", "-Dhttp.proxyPort=11705", "-Djava.util.Arrays.useLegacyMergeSort=true");
+    jvmArgs = listOf("-Dhttp.proxyHost=betacraft.ee", "-Dhttp.proxyPort=11705", "-Djava.util.Arrays.useLegacyMergeSort=true") // Betacraft proxy for skinfix
 
     systemProperty("java.library.path", layout.buildDirectory.dir("natives").get().asFile.absolutePath)
 })

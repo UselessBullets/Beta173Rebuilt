@@ -23,14 +23,15 @@ repositories {
     maven("https://libraries.minecraft.net/")
 }
 
+val clientInclude: Configuration by configurations.creating
 val serverInclude: Configuration by configurations.creating
 
 dependencies {
-    implementation("com.paulscode:soundsystem:20120107") // needs to be included in client jar
-    implementation("com.paulscode:librarylwjglopenal:20100824") // needs to be included in client jar
-    implementation("com.paulscode:codecwav:20101023") // needs to be included in client jar
+    implementation("com.paulscode:soundsystem:20120107")?.let { clientInclude(it) }
+    implementation("com.paulscode:librarylwjglopenal:20100824")?.let { clientInclude(it) } // TODO this include copies more than it needs to, exclusion policies need to be setup
+    implementation("com.paulscode:codecwav:20101023")?.let { clientInclude(it) }
 //    implementation("com.paulscode:codecjorbis:20101023") // Is copied into project since b173 uses a very slightly modified version to faciliate CodecMus
-    implementation("net.sourceforge.argo:argo:3.4") // needs to be included in client jar, newer than what would've been in b173, but the older version on maven don't work properly, think b173 used 2.10 or 2.11 but thats not on maven
+    implementation("net.sourceforge.argo:argo:3.4")?.let { clientInclude(it) } // newer than what would've been in b173, but the older version on maven don't work properly, think b173 used 2.10 or 2.11 but thats not on maven
 
     val lwjglVer = "2.9.4-nightly-20150209"
     implementation("org.lwjgl.lwjgl:lwjgl:$lwjglVer")
@@ -68,6 +69,8 @@ tasks.register("runServer", JavaExec::class.java, {
 tasks.register("buildServer", ShadowJar::class) {
     description = "Builds game server jar artifact"
 
+    configurations = listOf(serverInclude)
+
     from(sourceSets.main.get().output.classesDirs)
     from(sourceSets.main.get().resources)
 
@@ -90,6 +93,8 @@ tasks.register("runClient", JavaExec::class.java, {
 
 tasks.register("buildClient", ShadowJar::class) {
     description = "Builds game client jar artifact"
+
+    configurations = listOf(clientInclude)
 
     from(sourceSets.main.get().output.classesDirs)
     from(sourceSets.main.get().resources)

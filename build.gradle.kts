@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import groovy.json.JsonSlurper
 import org.gradle.internal.os.OperatingSystem.*
 import java.net.URL
@@ -15,12 +16,14 @@ plugins {
 }
 
 group = "net.minecraft"
-version = "1.0-SNAPSHOT"
+version = "b1.7.3"
 
 repositories {
     mavenCentral()
     maven("https://libraries.minecraft.net/")
 }
+
+val serverInclude: Configuration by configurations.creating
 
 dependencies {
     implementation("com.paulscode:soundsystem:20120107") // needs to be included in client jar
@@ -40,6 +43,8 @@ dependencies {
 }
 
 tasks.register("copyNatives", Copy::class.java, {
+    description = "Copies native libraries to output directory so they can be loaded on run"
+
     configurations.runtimeClasspath.get()
         .filter { it.extension == "jar" && it.name.contains("platform") }
         .forEach {
@@ -50,24 +55,55 @@ tasks.register("copyNatives", Copy::class.java, {
 })
 
 tasks.register("runServer", JavaExec::class.java, {
+    description = "Builds and runs game server"
+
     val mpDir = File(workingDir, "mp")
     mpDir.mkdir()
     workingDir = mpDir
     mainClass.set("net.minecraft.server.MinecraftServer")
     classpath = sourceSets["main"].runtimeClasspath
+    jvmArgs = listOf("-Dhttp.proxyHost=betacraft.ee", "-Dhttp.proxyPort=11705", "-Djava.util.Arrays.useLegacyMergeSort=true") // Betacraft proxy for online fixes
 })
 
+tasks.register("buildServer", ShadowJar::class) {
+    description = "Builds game server jar artifact"
+
+    from(sourceSets.main.get().output.classesDirs)
+    from(sourceSets.main.get().resources)
+
+    archiveFileName = "$version.jar"
+    manifest {
+        attributes["Main-Class"] = "net.minecraft.server.MinecraftServer"
+    }
+}
+
 tasks.register("runClient", JavaExec::class.java, {
+    description = "Builds and runs game client"
+
     dependsOn("copyNatives"/*, "downloadAssets"*/)
     mainClass.set("net.minecraft.client.Minecraft")
     classpath = sourceSets["main"].runtimeClasspath
-    jvmArgs = listOf("-Dhttp.proxyHost=betacraft.ee", "-Dhttp.proxyPort=11705", "-Djava.util.Arrays.useLegacyMergeSort=true") // Betacraft proxy for skinfix
+    jvmArgs = listOf("-Dhttp.proxyHost=betacraft.ee", "-Dhttp.proxyPort=11705", "-Djava.util.Arrays.useLegacyMergeSort=true") // Betacraft proxy for online fixes
 
     systemProperty("java.library.path", layout.buildDirectory.dir("natives").get().asFile.absolutePath)
 })
 
+tasks.register("buildClient", ShadowJar::class) {
+    description = "Builds game client jar artifact"
+
+    from(sourceSets.main.get().output.classesDirs)
+    from(sourceSets.main.get().resources)
+
+    archiveFileName = "client.jar"
+    manifest {
+        attributes["Main-Class"] = "net.minecraft.client.Minecraft"
+    }
+}
+
+
 tasks.register("downloadAssets") {
     description = "Download's assets from Mojang's resource API"
+
     val workingDir = getWorkingDirectory("minecraft")
     downloadResourcesToDir("https://piston-meta.mojang.com/v1/packages/3d8e55480977e32acd9844e545177e69a52f594b/pre-1.6.json", File(workingDir, "resources"))
 

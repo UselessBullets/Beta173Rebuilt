@@ -4,6 +4,7 @@
 
 package net.minecraft.world.level.pathfinder;
 
+// Useless - Binary heap implementation that was copied and adapted from here https://jvm-gaming.org/t/a/34822/17
 public class BinaryHeap
 {
     private Node[] heap;

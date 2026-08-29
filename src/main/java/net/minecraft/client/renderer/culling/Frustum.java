@@ -9,7 +9,9 @@ import net.minecraft.client.MemoryTracker;
 import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
-// Useless - This class is apparently a java-ification of https://github.com/gametutorials/tutorials/blob/master/OpenGL/Frustum%20Culling/Frustum.cpp possibly more properly from https://www.markmorley.com/opengl/frustumculling.html
+// Useless - This class is apparently a java-ification of https://github.com/gametutorials/tutorials/blob/master/OpenGL/Frustum%20Culling/Frustum.cpp
+// and https://web.archive.org/web/20050116073004if_/http://www.gametutorials.com/download/OpenGL/FrustumCulling_OGL.zip
+// possibly also sourceable from https://www.markmorley.com/opengl/frustumculling.html
 public class Frustum extends FrustrumData
 {
     private static final Frustum frustum = new Frustum();

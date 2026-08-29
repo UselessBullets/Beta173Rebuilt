@@ -4,11 +4,11 @@
 
 package util;
 
-// Useless - Limited information of internal class info, besides a couple constants from b1.2 leaks
+// Useless - Specialized version of https://github.com/openjdk/jdk6/blob/master/jdk/src/share/classes/java/util/HashMap.java using int primitive keys
 public class IntHashMap<V>
 {
     private static final int DEFAULT_INITIAL_CAPACITY = 16;
-    private static final int MAXIMUM_CAPACITY = 1073741824;
+    private static final int MAXIMUM_CAPACITY = 1 << 30;
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;
     private transient Entry<V>[] table = new Entry[DEFAULT_INITIAL_CAPACITY];
     private transient int size;

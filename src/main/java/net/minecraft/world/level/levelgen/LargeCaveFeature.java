@@ -92,7 +92,7 @@ public class LargeCaveFeature extends LargeFeature
             if (x0 < 0) x0 = 0;
             if (x1 > 16) x1 = 16;
 
-            if (y0 < 1) y0 = 1;
+            if (y0 < Level.MIN_HEIGHT + 1) y0 = Level.MIN_HEIGHT + 1;
             if (y1 > Level.MAX_HEIGHT - 8) y1 = Level.MAX_HEIGHT - 8;
 
             if (z0 < 0) z0 = 0;
@@ -103,7 +103,7 @@ public class LargeCaveFeature extends LargeFeature
                 for (int zz = z0; !detectedWater && zz < z1; ++zz) {
                     for (int yy = y1 + 1; !detectedWater && yy >= y0 - 1; --yy) {
                         final int p = (xx * 16 + zz) * Level.MAX_HEIGHT + yy;
-                        if (yy < 0 || yy >= Level.MAX_HEIGHT) continue;
+                        if (yy < Level.MIN_HEIGHT || yy >= Level.MAX_HEIGHT) continue;
                         if (blocks[p] == Tile.water.id || blocks[p] == Tile.calmWater.id) {
                             detectedWater = true;
                         }

@@ -1,6 +1,6 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import groovy.json.JsonSlurper
 import org.gradle.internal.os.OperatingSystem.*
+import java.net.URI
 import java.net.URL
 import java.security.MessageDigest
 import java.util.concurrent.Executors
@@ -11,8 +11,6 @@ import kotlin.io.path.fileSize
 
 plugins {
     id("java")
-    id("com.gradleup.shadow") version ("8.3.5")
-    id("org.cyclonedx.bom") version ("2.3.1")
 }
 
 group = "net.minecraft"
@@ -28,7 +26,7 @@ val serverInclude: Configuration by configurations.creating
 
 dependencies {
     implementation("com.paulscode:soundsystem:20120107")?.let { clientInclude(it) }
-    implementation("com.paulscode:librarylwjglopenal:20100824")?.let { clientInclude(it) } // TODO this include copies more than it needs to, exclusion policies need to be setup
+    implementation("com.paulscode:librarylwjglopenal:20100824")?.let { clientInclude(it) }
     implementation("com.paulscode:codecwav:20101023")?.let { clientInclude(it) }
 //    implementation("com.paulscode:codecjorbis:20101023") // Is copied into project since b173 uses a very slightly modified version to faciliate CodecMus
     implementation("net.sourceforge.argo:argo:3.4")?.let { clientInclude(it) } // newer than what would've been in b173, but the older version on maven don't work properly, think b173 used 2.10 or 2.11 but thats not on maven
@@ -66,13 +64,24 @@ tasks.register("runServer", JavaExec::class.java, {
     jvmArgs = listOf("-Dhttp.proxyHost=betacraft.ee", "-Dhttp.proxyPort=11705", "-Djava.util.Arrays.useLegacyMergeSort=true") // Betacraft proxy for online fixes
 })
 
-tasks.register("buildServer", ShadowJar::class) {
+tasks.register("buildServer", Jar::class) {
     description = "Builds game server jar artifact"
-
-    configurations = listOf(serverInclude)
 
     from(sourceSets.main.get().output.classesDirs)
     from(sourceSets.main.get().resources)
+    serverInclude.forEach {
+        if (!it.isDirectory) {
+            from(zipTree(it))
+        }
+    }
+
+    // Exclude some client only resources
+    exclude(
+        "net/minecraft/client",
+        "paulscode",
+        "com/jcraft",
+        "**/*.png",
+    )
 
     archiveFileName = "$version.jar"
     manifest {
@@ -91,13 +100,27 @@ tasks.register("runClient", JavaExec::class.java, {
     systemProperty("java.library.path", layout.buildDirectory.dir("natives").get().asFile.absolutePath)
 })
 
-tasks.register("buildClient", ShadowJar::class) {
+tasks.register("buildClient", Jar::class) {
     description = "Builds game client jar artifact"
-
-    configurations = listOf(clientInclude)
 
     from(sourceSets.main.get().output.classesDirs)
     from(sourceSets.main.get().resources)
+    clientInclude.forEach {
+        if (!it.isDirectory) {
+            from(zipTree(it))
+        }
+    }
+
+    // Exclude native stuffs that are externally loaded for client, and also server only code
+    exclude(
+        "net/minecraft/server/**",
+        "org/lwjgl/**",
+        "net/java/**",
+        "**/*.so",
+        "**/*.dll",
+        "**/*.jnilib",
+        "**/*.dylib",
+        )
 
     archiveFileName = "client.jar"
     manifest {
@@ -131,7 +154,7 @@ fun getWorkingDirectory(applicationName: String?): File {
 }
 
 fun downloadResourcesToDir(manifestLocation: String, destination: File) {
-    val assets: Map<*, *> = JsonSlurper().parse(URL(manifestLocation)) as Map<*, *>
+    val assets: Map<*, *> = JsonSlurper().parse(URI(manifestLocation).toURL()) as Map<*, *>
 
     val objects = assets["objects"] as? Map<*, *>
     if (objects != null) {
@@ -194,7 +217,7 @@ fun downloadResource(key: String, hash: String, size: Number?, destination: File
     }
     assetFile.parentFile.mkdirs()
     assetFile.createNewFile()
-    val bytes = URL("https://resources.download.minecraft.net/${hash.substring(0, 2)}/$hash").openStream().readBytes()
+    val bytes = URI("https://resources.download.minecraft.net/${hash.substring(0, 2)}/$hash").toURL().openStream().readBytes()
     assetFile.writeBytes(bytes)
     val fHash = sha1(bytes)
     logger.info("Downloaded $key to file:///${assetFile.absolutePath}")

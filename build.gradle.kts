@@ -1,5 +1,12 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.kotlin.dsl.register
+import groovy.json.JsonSlurper
+import org.gradle.internal.os.OperatingSystem.*
+import java.net.URL
+import java.security.MessageDigest
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
+import kotlin.io.path.fileSize
+
 
 plugins {
     id("java")
@@ -51,13 +58,126 @@ tasks.register("runServer", JavaExec::class.java, {
 })
 
 tasks.register("runClient", JavaExec::class.java, {
-    dependsOn(tasks["copyNatives"])
+    dependsOn("copyNatives", "downloadAssets")
     mainClass.set("net.minecraft.client.Minecraft")
     classpath = sourceSets["main"].runtimeClasspath
 //    args = listOf("-Dhttp.proxyHost=betacraft.ee", "-Dhttp.proxyPort=11705", "-Djava.util.Arrays.useLegacyMergeSort=true");
 
     systemProperty("java.library.path", layout.buildDirectory.dir("natives").get().asFile.absolutePath)
 })
+
+tasks.register("downloadAssets") {
+    description = "Download's assets from Mojang's resource API"
+    val workingDir = getWorkingDirectory("minecraft")
+    downloadResourcesToDir("https://piston-meta.mojang.com/v1/packages/3d8e55480977e32acd9844e545177e69a52f594b/pre-1.6.json", File(workingDir, "resources"))
+
+}
+
+fun getWorkingDirectory(applicationName: String?): File {
+    val userHome: String? = System.getProperty("user.home", ".")
+    val workingDirectory: File = when (current()) {
+        LINUX, SOLARIS -> File(userHome, ".$applicationName/")
+        WINDOWS -> {
+            val applicationData: String? = System.getenv("APPDATA")
+            if (applicationData != null) File(applicationData, ".$applicationName/")
+            else File(userHome, ".$applicationName/")
+        }
+        MAC_OS -> File(userHome, "Library/Application Support/$applicationName")
+        else -> File(userHome, "$applicationName/")
+    }
+    if (!workingDirectory.exists() && !workingDirectory.mkdirs()) throw RuntimeException("The working directory could not be created: $workingDirectory")
+    return workingDirectory
+}
+
+fun downloadResourcesToDir(manifestLocation: String, destination: File) {
+    val assets: Map<*, *> = JsonSlurper().parse(URL(manifestLocation)) as Map<*, *>
+
+    val objects = assets["objects"] as? Map<*, *>
+    if (objects != null) {
+        logger.lifecycle("Downloading Assets")
+        val pool = Executors.newWorkStealingPool()
+        val fileTotal = objects.size
+        val fileCount = AtomicInteger(0);
+        var sizeTotal = 0L
+        val sizeCount = AtomicLong(0)
+
+        for ((key, value) in objects) {
+            if (key !is String) {
+                logger.error("Asset Object Key '$key' is not a string!")
+                continue
+            }
+            val obj = value as? Map<*, *>
+            if (obj == null) {
+                logger.error("Asset Object '$key' cannot be read!")
+                continue
+            }
+            val hash = obj["hash"] as? String
+            if (hash == null) {
+                logger.error("Asset Object '$key' hash not found!")
+                continue
+            }
+            val size = obj["size"] as? Number
+            if (size != null) sizeTotal += size.toLong();
+
+
+            pool.submit {
+                downloadResource(key, hash, size, destination)
+                fileCount.addAndGet(1)
+                if (size != null) sizeCount.addAndGet(size.toLong())
+            }
+        }
+        pool.shutdown()
+        while (!pool.isTerminated) {
+            val c = fileCount.get()
+            val s = sizeCount.get()
+            logger.lifecycle("Downloaded $c/$fileTotal files (%.3f / %.3f MB)".format((s / 1024.0 / 1024.0), sizeTotal / 1024.0 / 1024.0))
+            Thread.sleep(1000L)
+        }
+        pool.shutdownNow()
+        logger.lifecycle("Downloaded all $fileTotal assets")
+    } else {
+        logger.error("Failed to read Assets manifest!")
+    }
+
+}
+fun downloadResource(key: String, hash: String, size: Number?, destination: File): Boolean {
+    val assetFile = File(destination, key)
+    if (assetFile.exists()) {
+        // File the file exists and matches the expected size and hash already then skip downloading
+        if (assetFile.isFile && (size == null || assetFile.toPath().fileSize() == size.toLong()) && sha1(assetFile.readBytes()) == hash) {
+            logger.info("File $key up to date, skipping!")
+            return false
+        }
+        // Otherwise delete out of date file
+        assetFile.delete()
+    }
+    assetFile.parentFile.mkdirs()
+    assetFile.createNewFile()
+    val bytes = URL("https://resources.download.minecraft.net/${hash.substring(0, 2)}/$hash").openStream().readBytes()
+    assetFile.writeBytes(bytes)
+    val fHash = sha1(bytes)
+    logger.info("Downloaded $key to file:///${assetFile.absolutePath}")
+    if (size != null) {
+        val fSize = assetFile.toPath().fileSize()
+        if (fSize != size.toLong()) {
+            logger.error("File $key at file:///${assetFile.absolutePath} was expected to be '$size' bytes but was actually '$fSize'!")
+        }
+    } else if (hash != fHash) {
+        logger.error("File $key at file:///${assetFile.absolutePath} was expected to have sha1 hash of '$hash'  but was actually '$fHash'!")
+    }
+    return true
+}
+
+fun sha1(input: ByteArray): String {
+    // Create a SHA-1 MessageDigest instance
+    val digest = MessageDigest.getInstance("SHA-1")
+
+    // Update the digest with the input
+    digest.update(input)
+
+    // Generate the hash and convert it to a hexadecimal string
+    return digest.digest().joinToString("") { "%02x".format(it) }
+}
 
 tasks.withType(JavaCompile::class.java) {
     options.isIncremental = false
@@ -69,6 +189,6 @@ tasks.withType(JavaCompile::class.java) {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility =  JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }

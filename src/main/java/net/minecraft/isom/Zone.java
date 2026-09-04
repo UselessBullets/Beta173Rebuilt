@@ -1,38 +1,39 @@
-// 
-// Decompiled by Procyon v0.6.0
-// 
-
 package net.minecraft.isom;
 
-import net.minecraft.world.level.Level;
 import java.awt.image.BufferedImage;
 
-public class Zone
-{
+import net.minecraft.world.level.Level;
+
+// Useless - Isom package was pulled straight from the Beta 1.9-pre6 jar as it had source for this package, thanks @genericpnpmonit0r for telling me this
+public class Zone {
+    public static final int CHUNK_SIZE = 16;
+
     public BufferedImage image;
+
     public Level level;
-    public int x;
-    public int y;
+    public int x, y;
     public boolean rendered = false;
     public boolean noContent = false;
+
     public int lastVisible = 0;
+
     public boolean addedToRenderQueue = false;
-    
-    public Zone(final Level level, final int x, final int y) {
+
+    public Zone(Level level, int x, int y) {
         this.level = level;
-        this.init(x, y);
+        init(x, y);
     }
-    
-    public void init(final int x, final int y) {
-        this.rendered = false;
+
+    public void init(int x, int y) {
+        rendered = false;
         this.x = x;
         this.y = y;
-        this.lastVisible = 0;
-        this.addedToRenderQueue = false;
+        lastVisible = 0;
+        addedToRenderQueue = false;
     }
-    
-    public void init(final Level level, final int x, final int y) {
+
+    public void init(Level level, int x, int y) {
         this.level = level;
-        this.init(x, y);
+        init(x, y);
     }
 }

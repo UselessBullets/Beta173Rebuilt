@@ -1,28 +1,24 @@
-// 
-// Decompiled by Procyon v0.6.0
-// 
-
 package net.minecraft.isom;
 
-import java.awt.BorderLayout;
 import java.applet.Applet;
+import java.awt.BorderLayout;
 
-public class IsomPreviewApplet extends Applet
-{
+// Useless - Isom package was pulled straight from the Beta 1.9-pre6 jar as it had source for this package, thanks @genericpnpmonit0r for telling me this
+public class IsomPreviewApplet extends Applet {
+    private static final long serialVersionUID = 1L;
+
     private IsomPreview isomPreview = new IsomPreview();
-    
+
     public IsomPreviewApplet() {
         this.setLayout(new BorderLayout());
-        this.add(this.isomPreview, "Center");
+        add(isomPreview, BorderLayout.CENTER);
     }
-    
-    @Override
+
     public void start() {
-        this.isomPreview.start();
+        isomPreview.start();
     }
-    
-    @Override
+
     public void stop() {
-        this.isomPreview.stop();
+        isomPreview.stop();
     }
 }

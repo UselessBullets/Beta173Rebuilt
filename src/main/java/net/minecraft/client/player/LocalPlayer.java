@@ -67,16 +67,16 @@ public class LocalPlayer extends Player
         }
     }
 
-    // Useless - recovered from LCE, presumably is the usage of the flying stuff stored in option
+    // Useless - recovered from LCE and b1.8-pre1, presumably is the usage of the flying stuff stored in option
     private void calculateFlight(float xa, float ya, float za)
     {
-        xa = xa * this.minecraft.options.flySpeed;
-        ya = ((this.input.jumping ? 1 : 0) + (this.input.sneaking ? -1 : 0)) * this.minecraft.options.flySpeed / 5;
-        za = za * this.minecraft.options.flySpeed;
+        xa *= this.minecraft.options.flySpeed;
+        ya = 0.0f;
+        za *= this.minecraft.options.flySpeed;
 
-        this.flyX = this.smoothFlyX.getNewDeltaValue(xa, .35f * this.minecraft.options.sensitivity);
-        this.flyY = this.smoothFlyY.getNewDeltaValue(ya, .35f * this.minecraft.options.sensitivity);
-        this.flyZ = this.smoothFlyZ.getNewDeltaValue(za, .35f * this.minecraft.options.sensitivity);
+        this.flyX = this.smoothFlyX.getNewDeltaValue(xa, 0.35f * this.minecraft.options.sensitivity);
+        this.flyY = this.smoothFlyY.getNewDeltaValue(ya, 0.35f * this.minecraft.options.sensitivity);
+        this.flyZ = this.smoothFlyZ.getNewDeltaValue(za, 0.35f * this.minecraft.options.sensitivity);
 
     }
     

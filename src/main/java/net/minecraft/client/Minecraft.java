@@ -104,7 +104,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public abstract class Minecraft implements Runnable
 {
-    public static byte[] __unused_byte_buffer = new byte[10485760];
+    public static byte[] __unused_byte_buffer = new byte[0xa00000];
     private static Minecraft instance;
     public static final boolean FLYBY_MODE = false; // Useless - In the LCE and b1.2 leaks
     public static final boolean DEADMAU5_CAMERA_CHEATS = false; // Useless - In the LCE leaks

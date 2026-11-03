@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.level.chunk.ChunkCache;
 import org.lwjgl.input.Mouse;
 import net.minecraft.client.gui.ScreenSizeCalculator;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.NVFogDistance;
 import net.minecraft.world.level.tile.Tile;
@@ -423,7 +422,7 @@ public class GameRenderer
     }
     
     public void render(final float a) {
-        if (Display.isActive()) {
+        if (/*Display.isActive()*/true) { // TODO Useless - find SDL3 equivalent
             this.lastActiveTime = System.currentTimeMillis();
         } else {
             if (System.currentTimeMillis() - this.lastActiveTime > 500L) {

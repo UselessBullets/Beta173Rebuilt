@@ -41,8 +41,6 @@ package org.lwjgl.opengl;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-import org.lwjgl.LWJGLException;
-
 public interface InputImplementation {
 	/*
 	 * Mouse methods
@@ -56,7 +54,7 @@ public interface InputImplementation {
 	/**
 	 * Method to create the mouse.
 	 */
-	void createMouse() throws LWJGLException;
+	void createMouse();
 
 	/**
 	 * Method the destroy the mouse
@@ -84,7 +82,7 @@ public interface InputImplementation {
 	void setCursorPosition(int x, int y);
 	
 	/** Method to set the native cursor */
-	void setNativeCursor(Object handle) throws LWJGLException;
+	void setNativeCursor(Object handle);
 
 	/** Method returning the minimum cursor size */
 	int getMinCursorSize();
@@ -99,7 +97,7 @@ public interface InputImplementation {
 	/**
 	 * Method to create the keyboard
 	 */
-	void createKeyboard() throws LWJGLException;
+	void createKeyboard();
 
 	/**
 	 * Method to destroy the keyboard
@@ -122,7 +120,7 @@ public interface InputImplementation {
 //	int isStateKeySet(int key);
 
 	/** Native cursor handles */
-	Object createCursor(int width, int height, int xHotspot, int yHotspot, int numImages, IntBuffer images, IntBuffer delays) throws LWJGLException;
+	Object createCursor(int width, int height, int xHotspot, int yHotspot, int numImages, IntBuffer images, IntBuffer delays);
 
 	void destroyCursor(Object cursor_handle);
 

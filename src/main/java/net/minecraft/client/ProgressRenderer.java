@@ -4,7 +4,6 @@
 
 package net.minecraft.client;
 
-import org.lwjgl.opengl.Display;
 import net.minecraft.client.renderer.Tesselator;
 import net.minecraft.client.gui.ScreenSizeCalculator;
 import util.ProgressListener;
@@ -121,7 +120,7 @@ public class ProgressRenderer implements ProgressListener
 
         this.minecraft.font.drawShadow(this.title, (screenWidth - this.minecraft.font.width(this.title)) / 2, screemHeight / 2 - 4 - 16, 0xffffff);
         this.minecraft.font.drawShadow(this.status, (screenWidth - this.minecraft.font.width(this.status)) / 2, screemHeight / 2 - 4 + 8, 0xffffff);
-        Display.update();
+        this.minecraft.window.swapBuffers();
 
         try {
             Thread.yield();

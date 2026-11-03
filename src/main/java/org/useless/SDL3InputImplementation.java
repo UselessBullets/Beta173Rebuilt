@@ -5,7 +5,10 @@ import org.lwjgl.opengl.InputImplementation;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-public class WindowSDL3 implements InputImplementation {
+public class SDL3InputImplementation implements InputImplementation {
+    public SDL3InputImplementation() {
+
+    }
     @Override
     public boolean hasWheel() {
         return false;
@@ -17,7 +20,7 @@ public class WindowSDL3 implements InputImplementation {
     }
 
     @Override
-    public void createMouse() throws LWJGLException {
+    public void createMouse() {
 
     }
 
@@ -52,7 +55,7 @@ public class WindowSDL3 implements InputImplementation {
     }
 
     @Override
-    public void setNativeCursor(Object handle) throws LWJGLException {
+    public void setNativeCursor(Object handle) {
 
     }
 
@@ -67,7 +70,7 @@ public class WindowSDL3 implements InputImplementation {
     }
 
     @Override
-    public void createKeyboard() throws LWJGLException {
+    public void createKeyboard() {
 
     }
 
@@ -87,7 +90,7 @@ public class WindowSDL3 implements InputImplementation {
     }
 
     @Override
-    public Object createCursor(int width, int height, int xHotspot, int yHotspot, int numImages, IntBuffer images, IntBuffer delays) throws LWJGLException {
+    public Object createCursor(int width, int height, int xHotspot, int yHotspot, int numImages, IntBuffer images, IntBuffer delays) {
         return null;
     }
 

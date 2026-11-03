@@ -11,8 +11,7 @@ import javax.sound.sampled.AudioFormat;
 
 // From the lwjgl library, http://www.lwjgl.org
 import org.lwjgl.BufferUtils;
-import org.lwjgl.openal.AL;
-import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.*;
 
 import paulscode.sound.Channel;
 import paulscode.sound.FilenameURL;
@@ -160,7 +159,7 @@ public class LibraryLWJGLOpenAL extends Library
 //        try
         {
             // Try and create the sound system:
-            AL.create();
+            ALC.create();
             errors = checkALError();
         }
 //        catch( LWJGLException e )
@@ -256,12 +255,12 @@ public class LibraryLWJGLOpenAL extends Library
  */
     public static boolean libraryCompatible()
     {
-        if( AL.isCreated() )
-            return true;
+//        if( AL.isCreated() ) TODO - Useless figure out lwjgl3 equivalent?
+//            return true;
         
         try
         {
-            AL.create();
+            ALC.create();
         }
         catch( java.lang.Exception e )
         {
@@ -270,7 +269,7 @@ public class LibraryLWJGLOpenAL extends Library
         
         try
         {
-            AL.destroy();
+            ALC.destroy();
         }
         catch( java.lang.Exception e )
         {}
@@ -336,7 +335,7 @@ public class LibraryLWJGLOpenAL extends Library
         }
         
         bufferMap.clear();
-        AL.destroy();
+        ALC.destroy();
         
         bufferMap = null;
         listenerPositionAL = null;

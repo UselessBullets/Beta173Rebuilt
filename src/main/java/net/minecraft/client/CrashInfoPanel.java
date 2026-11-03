@@ -4,9 +4,9 @@
 
 package net.minecraft.client;
 
-import java.awt.*;
+import org.lwjgl.Version;
 
-import org.lwjgl.Sys;
+import java.awt.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -36,7 +36,7 @@ public class CrashInfoPanel extends Panel
             msg = msg + "OS: " + System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ") version " + System.getProperty("os.version") + "\n";
             msg = msg + "Java: " + System.getProperty("java.version") + ", " + System.getProperty("java.vendor") + "\n";
             msg = msg + "VM: " + System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.info") + "), " + System.getProperty("java.vm.vendor") + "\n";
-            msg = msg + "LWJGL: " + Sys.getVersion() + "\n";
+            msg = msg + "LWJGL: " + Version.getVersion() + "\n";
             vendor = glGetString(GL_VENDOR);
             msg = msg + "OpenGL: " + glGetString(GL_RENDERER) + " version " + glGetString(GL_VERSION) + ", " + glGetString(GL_VENDOR) + "\n";
         }

@@ -9,9 +9,10 @@ import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import net.minecraft.locale.language.I18n;
-import org.lwjgl.input.Keyboard;
 import net.minecraft.locale.language.Language;
+
 import java.io.File;
+import org.lwjgl.input.Keyboard;
 
 public class Options
 {
@@ -136,14 +137,14 @@ public class Options
     }
     
     public boolean getBooleanValue(final Option option) {
-        switch (option) {
-            case INVERT_MOUSE: return this.invertYMouse;
-            case VIEW_BOBBING: return this.bobView;
-            case ANAGLYPH: return this.anaglyph3d;
-            case ADVANCED_OPENGL: return this.advancedOpengl;
-            case AMBIENT_OCCLUSION: return this.ambientOcclusion;
-            default: return false;
-        }
+        return switch (option) {
+            case INVERT_MOUSE -> this.invertYMouse;
+            case VIEW_BOBBING -> this.bobView;
+            case ANAGLYPH -> this.anaglyph3d;
+            case ADVANCED_OPENGL -> this.advancedOpengl;
+            case AMBIENT_OCCLUSION -> this.ambientOcclusion;
+            default -> false;
+        };
     }
     
     public String getMessage(final Option item) {

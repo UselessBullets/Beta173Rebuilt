@@ -6,10 +6,10 @@ package net.minecraft.client.renderer;
 
 import java.nio.ByteOrder;
 
-import org.lwjgl.opengl.ARBBufferObject;
 import org.lwjgl.opengl.ARBVertexBufferObject;
-import org.lwjgl.opengl.GLContext;
 import net.minecraft.client.MemoryTracker;
+import org.lwjgl.opengl.GL;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
@@ -53,7 +53,7 @@ public class Tesselator
         this.fb = this.buffer.asFloatBuffer();
         this.array = new int[size];
 
-        this.vboMode = (Tesselator.USE_VBO && GLContext.getCapabilities().GL_ARB_vertex_buffer_object);
+        this.vboMode = (Tesselator.USE_VBO && GL.getCapabilities().GL_ARB_vertex_buffer_object);
         if (this.vboMode) {
             this.vboIds = MemoryTracker.createIntBuffer(this.vboCounts);
             ARBVertexBufferObject.glGenBuffersARB(this.vboIds);
@@ -72,7 +72,7 @@ public class Tesselator
             if (this.vboMode) {
                 this.vboId = (this.vboId + 1) % this.vboCounts;
                 ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, this.vboIds.get(this.vboId));
-                ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, this.buffer, ARBBufferObject.GL_STREAM_DRAW_ARB);
+                ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, this.buffer, ARBVertexBufferObject.GL_STREAM_DRAW_ARB);
             }
 
             if (this.hasTexture) {
@@ -81,7 +81,7 @@ public class Tesselator
                 }
                 else {
                     this.fb.position(3);
-                    glTexCoordPointer(2, 32, this.fb);
+                    glTexCoordPointer(2, GL_FLOAT, 32, this.fb);
                 }
                 glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             }
@@ -92,7 +92,7 @@ public class Tesselator
                 }
                 else {
                     this.buffer.position(20);
-                    glColorPointer(4, true, 32, this.buffer);
+                    glColorPointer(4, GL_UNSIGNED_BYTE, 32, this.buffer);
                 }
                 glEnableClientState(GL_COLOR_ARRAY);
             }
@@ -103,7 +103,7 @@ public class Tesselator
                 }
                 else {
                     this.buffer.position(24);
-                    glNormalPointer(32, this.buffer);
+                    glNormalPointer(GL_BYTE, 32, this.buffer);
                 }
                 glEnableClientState(GL_NORMAL_ARRAY);
             }
@@ -113,7 +113,7 @@ public class Tesselator
             }
             else {
                 this.fb.position(0);
-                glVertexPointer(3, 32, this.fb);
+                glVertexPointer(3, GL_FLOAT, 32, this.fb);
             }
 
             glEnableClientState(GL_VERTEX_ARRAY);

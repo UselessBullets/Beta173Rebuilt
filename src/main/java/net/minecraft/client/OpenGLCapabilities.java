@@ -4,14 +4,15 @@
 
 package net.minecraft.client;
 
-import org.lwjgl.opengl.GLContext;
+import org.lwjgl.opengl.GL;
 
 public class OpenGLCapabilities
 {
     private static boolean USE_OCCLUSION_QUERY = true;
     
     public boolean hasOcclusionChecks() {
-        return OpenGLCapabilities.USE_OCCLUSION_QUERY && GLContext.getCapabilities().GL_ARB_occlusion_query;
+
+        return OpenGLCapabilities.USE_OCCLUSION_QUERY && GL.getCapabilities().GL_ARB_occlusion_query;
     }
 
 }

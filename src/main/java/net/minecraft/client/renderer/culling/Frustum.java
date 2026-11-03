@@ -47,11 +47,11 @@ public class Frustum extends FrustrumData
         // glGetFloatv() is used to extract information about our OpenGL world.
         // Below, we pass in GL_PROJECTION_MATRIX to abstract our projection matrix.
         // It then stores the matrix into an array of [16].
-        glGetFloat(GL_PROJECTION_MATRIX, this._proj);
+        glGetFloatv(GL_PROJECTION_MATRIX, this._proj);
 
         // By passing in GL_MODELVIEW_MATRIX, we can abstract our model view matrix.
         // This also stores it in an array of [16].
-        glGetFloat(GL_MODELVIEW_MATRIX, this._modl);
+        glGetFloatv(GL_MODELVIEW_MATRIX, this._modl);
 
         this._proj.flip().limit(16);
         this._proj.get(this.proj);

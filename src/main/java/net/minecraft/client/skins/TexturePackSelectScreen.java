@@ -6,13 +6,17 @@ package net.minecraft.client.skins;
 
 import net.minecraft.client.gui.ScrolledSelectionList;
 import net.minecraft.client.renderer.Tesselator;
-import org.lwjgl.Sys;
 import net.minecraft.client.gui.Button;
+
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.SmallButton;
 import net.minecraft.locale.language.Language;
 import net.minecraft.client.gui.Screen;
+import org.lwjgl.Version;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -20,7 +24,7 @@ public class TexturePackSelectScreen extends Screen
 {
     protected Screen lastScreen;
     private int updateIn = -1;
-    private String instructions = "";
+    private File instructions = null;
     private ScrolledSelectionList packList;
     
     public TexturePackSelectScreen(final Screen lastScreen) {
@@ -33,7 +37,7 @@ public class TexturePackSelectScreen extends Screen
         this.buttons.add(new SmallButton(5, this.width / 2 - 154, this.height - 48, instance.getElement("texturePack.openFolder")));
         this.buttons.add(new SmallButton(6, this.width / 2 + 4, this.height - 48, instance.getElement("gui.done")));
         this.minecraft.skins.updateList();
-        this.instructions = new File(Minecraft.getWorkingDirectory(), "texturepacks").getAbsolutePath();
+        this.instructions = new File(Minecraft.getWorkingDirectory(), "texturepacks");
         (this.packList = new ScrolledSelectionList(this.minecraft, this.width, this.height, 32, this.height - 55 + 4, 36) {
 
             @Override
@@ -88,7 +92,11 @@ public class TexturePackSelectScreen extends Screen
         if (!button.active) return;
 
         if (button.id == 5) {
-            Sys.openURL("file://" + this.instructions);
+            try {
+                Desktop.getDesktop().open(this.instructions);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         else if (button.id == 6) {
             this.minecraft.textures.reloadAll();

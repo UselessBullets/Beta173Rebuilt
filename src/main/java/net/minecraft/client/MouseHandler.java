@@ -7,7 +7,7 @@ package net.minecraft.client;
 import org.lwjgl.input.Mouse;
 import java.nio.IntBuffer;
 import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Cursor;
+
 import java.awt.Component;
 
 public class MouseHandler

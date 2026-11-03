@@ -6,7 +6,6 @@ package net.minecraft.client.renderer;
 
 import net.minecraft.client.renderer.culling.Culler;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GLContext;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.Level;
 import net.minecraft.client.particle.WaterDropParticle;
@@ -20,8 +19,8 @@ import net.minecraft.world.level.chunk.ChunkCache;
 import org.lwjgl.input.Mouse;
 import net.minecraft.client.gui.ScreenSizeCalculator;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.NVFogDistance;
-import org.lwjgl.util.glu.GLU;
 import net.minecraft.world.level.tile.Tile;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Mob;
@@ -31,6 +30,7 @@ import java.util.List;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.client.gamemode.CreativeMode;
+import org.lwjgl.util.glu.GLU;
 import util.Mth;
 import net.minecraft.client.MemoryTracker;
 import java.nio.FloatBuffer;
@@ -969,7 +969,7 @@ public class GameRenderer
     private void setupFog(final int i, final float alpha) {
         final Mob player = this.mc.cameraTargetPlayer;
 
-        glFog(GL_FOG_COLOR, this.getBuffer(this.fr, this.fg, this.fb, 1.0f));
+        glFogfv(GL_FOG_COLOR, this.getBuffer(this.fr, this.fg, this.fb, 1.0f));
         glNormal3f(0.0f, -1.0f, 0.0f);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -997,7 +997,7 @@ public class GameRenderer
                 glFogf(GL_FOG_END, this.renderDistance * 0.8f);
             }
 
-            if (GLContext.getCapabilities().GL_NV_fog_distance) {
+            if (GL.getCapabilities().GL_NV_fog_distance) {
                 glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, NVFogDistance.GL_EYE_RADIAL_NV);
             }
 

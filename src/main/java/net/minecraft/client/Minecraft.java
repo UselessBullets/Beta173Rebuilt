@@ -22,8 +22,8 @@ import net.minecraft.client.gui.ChatScreen;
 import net.minecraft.client.gui.inventory.InventoryScreen;
 import net.minecraft.client.gui.InBedChatScreen;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.*;
+import org.lwjgl.util.glu.GLU;
 import util.Mth;
 import net.minecraft.world.level.chunk.ChunkCache;
 import net.minecraft.world.level.tile.Tile;
@@ -38,7 +38,6 @@ import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.client.gui.LevelConflictScreen;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
-import org.lwjgl.util.glu.GLU;
 import net.minecraft.client.gui.DeathScreen;
 import net.minecraft.client.gui.ErrorScreen;
 import net.minecraft.client.renderer.Tesselator;
@@ -52,7 +51,6 @@ import net.minecraft.client.renderer.ptexture.WaterSideTexture;
 import net.minecraft.client.renderer.ptexture.ClockTexture;
 import net.minecraft.client.renderer.ptexture.CompassTexture;
 import net.minecraft.client.renderer.ptexture.PortalTexture;
-import org.lwjgl.input.Controllers;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.input.Keyboard;
 import net.minecraft.stats.Achievements;
@@ -62,9 +60,7 @@ import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.WaterColor;
 import net.minecraft.world.level.storage.McRegionLevelStorageSource;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.DisplayMode;
-import org.lwjgl.opengl.Display;
+
 import java.awt.Color;
 import net.minecraft.stats.Stats;
 import java.awt.Component;
@@ -210,7 +206,7 @@ public abstract class Minecraft implements Runnable
         this.connectToPort = port;
     }
     
-    public void init() throws LWJGLException {
+    public void init() {
         if (this.parent != null) {
             final Graphics g = this.parent.getGraphics();
             if (g != null) {
@@ -232,7 +228,8 @@ public abstract class Minecraft implements Runnable
             }
         }
         Display.setTitle(VERSION_STRING);
-        try {
+//        try
+        {
             Display.create();
             // Useless - Below commented out java code is from the LCE leak
             /*
@@ -259,16 +256,16 @@ public abstract class Minecraft implements Runnable
              * GL32.GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) != 0)); }
              */
         }
-        catch (final LWJGLException e) {
+//        catch (final LWJGLException e) {
             // This COULD be because of a bug! A delay followed by a new attempt
             // is supposed to fix it.
-            e.printStackTrace();
+//            e.printStackTrace();
             try {
                 Thread.sleep(1000L);
             }
             catch (final InterruptedException ex2) {}
             Display.create();
-        }
+//        }
 
         // Useless - Sourced from LCE leak
         if (Minecraft.FLYBY_MODE) {
@@ -362,7 +359,7 @@ public abstract class Minecraft implements Runnable
         }
     }
     
-    private void renderLoadingScreen() throws LWJGLException {
+    private void renderLoadingScreen() {
         final ScreenSizeCalculator ssc = new ScreenSizeCalculator(this.options, this.width, this.height);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

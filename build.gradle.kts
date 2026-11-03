@@ -21,24 +21,51 @@ repositories {
     maven("https://libraries.minecraft.net/")
 }
 
+
+val lwjglVersion = "3.4.3"
+
+val lwjglNatives = Pair(
+    System.getProperty("os.name")!!,
+    System.getProperty("os.arch")!!
+).let { (name, arch) ->
+    when {
+        arrayOf("Linux", "SunOS", "Unix").any { name.startsWith(it) } ->
+            if (arrayOf("arm", "aarch64").any { arch.startsWith(it) })
+                "natives-linux${if (arch.contains("64") || arch.startsWith("armv8")) "-arm64" else "-arm32"}"
+            else if (arch.startsWith("ppc"))
+                "natives-linux-ppc64le"
+            else if (arch.startsWith("riscv"))
+                "natives-linux-riscv64"
+            else
+                "natives-linux"
+        arrayOf("Mac OS X", "Darwin").any { name.startsWith(it) }     ->
+            "natives-macos${if (arch.startsWith("aarch64")) "-arm64" else ""}"
+        arrayOf("Windows").any { name.startsWith(it) }                ->
+            "natives-windows"
+        else                                                                            ->
+            throw Error("Unrecognized or unsupported platform. Please set \"lwjglNatives\" manually")
+    }
+}
+
 val clientInclude: Configuration by configurations.creating
 val serverInclude: Configuration by configurations.creating
 
 dependencies {
     implementation("com.paulscode:soundsystem:20120107")?.let { clientInclude(it) }
-    implementation("com.paulscode:librarylwjglopenal:20100824")?.let { clientInclude(it) }
+//    implementation("com.paulscode:librarylwjglopenal:20100824")?.let { clientInclude(it) }
     implementation("com.paulscode:codecwav:20101023")?.let { clientInclude(it) }
 //    implementation("com.paulscode:codecjorbis:20101023") // Is copied into project since b173 uses a very slightly modified version to faciliate CodecMus
     implementation("net.sourceforge.argo:argo:3.4")?.let { clientInclude(it) } // newer than what would've been in b173, but the older version on maven don't work properly, think b173 used 2.10 or 2.11 but thats not on maven
 
-    val lwjglVer = "2.9.4-nightly-20150209"
-    implementation("org.lwjgl.lwjgl:lwjgl:$lwjglVer")
-    implementation("org.lwjgl.lwjgl:lwjgl_util:$lwjglVer")
-    runtimeOnly("org.lwjgl.lwjgl:lwjgl-platform:${lwjglVer}")
+    implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
 
-    runtimeOnly("net.java.jinput:jinput-platform:2.0.5")
-    implementation("net.java.jinput:jinput:2.0.5")
-    implementation("net.java.jutils:jutils:1.0.0")
+    implementation("org.lwjgl:lwjgl")
+    implementation("org.lwjgl:lwjgl-openal")
+    implementation("org.lwjgl:lwjgl-opengl")
+    implementation("org.lwjgl:lwjgl-sdl")
+    implementation("org.lwjgl:lwjgl::$lwjglNatives")
+    implementation("org.lwjgl:lwjgl-opengl::$lwjglNatives")
+    implementation("org.lwjgl:lwjgl-sdl::$lwjglNatives")
 }
 
 tasks.register("copyNatives", Copy::class.java, {
@@ -246,13 +273,13 @@ fun sha1(input: ByteArray): String {
 tasks.withType(JavaCompile::class.java) {
     options.isIncremental = false
     options.encoding = "UTF-8"
-    if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+    if (JavaVersion.current() != JavaVersion.VERSION_25) {
         options.compilerArgs.add("--release")
-        options.compilerArgs.add("8")
+        options.compilerArgs.add("25")
     }
 }
 
 java {
-    sourceCompatibility =  JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility =  JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }

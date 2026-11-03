@@ -534,11 +534,11 @@ public class LevelRenderer implements LevelListener
         for (int i = from; i < to; ++i) {
             if (this.sortedChunks[i].occlusion_querying) {
                 this.resultBuffer.clear();
-                ARBOcclusionQuery.glGetQueryObjectuARB(this.sortedChunks[i].occlusion_id, ARBOcclusionQuery.GL_QUERY_RESULT_AVAILABLE_ARB, this.resultBuffer);
+                ARBOcclusionQuery.glGetQueryObjectuivARB(this.sortedChunks[i].occlusion_id, ARBOcclusionQuery.GL_QUERY_RESULT_AVAILABLE_ARB, this.resultBuffer);
                 if (this.resultBuffer.get(0) != 0) {
                     this.sortedChunks[i].occlusion_querying = false;
                     this.resultBuffer.clear();
-                    ARBOcclusionQuery.glGetQueryObjectuARB(this.sortedChunks[i].occlusion_id, ARBOcclusionQuery.GL_QUERY_RESULT_ARB, this.resultBuffer);
+                    ARBOcclusionQuery.glGetQueryObjectuivARB(this.sortedChunks[i].occlusion_id, ARBOcclusionQuery.GL_QUERY_RESULT_ARB, this.resultBuffer);
                     this.sortedChunks[i].occlusion_visible = (this.resultBuffer.get(0) != 0);
                 }
             }

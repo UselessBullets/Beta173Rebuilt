@@ -56,7 +56,7 @@ public class SDL3Window {
         Configuration.OPENGL_EXPLICIT_INIT.set(true);
 
         GL.create(SDLVideo::SDL_GL_GetProcAddress);
-        GL.createCapabilities(MemoryUtil::memCallocPointer);
+        GL.createCapabilities(null);
 
         debugCallback = GLUtil.setupDebugMessageCallback();
 
@@ -92,6 +92,7 @@ public class SDL3Window {
         while (SDLEvents.SDL_PollEvent(event)) {
             this.eventHandler.handleEvent(event);
         }
+        event.free();
     }
 
     public void swapBuffers() {
@@ -99,7 +100,9 @@ public class SDL3Window {
     }
 
     public void quit() {
+        GL.destroy();
         debugCallback.free();
+
         SDL_GL_DestroyContext(SDL_GLContext_Handle);
         SDL_DestroyWindow(SDL_Window_Handle);
         SDL_Quit();

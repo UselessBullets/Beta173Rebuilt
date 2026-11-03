@@ -22,6 +22,7 @@ import net.minecraft.client.gui.InBedChatScreen;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 import org.lwjgl.sdl.SDLEvents;
+import org.lwjgl.system.Configuration;
 import org.lwjgl.util.glu.GLU;
 import org.useless.SDL3InputImplementation;
 import org.useless.SDL3Window;
@@ -98,6 +99,7 @@ public abstract class Minecraft implements Runnable
 {
     public static byte[] __unused_byte_buffer = new byte[0xa00000];
     private static Minecraft instance;
+    public static final boolean DEBUG_MODE = true;
     public static final boolean FLYBY_MODE = false; // Useless - In the LCE and b1.2 leaks
     public static final boolean DEADMAU5_CAMERA_CHEATS = false; // Useless - In the LCE leaks
     public static final String VERSION_STRING = "Minecraft " + SharedConstants.VERSION_STRING;
@@ -1638,6 +1640,20 @@ public abstract class Minecraft implements Runnable
     }
     
     public static void main(final String[] args) {
+        if (DEBUG_MODE) {
+            System.out.println("Enabling LWJGL debug stack");
+            Configuration.DEBUG.set(true);
+            Configuration.DEBUG_LOADER.set(true);
+            Configuration.DEBUG_STACK.set(true);
+            Configuration.DEBUG_MEMORY_ALLOCATOR.set(true);
+            Configuration.DEBUG_FUNCTIONS.set(true);
+//            Configuration.DEBUG_STREAM.set(
+//                IoBuilder
+//                    .forLogger("LWJGL")
+//                    .setLevel(Level.DEBUG)
+//                    .buildPrintStream())
+        }
+
         String name = "Player" + System.currentTimeMillis() % 1000L;
         if (args.length > 0) name = args[0];
 

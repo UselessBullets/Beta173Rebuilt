@@ -362,6 +362,8 @@ public class Mouse {
 //		synchronized (OpenGLPackageAccess.global_lock) {
 			if (!created) throw new IllegalStateException("Mouse must be created before you can read events");
 			if (readBuffer.hasRemaining()) {
+				// ungrabbed but8_state8_x32_y32_dw32_time64
+				// grabbed but8_state8_dx32_dy32_dw32_time64
 				eventButton = readBuffer.get();
 				eventState = readBuffer.get() != 0;
 				if (isGrabbed()) {
@@ -458,20 +460,6 @@ public class Mouse {
 	}
 
 	/**
-	 * Gets the time in nanoseconds of the current event.
-	 * Only useful for relative comparisons with other
-	 * Mouse events, as the absolute time has no defined
-	 * origin.
-	 *
-	 * @return The time in nanoseconds of the current event
-	 */
-	public static long getEventNanoseconds() {
-//		synchronized (OpenGLPackageAccess.global_lock) {
-			return event_nanos;
-//		}
-	}
-
-	/**
 	 * Retrieves the absolute position. It will be clamped to
 	 * 0...width-1.
 	 *
@@ -529,24 +517,6 @@ public class Mouse {
 	}
 
 	/**
-	 * @return Number of buttons on this mouse
-	 */
-	public static int getButtonCount() {
-//		synchronized (OpenGLPackageAccess.global_lock) {
-			return buttonCount;
-//		}
-	}
-
-	/**
-	 * @return Whether or not this mouse has wheel support
-	 */
-	public static boolean hasWheel() {
-//		synchronized (OpenGLPackageAccess.global_lock) {
-			return hasWheel;
-//		}
-	}
-
-	/**
 	 * @return whether or not the mouse has grabbed the cursor
 	 */
 	public static boolean isGrabbed() {
@@ -590,13 +560,4 @@ public class Mouse {
 //		}
 	}
 
-	/**
-	 * Retrieves whether or not the mouse cursor is within the bounds of the window.
-	 * If the mouse cursor was moved outside the display during a drag, then the result of calling
-	 * this method will be true until the button is released.
-	 * @return true if mouse is inside display, false otherwise.
-	 */
-	public static boolean isInsideWindow() {
-		return implementation.isInsideWindow();
-	}
 }

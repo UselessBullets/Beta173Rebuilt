@@ -1,6 +1,8 @@
 package org.useless;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLUtil;
@@ -22,8 +24,10 @@ public class SDL3Window {
     private final long SDL_GLContext_Handle;
     private final Callback debugCallback;
     private EventHandler eventHandler;
+    private SDL3InputImplementation inputImplementation;
     public SDL3Window(CharSequence title, int width, int height, EventHandler eventHandler) throws SDLException {
         this.eventHandler = eventHandler;
+        inputImplementation = new SDL3InputImplementation(this);
 
         if (!SDL_Init(SDL_INIT_VIDEO)) throw new SDLException("Failed to initialized SDL: " + SDL_GetError());
 
@@ -64,6 +68,18 @@ public class SDL3Window {
         checkSdlError(SDL_ShowWindow(SDL_Window_Handle));
     }
 
+    public SDL3InputImplementation getInputImplementation() {
+        return inputImplementation;
+    }
+
+    public long getRawSDLWindowHandle() {
+        return SDL_Window_Handle;
+    }
+
+    public long getRawOpenGLContextHandle() {
+        return SDL_GLContext_Handle;
+    }
+
     private IntBuffer buf1 = BufferUtils.createIntBuffer(1);
     private IntBuffer buf2 = BufferUtils.createIntBuffer(1);
 
@@ -91,8 +107,11 @@ public class SDL3Window {
         SDL_Event event = SDL_Event.calloc();
         while (SDLEvents.SDL_PollEvent(event)) {
             this.eventHandler.handleEvent(event);
+            this.inputImplementation.handleEvent(event);
         }
         event.free();
+        Keyboard.poll();
+        Mouse.poll();
     }
 
     public void swapBuffers() {

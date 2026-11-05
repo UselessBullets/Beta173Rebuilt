@@ -93,6 +93,8 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.level.Level;
 import net.minecraft.client.gamemode.GameMode;
 
+import javax.imageio.ImageIO;
+
 import static org.lwjgl.opengl.GL11.*;
 
 public abstract class Minecraft implements Runnable
@@ -198,7 +200,6 @@ public abstract class Minecraft implements Runnable
     }
     
     public void init() {
-        SDL3InputImplementation inputImplementation = new SDL3InputImplementation();
         try {
             this.window = new SDL3Window(VERSION_STRING, this.width, this.height, event -> {
                 switch (event.type()) {
@@ -241,8 +242,8 @@ public abstract class Minecraft implements Runnable
 
         this.renderLoadingScreen();
 
-        Keyboard.create(inputImplementation);
-        Mouse.create(inputImplementation);
+        Keyboard.create(this.window.getInputImplementation());
+        Mouse.create(this.window.getInputImplementation());
         this.mouseHandler = new MouseHandler(this.window);
 
 
@@ -1640,6 +1641,7 @@ public abstract class Minecraft implements Runnable
     }
     
     public static void main(final String[] args) {
+        ImageIO.setUseCache(false); // Useless - Not related to lwjgl3 but good lord does it make the game boot faster
         if (DEBUG_MODE) {
             System.out.println("Enabling LWJGL debug stack");
             Configuration.DEBUG.set(true);

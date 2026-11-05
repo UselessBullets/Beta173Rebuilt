@@ -73,22 +73,8 @@ public interface InputImplementation {
 
 	void grabMouse(boolean grab);
 
-	/**
-	 * Function to determine native cursor support
-	 */
-	int getNativeCursorCapabilities();
-
 	/** Method to set the native cursor position */
 	void setCursorPosition(int x, int y);
-	
-	/** Method to set the native cursor */
-	void setNativeCursor(Object handle);
-
-	/** Method returning the minimum cursor size */
-	int getMinCursorSize();
-
-	/** Method returning the maximum cursor size */
-	int getMaxCursorSize();
 
 	/*
 	 * Keyboard methods
@@ -117,16 +103,4 @@ public interface InputImplementation {
 	 */
 	void readKeyboard(ByteBuffer buffer);
 
-//	int isStateKeySet(int key);
-
-	/** Native cursor handles */
-	Object createCursor(int width, int height, int xHotspot, int yHotspot, int numImages, IntBuffer images, IntBuffer delays);
-
-	void destroyCursor(Object cursor_handle);
-
-	int getWidth();
-
-	int getHeight();
-
-        boolean isInsideWindow();
 }

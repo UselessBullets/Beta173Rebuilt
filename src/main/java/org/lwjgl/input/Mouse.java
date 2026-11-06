@@ -56,6 +56,7 @@ import org.lwjgl.opengl.InputImplementation;
  * @version $Revision$
  * $Id$
  */
+// Useless - Only copied relevant parts for b173
 public class Mouse {
 	/** Internal use - event size in bytes */
 	public static final int	EVENT_SIZE									= 1 + 1 + 4 + 4 + 4 + 8;

@@ -45,6 +45,7 @@ import static org.lwjgl.opengl.GL11.*;
  *
  * @author Erik Duijs
  */
+// Useless - Only copied relevant parts for b173
 public class Project {
 
 	private static final float[] IDENTITY_MATRIX =

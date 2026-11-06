@@ -41,6 +41,7 @@ package org.lwjgl.opengl;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+// Useless - Only copied relevant parts for b173
 public interface InputImplementation {
 	/*
 	 * Mouse methods

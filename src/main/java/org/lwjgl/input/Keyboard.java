@@ -51,6 +51,7 @@ import org.lwjgl.opengl.InputImplementation;
  * @version $Revision$
  * $Id$
  */
+// Useless - Only copied relevant parts for b173
 public class Keyboard {
 	/** Internal use - event size in bytes */
 	public static final int EVENT_SIZE = 4 + 1 + 4 + 8 + 1;

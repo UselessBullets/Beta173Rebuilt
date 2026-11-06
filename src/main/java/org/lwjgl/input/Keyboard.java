@@ -491,6 +491,7 @@ public class Keyboard {
 	}
 
 	private static boolean readNext(KeyEvent event) {
+		// keycode32_state8_char32_time64_repeat8
 		if (readBuffer.hasRemaining()) {
 			event.key = readBuffer.getInt() & 0xFF;
 			event.state = readBuffer.get() != 0;

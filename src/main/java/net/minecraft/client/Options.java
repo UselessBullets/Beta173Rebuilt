@@ -42,7 +42,6 @@ public class Options
     public KeyMapping keyChat = new KeyMapping("key.chat", Keyboard.KEY_T);
     public KeyMapping keyFog = new KeyMapping("key.fog", Keyboard.KEY_F);
     public KeyMapping keySneak = new KeyMapping("key.sneak", Keyboard.KEY_LSHIFT);
-    public KeyMapping keyDebug = new KeyMapping("key.debug", Keyboard.KEY_V);
     public KeyMapping[] keyMappings = new KeyMapping[] {
             this.keyUp,
             this.keyLeft,
@@ -53,8 +52,7 @@ public class Options
             this.keyDrop,
             this.keyBuild,
             this.keyChat,
-            this.keyFog,
-            this.keyDebug
+            this.keyFog
     };;
     protected Minecraft minecraft;
     private File optionsFile;

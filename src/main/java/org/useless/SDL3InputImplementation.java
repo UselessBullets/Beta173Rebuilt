@@ -355,11 +355,6 @@ public class SDL3InputImplementation implements InputImplementation {
         SDLVideo.SDL_SetWindowMouseGrab(this.window.getRawSDLWindowHandle(), grab);
         SDLMouse.SDL_SetWindowRelativeMouseMode(this.window.getRawSDLWindowHandle(), grab);
         this.grabbed = grab;
-
-//        if (grab) {
-//            mPosDX = 0;
-//            mPosDY = 0;
-//        }
     }
 
     @Override

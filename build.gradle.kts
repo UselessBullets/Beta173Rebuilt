@@ -64,6 +64,7 @@ dependencies {
     implementation("org.lwjgl:lwjgl-opengl")
     implementation("org.lwjgl:lwjgl-sdl")
     implementation("org.lwjgl:lwjgl::$lwjglNatives")
+    implementation("org.lwjgl:lwjgl-openal::$lwjglNatives")
     implementation("org.lwjgl:lwjgl-opengl::$lwjglNatives")
     implementation("org.lwjgl:lwjgl-sdl::$lwjglNatives")
 }

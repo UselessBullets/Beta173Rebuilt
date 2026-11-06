@@ -13,6 +13,7 @@ import javax.sound.sampled.AudioFormat;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.*;
 
+import org.lwjgl.system.MemoryUtil;
 import paulscode.sound.Channel;
 import paulscode.sound.FilenameURL;
 import paulscode.sound.ICodec;
@@ -135,10 +136,10 @@ public class LibraryLWJGLOpenAL extends Library
  * Whether or not the AL_PITCH control is supported.
  */
     private static boolean alPitchSupported = true;
-    
+
 /**
- * Constructor: Instantiates the source map, buffer map and listener 
- * information.  Also sets the library type to 
+ * Constructor: Instantiates the source map, buffer map and listener
+ * information.  Also sets the library type to
  * SoundSystemConfig.LIBRARY_OPENAL
  */
     public LibraryLWJGLOpenAL() throws SoundSystemException
@@ -147,19 +148,27 @@ public class LibraryLWJGLOpenAL extends Library
         ALBufferMap = new HashMap<String, IntBuffer>();
         reverseByteOrder = true;
     }
-    
+
 /**
- * Initializes OpenAL, creates the listener, and grabs up audio channels. 
+ * Initializes OpenAL, creates the listener, and grabs up audio channels.
  */
     @Override
     public void init() throws SoundSystemException
     {
         boolean errors = false; // set to 'true' if error(s) occur:
-        
+
 //        try
         {
             // Try and create the sound system:
-            ALC.create();
+            var device = ALC10.alcOpenDevice((ByteBuffer) null);
+            if (device == MemoryUtil.NULL) throw new SoundSystemException("Failed to open the default OpenAL device.");
+
+            var context = ALC10.alcCreateContext(device, (IntBuffer) null);
+            if (context == MemoryUtil.NULL) throw new SoundSystemException("Failed to create an OpenAL context.");
+
+            ALC10.alcMakeContextCurrent(context);
+            AL.createCapabilities(ALC.createCapabilities(device));
+
             errors = checkALError();
         }
 //        catch( LWJGLException e )

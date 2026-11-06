@@ -14,6 +14,7 @@ import java.awt.BorderLayout;
 import java.awt.Frame;
 import net.minecraft.Pos;
 import net.minecraft.client.player.KeyboardInput;
+import net.minecraft.midforddevutils.DebugMenuSelectorScreen;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.dimension.Dimension;
@@ -123,7 +124,6 @@ public abstract class Minecraft implements Runnable
     public User user = null;
     public String serverDomain;
     public Canvas parent;
-    public boolean appletMode = true;
     public volatile boolean pause = false;
     public Textures textures;
     public Font font;
@@ -140,7 +140,6 @@ public abstract class Minecraft implements Runnable
     public HumanoidModel humanoidModel = new HumanoidModel(0.0f);
     public HitResult hitResult = null;
     public Options options;
-    protected MinecraftApplet minecraftApplet;
     public SoundEngine soundEngine = new SoundEngine();
     public MouseHandler mouseHandler;
     public TexturePackRepository skins;
@@ -166,11 +165,10 @@ public abstract class Minecraft implements Runnable
     long lastTickTime = System.currentTimeMillis();
     private int recheckPlayerIn = 0;
     
-    public Minecraft(final Component component, final Canvas parent, final MinecraftApplet minecraftApplet, final int width, final int height, final boolean fullscreen) {
+    public Minecraft(final Component component, final Canvas parent, final int width, final int height, final boolean fullscreen) {
         Stats.init();
         this.orgHeight = height;
         this.fullscreen = fullscreen;
-        this.minecraftApplet = minecraftApplet;
         new Thread("Timer hack thread") {
 
             {
@@ -192,9 +190,6 @@ public abstract class Minecraft implements Runnable
         this.width = width;
         this.height = height;
         this.fullscreen = fullscreen;
-        if (minecraftApplet == null || "true".equals(minecraftApplet.getParameter("stand-alone"))) {
-            this.appletMode = false;
-        }
         Minecraft.instance = this;
     }
     
@@ -514,9 +509,6 @@ public abstract class Minecraft implements Runnable
             this.stats.forceSend();
             this.stats.forceSave();
 
-            if (this.minecraftApplet != null) {
-                this.minecraftApplet.clearMemory();
-            }
 
             try {
                 if (this.bgLoader != null) {
@@ -680,7 +672,6 @@ public abstract class Minecraft implements Runnable
 
             while (this.running) {
                 try {
-                    if (this.minecraftApplet != null && !this.minecraftApplet.isActive()) break;
 
                     AABB.resetPool();
                     Vec3.resetPool();
@@ -1301,6 +1292,10 @@ public abstract class Minecraft implements Runnable
                     if (Keyboard.getEventKey() == this.options.keyFog.key) {
                         this.options.toggle(Option.RENDER_DISTANCE, (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) ? -1 : 1);
                     }
+                    if (Keyboard.getEventKey() == this.options.keyDebug.key){
+
+                        this.setScreen(new DebugMenuSelectorScreen());
+                    }
                 }
             }
 
@@ -1661,7 +1656,7 @@ public abstract class Minecraft implements Runnable
         canvas.setPreferredSize(new java.awt.Dimension(854, 480));
         frame.pack();
         frame.setLocationRelativeTo(null);
-        final Minecraft minecraft = new Minecraft(frame, canvas, null, 854, 480, fullscreen) {
+        final Minecraft minecraft = new Minecraft(frame, canvas, 854, 480, fullscreen) {
             @Override
             public void onCrash(final CrashReport crashReport) {
                 frame.removeAll();

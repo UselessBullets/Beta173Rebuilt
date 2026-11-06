@@ -246,13 +246,13 @@ fun sha1(input: ByteArray): String {
 tasks.withType(JavaCompile::class.java) {
     options.isIncremental = false
     options.encoding = "UTF-8"
-    if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+    if (JavaVersion.current() != JavaVersion.VERSION_25) {
         options.compilerArgs.add("--release")
-        options.compilerArgs.add("8")
+        options.compilerArgs.add("25")
     }
 }
 
 java {
-    sourceCompatibility =  JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility =  JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }

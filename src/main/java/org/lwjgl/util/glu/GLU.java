@@ -31,6 +31,10 @@
  */
 package org.lwjgl.util.glu;
 
+import org.lwjgl.BufferUtils;
+
+import java.nio.FloatBuffer;
+
 import static org.lwjgl.opengl.ARBImaging.GL_TABLE_TOO_LARGE;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_INVALID_OPERATION;
@@ -47,7 +51,7 @@ import static org.lwjgl.opengl.GL30.GL_INVALID_FRAMEBUFFER_OPERATION;
  * Created 23-dec-2003
  * @author Erik Duijs
  */
-// Useless - Only copied relevant parts for b173
+// Useless - Only copied relevant parts for b173, inlined Project.class usage here
 public class GLU {
     static final float PI = (float)Math.PI;
 
@@ -55,6 +59,17 @@ public class GLU {
     public static final int GLU_INVALID_ENUM        = 100900;
     public static final int GLU_INVALID_VALUE       = 100901;
     public static final int GLU_OUT_OF_MEMORY       = 100902;
+
+    // Copied from Project.class
+    private static final float[] IDENTITY_MATRIX =
+            new float[] {
+                    1.0f, 0.0f, 0.0f, 0.0f,
+                    0.0f, 1.0f, 0.0f, 0.0f,
+                    0.0f, 0.0f, 1.0f, 0.0f,
+                    0.0f, 0.0f, 0.0f, 1.0f };
+
+    // Copied from Project.class
+    private static final FloatBuffer matrix = BufferUtils.createFloatBuffer(16);
 
     /**
      * Method gluPerspective
@@ -69,7 +84,33 @@ public class GLU {
             float zNear,
             float zFar) {
 
-        Project.gluPerspective(fovy, aspect, zNear, zFar);
+        // Copied from Project.gluPerspective
+        float sine, cotangent, deltaZ;
+        float radians = fovy / 2 * GLU.PI / 180;
+
+        deltaZ = zFar - zNear;
+        sine = (float) Math.sin(radians);
+
+        if ((deltaZ == 0) || (sine == 0) || (aspect == 0)) {
+            return;
+        }
+
+        cotangent = (float) Math.cos(radians) / sine;
+
+        { // Copied from Project.__gluMakeIdentityf
+            int oldPos = matrix.position();
+            matrix.put(IDENTITY_MATRIX);
+            matrix.position(oldPos);
+        }
+
+        matrix.put(0 * 4 + 0, cotangent / aspect);
+        matrix.put(1 * 4 + 1, cotangent);
+        matrix.put(2 * 4 + 2, - (zFar + zNear) / deltaZ);
+        matrix.put(2 * 4 + 3, -1);
+        matrix.put(3 * 4 + 2, -2 * zNear * zFar / deltaZ);
+        matrix.put(3 * 4 + 3, 0);
+
+        glMultMatrixf(matrix);
     }
 
     public static String gluErrorString(int error_code) {

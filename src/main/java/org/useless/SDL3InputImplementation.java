@@ -292,7 +292,7 @@ public class SDL3InputImplementation implements InputImplementation {
                 var state = (byte) (k.down() ? 1 : 0);
                 kButtons[lwjglKey] = state;
 
-                this.lastKeyboardEvent = KeyboardEventEntry.putEvent(lwjglKey, state, 0, k.timestamp(), (byte) (k.repeat() ? 1 : 0));
+                this.lastKeyboardEvent = KeyboardEventEntry.putEvent(lwjglKey, state, Keyboard.CHAR_NONE, k.timestamp(), (byte) (k.repeat() ? 1 : 0));
             }
             case SDLEvents.SDL_EVENT_TEXT_INPUT -> { // Key_UP/Down fires before text input so we're going to just modify the prior event to fix it's lack of char code
                 var t = event.text();

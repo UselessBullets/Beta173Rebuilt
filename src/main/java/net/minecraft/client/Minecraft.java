@@ -12,6 +12,7 @@ import net.minecraft.client.multiplayer.ClientConnection;
 
 import net.minecraft.Pos;
 import net.minecraft.client.player.KeyboardInput;
+import net.minecraft.midforddevutils.DebugMenuSelectorScreen;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.dimension.Dimension;
@@ -1226,6 +1227,10 @@ public abstract class Minecraft implements Runnable
                     }
                     if (Keyboard.getEventKey() == this.options.keyFog.key) {
                         this.options.toggle(Option.RENDER_DISTANCE, (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) ? -1 : 1);
+                    }
+                    if (Keyboard.getEventKey() == this.options.keyDebug.key){
+
+                        this.setScreen(new DebugMenuSelectorScreen());
                     }
                 }
             }

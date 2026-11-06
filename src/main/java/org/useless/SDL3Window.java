@@ -99,6 +99,22 @@ public class SDL3Window {
         return buf2.get(0);
     }
 
+    public int getMonitorWidth() {
+        var display = SDL_GetDisplayForWindow(SDL_Window_Handle);
+        var mode = SDL_GetCurrentDisplayMode(display);
+        return mode.w();
+    }
+
+    public int getMonitorHeight() {
+        var display = SDL_GetDisplayForWindow(SDL_Window_Handle);
+        var mode = SDL_GetCurrentDisplayMode(display);
+        return mode.h();
+    }
+
+    public void setTitle(CharSequence title) {
+        checkSdlError(SDLVideo.SDL_SetWindowTitle(SDL_Window_Handle, title));
+    }
+
     public void setFullscreen(boolean fullscreen) {
         checkSdlError(SDL_SetWindowFullscreen(SDL_Window_Handle, fullscreen));
     }
@@ -116,6 +132,11 @@ public class SDL3Window {
 
     public void swapBuffers() {
         checkSdlError(SDL_GL_SwapWindow(SDL_Window_Handle));
+    }
+
+    public void update() {
+        swapBuffers();
+        poll();
     }
 
     public void quit() {

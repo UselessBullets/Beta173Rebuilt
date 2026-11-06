@@ -563,7 +563,7 @@ public abstract class Minecraft implements Runnable
             this.gameRenderer.renderLevel(1.0F, 0L);
             glBindTexture(GL_TEXTURE_2D, this.textures.loadTexture("/terrain.png"));
             this.textures.tick();
-            this.window.swapBuffers();
+            this.window.update();
 
             pixelBuffer.clear();
             glReadPixels(0, 0, this.width, this.height, GL12.GL_BGR, GL_UNSIGNED_BYTE, pixelBuffer);
@@ -647,10 +647,7 @@ public abstract class Minecraft implements Runnable
                     glEnable(GL_TEXTURE_2D);
                     if (this.level != null) this.level.updateLights();
 
-                    if (!Keyboard.isKeyDown(Keyboard.KEY_F7)) {
-                        this.window.swapBuffers();
-                        this.window.poll();
-                    }
+                    if (!Keyboard.isKeyDown(Keyboard.KEY_F7)) this.window.update();
 
                     if (this.player != null && this.player.isInWall()) this.options.thirdPersonView = false;
                     if (!this.noRender) {
@@ -676,10 +673,7 @@ public abstract class Minecraft implements Runnable
 
                     Thread.yield();
 
-                    if (Keyboard.isKeyDown(Keyboard.KEY_F7)) {
-                        this.window.swapBuffers();
-                        this.window.poll();
-                    }
+                    if (Keyboard.isKeyDown(Keyboard.KEY_F7)) this.window.update();
 
                     this.checkScreenshot();
                     if (!this.fullscreen)
@@ -993,9 +987,8 @@ public abstract class Minecraft implements Runnable
         try {
             this.fullscreen = !this.fullscreen;
             if (this.fullscreen) {
-//                Display.setDisplayMode(Display.getDesktopDisplayMode()); TODO
-//                this.width = Display.getDisplayMode().getWidth();
-//                this.height = Display.getDisplayMode().getHeight();
+                this.width = this.window.getMonitorWidth();
+                this.height = this.window.getMonitorHeight();
                 if (this.width <= 0) this.width = 1;
                 if (this.height <= 0) this.height = 1;
             }
@@ -1016,7 +1009,7 @@ public abstract class Minecraft implements Runnable
                 this.resize(this.width, this.height);
             }
             this.window.setFullscreen(this.fullscreen);
-            this.window.swapBuffers();
+            this.window.update();
         }
         catch (final Exception e) {
             e.printStackTrace();

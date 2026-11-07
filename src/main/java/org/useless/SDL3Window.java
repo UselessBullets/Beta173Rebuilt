@@ -9,8 +9,10 @@ import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.sdl.*;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.Configuration;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -25,6 +27,7 @@ public class SDL3Window {
     private final Callback debugCallback;
     private EventHandler eventHandler;
     private SDL3InputImplementation inputImplementation;
+    private SDL_Surface iconSurface = null;
     public SDL3Window(CharSequence title, int width, int height, EventHandler eventHandler) throws SDLException {
         this.eventHandler = eventHandler;
         inputImplementation = new SDL3InputImplementation(this);
@@ -115,6 +118,32 @@ public class SDL3Window {
         checkSdlError(SDLVideo.SDL_SetWindowTitle(SDL_Window_Handle, title));
     }
 
+    /**
+     * @param iconImages Icon images to use, should be ordered from smallest to largest resolution
+     */
+    public void setIcons(BufferedImage ... iconImages) {
+        SDL_Surface surface = null;
+        for (int i = 0; i < iconImages.length; i++) {
+            var img = iconImages[i];
+            int w = img.getWidth();
+            int h = img.getHeight();
+
+            int[] pixels = new int[w * h];
+            img.getRGB(0, 0, w, h, pixels, 0, w);
+            var pixelBuffer = BufferUtils.createByteBuffer(pixels.length * 4);
+            for (int j = 0; j < pixels.length; j++) pixelBuffer.putInt(j * 4, pixels[j]);
+
+            if (surface == null) {
+                surface = checkSdlError(SDLSurface.SDL_CreateSurfaceFrom(w, h, SDLPixels.SDL_PIXELFORMAT_BGRA32, pixelBuffer, w * 4));
+            } else {
+                checkSdlError(SDLSurface.SDL_AddSurfaceAlternateImage(surface, SDLSurface.SDL_CreateSurfaceFrom(w, h, SDLPixels.SDL_PIXELFORMAT_BGRA32, pixelBuffer, w * 4)));
+            }
+        }
+        if (surface != null) checkSdlError(SDLVideo.SDL_SetWindowIcon(SDL_Window_Handle, surface));
+        if (iconSurface != null) SDLSurface.SDL_DestroySurface(iconSurface);
+        this.iconSurface = surface;
+    }
+
     public void setFullscreen(boolean fullscreen) {
         checkSdlError(SDL_SetWindowFullscreen(SDL_Window_Handle, fullscreen));
     }
@@ -145,6 +174,7 @@ public class SDL3Window {
 
         SDL_GL_DestroyContext(SDL_GLContext_Handle);
         SDL_DestroyWindow(SDL_Window_Handle);
+        if (iconSurface != null) SDLSurface.SDL_DestroySurface(iconSurface);
         SDL_Quit();
     }
 
@@ -155,6 +185,11 @@ public class SDL3Window {
     private static long checkSdlError(long resultPointer) {
         if (resultPointer == MemoryUtil.NULL) throw new SDLRuntimeException("SDL error encountered: " + SDL_GetError());
         return resultPointer;
+    }
+
+    private static <T> T checkSdlError(T result) {
+        if (result == null) throw new SDLRuntimeException("SDL error encountered: " + SDL_GetError());
+        return result;
     }
 
     public static class SDLException extends Exception {

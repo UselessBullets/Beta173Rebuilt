@@ -256,14 +256,14 @@ public class SDL3InputImplementation implements InputImplementation {
                 this.mPosDX += m.xrel();
                 this.mPosDY -= m.yrel();
                 this.mPosX = m.x();
-                this.mPosY = window.getHeight() - m.y();
+                this.mPosY = window.getHeight() - m.y() - 1;
             }
             case SDLEvents.SDL_EVENT_MOUSE_WHEEL -> {
                 var m = event.wheel();
                 this.mPosDW += m.y();
 
                 int x = (int)m.x();
-                int y = (int)(window.getHeight() - m.y());
+                int y = (int)(window.getHeight() - m.y() - 1);
                 MouseEventEntry.putEvent((byte) -1, (byte) 0, x, y, m.integer_y(), m.timestamp());
             }
             case SDLEvents.SDL_EVENT_MOUSE_BUTTON_DOWN, SDLEvents.SDL_EVENT_MOUSE_BUTTON_UP -> {
@@ -282,7 +282,7 @@ public class SDL3InputImplementation implements InputImplementation {
 
                 mButtons[button & 0xFF] = state;
                 int x = (int)m.x();
-                int y = (int)(window.getHeight() - m.y());
+                int y = (int)(window.getHeight() - m.y() - 1);
                 MouseEventEntry.putEvent(button, state, x, y, 0, m.timestamp());
             }
             case SDLEvents.SDL_EVENT_KEY_DOWN, SDLEvents.SDL_EVENT_KEY_UP -> {

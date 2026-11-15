@@ -14,7 +14,7 @@ public class Direction {
 
     public static final int[] STEP_X = new int[] {0, -1, 0, 1}; // Useless - LCE inclusion
 
-    public static final int[] STEP_Z = new int[] {1, 0, -1, }; // Useless - LCE inclusion
+    public static final int[] STEP_Z = new int[] {1, 0, -1, 0}; // Useless - LCE inclusion
 
     // for [direction] it gives [tile-face]
     public static final int[] DIRECTION_FACING = new int[]{Facing.SOUTH, Facing.WEST, Facing.NORTH, Facing.EAST};

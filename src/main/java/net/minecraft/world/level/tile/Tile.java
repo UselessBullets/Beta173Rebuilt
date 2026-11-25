@@ -244,7 +244,7 @@ public class Tile implements Descriptive<Tile> {
             .setDestroyTime(0.0f)
             .setSoundType(Tile.SOUND_GRASS)
             .setDescriptionId("deadbush");
-    public static final Tile pistonBase = new PistonBaseTile(33, PistonBaseTile.PLATFORM_STICKY_TEX, false)
+    public static final Tile pistonBase = new PistonBaseTile(33, PistonBaseTile.PLATFORM_TEX, false)
             .setDescriptionId("pistonBase")
             .sendTileData();
     public static final PistonExtensionTile pistonExtension = (PistonExtensionTile)new PistonExtensionTile(34, 107)
